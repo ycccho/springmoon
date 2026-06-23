@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
   <title>개인 포트폴리오</title>
+  <!-- OG Meta Tags -->
+  <meta property="og:title" content="개인 포트폴리오" />
+  <meta property="og:description" content="webP 이미지 최적화, 키워드 조합기, 방문자 통계 등 다양한 도구를 제공합니다." />
+  <meta property="og:image" content="https://blog.naver.com/babolang/223006653417?photoView=3" />
+  <meta property="og:url" content="https://springmoons.pages.dev/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="개인 포트폴리오" />
+  <meta name="twitter:description" content="webP 이미지 최적화, 키워드 조합기, 방문자 통계 등 다양한 도구를 제공합니다." />
+  <meta name="twitter:image" content="https://blog.naver.com/babolang/223006653417?photoView=3" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
@@ -66,6 +76,7 @@
       { id: "webp", name: "webP변환", protected: true },
       { id: "stats", name: "방문자통계", protected: true },
       { id: "marketing", name: "주간 마케팅 비용", protected: true },
+      { id: "keyword", name: "키워드조합기", protected: true },
       { id: "home", name: "홈", protected: false },
       { id: "about", name: "소개", protected: false }
     ];
@@ -260,12 +271,16 @@
       // 초기: 홈 표시
       const home = document.getElementById("home");
       if (home) home.classList.remove("hidden");
+
+      // 키워드조합기 이벤트 설정
+      setTimeout(() => setupKeywordCombiner(), 100);
     }
 
     function getPanelHTML(id, name) {
       if (id === "webp") return getWebPHTML();
       if (id === "stats") return getStatsHTML();
       if (id === "marketing") return getMarketingHTML();
+      if (id === "keyword") return getKeywordHTML();
       if (id === "home") return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">홈</h2><p class="text-gray-600 dark-mode:text-gray-300 editable" contenteditable="true" id="home-content">여기에 홈 페이지 내용을 입력하세요.</p></div>`;
       if (id === "about") return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">소개</h2><p class="text-gray-600 dark-mode:text-gray-300 editable" contenteditable="true" id="about-content">여기에 소개 페이지 내용을 입력하세요.</p></div>`;
       return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8"><h2 class="text-3xl font-bold mb-4">${name}</h2></div>`;
@@ -283,6 +298,103 @@
     // ============================================
     function getStatsHTML() {
       return `<div class="max-w-6xl mx-auto space-y-4"><div class="bg-white dark-mode:bg-gray-800 p-4 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm flex justify-between items-center"><div class="flex items-center gap-2 font-medium text-gray-600 dark-mode:text-gray-300 text-sm"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>홈페이지 방문자 통계 대시보드</div><button id="edit-stats-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">📝 데이터 편집</button></div><div id="edit-panel" class="hidden bg-blue-50 dark-mode:bg-blue-900 border border-blue-200 dark-mode:border-blue-700 rounded-xl p-4 shadow-sm"><p class="text-xs text-blue-700 dark-mode:text-blue-200 mb-3">월간/일간 데이터를 한 줄씩 입력하세요</p><textarea id="data-import" placeholder="월간 데이터: 2026 703 1012..." rows="3" class="w-full border border-blue-300 dark-mode:border-blue-600 rounded p-2 text-xs mb-3 bg-white dark-mode:bg-gray-800 text-gray-800 dark-mode:text-gray-100"></textarea><textarea id="daily-import" placeholder="일간 데이터: 2026 23 37..." rows="3" class="w-full border border-blue-300 dark-mode:border-blue-600 rounded p-2 text-xs mb-3 bg-white dark-mode:bg-gray-800 text-gray-800 dark-mode:text-gray-100"></textarea><button id="import-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium">데이터 적용</button><button id="close-edit-btn" class="ml-2 px-4 py-2 bg-gray-300 dark-mode:bg-gray-600 text-gray-800 dark-mode:text-gray-100 rounded text-xs font-medium">닫기</button></div><div class="bg-white dark-mode:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark-mode:border-gray-700 overflow-hidden"><div class="bg-gradient-to-r from-gray-100 dark-mode:from-gray-700 to-gray-50 dark-mode:to-gray-800 px-4 py-2 border-b border-gray-200 dark-mode:border-gray-700"><h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">📊 월간 방문자 수</h3></div><div class="overflow-x-auto"><table class="w-full border-collapse text-xs"><thead><tr class="bg-gray-50 dark-mode:bg-gray-700 border-b border-gray-300 dark-mode:border-gray-600"><th class="py-2 px-2 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">연도</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">1월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">2월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">3월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">4월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">5월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">6월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">7월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">8월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">9월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">10월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">11월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">12월</th><th class="py-2 px-2 font-bold text-gray-800 dark-mode:text-gray-100 text-center bg-gray-100 dark-mode:bg-gray-600">평균</th></tr></thead><tbody id="monthly-body"></tbody></table></div></div><div class="bg-white dark-mode:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark-mode:border-gray-700 overflow-hidden"><div class="bg-gradient-to-r from-gray-100 dark-mode:from-gray-700 to-gray-50 dark-mode:to-gray-800 px-4 py-2 border-b border-gray-200 dark-mode:border-gray-700"><h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">📈 일간 평균</h3></div><div class="overflow-x-auto"><table class="w-full border-collapse text-xs"><thead><tr class="bg-gray-50 dark-mode:bg-gray-700 border-b border-gray-300 dark-mode:border-gray-600"><th class="py-2 px-2 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">연도</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">1월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">2월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">3월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">4월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">5월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">6월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">7월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">8월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">9월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">10월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">11월</th><th class="py-2 px-1 font-semibold text-gray-600 dark-mode:text-gray-300 text-center border-r border-gray-200 dark-mode:border-gray-600">12월</th><th class="py-2 px-2 font-bold text-gray-800 dark-mode:text-gray-100 text-center bg-gray-100 dark-mode:bg-gray-600">평균</th></tr></thead><tbody id="daily-body"></tbody></table></div></div></div>`;
+    }
+
+    // ============================================
+    // 키워드조합기 메뉴 (제공된 코드를 Vanilla JS로 변환)
+    // ============================================
+    function getKeywordHTML() {
+      return `<div class="min-h-screen bg-slate-50 p-4 md:p-6 font-sans text-slate-800 dark-mode:bg-gray-900">
+        <div class="max-w-7xl mx-auto">
+          <header class="mb-6 text-center">
+            <h1 class="text-3xl font-bold text-indigo-600 dark-mode:text-indigo-400">🔀 키워드 조합기 Pro</h1>
+            <p class="text-slate-500 dark-mode:text-slate-400 mt-1">검색광고 효율화를 위한 모든 조합 케이스 지원</p>
+          </header>
+
+          <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <div class="xl:col-span-3 space-y-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div><label class="font-bold flex items-center gap-2 px-1 text-sm text-slate-600 dark-mode:text-slate-300 mb-2"><span class="bg-indigo-100 text-indigo-600 w-5 h-5 rounded-md flex items-center justify-center text-xs">1</span>그룹 1</label><textarea class="keyword-input w-full h-48 p-3 rounded-xl border border-slate-200 dark-mode:border-slate-600 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all resize-none shadow-sm text-sm bg-white dark-mode:bg-gray-800 text-slate-800 dark-mode:text-slate-100" placeholder="키워드 입력..." data-group="1"></textarea></div>
+                <div><label class="font-bold flex items-center gap-2 px-1 text-sm text-slate-600 dark-mode:text-slate-300 mb-2"><span class="bg-indigo-100 text-indigo-600 w-5 h-5 rounded-md flex items-center justify-center text-xs">2</span>그룹 2</label><textarea class="keyword-input w-full h-48 p-3 rounded-xl border border-slate-200 dark-mode:border-slate-600 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all resize-none shadow-sm text-sm bg-white dark-mode:bg-gray-800 text-slate-800 dark-mode:text-slate-100" placeholder="키워드 입력..." data-group="2"></textarea></div>
+                <div><label class="font-bold flex items-center gap-2 px-1 text-sm text-slate-600 dark-mode:text-slate-300 mb-2"><span class="bg-indigo-100 text-indigo-600 w-5 h-5 rounded-md flex items-center justify-center text-xs">3</span>그룹 3</label><textarea class="keyword-input w-full h-48 p-3 rounded-xl border border-slate-200 dark-mode:border-slate-600 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all resize-none shadow-sm text-sm bg-white dark-mode:bg-gray-800 text-slate-800 dark-mode:text-slate-100" placeholder="키워드 입력..." data-group="3"></textarea></div>
+                <div><label class="font-bold flex items-center gap-2 px-1 text-sm text-slate-600 dark-mode:text-slate-300 mb-2"><span class="bg-indigo-100 text-indigo-600 w-5 h-5 rounded-md flex items-center justify-center text-xs">4</span>그룹 4</label><textarea class="keyword-input w-full h-48 p-3 rounded-xl border border-slate-200 dark-mode:border-slate-600 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all resize-none shadow-sm text-sm bg-white dark-mode:bg-gray-800 text-slate-800 dark-mode:text-slate-100" placeholder="키워드 입력..." data-group="4"></textarea></div>
+              </div>
+
+              <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark-mode:border-slate-700">
+                <div class="flex flex-col lg:flex-row gap-8">
+                  <div class="flex-1">
+                    <h3 class="font-bold mb-4 flex items-center gap-2 text-slate-700 dark-mode:text-slate-200 text-sm">⚙️ 조합 케이스 선택</h3>
+                    <div class="space-y-4">
+                      <div class="flex flex-wrap gap-x-4 gap-y-2">
+                        <span class="text-xs font-semibold text-slate-400 dark-mode:text-slate-500 w-full mb-1 italic">2개 조합</span>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c12" checked><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">1+2</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c13"><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">1+3</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c14"><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">1+4</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c23"><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">2+3</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c24"><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">2+4</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c34"><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">3+4</span></label>
+                      </div>
+                      <div class="flex flex-wrap gap-x-4 gap-y-2">
+                        <span class="text-xs font-semibold text-slate-400 dark-mode:text-slate-500 w-full mb-1 italic">3개 조합</span>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c123" checked><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">1+2+3</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c124"><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">1+2+4</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c134"><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">1+3+4</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-slate-50 dark-mode:bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark-mode:hover:bg-indigo-900 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c234"><span class="text-xs font-medium text-slate-600 dark-mode:text-slate-300">2+3+4</span></label>
+                      </div>
+                      <div class="flex flex-wrap gap-x-4 gap-y-2">
+                        <span class="text-xs font-semibold text-slate-400 dark-mode:text-slate-500 w-full mb-1 italic">4개 조합</span>
+                        <label class="flex items-center gap-2 cursor-pointer group bg-indigo-50 dark-mode:bg-indigo-900 border border-indigo-100 dark-mode:border-indigo-700 px-3 py-1.5 rounded-lg hover:bg-indigo-100 dark-mode:hover:bg-indigo-800 transition-colors"><input type="checkbox" class="keyword-comb w-4 h-4 rounded text-indigo-600" data-comb="c1234" checked><span class="text-xs font-bold text-indigo-700 dark-mode:text-indigo-200">1+2+3+4</span></label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="w-full lg:w-64 flex flex-col gap-6 border-l lg:pl-8 border-slate-100 dark-mode:border-slate-700">
+                    <div>
+                      <h3 class="font-bold mb-3 text-slate-700 dark-mode:text-slate-200 text-sm flex items-center gap-2">📏 띄어쓰기 설정</h3>
+                      <div class="flex bg-slate-100 dark-mode:bg-gray-700 p-1 rounded-xl">
+                        <button class="keyword-space-btn flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-white dark-mode:text-indigo-400 shadow-sm text-indigo-600" data-space="true">공백 포함</button>
+                        <button class="keyword-space-btn flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-500 dark-mode:text-slate-400" data-space="false">공백 제거</button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 class="font-bold mb-3 text-slate-700 dark-mode:text-slate-200 text-sm flex items-center gap-2">ℹ️ 검색 광고 유형</h3>
+                      <div class="flex flex-col gap-2">
+                        <label class="flex items-center gap-2 cursor-pointer group"><input type="radio" name="keyword-match" class="keyword-match-type text-indigo-600" data-type="none" checked><span class="text-xs text-slate-600 dark-mode:text-slate-300 font-medium group-hover:text-indigo-600">확장 검색 (기본)</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group"><input type="radio" name="keyword-match" class="keyword-match-type text-indigo-600" data-type="phrase"><span class="text-xs text-blue-600 dark-mode:text-blue-400 font-medium font-mono group-hover:underline">구문 검색 " "</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer group"><input type="radio" name="keyword-match" class="keyword-match-type text-indigo-600" data-type="exact"><span class="text-xs text-orange-600 dark-mode:text-orange-400 font-medium font-mono group-hover:underline">일치 검색 [ ]</span></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button id="keyword-combine-btn" class="w-full mt-8 bg-indigo-600 hover:bg-indigo-700 dark-mode:hover:bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">🔄 선택한 조건으로 조합하기</button>
+              </div>
+            </div>
+
+            <div class="xl:col-span-1 flex flex-col gap-3 h-full">
+              <div class="flex items-center justify-between px-1">
+                <label class="font-bold flex items-center gap-2 text-slate-700 dark-mode:text-slate-200 text-sm">📝 조합 결과 <span id="keyword-result-count" class="bg-indigo-100 dark-mode:bg-indigo-900 text-indigo-700 dark-mode:text-indigo-300 text-[10px] px-2 py-0.5 rounded-full">0</span></label>
+                <button id="keyword-copy-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark-mode:bg-gray-800 text-slate-700 dark-mode:text-slate-300 border border-slate-200 dark-mode:border-slate-600 hover:bg-slate-50 dark-mode:hover:bg-gray-700 disabled:opacity-50">📋 복사</button>
+              </div>
+              <textarea id="keyword-output" readonly class="w-full flex-grow min-h-[500px] xl:min-h-0 xl:h-[calc(100vh-280px)] p-4 rounded-2xl border border-slate-200 dark-mode:border-slate-600 bg-white dark-mode:bg-gray-800 font-mono text-[13px] leading-relaxed focus:outline-none resize-none shadow-inner text-slate-800 dark-mode:text-slate-100" placeholder="조합 결과가 여기에 표시됩니다."></textarea>
+            </div>
+          </div>
+
+          <footer class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-indigo-50 dark-mode:bg-indigo-900 rounded-xl border border-indigo-100 dark-mode:border-indigo-800 text-xs text-indigo-700 dark-mode:text-indigo-300">
+              <p class="font-bold mb-1">💡 조합 팁</p>
+              조합 케이스에서 숫자는 각 그룹의 번호를 의미합니다. 예를 들어 1+3+4를 선택하면 그룹 1, 3, 4번에 입력된 키워드들만 순서대로 조합됩니다.
+            </div>
+            <div class="p-4 bg-slate-100 dark-mode:bg-gray-800 rounded-xl border border-slate-200 dark-mode:border-slate-700 text-[11px] text-slate-600 dark-mode:text-slate-400 space-y-2">
+              <p class="font-bold mb-1 text-slate-800 dark-mode:text-slate-200 text-xs">🛠️ 검색 광고 유형 가이드</p>
+              <p>• <strong>확장 검색 (Broad):</strong> 별도 기호 없음. 키워드와 관련된 광범위한 검색어에 노출됩니다.</p>
+              <p>• <strong>구문 검색 (Phrase):</strong> <code>"키워드"</code> 형식. 키워드의 의미를 포함하는 검색어에 노출됩니다.</p>
+              <p>• <strong>일치 검색 (Exact):</strong> <code>[키워드]</code> 형식. 키워드와 동일한 의미나 의도를 가진 검색어에만 광고가 노출됩니다.</p>
+            </div>
+          </footer>
+        </div>
+      </div>`;
     }
 
     // ============================================
@@ -502,6 +614,120 @@
         });
       }
     });
+
+    // ============================================
+    // 키워드조합기 로직 (제공된 코드를 Vanilla JS로 변환)
+    // ============================================
+    const keywordState = {
+      inputs: { 1: '', 2: '', 3: '', 4: '' },
+      output: '',
+      combOptions: { c12: true, c13: false, c14: false, c23: false, c24: false, c34: false, c123: true, c124: false, c134: false, c234: false, c1234: true },
+      settings: { matchType: 'none', useSpace: true }
+    };
+
+    function setupKeywordCombiner() {
+      // 텍스트 입력 이벤트
+      document.querySelectorAll('.keyword-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          keywordState.inputs[e.target.dataset.group] = e.target.value;
+        });
+      });
+
+      // 조합 체크박스
+      document.querySelectorAll('.keyword-comb').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+          keywordState.combOptions[e.target.dataset.comb] = e.target.checked;
+        });
+      });
+
+      // 띄어쓰기 버튼
+      document.querySelectorAll('.keyword-space-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const useSpace = e.target.dataset.space === 'true';
+          keywordState.settings.useSpace = useSpace;
+          document.querySelectorAll('.keyword-space-btn').forEach(b => {
+            b.classList.remove('bg-white', 'dark-mode:text-indigo-400', 'shadow-sm', 'text-indigo-600');
+            b.classList.add('text-slate-500', 'dark-mode:text-slate-400');
+          });
+          e.target.classList.add('bg-white', 'dark-mode:text-indigo-400', 'shadow-sm', 'text-indigo-600');
+          e.target.classList.remove('text-slate-500', 'dark-mode:text-slate-400');
+        });
+      });
+
+      // 검색 광고 유형 라디오
+      document.querySelectorAll('.keyword-match-type').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          keywordState.settings.matchType = e.target.dataset.type;
+        });
+      });
+
+      // 조합 버튼
+      document.getElementById('keyword-combine-btn').addEventListener('click', combineKeywords);
+
+      // 복사 버튼
+      document.getElementById('keyword-copy-btn').addEventListener('click', () => {
+        const output = document.getElementById('keyword-output');
+        if (!output.value) return;
+        navigator.clipboard.writeText(output.value).then(() => {
+          const btn = document.getElementById('keyword-copy-btn');
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '✅ 복사됨';
+          setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+        });
+      });
+    }
+
+    function combineKeywords() {
+      const lists = {
+        1: keywordState.inputs[1].split('\\n').map(s => s.trim()).filter(s => s !== ''),
+        2: keywordState.inputs[2].split('\\n').map(s => s.trim()).filter(s => s !== ''),
+        3: keywordState.inputs[3].split('\\n').map(s => s.trim()).filter(s => s !== ''),
+        4: keywordState.inputs[4].split('\\n').map(s => s.trim()).filter(s => s !== '')
+      };
+
+      const separator = keywordState.settings.useSpace ? ' ' : '';
+      let results = [];
+
+      const getCombinations = (ids) => {
+        if (ids.some(id => lists[id].length === 0)) return [];
+        let temp = lists[ids[0]];
+        for (let i = 1; i < ids.length; i++) {
+          let next = [];
+          temp.forEach(current => {
+            lists[ids[i]].forEach(item => {
+              next.push(`${current}${separator}${item}`);
+            });
+          });
+          temp = next;
+        }
+        return temp;
+      };
+
+      if (keywordState.combOptions.c12) results.push(...getCombinations([1, 2]));
+      if (keywordState.combOptions.c13) results.push(...getCombinations([1, 3]));
+      if (keywordState.combOptions.c14) results.push(...getCombinations([1, 4]));
+      if (keywordState.combOptions.c23) results.push(...getCombinations([2, 3]));
+      if (keywordState.combOptions.c24) results.push(...getCombinations([2, 4]));
+      if (keywordState.combOptions.c34) results.push(...getCombinations([3, 4]));
+      if (keywordState.combOptions.c123) results.push(...getCombinations([1, 2, 3]));
+      if (keywordState.combOptions.c124) results.push(...getCombinations([1, 2, 4]));
+      if (keywordState.combOptions.c134) results.push(...getCombinations([1, 3, 4]));
+      if (keywordState.combOptions.c234) results.push(...getCombinations([2, 3, 4]));
+      if (keywordState.combOptions.c1234) results.push(...getCombinations([1, 2, 3, 4]));
+
+      let finalResults = [...new Set(results)];
+
+      if (keywordState.settings.matchType === 'exact') {
+        finalResults = finalResults.map(kw => `[${kw}]`);
+      } else if (keywordState.settings.matchType === 'phrase') {
+        finalResults = finalResults.map(kw => `"${kw}"`);
+      }
+
+      const output = finalResults.join('\\n');
+      document.getElementById('keyword-output').value = output;
+      document.getElementById('keyword-result-count').textContent = finalResults.length;
+      keywordState.output = output;
+    }
 
     // ============================================
     // 통계 메뉴 함수
