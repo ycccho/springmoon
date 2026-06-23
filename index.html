@@ -13,12 +13,13 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
   <div class="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
-    <aside class="bg-slate-900 text-slate-100 p-6 shadow-lg">
+    <aside style="background-color: #dd5828;" class="text-white p-6 shadow-lg">
       <div class="text-2xl font-bold mb-8">Portfolio</div>
       <nav class="space-y-2">
-        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl bg-slate-800 text-slate-100 text-sm font-semibold" data-section="webp">webP변환</button>
-        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white text-sm" data-section="home">홈</button>
-        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white text-sm" data-section="about">소개</button>
+        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-white text-sm font-semibold" data-section="webp" style="background-color: rgba(0,0,0,0.2);">webP변환</button>
+        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm" data-section="stats">방문자통계</button>
+        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm" data-section="home">홈</button>
+        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm" data-section="about">소개</button>
       </nav>
     </aside>
 
@@ -131,6 +132,98 @@
         </div>
       </section>
 
+      <section id="stats" class="panel hidden">
+        <div class="max-w-6xl mx-auto space-y-4">
+          <!-- 상단 컨트롤 바 -->
+          <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
+            <div class="flex items-center gap-2 font-medium text-gray-600 text-sm">
+              <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+              홈페이지 방문자 통계 대시보드
+            </div>
+            <button id="edit-stats-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+              📝 데이터 편집
+            </button>
+          </div>
+
+          <!-- 편집 패널 (숨겨짐) -->
+          <div id="edit-panel" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
+            <p class="text-xs text-blue-700 mb-3">월간/일간 데이터를 한 줄씩 입력하세요 (예: 2026 703 1012 2065...)</p>
+            <textarea id="data-import" placeholder="월간 데이터: 2026 703 1012 2065..." rows="3" class="w-full border border-blue-300 rounded p-2 text-xs mb-3 font-mono"></textarea>
+            <textarea id="daily-import" placeholder="일간 데이터: 2026 23 37 67..." rows="3" class="w-full border border-blue-300 rounded p-2 text-xs mb-3 font-mono"></textarea>
+            <div class="flex gap-2">
+              <button id="import-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium">데이터 적용</button>
+              <button id="close-edit-btn" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded text-xs font-medium">닫기</button>
+            </div>
+          </div>
+
+          <!-- 월간 방문자 통계 -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-2 border-b border-gray-200">
+              <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-blue-600"></span>
+                월간 방문자 수 (단위: 명/월)
+              </h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table id="monthly-table" class="w-full border-collapse text-xs">
+                <thead>
+                  <tr class="bg-gray-50 border-b border-gray-300">
+                    <th class="py-2 px-2 font-semibold text-gray-600 text-center border-r border-gray-200 w-16">연도</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">1월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">2월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">3월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">4월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">5월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">6월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">7월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">8월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">9월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">10월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">11월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">12월</th>
+                    <th class="py-2 px-2 font-bold text-gray-800 text-center bg-gray-100">평균</th>
+                  </tr>
+                </thead>
+                <tbody id="monthly-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 일간 방문자 통계 -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-2 border-b border-gray-200">
+              <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-600"></span>
+                일간 평균 방문자 수 (단위: 명/일)
+              </h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table id="daily-table" class="w-full border-collapse text-xs">
+                <thead>
+                  <tr class="bg-gray-50 border-b border-gray-300">
+                    <th class="py-2 px-2 font-semibold text-gray-600 text-center border-r border-gray-200 w-16">연도</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">1월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">2월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">3월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">4월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">5월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">6월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">7월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">8월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">9월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">10월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">11월</th>
+                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">12월</th>
+                    <th class="py-2 px-2 font-bold text-gray-800 text-center bg-gray-100">평균</th>
+                  </tr>
+                </thead>
+                <tbody id="daily-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="about" class="panel hidden">
         <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
           <h2 class="text-3xl font-bold mb-4">소개</h2>
@@ -148,9 +241,9 @@
       button.addEventListener('click', () => {
         const target = button.dataset.section;
         menuButtons.forEach((btn) => {
-          btn.classList.toggle('bg-slate-800', btn === button);
-          btn.classList.toggle('text-slate-100', btn === button);
-          btn.classList.toggle('text-slate-300', btn !== button);
+          const isActive = btn === button;
+          btn.style.backgroundColor = isActive ? 'rgba(0,0,0,0.2)' : 'transparent';
+          btn.style.color = isActive ? 'white' : 'white';
         });
         panels.forEach((panel) => {
           panel.classList.toggle('hidden', panel.id !== target);
@@ -493,6 +586,118 @@
         downloadZipBtn.innerHTML = originalBtnText;
         downloadZipBtn.disabled = false;
       }
+    });
+
+    // ============================================
+    // 방문자 통계 기능
+    // ============================================
+    const trafficData = [
+      { year: '2026', data: [703, 1012, 2065, 2010, 2483, 2208, null, null, null, null, null, null] },
+      { year: '2025', data: [350, 506, 777, 451, 402, 385, 436, 448, 465, 454, 538, 710] },
+      { year: '2024', data: [188, 107, 134, 174, 216, 193, 280, 319, 375, 446, 421, 327] },
+      { year: '2023', data: [0, 0, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
+    ];
+
+    const dailyData = [
+      { year: '2026', data: [23, 37, 67, 67, 81, 92, null, null, null, null, null, null] },
+      { year: '2025', data: [12, 19, 26, 16, 13, 13, 15, 15, 16, 15, 18, 23] },
+      { year: '2024', data: [7, 4, 5, 6, 7, 7, 10, 11, 13, 15, 15, 11] },
+      { year: '2023', data: [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
+    ];
+
+    const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+
+    function calculateAverage(data) {
+      const valid = data.filter(v => v !== null && v !== '');
+      if (valid.length === 0) return 0;
+      return Math.round(valid.reduce((a, b) => a + Number(b), 0) / valid.length);
+    }
+
+    function renderMonthlyTable() {
+      const tbody = document.getElementById('monthly-body');
+      tbody.innerHTML = '';
+      trafficData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-200';
+        tr.innerHTML = `<td class="py-2 px-2 text-center font-bold text-gray-700 bg-gray-50 border-r border-gray-200">${row.year}년</td>`;
+        row.data.forEach((val, idx) => {
+          const td = document.createElement('td');
+          td.className = 'py-2 px-1 text-center border-r border-gray-200';
+          td.textContent = val !== null ? val.toLocaleString() : '-';
+          tr.appendChild(td);
+        });
+        const avgTd = document.createElement('td');
+        avgTd.className = 'py-2 px-2 text-center font-bold text-gray-800 bg-gray-50';
+        avgTd.textContent = calculateAverage(row.data).toLocaleString();
+        tr.appendChild(avgTd);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderDailyTable() {
+      const tbody = document.getElementById('daily-body');
+      tbody.innerHTML = '';
+      dailyData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-200';
+        tr.innerHTML = `<td class="py-2 px-2 text-center font-bold text-gray-700 bg-gray-50 border-r border-gray-200">${row.year}년</td>`;
+        row.data.forEach((val, idx) => {
+          const td = document.createElement('td');
+          td.className = 'py-2 px-1 text-center border-r border-gray-200';
+          td.textContent = val !== null ? val : '-';
+          tr.appendChild(td);
+        });
+        const avgTd = document.createElement('td');
+        avgTd.className = 'py-2 px-2 text-center font-bold text-gray-800 bg-gray-50';
+        avgTd.textContent = calculateAverage(row.data);
+        tr.appendChild(avgTd);
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 초기 렌더링
+    renderMonthlyTable();
+    renderDailyTable();
+
+    // 편집 버튼 이벤트
+    document.getElementById('edit-stats-btn').addEventListener('click', () => {
+      document.getElementById('edit-panel').classList.toggle('hidden');
+    });
+
+    document.getElementById('close-edit-btn').addEventListener('click', () => {
+      document.getElementById('edit-panel').classList.add('hidden');
+    });
+
+    document.getElementById('import-btn').addEventListener('click', () => {
+      const monthlyText = document.getElementById('data-import').value.trim();
+      const dailyText = document.getElementById('daily-import').value.trim();
+
+      if (monthlyText) {
+        const parts = monthlyText.split(' ');
+        const year = parts[0];
+        const data = parts.slice(1).map(v => parseInt(v) || null);
+        const row = trafficData.find(r => r.year === year);
+        if (row) {
+          row.data = data.slice(0, 12);
+          while (row.data.length < 12) row.data.push(null);
+        }
+      }
+
+      if (dailyText) {
+        const parts = dailyText.split(' ');
+        const year = parts[0];
+        const data = parts.slice(1).map(v => parseInt(v) || null);
+        const row = dailyData.find(r => r.year === year);
+        if (row) {
+          row.data = data.slice(0, 12);
+          while (row.data.length < 12) row.data.push(null);
+        }
+      }
+
+      renderMonthlyTable();
+      renderDailyTable();
+      document.getElementById('edit-panel').classList.add('hidden');
+      alert('데이터가 업데이트되었습니다!');
     });
   </script>
 </body>
