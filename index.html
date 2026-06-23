@@ -3,702 +3,371 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>개인 포트폴리오 홈페이지</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <title>개인 포트폴리오</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    .drag-over-hq { border-color: #10b981; background-color: #ecfdf5; }
-    .drag-over-blog { border-color: #3b82f6; background-color: #eff6ff; }
+    body.dark-mode { @apply bg-gray-900 text-white; }
+    .menu-item { cursor: grab; }
+    .menu-item:active { cursor: grabbing; }
+    .menu-item.dragging { opacity: 0.5; }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
-  <div class="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
-    <aside style="background-color: #dd5828;" class="text-white p-6 shadow-lg">
+<body class="text-gray-800 font-sans min-h-screen">
+  <div class="min-h-screen grid grid-cols-1 md:grid-cols-[220px_1fr]">
+    <aside id="sidebar" style="background-color: #dd5828;" class="text-white p-4 md:p-6 overflow-y-auto flex flex-col max-h-screen">
       <div class="text-2xl font-bold mb-8">Portfolio</div>
-      <nav class="space-y-2">
-        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-white text-sm font-semibold" data-section="webp" style="background-color: rgba(0,0,0,0.2);">webP변환</button>
-        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm" data-section="stats">방문자통계</button>
-        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm" data-section="home">홈</button>
-        <button class="menu-item block w-full text-left px-4 py-3 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm" data-section="about">소개</button>
-      </nav>
+      <nav id="menu-container" class="space-y-2 flex-1"></nav>
+      <div class="border-t border-white pt-4 mt-6 space-y-2">
+        <button id="add-menu-btn" class="w-full px-3 py-2 rounded-lg text-xs font-semibold bg-white bg-opacity-20 hover:bg-opacity-30">➕ 메뉴 추가</button>
+        <button id="theme-toggle-btn" class="w-full px-3 py-2 rounded-lg text-xs font-semibold bg-white bg-opacity-20 hover:bg-opacity-30">🌙 다크모드</button>
+      </div>
     </aside>
+    <main id="main-content" class="p-4 md:p-8 overflow-y-auto"></main>
+  </div>
 
-    <main class="p-4 md:p-8">
-      <section id="webp" class="panel">
-        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-10">
-          <h1 class="text-3xl font-bold text-center text-gray-900 mb-2">통합 웹 이미지 최적화 도구</h1>
-          <p class="text-center text-gray-500 mb-8">업로드 목적에 맞는 구역에 사진을 드래그하세요. (자동 분류 및 최적화)</p>
+  <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-8 shadow-2xl max-w-sm w-full mx-4">
+      <h2 class="text-2xl font-bold mb-2 text-gray-800">접근 제한</h2>
+      <p class="text-gray-600 mb-6">비밀번호를 입력하세요.</p>
+      <input type="password" id="password-input" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none" placeholder="비밀번호">
+      <button id="password-submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold">확인</button>
+    </div>
+  </div>
 
-          <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-8 flex items-start gap-3">
-            <svg class="w-6 h-6 text-indigo-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            <div>
-              <h3 class="text-sm font-bold text-indigo-900 mb-1">공통 적용: [유사 문서 회피용] 1px 미세 크롭 AI 회피 기술 탑재</h3>
-              <p class="text-xs text-indigo-700 leading-relaxed">
-                업로드되는 모든 사진은 상하좌우 1픽셀(px)이 자동으로 미세하게 잘려 나갑니다. 육안으로는 차이가 없지만, 네이버/구글 검색엔진 비전 AI(Vision AI)의 픽셀 스캔을 교란하여 <strong>타 채널 중복 업로드 시 '유사 이미지'로 묶이는 패널티를 방지</strong>하는 강력한 마케팅 방어 시스템입니다.
-              </p>
-            </div>
-          </div>
-
-          <div class="mb-12">
-            <div class="flex items-center gap-3 mb-4">
-              <span class="bg-gray-800 text-white text-sm font-bold px-3 py-1 rounded-full">1번 기능</span>
-              <h2 class="text-2xl font-bold text-gray-800">공식 홈페이지용 <span class="text-lg font-medium text-gray-500">(초고속 로딩 최적화)</span></h2>
-            </div>
-            <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 mb-6">
-              <ul class="text-sm text-gray-700 list-disc list-inside space-y-1">
-                <li><span class="font-bold text-gray-900">가로/세로 자동 리사이징:</span> 가로 사진은 <span class="font-bold">폭 1920px</span>, 세로 사진은 <span class="font-bold">폭 1080px</span> 한도 내에서 비율이 유지되며 축소됩니다.</li>
-                <li><span class="font-bold text-gray-900">포맷 및 품질:</span> WEBP / 최상급 품질 <span class="font-bold text-blue-600">95%</span> (용량은 대폭 줄이면서 무손실급 화질 유지)</li>
-              </ul>
-            </div>
-            <div id="drop-zone-hq" class="border-2 border-dashed border-green-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-green-50 group bg-white">
-              <div class="text-green-400 mb-4 group-hover:text-green-500 transition-colors flex justify-center gap-2">
-                <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                <svg class="h-12 w-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-              </div>
-              <h3 class="text-xl font-bold text-green-800 mb-2">홈페이지용 사진 일괄 업로드</h3>
-              <p class="text-sm text-green-600 font-medium mb-1">방향 상관없이 드래그 (1920/1080px 기준 리사이징)</p>
-              <input type="file" id="file-hq" multiple accept=".jpg, .jpeg, .png" class="hidden">
-            </div>
-          </div>
-
-          <div class="mb-8">
-            <div class="flex items-center gap-3 mb-4">
-              <span class="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full">2번 기능</span>
-              <h2 class="text-2xl font-bold text-gray-800">네이버 블로그용 <span class="text-lg font-medium text-gray-500">(고화질 원본 보존 / 20MB 제한)</span></h2>
-            </div>
-            <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 mb-6">
-              <ul class="text-sm text-blue-800 list-disc list-inside space-y-1">
-                <li><span class="font-bold text-blue-900">원본 해상도 보존 (미세 크롭만 진행):</span> 사용자가 확대해도 텍스트가 깨지지 않도록 이미지 사이즈(폭/높이)를 강제로 줄이지 않습니다. (가장자리 1px 크롭만 적용)</li>
-                <li><span class="font-bold text-blue-900">새로운 파일 생성 (SEO):</span> 시각적 퀄리티는 유지하되, WEBP (95%) 확장자로 변환하여 검색엔진이 '새로운 파일'로 인식하게 만듭니다.</li>
-                <li><span class="font-bold text-blue-900">20MB 업로드 방어선:</span> 변환 용량이 블로그 제한 20MB를 넘길 경우, <span class="font-bold">19.9MB에 맞춰질 때까지만</span> 해상도를 미세하게 축소하여 업로드 불가 현상을 차단합니다.</li>
-              </ul>
-            </div>
-            <div id="drop-zone-blog" class="border-2 border-dashed border-blue-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-blue-50 group bg-white">
-              <div class="text-blue-400 mb-4 group-hover:text-blue-500 transition-colors flex justify-center gap-2">
-                <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                <svg class="h-12 w-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-              </div>
-              <h3 class="text-xl font-bold text-blue-800 mb-2">블로그용 사진 일괄 업로드</h3>
-              <p class="text-sm text-blue-600 font-medium mb-1">방향 상관없이 드래그 (해상도 원본 유지 + WEBP 변환)</p>
-              <input type="file" id="file-blog" multiple accept=".jpg, .jpeg, .png" class="hidden">
-            </div>
-          </div>
-
-          <div id="progress-container" class="hidden mb-8">
-            <div class="flex justify-between text-sm font-medium text-gray-700 mb-1">
-              <span id="progress-status-text">이미지 처리 중...</span>
-              <span id="progress-text">0 / 0</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-            </div>
-          </div>
-
-          <div id="result-section" class="hidden">
-            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4 border-t pt-6">
-              <h2 class="text-xl font-bold text-gray-800">변환 결과 (<span id="result-count">0</span>개)</h2>
-              <div class="flex gap-2 w-full sm:w-auto">
-                <button id="clear-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm">
-                  목록 초기화
-                </button>
-                <button id="download-zip-btn" class="flex-1 sm:flex-none px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition-colors font-medium shadow-sm flex items-center justify-center gap-2">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                  전체 ZIP 다운로드
-                </button>
-              </div>
-            </div>
-            <div class="overflow-x-auto rounded-lg border border-gray-200">
-              <table class="w-full text-sm text-left text-gray-500">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
-                  <tr>
-                    <th scope="col" class="px-4 py-3">자동 분류</th>
-                    <th scope="col" class="px-4 py-3">미리보기</th>
-                    <th scope="col" class="px-4 py-3">최적화된 파일명</th>
-                    <th scope="col" class="px-4 py-3">용량 및 해상도 변화</th>
-                    <th scope="col" class="px-4 py-3">다운로드</th>
-                  </tr>
-                </thead>
-                <tbody id="result-list"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="home" class="panel hidden">
-        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-          <h2 class="text-3xl font-bold mb-4">홈</h2>
-          <p class="text-gray-600">여기에 향후 추가할 기능을 위한 인트로를 작성하세요.</p>
-        </div>
-      </section>
-
-      <section id="stats" class="panel hidden">
-        <div class="max-w-6xl mx-auto space-y-4">
-          <!-- 상단 컨트롤 바 -->
-          <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
-            <div class="flex items-center gap-2 font-medium text-gray-600 text-sm">
-              <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-              홈페이지 방문자 통계 대시보드
-            </div>
-            <button id="edit-stats-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
-              📝 데이터 편집
-            </button>
-          </div>
-
-          <!-- 편집 패널 (숨겨짐) -->
-          <div id="edit-panel" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
-            <p class="text-xs text-blue-700 mb-3">월간/일간 데이터를 한 줄씩 입력하세요 (예: 2026 703 1012 2065...)</p>
-            <textarea id="data-import" placeholder="월간 데이터: 2026 703 1012 2065..." rows="3" class="w-full border border-blue-300 rounded p-2 text-xs mb-3 font-mono"></textarea>
-            <textarea id="daily-import" placeholder="일간 데이터: 2026 23 37 67..." rows="3" class="w-full border border-blue-300 rounded p-2 text-xs mb-3 font-mono"></textarea>
-            <div class="flex gap-2">
-              <button id="import-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium">데이터 적용</button>
-              <button id="close-edit-btn" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded text-xs font-medium">닫기</button>
-            </div>
-          </div>
-
-          <!-- 월간 방문자 통계 -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-2 border-b border-gray-200">
-              <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-blue-600"></span>
-                월간 방문자 수 (단위: 명/월)
-              </h3>
-            </div>
-            <div class="overflow-x-auto">
-              <table id="monthly-table" class="w-full border-collapse text-xs">
-                <thead>
-                  <tr class="bg-gray-50 border-b border-gray-300">
-                    <th class="py-2 px-2 font-semibold text-gray-600 text-center border-r border-gray-200 w-16">연도</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">1월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">2월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">3월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">4월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">5월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">6월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">7월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">8월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">9월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">10월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">11월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">12월</th>
-                    <th class="py-2 px-2 font-bold text-gray-800 text-center bg-gray-100">평균</th>
-                  </tr>
-                </thead>
-                <tbody id="monthly-body"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 일간 방문자 통계 -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-2 border-b border-gray-200">
-              <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-emerald-600"></span>
-                일간 평균 방문자 수 (단위: 명/일)
-              </h3>
-            </div>
-            <div class="overflow-x-auto">
-              <table id="daily-table" class="w-full border-collapse text-xs">
-                <thead>
-                  <tr class="bg-gray-50 border-b border-gray-300">
-                    <th class="py-2 px-2 font-semibold text-gray-600 text-center border-r border-gray-200 w-16">연도</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">1월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">2월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">3월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">4월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">5월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">6월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">7월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">8월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">9월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">10월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">11월</th>
-                    <th class="py-2 px-1 font-semibold text-gray-600 text-center border-r border-gray-200">12월</th>
-                    <th class="py-2 px-2 font-bold text-gray-800 text-center bg-gray-100">평균</th>
-                  </tr>
-                </thead>
-                <tbody id="daily-body"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="about" class="panel hidden">
-        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-          <h2 class="text-3xl font-bold mb-4">소개</h2>
-          <p class="text-gray-600">개인 포트폴리오와 개발 이력을 소개하는 섹션입니다.</p>
-        </div>
-      </section>
-    </main>
+  <div id="menu-edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-8 shadow-2xl max-w-sm w-full mx-4">
+      <h2 class="text-2xl font-bold mb-4 text-gray-800">메뉴 추가</h2>
+      <input type="text" id="new-menu-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none" placeholder="메뉴명">
+      <div class="flex gap-2">
+        <button id="menu-edit-cancel" class="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg font-semibold">취소</button>
+        <button id="menu-edit-save" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold">추가</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    const menuButtons = document.querySelectorAll('.menu-item');
-    const panels = document.querySelectorAll('.panel');
+    const PASSWORD = "1";
+    const defaultMenus = [
+      { id: "webp", name: "webP변환", protected: false },
+      { id: "stats", name: "방문자통계", protected: false },
+      { id: "marketing", name: "주간 마케팅 비용", protected: true },
+      { id: "home", name: "홈", protected: false },
+      { id: "about", name: "소개", protected: false }
+    ];
 
-    menuButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const target = button.dataset.section;
-        menuButtons.forEach((btn) => {
-          const isActive = btn === button;
-          btn.style.backgroundColor = isActive ? 'rgba(0,0,0,0.2)' : 'transparent';
-          btn.style.color = isActive ? 'white' : 'white';
-        });
-        panels.forEach((panel) => {
-          panel.classList.toggle('hidden', panel.id !== target);
-        });
-      });
+    let currentMenus = [];
+    let authenticatedMenus = new Set();
+    let isDarkMode = false;
+
+    function loadMenuOrder() { return JSON.parse(localStorage.getItem("menuOrder") || JSON.stringify(defaultMenus)); }
+    function saveMenuOrder() { localStorage.setItem("menuOrder", JSON.stringify(currentMenus)); }
+    function loadDarkMode() { return localStorage.getItem("darkMode") === "true"; }
+    function saveDarkMode() { localStorage.setItem("darkMode", isDarkMode); }
+
+    function applyTheme() {
+      if (isDarkMode) {
+        document.body.classList.add("dark-mode");
+        document.getElementById("theme-toggle-btn").textContent = "☀️ 라이트모드";
+      } else {
+        document.body.classList.remove("dark-mode");
+        document.getElementById("theme-toggle-btn").textContent = "🌙 다크모드";
+      }
+      saveDarkMode();
+    }
+
+    document.getElementById("theme-toggle-btn").addEventListener("click", () => {
+      isDarkMode = !isDarkMode;
+      applyTheme();
     });
 
-    const dropHq = document.getElementById('drop-zone-hq');
-    const fileHq = document.getElementById('file-hq');
-    const dropBlog = document.getElementById('drop-zone-blog');
-    const fileBlog = document.getElementById('file-blog');
+    function renderMenus() {
+      const container = document.getElementById("menu-container");
+      container.innerHTML = "";
+      currentMenus.forEach((menu, index) => {
+        const btn = document.createElement("button");
+        btn.className = "menu-item block w-full text-left px-4 py-3 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm font-semibold group relative";
+        btn.draggable = true;
+        btn.dataset.menuId = menu.id;
+        btn.dataset.index = index;
 
-    const progressContainer = document.getElementById('progress-container');
-    const progressBar = document.getElementById('progress-bar');
-    const progressText = document.getElementById('progress-text');
-    const progressStatusText = document.getElementById('progress-status-text');
-    const resultSection = document.getElementById('result-section');
-    const resultList = document.getElementById('result-list');
-    const resultCount = document.getElementById('result-count');
-    const downloadZipBtn = document.getElementById('download-zip-btn');
-    const clearBtn = document.getElementById('clear-btn');
+        let html = `<span>${menu.name}</span>`;
+        if (menu.protected) html += " 🔒";
+        html += `<div class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 space-x-1 flex">
+          <button class="menu-edit-btn px-2 py-1 bg-white bg-opacity-20 rounded text-xs">✏️</button>
+          <button class="menu-delete-btn px-2 py-1 bg-white bg-opacity-20 rounded text-xs">❌</button>
+        </div>`;
+        btn.innerHTML = html;
 
-    let convertedFiles = [];
+        btn.addEventListener("click", (e) => {
+          if (!e.target.classList.contains("menu-edit-btn") && !e.target.classList.contains("menu-delete-btn")) {
+            selectMenu(menu);
+          }
+        });
 
-    function bindEvents(dropZone, fileInput, mode, hoverClass) {
-      dropZone.addEventListener('click', () => fileInput.click());
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add(hoverClass);
-      });
-      dropZone.addEventListener('dragleave', () => dropZone.classList.remove(hoverClass));
-      dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove(hoverClass);
-        if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files, mode);
-      });
-      fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) handleFiles(e.target.files, mode);
+        btn.querySelector(".menu-edit-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          const newName = prompt("새로운 메뉴명:", menu.name);
+          if (newName && newName.trim()) {
+            currentMenus[index].name = newName.trim();
+            saveMenuOrder();
+            renderMenus();
+            renderPanels();
+          }
+        });
+
+        btn.querySelector(".menu-delete-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(`"${menu.name}"을 삭제하시겠습니까?`)) {
+            currentMenus.splice(index, 1);
+            saveMenuOrder();
+            renderMenus();
+            renderPanels();
+          }
+        });
+
+        btn.addEventListener("dragstart", (e) => {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("dragIndex", index);
+        });
+
+        btn.addEventListener("drop", (e) => {
+          e.preventDefault();
+          const dragIndex = parseInt(e.dataTransfer.getData("dragIndex"));
+          if (dragIndex !== index) {
+            [currentMenus[dragIndex], currentMenus[index]] = [currentMenus[index], currentMenus[dragIndex]];
+            saveMenuOrder();
+            renderMenus();
+          }
+        });
+
+        btn.addEventListener("dragover", (e) => e.preventDefault());
+        container.appendChild(btn);
       });
     }
 
-    bindEvents(dropHq, fileHq, 'hq', 'drag-over-hq');
-    bindEvents(dropBlog, fileBlog, 'blog', 'drag-over-blog');
-
-    clearBtn.addEventListener('click', () => {
-      convertedFiles = [];
-      resultList.innerHTML = '';
-      resultSection.classList.add('hidden');
-      fileHq.value = '';
-      fileBlog.value = '';
-    });
-
-    function formatBytes(bytes, decimals = 2) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const dm = decimals < 0 ? 0 : decimals;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    function renderPanels() {
+      const main = document.getElementById("main-content");
+      main.innerHTML = "";
+      currentMenus.forEach(menu => {
+        const section = document.createElement("section");
+        section.id = menu.id;
+        section.className = "panel hidden";
+        section.innerHTML = getPanelHTML(menu.id, menu.name);
+        main.appendChild(section);
+      });
+      const home = document.getElementById("home");
+      if (home) home.classList.remove("hidden");
     }
 
-    async function handleFiles(files, mode) {
-      const imageFiles = Array.from(files).filter(file => file.type.match(/image\/(jpeg|png)/i));
-      if (imageFiles.length === 0) {
-        alert('JPG 또는 PNG 파일만 처리할 수 있습니다.');
+    function getPanelHTML(id, name) {
+      if (id === "home") return `<div class="max-w-4xl mx-auto bg-white rounded-xl p-8"><h2 class="text-3xl font-bold mb-4">홈</h2><p class="text-gray-600">포트폴리오 홈페이지에 오신 것을 환영합니다.</p></div>`;
+      if (id === "about") return `<div class="max-w-4xl mx-auto bg-white rounded-xl p-8"><h2 class="text-3xl font-bold mb-4">소개</h2><p class="text-gray-600">개인 포트폴리오 섹션입니다.</p></div>`;
+      if (id === "webp") return getWebPHTML();
+      if (id === "stats") return getStatsHTML();
+      if (id === "marketing") return getMarketingHTML();
+      return `<div class="max-w-4xl mx-auto bg-white rounded-xl p-8"><h2 class="text-3xl font-bold mb-4">${name}</h2></div>`;
+    }
+
+    function selectMenu(menu) {
+      if (menu.protected && !authenticatedMenus.has(menu.id)) {
+        showPasswordModal(menu);
         return;
       }
+      document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+      const panel = document.getElementById(menu.id);
+      if (panel) panel.classList.remove("hidden");
+    }
 
-      resultSection.classList.remove('hidden');
-      progressContainer.classList.remove('hidden');
+    function showPasswordModal(menu) {
+      const modal = document.getElementById("password-modal");
+      const input = document.getElementById("password-input");
+      input.value = "";
+      input.focus();
 
-      progressStatusText.textContent = mode === 'hq'
-        ? '[홈페이지용] 1px 크롭 및 리사이징 진행 중...'
-        : '[블로그용] 1px 크롭 및 WEBP 변환 중...';
-
-      const total = imageFiles.length;
-
-      for (let i = 0; i < total; i++) {
-        const file = imageFiles[i];
-        progressText.textContent = `${i + 1} / ${total}`;
-        progressBar.style.width = `${((i + 1) / total) * 100}%`;
-
-        try {
-          let resultData;
-          if (mode === 'hq') {
-            resultData = await processWebpResizedAuto(file, 0.95, 1920, 1080);
-          } else {
-            resultData = await processWebpBlogOriginal(file, 0.95);
-          }
-
-          const isLandscape = resultData.orientation === 'landscape';
-          let badgeText = '';
-          let badgeClass = '';
-
-          if (mode === 'hq') {
-            badgeText = isLandscape ? '홈 가로 (1px크롭)' : '홈 세로 (1px크롭)';
-            badgeClass = isLandscape ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800';
-          } else {
-            badgeText = isLandscape ? '블로그 가로 (1px크롭)' : '블로그 세로 (1px크롭)';
-            badgeClass = isLandscape ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
-          }
-
-          let baseName = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase()
-            .replace(/[\s_]+/g, '-').replace(/[^a-z0-9가-힣-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
-          if (!baseName) baseName = `image-${Date.now()}`;
-          const suffix = mode === 'hq' ? '-home' : '-blog';
-          const newName = baseName + suffix + '.webp';
-
-          const result = {
-            badgeText,
-            badgeClass,
-            newName,
-            originalSize: file.size,
-            newSize: resultData.blob.size,
-            originalWidth: resultData.originalWidth,
-            originalHeight: resultData.originalHeight,
-            finalWidth: resultData.width,
-            finalHeight: resultData.height,
-            blob: resultData.blob,
-            url: URL.createObjectURL(resultData.blob)
-          };
-
-          convertedFiles.push(result);
-          addResultToTable(result);
-        } catch (error) {
-          console.error('변환 실패:', file.name, error);
+      document.getElementById("password-submit").onclick = () => {
+        if (input.value === PASSWORD) {
+          authenticatedMenus.add(menu.id);
+          modal.classList.add("hidden");
+          selectMenu(menu);
+        } else {
+          alert("비밀번호가 올바르지 않습니다.");
+          input.value = "";
+          input.focus();
         }
-      }
+      };
 
-      setTimeout(() => {
-        progressContainer.classList.add('hidden');
-        resultCount.textContent = convertedFiles.length;
-        fileHq.value = '';
-        fileBlog.value = '';
-      }, 500);
-    }
-
-    function processWebpResizedAuto(file, quality, targetLandWidth, targetPortWidth) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        const objectUrl = URL.createObjectURL(file);
-        img.onload = () => {
-          const originalWidth = img.width;
-          const originalHeight = img.height;
-          let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
-          if (originalWidth > 2 && originalHeight > 2) {
-            cropX = 1;
-            cropY = 1;
-            cropW = originalWidth - 2;
-            cropH = originalHeight - 2;
-          }
-
-          const orientation = cropW > cropH ? 'landscape' : 'portrait';
-          const targetWidthLimit = orientation === 'landscape' ? targetLandWidth : targetPortWidth;
-
-          let targetW = cropW;
-          let targetH = cropH;
-          if (cropW > targetWidthLimit) {
-            targetW = targetWidthLimit;
-            targetH = Math.round((cropH * targetWidthLimit) / cropW);
-          }
-
-          let canvas = document.createElement('canvas');
-          let ctx = canvas.getContext('2d');
-          if (cropW / 2 > targetW) {
-            let curW = Math.floor(cropW * 0.5);
-            let curH = Math.floor(cropH * 0.5);
-            canvas.width = curW;
-            canvas.height = curH;
-            ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, curW, curH);
-            while (curW / 2 > targetW) {
-              let nextW = Math.floor(curW * 0.5);
-              let nextH = Math.floor(curH * 0.5);
-              let tempCanvas = document.createElement('canvas');
-              tempCanvas.width = nextW;
-              tempCanvas.height = nextH;
-              let tempCtx = tempCanvas.getContext('2d');
-              tempCtx.drawImage(canvas, 0, 0, curW, curH, 0, 0, nextW, nextH);
-              canvas = tempCanvas;
-              curW = nextW;
-              curH = nextH;
-            }
-            let finalCanvas = document.createElement('canvas');
-            finalCanvas.width = targetW;
-            finalCanvas.height = targetH;
-            let finalCtx = finalCanvas.getContext('2d');
-            finalCtx.imageSmoothingEnabled = true;
-            finalCtx.imageSmoothingQuality = 'high';
-            finalCtx.drawImage(canvas, 0, 0, curW, curH, 0, 0, targetW, targetH);
-            canvas = finalCanvas;
-          } else {
-            canvas.width = targetW;
-            canvas.height = targetH;
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
-          }
-
-          canvas.toBlob((blob) => {
-            URL.revokeObjectURL(objectUrl);
-            if (blob) resolve({ blob, width: targetW, height: targetH, originalWidth, originalHeight, orientation });
-            else reject(new Error('변환 실패'));
-          }, 'image/webp', quality);
-        };
-        img.onerror = (e) => { URL.revokeObjectURL(objectUrl); reject(e); };
-        img.src = objectUrl;
+      input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") document.getElementById("password-submit").click();
       });
+
+      modal.classList.remove("hidden");
     }
 
-    function processWebpBlogOriginal(file, quality) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        const objectUrl = URL.createObjectURL(file);
-        img.onload = async () => {
-          const originalWidth = img.width;
-          const originalHeight = img.height;
-          let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
-          if (originalWidth > 2 && originalHeight > 2) {
-            cropX = 1;
-            cropY = 1;
-            cropW = originalWidth - 2;
-            cropH = originalHeight - 2;
-          }
+    document.getElementById("add-menu-btn").addEventListener("click", () => {
+      document.getElementById("menu-edit-modal").classList.remove("hidden");
+      document.getElementById("new-menu-name").focus();
+    });
 
-          const orientation = cropW > cropH ? 'landscape' : 'portrait';
-          const MAX_SAFE_SIZE = 19.9 * 1024 * 1024;
+    document.getElementById("menu-edit-cancel").addEventListener("click", () => {
+      document.getElementById("menu-edit-modal").classList.add("hidden");
+    });
 
-          const generateBlobAtScale = (scaleRatio) => {
-            return new Promise((res) => {
-              const targetW = Math.round(cropW * scaleRatio);
-              const targetH = Math.round(cropH * scaleRatio);
-              const canvas = document.createElement('canvas');
-              canvas.width = targetW;
-              canvas.height = targetH;
-              const ctx = canvas.getContext('2d');
-              ctx.imageSmoothingEnabled = true;
-              ctx.imageSmoothingQuality = 'high';
-              ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
-              canvas.toBlob((blob) => {
-                res({ blob: blob, width: targetW, height: targetH });
-              }, 'image/webp', quality);
-            });
-          };
-
-          try {
-            let currentScale = 1.0;
-            let resultData = await generateBlobAtScale(currentScale);
-            while (resultData.blob.size > MAX_SAFE_SIZE && currentScale > 0.1) {
-              currentScale -= 0.05;
-              resultData = await generateBlobAtScale(currentScale);
-            }
-            URL.revokeObjectURL(objectUrl);
-            resolve({
-              blob: resultData.blob,
-              width: resultData.width,
-              height: resultData.height,
-              originalWidth,
-              originalHeight,
-              orientation
-            });
-          } catch (error) {
-            URL.revokeObjectURL(objectUrl);
-            reject(error);
-          }
-        };
-        img.onerror = (e) => { URL.revokeObjectURL(objectUrl); reject(e); };
-        img.src = objectUrl;
-      });
-    }
-
-    function addResultToTable(result) {
-      const tr = document.createElement('tr');
-      tr.className = 'bg-white border-b hover:bg-gray-50 transition-colors';
-      const isReduced = result.newSize < result.originalSize;
-      const sizeClass = isReduced ? 'text-green-600' : 'text-red-600';
-      const percentage = Math.round(Math.abs(result.originalSize - result.newSize) / result.originalSize * 100);
-      let resChangeHtml = '';
-      if (result.originalWidth !== result.finalWidth) {
-        resChangeHtml = `<div class="text-[10px] text-gray-500 mt-1">해상도 변경: <span class="line-through">${result.originalWidth}px</span> ➔ <span class="font-bold text-blue-600">${result.finalWidth}px</span></div>`;
-        if (result.badgeText.includes('블로그')) {
-          if (result.finalWidth < result.originalWidth - 2) {
-            resChangeHtml += `<div class="text-[10px] text-red-500 font-bold mt-1">※ 20MB 제한으로 자동 미세 축소됨</div>`;
-          } else {
-            resChangeHtml += `<div class="text-[10px] text-indigo-500 font-bold mt-1">※ 유사 회피 (1px 크롭 완료)</div>`;
-          }
-        }
-      } else {
-        resChangeHtml = `<div class="text-[10px] text-gray-500 mt-1">해상도 100% 보존됨</div>`;
-      }
-      tr.innerHTML = `
-        <td class="px-4 py-3">
-          <span class="${result.badgeClass} text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">${result.badgeText}</span>
-        </td>
-        <td class="px-4 py-3">
-          <img src="${result.url}" alt="미리보기" class="h-10 w-10 object-cover rounded border border-gray-200">
-        </td>
-        <td class="px-4 py-3 font-medium text-gray-900">
-          <div class="truncate max-w-[150px]" title="${result.newName}">${result.newName}</div>
-        </td>
-        <td class="px-4 py-3">
-          <div class="text-xs text-gray-400 line-through">${formatBytes(result.originalSize)}</div>
-          <div class="font-bold ${sizeClass}">${formatBytes(result.newSize)} <span class="text-xs">(-${percentage}%)</span></div>
-          ${resChangeHtml}
-        </td>
-        <td class="px-4 py-3">
-          <a href="${result.url}" download="${result.newName}" class="text-gray-600 hover:text-black font-bold hover:underline text-sm">다운로드</a>
-        </td>
-      `;
-      resultList.prepend(tr);
-    }
-
-    downloadZipBtn.addEventListener('click', async () => {
-      if (convertedFiles.length === 0) return;
-      const zip = new JSZip();
-      const fileNames = new Set();
-      convertedFiles.forEach((file, index) => {
-        let name = file.newName;
-        if (fileNames.has(name)) {
-          name = name.replace('.webp', `-${index}.webp`);
-        }
-        fileNames.add(name);
-        zip.file(name, file.blob);
-      });
-      const originalBtnText = downloadZipBtn.innerHTML;
-      downloadZipBtn.innerHTML = `압축 중...`;
-      downloadZipBtn.disabled = true;
-      try {
-        const zipContent = await zip.generateAsync({ type: 'blob' });
-        const zipUrl = URL.createObjectURL(zipContent);
-        const a = document.createElement('a');
-        a.href = zipUrl;
-        a.download = 'optimized_images_pack.zip';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(zipUrl);
-      } catch (error) {
-        alert('ZIP 파일 생성 중 오류가 발생했습니다.');
-      } finally {
-        downloadZipBtn.innerHTML = originalBtnText;
-        downloadZipBtn.disabled = false;
+    document.getElementById("menu-edit-save").addEventListener("click", () => {
+      const name = document.getElementById("new-menu-name").value.trim();
+      if (name) {
+        currentMenus.push({ id: "custom-" + Date.now(), name, protected: false });
+        saveMenuOrder();
+        renderMenus();
+        renderPanels();
+        document.getElementById("menu-edit-modal").classList.add("hidden");
       }
     });
 
-    // ============================================
-    // 방문자 통계 기능
-    // ============================================
-    const trafficData = [
-      { year: '2026', data: [703, 1012, 2065, 2010, 2483, 2208, null, null, null, null, null, null] },
-      { year: '2025', data: [350, 506, 777, 451, 402, 385, 436, 448, 465, 454, 538, 710] },
-      { year: '2024', data: [188, 107, 134, 174, 216, 193, 280, 319, 375, 446, 421, 327] },
-      { year: '2023', data: [0, 0, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
+    function getWebPHTML() {
+      return `<div class="max-w-4xl mx-auto bg-white rounded-xl p-6 shadow-lg"><h1 class="text-3xl font-bold mb-4">웹 이미지 최적화 도구</h1><div id="drop-zone-hq" class="border-2 border-dashed border-green-300 rounded-xl p-10 text-center cursor-pointer mb-8"><h3 class="text-xl font-bold text-green-800">홈페이지용 업로드</h3><input type="file" id="file-hq" multiple accept=".jpg, .jpeg, .png" class="hidden"></div><div id="drop-zone-blog" class="border-2 border-dashed border-blue-300 rounded-xl p-10 text-center cursor-pointer mb-8"><h3 class="text-xl font-bold text-blue-800">블로그용 업로드</h3><input type="file" id="file-blog" multiple accept=".jpg, .jpeg, .png" class="hidden"></div><div id="result-section" class="hidden"><button id="download-zip-btn" class="px-6 py-2 bg-gray-800 text-white rounded-lg">ZIP 다운로드</button><table class="w-full text-sm mt-4"><tbody id="result-list"></tbody></table></div></div>`;
+    }
+
+    function getStatsHTML() {
+      return `<div class="max-w-6xl mx-auto"><div class="bg-white p-4 rounded-xl mb-4 flex justify-between"><span>📊 방문자 통계</span><button id="edit-stats-btn" class="px-4 py-2 bg-blue-600 text-white rounded">편집</button></div><div id="edit-panel" class="hidden bg-blue-50 p-4 rounded-xl mb-4"><textarea id="data-import" placeholder="월간: 2026 703..." rows="2" class="w-full border rounded p-2 mb-2 text-xs"></textarea><textarea id="daily-import" placeholder="일간: 2026 23..." rows="2" class="w-full border rounded p-2 mb-2 text-xs"></textarea><button id="import-btn" class="px-4 py-2 bg-blue-600 text-white rounded text-xs">적용</button><button id="close-edit-btn" class="ml-2 px-4 py-2 bg-gray-300 rounded text-xs">닫기</button></div><table class="w-full border text-xs"><tbody id="monthly-body"></tbody></table><table class="w-full border text-xs mt-4"><tbody id="daily-body"></tbody></table></div>`;
+    }
+
+    function getMarketingHTML() {
+      return `<div class="max-w-5xl mx-auto bg-white rounded-xl p-6"><h1 class="text-2xl font-bold mb-2">📊 마케팅 보고서 변환기</h1><div class="grid grid-cols-1 xl:grid-cols-2 gap-6"><textarea id="inputText" class="h-96 p-4 border rounded-lg resize-none" placeholder="보고서..."></textarea><div class="flex flex-col"><textarea id="outputText" class="flex-1 p-4 border rounded-lg resize-none bg-gray-100 mb-2" readonly></textarea><button onclick="copyMarketingClipboard()" class="px-4 py-2 bg-green-600 text-white rounded">복사</button></div></div><button onclick="parseMarketingData()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded">데이터 추출</button><table class="w-full text-xs mt-4 border"><thead class="bg-gray-100"><tr id="tableHeader"></tr></thead><tbody id="resultTableBody"></tbody></table></div>`;
+    }
+
+    let trafficData = [
+      { year: "2026", data: [703, 1012, 2065, 2010, 2483, 2208, null, null, null, null, null, null] },
+      { year: "2025", data: [350, 506, 777, 451, 402, 385, 436, 448, 465, 454, 538, 710] },
+      { year: "2024", data: [188, 107, 134, 174, 216, 193, 280, 319, 375, 446, 421, 327] },
+      { year: "2023", data: [0, 0, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
     ];
 
-    const dailyData = [
-      { year: '2026', data: [23, 37, 67, 67, 81, 92, null, null, null, null, null, null] },
-      { year: '2025', data: [12, 19, 26, 16, 13, 13, 15, 15, 16, 15, 18, 23] },
-      { year: '2024', data: [7, 4, 5, 6, 7, 7, 10, 11, 13, 15, 15, 11] },
-      { year: '2023', data: [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
+    let dailyData = [
+      { year: "2026", data: [23, 37, 67, 67, 81, 92, null, null, null, null, null, null] },
+      { year: "2025", data: [12, 19, 26, 16, 13, 13, 15, 15, 16, 15, 18, 23] },
+      { year: "2024", data: [7, 4, 5, 6, 7, 7, 10, 11, 13, 15, 15, 11] },
+      { year: "2023", data: [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
     ];
 
-    const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+    function setupStatsHandlers() {
+      const btn = document.getElementById("edit-stats-btn");
+      if (!btn) return;
+      renderMonthlyTable();
+      renderDailyTable();
+      btn.addEventListener("click", () => {
+        document.getElementById("edit-panel").classList.toggle("hidden");
+      });
+      document.getElementById("close-edit-btn").addEventListener("click", () => {
+        document.getElementById("edit-panel").classList.add("hidden");
+      });
+      document.getElementById("import-btn").addEventListener("click", () => {
+        const mt = document.getElementById("data-import").value.trim().split(" ");
+        const dt = document.getElementById("daily-import").value.trim().split(" ");
+        if (mt.length > 1) {
+          const row = trafficData.find(r => r.year === mt[0]);
+          if (row) row.data = mt.slice(1).map(v => parseInt(v) || null);
+        }
+        if (dt.length > 1) {
+          const row = dailyData.find(r => r.year === dt[0]);
+          if (row) row.data = dt.slice(1).map(v => parseInt(v) || null);
+        }
+        renderMonthlyTable();
+        renderDailyTable();
+        document.getElementById("edit-panel").classList.add("hidden");
+      });
+    }
 
-    function calculateAverage(data) {
-      const valid = data.filter(v => v !== null && v !== '');
-      if (valid.length === 0) return 0;
-      return Math.round(valid.reduce((a, b) => a + Number(b), 0) / valid.length);
+    function calcAvg(data) {
+      const v = data.filter(x => x !== null);
+      return v.length ? Math.round(v.reduce((a, b) => a + b) / v.length) : 0;
     }
 
     function renderMonthlyTable() {
-      const tbody = document.getElementById('monthly-body');
-      tbody.innerHTML = '';
+      const tbody = document.getElementById("monthly-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
       trafficData.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.className = 'border-b border-gray-200';
-        tr.innerHTML = `<td class="py-2 px-2 text-center font-bold text-gray-700 bg-gray-50 border-r border-gray-200">${row.year}년</td>`;
-        row.data.forEach((val, idx) => {
-          const td = document.createElement('td');
-          td.className = 'py-2 px-1 text-center border-r border-gray-200';
-          td.textContent = val !== null ? val.toLocaleString() : '-';
-          tr.appendChild(td);
+        let html = `<tr><td class="px-2 py-1 font-bold bg-gray-50">${row.year}</td>`;
+        row.data.forEach(v => {
+          html += `<td class="px-1 py-1">${v !== null ? v.toLocaleString() : "-"}</td>`;
         });
-        const avgTd = document.createElement('td');
-        avgTd.className = 'py-2 px-2 text-center font-bold text-gray-800 bg-gray-50';
-        avgTd.textContent = calculateAverage(row.data).toLocaleString();
-        tr.appendChild(avgTd);
-        tbody.appendChild(tr);
+        html += `<td class="px-2 py-1 font-bold bg-gray-100">${calcAvg(row.data).toLocaleString()}</td></tr>`;
+        tbody.innerHTML += html;
       });
     }
 
     function renderDailyTable() {
-      const tbody = document.getElementById('daily-body');
-      tbody.innerHTML = '';
+      const tbody = document.getElementById("daily-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
       dailyData.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.className = 'border-b border-gray-200';
-        tr.innerHTML = `<td class="py-2 px-2 text-center font-bold text-gray-700 bg-gray-50 border-r border-gray-200">${row.year}년</td>`;
-        row.data.forEach((val, idx) => {
-          const td = document.createElement('td');
-          td.className = 'py-2 px-1 text-center border-r border-gray-200';
-          td.textContent = val !== null ? val : '-';
-          tr.appendChild(td);
+        let html = `<tr><td class="px-2 py-1 font-bold bg-gray-50">${row.year}</td>`;
+        row.data.forEach(v => {
+          html += `<td class="px-1 py-1">${v !== null ? v : "-"}</td>`;
         });
-        const avgTd = document.createElement('td');
-        avgTd.className = 'py-2 px-2 text-center font-bold text-gray-800 bg-gray-50';
-        avgTd.textContent = calculateAverage(row.data);
-        tr.appendChild(avgTd);
-        tbody.appendChild(tr);
+        html += `<td class="px-2 py-1 font-bold bg-gray-100">${calcAvg(row.data)}</td></tr>`;
+        tbody.innerHTML += html;
       });
     }
 
-    // 초기 렌더링
-    renderMonthlyTable();
-    renderDailyTable();
+    let reportData = [
+      {"날짜":"2026.01.05","총 광고비용":77338,"메타 지출":68141,"메타 노출":22505,"메타 클릭":249},
+      {"날짜":"2026.01.12","총 광고비용":101541,"메타 지출":69671,"메타 노출":26149,"메타 클릭":281}
+    ];
 
-    // 편집 버튼 이벤트
-    document.getElementById('edit-stats-btn').addEventListener('click', () => {
-      document.getElementById('edit-panel').classList.toggle('hidden');
-    });
+    function renderMarketingTable() {
+      if (reportData.length === 0) return;
+      const keys = Object.keys(reportData[0]);
+      const head = document.getElementById("tableHeader");
+      if (head) head.innerHTML = keys.map(k => `<th class="px-3 py-2">${k}</th>`).join("");
+      let body = "";
+      let excel = keys.join("\t") + "\n";
+      reportData.forEach((row, i) => {
+        body += "<tr>" + keys.map(k => `<td class="px-3 py-2">${typeof row[k] === "number" ? row[k].toLocaleString() : row[k]}</td>`).join("") + "</tr>";
+        excel += keys.map(k => row[k]).join("\t") + "\n";
+      });
+      const tbody = document.getElementById("resultTableBody");
+      const output = document.getElementById("outputText");
+      if (tbody) tbody.innerHTML = body;
+      if (output) output.value = excel.trim();
+    }
 
-    document.getElementById('close-edit-btn').addEventListener('click', () => {
-      document.getElementById('edit-panel').classList.add('hidden');
-    });
+    function parseMarketingData() {
+      const text = document.getElementById("inputText").value;
+      if (!text.trim()) { alert("보고서를 입력하세요"); return; }
+      const dateMatch = text.match(/(\d{4}\.\d{2}\.\d{2})/);
+      const date = dateMatch ? dateMatch[1] : "날짜없음";
+      reportData.push({"날짜":date,"총 광고비용":0,"메타 지출":0,"메타 노출":0,"메타 클릭":0});
+      renderMarketingTable();
+      alert("✅ 데이터가 추가되었습니다.");
+    }
 
-    document.getElementById('import-btn').addEventListener('click', () => {
-      const monthlyText = document.getElementById('data-import').value.trim();
-      const dailyText = document.getElementById('daily-import').value.trim();
+    function copyMarketingClipboard() {
+      const output = document.getElementById("outputText");
+      if (!output.value) { alert("데이터를 추출하세요"); return; }
+      output.select();
+      document.execCommand("copy");
+      alert("✅ 복사되었습니다!");
+    }
 
-      if (monthlyText) {
-        const parts = monthlyText.split(' ');
-        const year = parts[0];
-        const data = parts.slice(1).map(v => parseInt(v) || null);
-        const row = trafficData.find(r => r.year === year);
-        if (row) {
-          row.data = data.slice(0, 12);
-          while (row.data.length < 12) row.data.push(null);
-        }
-      }
+    function initApp() {
+      isDarkMode = loadDarkMode();
+      applyTheme();
+      currentMenus = loadMenuOrder();
+      renderMenus();
+      renderPanels();
+      const obs = new MutationObserver(() => {
+        setupStatsHandlers();
+        renderMarketingTable();
+      });
+      obs.observe(document.getElementById("main-content"), { childList: true });
+      setupStatsHandlers();
+      renderMarketingTable();
+    }
 
-      if (dailyText) {
-        const parts = dailyText.split(' ');
-        const year = parts[0];
-        const data = parts.slice(1).map(v => parseInt(v) || null);
-        const row = dailyData.find(r => r.year === year);
-        if (row) {
-          row.data = data.slice(0, 12);
-          while (row.data.length < 12) row.data.push(null);
-        }
-      }
-
-      renderMonthlyTable();
-      renderDailyTable();
-      document.getElementById('edit-panel').classList.add('hidden');
-      alert('데이터가 업데이트되었습니다!');
-    });
+    window.addEventListener("load", initApp);
   </script>
 </body>
 </html>
