@@ -33,7 +33,7 @@
   <div class="min-h-screen grid grid-cols-1 md:grid-cols-[240px_1fr]">
     <!-- LEFT SIDEBAR -->
     <aside id="sidebar" style="background-color: #dd5828;" class="text-white p-4 md:p-6 overflow-y-auto flex flex-col max-h-screen">
-      <div class="text-2xl font-bold mb-8 cursor-pointer editable" id="brand-name" contenteditable="true">Portfolio</div>
+      <div class="text-2xl font-bold mb-8 cursor-pointer editable" id="brand-name" contenteditable="true">cho</div>
       
       <!-- Date/Time & IP widgets above buttons -->
       <div class="space-y-3 mb-6 border-b border-white border-opacity-15 pb-4">
@@ -99,7 +99,6 @@
       { id: "webp", name: "webP변환", protected: true },
       { id: "keyword", name: "키워드조합기", protected: true },
       { id: "keyword-search-count", name: "키워드조회수", protected: true },
-      { id: "home", name: "홈", protected: false },
       { id: "about", name: "소개", protected: false }
     ];
 
@@ -115,7 +114,7 @@
       let menus = JSON.parse(localStorage.getItem("menuOrder") || JSON.stringify(defaultMenus));
       
       // Clean up deleted default menus
-      menus = menus.filter(m => m.id !== "stats" && m.id !== "marketing");
+      menus = menus.filter(m => m.id !== "stats" && m.id !== "marketing" && m.id !== "home");
       
       // Ensure keyword-search-count exists
       if (!menus.some(m => m.id === "keyword-search-count")) {
@@ -137,7 +136,7 @@
     function loadAuthStatus() { return localStorage.getItem("authenticated") === "true"; }
     function saveAuthStatus() { localStorage.setItem("authenticated", isAuthenticated); }
     function saveBrandName(name) { localStorage.setItem("brandName", name); }
-    function loadBrandName() { return localStorage.getItem("brandName") || "Portfolio"; }
+    function loadBrandName() { return localStorage.getItem("brandName") || "cho"; }
 
     // ============================================
     // 테마 관리
@@ -422,6 +421,17 @@
       document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
       const panel = document.getElementById(menu.id);
       if (panel) panel.classList.remove("hidden");
+
+      // Update active menu button styling in sidebar
+      document.querySelectorAll(".menu-item").forEach(btn => {
+        if (btn.dataset.menuId === menu.id) {
+          btn.classList.add("bg-white", "text-orange-700");
+          btn.classList.remove("text-white");
+        } else {
+          btn.classList.remove("bg-white", "text-orange-700");
+          btn.classList.add("text-white");
+        }
+      });
     }
 
     function showPasswordModal(menu) {
@@ -505,9 +515,11 @@
         main.appendChild(section);
       });
 
-      // Default: show home
-      const home = document.getElementById("home");
-      if (home) home.classList.remove("hidden");
+      // Default: show the first unprotected panel (or first panel if authenticated)
+      const defaultMenu = currentMenus.find(m => isAuthenticated || !m.protected) || currentMenus[0];
+      if (defaultMenu) {
+        selectMenu(defaultMenu);
+      }
 
       // Initialize scripts for different panels
       setTimeout(() => {
@@ -521,13 +533,8 @@
       if (id === "webp") return getWebPHTML();
       if (id === "keyword") return getKeywordHTML();
       if (id === "keyword-search-count") return getKeywordSearchCountHTML();
-      if (id === "home") {
-        const savedHome = localStorage.getItem("homeContent") || "여기에 홈 페이지 내용을 입력하세요.";
-        return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">홈</h2><p class="text-gray-600 dark-mode:text-gray-300 editable" contenteditable="true" id="home-content">${savedHome}</p></div>`;
-      }
       if (id === "about") {
-        const savedAbout = localStorage.getItem("aboutContent") || "여기에 소개 페이지 내용을 입력하세요.";
-        return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">소개</h2><p class="text-gray-600 dark-mode:text-gray-300 editable" contenteditable="true" id="about-content">${savedAbout}</p></div>`;
+        return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">소개</h2><p class="text-gray-600 dark-mode:text-gray-300 font-semibold" id="about-content">cho가만든곳입니다 수정하지마셈</p></div>`;
       }
       return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8"><h2 class="text-3xl font-bold mb-4">${name}</h2></div>`;
     }
@@ -1205,6 +1212,7 @@
     // 키워드조회수 로직
     // ============================================
     let lastNaverResults = [];
+    let lastQuerySet = new Set();
 
     function setupKeywordSearchCount() {
       const searchBtn = document.getElementById('naver-search-btn');
@@ -1280,7 +1288,21 @@
           }
 
           lastNaverResults = data.keywordList;
-          renderNaverResults(lastNaverResults);
+          
+          // Populate query set with trimmed, lowercased user-inputted keywords
+          lastQuerySet = new Set(keywords.map(kw => kw.toLowerCase().trim()));
+          
+          // Sort results: matching user keywords first, then others
+          lastNaverResults.sort((a, b) => {
+            const aInQuery = lastQuerySet.has(a.relKeyword.toLowerCase().trim());
+            const bInQuery = lastQuerySet.has(b.relKeyword.toLowerCase().trim());
+            
+            if (aInQuery && !bInQuery) return -1;
+            if (!aInQuery && bInQuery) return 1;
+            return 0;
+          });
+
+          renderNaverResults(lastNaverResults, lastQuerySet);
           
           resultCount.textContent = lastNaverResults.length;
           tableContainer.classList.remove('hidden');
@@ -1299,7 +1321,7 @@
         if (lastNaverResults.length === 0) return;
 
         let csvContent = "\uFEFF";
-        csvContent += "키워드,PC 검색수,모바일 검색수,합계 검색수,PC 클릭수,모바일 클릭수,PC CTR,모바일 CTR,경쟁 정도\n";
+        csvContent += "구분,키워드,PC 검색수,모바일 검색수,합계 검색수,PC 클릭수,모바일 클릭수,PC CTR,모바일 CTR,경쟁 정도\n";
 
         lastNaverResults.forEach(item => {
           const pcQc = item.monthlyPcQcCnt;
@@ -1311,8 +1333,9 @@
           const pcCtr = item.monthlyPcCtr || 0;
           const mobCtr = item.monthlyMobileCtr || 0;
           const comp = getCompText(item.plPnrc);
+          const type = lastQuerySet.has(item.relKeyword.toLowerCase().trim()) ? "입력" : "관련";
 
-          csvContent += `"${item.relKeyword}",${pcQc},${mobQc},${totalQc},${pcClk},${mobClk},${pcCtr}%,${mobCtr}%,${comp}\n`;
+          csvContent += `"${type}","${item.relKeyword}",${pcQc},${mobQc},${totalQc},${pcClk},${mobClk},${pcCtr}%,${mobCtr}%,${comp}\n`;
         });
 
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -1345,7 +1368,7 @@
       return comp || "미확인";
     }
 
-    function renderNaverResults(list) {
+    function renderNaverResults(list, querySet) {
       const tbody = document.getElementById('naver-result-list');
       tbody.innerHTML = '';
 
@@ -1368,8 +1391,13 @@
         else if (comp === '중간') compClass = 'text-yellow-600 dark-mode:text-yellow-400 font-bold';
         else if (comp === '낮음') compClass = 'text-green-600 dark-mode:text-green-400 font-bold';
 
+        const isQueried = querySet && querySet.has(item.relKeyword.toLowerCase().trim());
+        const keywordDisplay = isQueried 
+          ? `<span class="font-bold text-blue-600 dark-mode:text-blue-400">${item.relKeyword}</span><span class="inline-block bg-blue-100 dark-mode:bg-blue-950 text-blue-800 dark-mode:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1.5 align-middle">입력</span>`
+          : `<span class="text-gray-700 dark-mode:text-gray-300">${item.relKeyword}</span>`;
+
         tr.innerHTML = `
-          <td class="px-3 py-2.5 font-semibold text-gray-900 dark-mode:text-white">${item.relKeyword}</td>
+          <td class="px-3 py-2.5 font-semibold text-gray-900 dark-mode:text-white">${keywordDisplay}</td>
           <td class="px-2 py-2.5 text-center">${formatNumber(pcQc)}</td>
           <td class="px-2 py-2.5 text-center">${formatNumber(mobQc)}</td>
           <td class="px-2 py-2.5 text-center bg-blue-50/50 dark-mode:bg-blue-900/20 text-blue-700 dark-mode:text-blue-300 font-bold">${formatNumber(totalQc)}</td>
@@ -1414,8 +1442,6 @@
         const saveContent = (e) => {
           if (e.target.id === "home-content") {
             localStorage.setItem("homeContent", e.target.innerHTML);
-          } else if (e.target.id === "about-content") {
-            localStorage.setItem("aboutContent", e.target.innerHTML);
           }
         };
         main.addEventListener("input", saveContent);
