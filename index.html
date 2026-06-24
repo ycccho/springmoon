@@ -24,6 +24,9 @@
     .menu-item.dragging { opacity: 0.5; }
     .editable { cursor: text; padding: 2px 4px; border-radius: 4px; }
     .editable:hover { background-color: rgba(255,255,255,0.1); }
+    /* 드래그 앤 드롭 활성화 스타일 */
+    .drag-over-hq { border-color: #10b981 !important; background-color: #ecfdf5 !important; }
+    .drag-over-blog { border-color: #3b82f6 !important; background-color: #eff6ff !important; }
   </style>
 </head>
 <body class="text-gray-800 font-sans min-h-screen">
@@ -272,8 +275,13 @@
       const home = document.getElementById("home");
       if (home) home.classList.remove("hidden");
 
-      // 키워드조합기 이벤트 설정
-      setTimeout(() => setupKeywordCombiner(), 100);
+      // 각 기능 이벤트 설정 및 초기화
+      setTimeout(() => {
+        setupKeywordCombiner();
+        setupWebP();
+        renderMonthlyTable();
+        renderDailyTable();
+      }, 100);
     }
 
     function getPanelHTML(id, name) {
@@ -281,8 +289,14 @@
       if (id === "stats") return getStatsHTML();
       if (id === "marketing") return getMarketingHTML();
       if (id === "keyword") return getKeywordHTML();
-      if (id === "home") return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">홈</h2><p class="text-gray-600 dark-mode:text-gray-300 editable" contenteditable="true" id="home-content">여기에 홈 페이지 내용을 입력하세요.</p></div>`;
-      if (id === "about") return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">소개</h2><p class="text-gray-600 dark-mode:text-gray-300 editable" contenteditable="true" id="about-content">여기에 소개 페이지 내용을 입력하세요.</p></div>`;
+      if (id === "home") {
+        const savedHome = localStorage.getItem("homeContent") || "여기에 홈 페이지 내용을 입력하세요.";
+        return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">홈</h2><p class="text-gray-600 dark-mode:text-gray-300 editable" contenteditable="true" id="home-content">${savedHome}</p></div>`;
+      }
+      if (id === "about") {
+        const savedAbout = localStorage.getItem("aboutContent") || "여기에 소개 페이지 내용을 입력하세요.";
+        return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">소개</h2><p class="text-gray-600 dark-mode:text-gray-300 editable" contenteditable="true" id="about-content">${savedAbout}</p></div>`;
+      }
       return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8"><h2 class="text-3xl font-bold mb-4">${name}</h2></div>`;
     }
 
@@ -405,215 +419,381 @@
     }
 
     // ============================================
-    // webP 처리 함수 (제공된 코드 그대로 사용)
+    // webP 처리 함수 및 이벤트 설정
     // ============================================
-    const results = [];
+    let convertedFiles = [];
 
+    // [1번 기능] 홈페이지용: 1px 크롭 + 자동 리사이징
     function processWebpResizedAuto(file, quality, targetLandWidth, targetPortWidth) {
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image();
-          img.onload = () => {
-            const isLandscape = img.width >= img.height;
-            const targetWidth = isLandscape ? targetLandWidth : targetPortWidth;
-            const scale = targetWidth / Math.max(img.width, img.height);
-            const scaledWidth = Math.round(img.width * scale);
-            const scaledHeight = Math.round(img.height * scale);
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            img.onload = () => {
+                const originalWidth = img.width;
+                const originalHeight = img.height;
+                
+                // 핵심 기술: 유사 문서 회피를 위해 1px씩 사방을 잘라냄 (크롭 영역 설정)
+                let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
+                if (originalWidth > 2 && originalHeight > 2) {
+                    cropX = 1; 
+                    cropY = 1;
+                    cropW = originalWidth - 2; 
+                    cropH = originalHeight - 2;
+                }
 
-            const canvas = document.createElement('canvas');
-            canvas.width = scaledWidth;
-            canvas.height = scaledHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+                // 잘려나간 후의 크기(cropW, cropH)를 기준으로 방향 판독
+                const orientation = (cropW > cropH) ? 'landscape' : 'portrait';
+                const targetWidthLimit = (orientation === 'landscape') ? targetLandWidth : targetPortWidth;
 
-            canvas.toBlob(blob => {
-              const newName = file.name.split('.')[0] + '_' + scaledWidth + 'x' + scaledHeight + (isLandscape ? '_landscape' : '_portrait') + '.webp';
-              const originalSize = file.size;
-              const newSize = blob.size;
-              const reduction = ((1 - newSize / originalSize) * 100).toFixed(1);
+                let targetW = cropW;
+                let targetH = cropH;
 
-              results.push({
-                file: new File([blob], newName, { type: 'image/webp' }),
-                originalName: file.name,
-                newName: newName,
-                originalSize: originalSize,
-                newSize: newSize,
-                reduction: reduction,
-                width: scaledWidth,
-                height: scaledHeight,
-                mode: 'homepage',
-                blob: blob
-              });
-              resolve();
-            }, 'image/webp', quality / 100);
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
+                // 폭(Width) 기준 리사이징
+                if (cropW > targetWidthLimit) {
+                    targetW = targetWidthLimit;
+                    targetH = Math.round((cropH * targetWidthLimit) / cropW);
+                }
+
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                
+                // 다단계 축소
+                if (cropW / 2 > targetW) {
+                    let curW = Math.floor(cropW * 0.5);
+                    let curH = Math.floor(cropH * 0.5);
+                    canvas.width = curW; canvas.height = curH;
+                    
+                    // 최초 그리기 시 1px 크롭 적용 (drawImage의 소스 좌표 활용)
+                    ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, curW, curH);
+                    
+                    while (curW / 2 > targetW) {
+                        let nextW = Math.floor(curW * 0.5);
+                        let nextH = Math.floor(curH * 0.5);
+                        let tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = nextW; tempCanvas.height = nextH;
+                        let tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.drawImage(canvas, 0, 0, curW, curH, 0, 0, nextW, nextH);
+                        canvas = tempCanvas; curW = nextW; curH = nextH;
+                    }
+                    
+                    let finalCanvas = document.createElement('canvas');
+                    finalCanvas.width = targetW; finalCanvas.height = targetH;
+                    let finalCtx = finalCanvas.getContext('2d');
+                    finalCtx.imageSmoothingEnabled = true; finalCtx.imageSmoothingQuality = 'high';
+                    finalCtx.drawImage(canvas, 0, 0, curW, curH, 0, 0, targetW, targetH);
+                    canvas = finalCanvas;
+                } else {
+                    canvas.width = targetW; canvas.height = targetH;
+                    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+                    // 크기가 작아 바로 그릴 때도 1px 크롭 적용
+                    ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
+                }
+                
+                canvas.toBlob((blob) => {
+                    URL.revokeObjectURL(objectUrl);
+                    if (blob) resolve({ blob, width: targetW, height: targetH, originalWidth, originalHeight, orientation });
+                    else reject(new Error('변환 실패'));
+                }, 'image/webp', quality);
+            };
+            img.onerror = (e) => { URL.revokeObjectURL(objectUrl); reject(e); };
+            img.src = objectUrl;
+        });
     }
 
+    // [2번 기능] 블로그용: 1px 크롭 + 원본 보존 (20MB 제한 방어)
     function processWebpBlogOriginal(file, quality) {
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image();
-          img.onload = () => {
-            let width = img.width - 2;
-            let height = img.height - 2;
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            
+            img.onload = async () => {
+                const originalWidth = img.width;
+                const originalHeight = img.height;
+                
+                // 1px 크롭 설정
+                let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
+                if (originalWidth > 2 && originalHeight > 2) {
+                    cropX = 1; 
+                    cropY = 1;
+                    cropW = originalWidth - 2; 
+                    cropH = originalHeight - 2;
+                }
 
-            const compressImage = (w, h) => {
-              return new Promise(res => {
-                const canvas = document.createElement('canvas');
-                canvas.width = w;
-                canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(img, 1, 1, w, h, 0, 0, w, h);
+                const orientation = (cropW > cropH) ? 'landscape' : 'portrait';
+                const MAX_SAFE_SIZE = 19.9 * 1024 * 1024; 
 
-                canvas.toBlob(blob => {
-                  res(blob);
-                }, 'image/webp', quality / 100);
-              });
+                // 캔버스에 이미지를 1px 크롭하여 그리고 Blob을 추출하는 함수
+                const generateBlobAtScale = (scaleRatio) => {
+                    return new Promise((res) => {
+                        const targetW = Math.round(cropW * scaleRatio);
+                        const targetH = Math.round(cropH * scaleRatio);
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = targetW;
+                        canvas.height = targetH;
+                        const ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        
+                        // 1px 크롭된 영역만 스케일에 맞춰 그리기
+                        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
+                        
+                        canvas.toBlob((blob) => {
+                            res({ blob: blob, width: targetW, height: targetH });
+                        }, 'image/webp', quality);
+                    });
+                };
+
+                try {
+                    let currentScale = 1.0;
+                    let resultData = await generateBlobAtScale(currentScale);
+
+                    while (resultData.blob.size > MAX_SAFE_SIZE && currentScale > 0.1) {
+                        currentScale -= 0.05;
+                        resultData = await generateBlobAtScale(currentScale);
+                    }
+
+                    URL.revokeObjectURL(objectUrl);
+                    resolve({ 
+                        blob: resultData.blob, 
+                        width: resultData.width, 
+                        height: resultData.height, 
+                        originalWidth: originalWidth, 
+                        originalHeight: originalHeight,
+                        orientation: orientation
+                    });
+                } catch (error) {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(error);
+                }
             };
-
-            const tryCompress = async () => {
-              let blob = await compressImage(width, height);
-              while (blob.size > 19.9 * 1024 * 1024 && width > 100 && height > 100) {
-                width = Math.round(width * 0.95);
-                height = Math.round(height * 0.95);
-                blob = await compressImage(width, height);
-              }
-
-              const newName = file.name.split('.')[0] + '_' + width + 'x' + height + '_blog.webp';
-              results.push({
-                file: new File([blob], newName, { type: 'image/webp' }),
-                originalName: file.name,
-                newName: newName,
-                originalSize: file.size,
-                newSize: blob.size,
-                reduction: ((1 - blob.size / file.size) * 100).toFixed(1),
-                width: width,
-                height: height,
-                mode: 'blog',
-                blob: blob
-              });
-              resolve();
-            };
-
-            tryCompress();
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
+            img.onerror = (e) => { URL.revokeObjectURL(objectUrl); reject(e); };
+            img.src = objectUrl;
+        });
     }
 
-    function setupDropZones() {
-      const setupZone = (zoneId, isHQ) => {
-        const zone = document.getElementById(zoneId);
-        if (!zone) return;
+    function setupWebP() {
+      const dropHq = document.getElementById('drop-zone-hq');
+      const fileHq = document.getElementById('file-hq');
+      const dropBlog = document.getElementById('drop-zone-blog');
+      const fileBlog = document.getElementById('file-blog');
 
-        zone.addEventListener('dragover', e => {
-          e.preventDefault();
-          zone.style.backgroundColor = isHQ ? '#dcfce7' : '#dbeafe';
-        });
-        zone.addEventListener('dragleave', () => {
-          zone.style.backgroundColor = 'white';
-        });
-        zone.addEventListener('drop', e => {
-          e.preventDefault();
-          zone.style.backgroundColor = 'white';
-          const files = Array.from(e.dataTransfer.files);
-          handleFiles(files, isHQ);
-        });
+      if (!dropHq || !fileHq || !dropBlog || !fileBlog) return;
 
-        zone.addEventListener('click', () => document.getElementById(isHQ ? 'file-hq' : 'file-blog').click());
-        document.getElementById(isHQ ? 'file-hq' : 'file-blog').addEventListener('change', e => {
-          handleFiles(Array.from(e.target.files), isHQ);
-        });
-      };
-
-      setupZone('drop-zone-hq', true);
-      setupZone('drop-zone-blog', false);
-    }
-
-    async function handleFiles(files, isHQ) {
-      document.getElementById('progress-container').classList.remove('hidden');
-      document.getElementById('result-section').classList.add('hidden');
+      const progressContainer = document.getElementById('progress-container');
       const progressBar = document.getElementById('progress-bar');
       const progressText = document.getElementById('progress-text');
+      const progressStatusText = document.getElementById('progress-status-text');
+      
+      const resultSection = document.getElementById('result-section');
+      const resultList = document.getElementById('result-list');
+      const resultCount = document.getElementById('result-count');
+      const downloadZipBtn = document.getElementById('download-zip-btn');
+      const clearBtn = document.getElementById('clear-btn');
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith('image/')) continue;
-
-        progressText.textContent = `${i + 1} / ${files.length}`;
-        progressBar.style.width = ((i + 1) / files.length * 100) + '%';
-
-        if (isHQ) {
-          await processWebpResizedAuto(file, 95, 1920, 1080);
-        } else {
-          await processWebpBlogOriginal(file, 95);
-        }
-      }
-
-      displayResults();
-    }
-
-    function displayResults() {
-      document.getElementById('progress-container').classList.add('hidden');
-      document.getElementById('result-section').classList.remove('hidden');
-      document.getElementById('result-count').textContent = results.length;
-
-      const list = document.getElementById('result-list');
-      list.innerHTML = '';
-
-      results.forEach((result, idx) => {
-        const row = document.createElement('tr');
-        row.className = idx % 2 === 0 ? 'border-b border-gray-100' : 'bg-gray-50 border-b border-gray-100';
-
-        const sizeReductionColor = result.reduction > 50 ? '#10b981' : result.reduction > 30 ? '#f59e0b' : '#ef4444';
-
-        row.innerHTML = `
-          <td class="px-4 py-3 text-xs"><span style="background-color: ${result.mode === 'homepage' ? '#dcfce7' : '#dbeafe'};" class="px-2 py-1 rounded">${result.mode === 'homepage' ? '🏠 홈페이지' : '📝 블로그'}</span></td>
-          <td class="px-4 py-3"><div class="w-12 h-12 rounded bg-gray-100 flex items-center justify-center overflow-hidden"><img src="${URL.createObjectURL(result.blob)}" style="width:100%; height:100%; object-fit: cover;"></div></td>
-          <td class="px-4 py-3 text-xs"><code class="bg-gray-100 px-2 py-1 rounded text-xs">${result.newName}</code></td>
-          <td class="px-4 py-3 text-xs"><span class="block text-gray-600">${(result.originalSize/1024/1024).toFixed(2)}MB → ${(result.newSize/1024/1024).toFixed(2)}MB</span><span style="color: ${sizeReductionColor};" class="font-bold">${result.reduction}% 감소</span><br><span class="text-gray-500">${result.width}x${result.height}px</span></td>
-          <td class="px-4 py-3"><a href="${URL.createObjectURL(result.blob)}" download="${result.newName}" class="px-3 py-1 text-xs font-semibold text-white rounded bg-blue-600 hover:bg-blue-700 inline-block">⬇️ 다운</a></td>
-        `;
-        list.appendChild(row);
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const main = document.getElementById('main-content');
-      if (main && main.querySelector('#drop-zone-hq')) {
-        setupDropZones();
-
-        document.getElementById('clear-btn').addEventListener('click', () => {
-          results.length = 0;
-          document.getElementById('progress-container').classList.add('hidden');
-          document.getElementById('result-section').classList.add('hidden');
-        });
-
-        document.getElementById('download-zip-btn').addEventListener('click', async () => {
-          const zip = new JSZip();
-          results.forEach(result => {
-            zip.file(result.newName, result.blob);
+      // 이벤트 바인딩 헬퍼
+      function bindEvents(dropZone, fileInput, mode, hoverClass) {
+          dropZone.addEventListener('click', () => fileInput.click());
+          dropZone.addEventListener('dragover', (e) => {
+              e.preventDefault(); dropZone.classList.add(hoverClass);
           });
-          const blob = await zip.generateAsync({ type: 'blob' });
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = 'converted_images.zip';
-          link.click();
-        });
+          dropZone.addEventListener('dragleave', () => dropZone.classList.remove(hoverClass));
+          dropZone.addEventListener('drop', (e) => {
+              e.preventDefault(); dropZone.classList.remove(hoverClass);
+              if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files, mode);
+          });
+          fileInput.addEventListener('change', (e) => {
+              if (e.target.files.length > 0) handleFiles(e.target.files, mode);
+          });
       }
-    });
+
+      bindEvents(dropHq, fileHq, 'hq', 'drag-over-hq');
+      bindEvents(dropBlog, fileBlog, 'blog', 'drag-over-blog');
+
+      clearBtn.addEventListener('click', () => {
+          convertedFiles = [];
+          resultList.innerHTML = '';
+          resultSection.classList.add('hidden');
+          fileHq.value = '';
+          fileBlog.value = '';
+      });
+
+      // ZIP 다운로드
+      downloadZipBtn.addEventListener('click', async () => {
+          if (convertedFiles.length === 0) return;
+          
+          const zip = new JSZip();
+          const fileNames = new Set();
+          
+          convertedFiles.forEach((file, index) => {
+              let name = file.newName;
+              if (fileNames.has(name)) {
+                  name = name.replace('.webp', `-${index}.webp`);
+              }
+              fileNames.add(name);
+              zip.file(name, file.blob);
+          });
+
+          const originalBtnText = downloadZipBtn.innerHTML;
+          downloadZipBtn.innerHTML = `압축 중...`;
+          downloadZipBtn.disabled = true;
+
+          try {
+              const zipContent = await zip.generateAsync({ type: "blob" });
+              const zipUrl = URL.createObjectURL(zipContent);
+              const a = document.createElement('a');
+              a.href = zipUrl;
+              a.download = "optimized_images_pack.zip";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(zipUrl);
+          } catch (error) {
+              alert("ZIP 파일 생성 중 오류가 발생했습니다.");
+          } finally {
+              downloadZipBtn.innerHTML = originalBtnText;
+              downloadZipBtn.disabled = false;
+          }
+      });
+
+      // 메인 핸들러
+      async function handleFiles(files, mode) {
+          const imageFiles = Array.from(files).filter(file => file.type.match(/image\/(jpeg|png)/i));
+          if (imageFiles.length === 0) {
+              alert("JPG 또는 PNG 파일만 처리할 수 있습니다."); return;
+          }
+
+          resultSection.classList.remove('hidden');
+          progressContainer.classList.remove('hidden');
+          
+          if (mode === 'hq') {
+              progressStatusText.textContent = `[홈페이지용] 1px 크롭 및 리사이징 진행 중...`;
+          } else {
+              progressStatusText.textContent = `[블로그용] 1px 크롭 및 WEBP 변환 중...`;
+          }
+          
+          const total = imageFiles.length;
+
+          for (let i = 0; i < total; i++) {
+              const file = imageFiles[i];
+              progressText.textContent = `${i + 1} / ${total}`;
+              progressBar.style.width = `${((i + 1) / total) * 100}%`;
+
+              try {
+                  let resultData;
+                  
+                  if (mode === 'hq') {
+                      resultData = await processWebpResizedAuto(file, 0.95, 1920, 1080);
+                  } else {
+                      resultData = await processWebpBlogOriginal(file, 0.95);
+                  }
+                  
+                  const isLandscape = resultData.orientation === 'landscape';
+                  let badgeText = '';
+                  let badgeClass = '';
+                  
+                  if (mode === 'hq') {
+                      badgeText = isLandscape ? '홈 가로 (1px크롭)' : '홈 세로 (1px크롭)';
+                      badgeClass = isLandscape ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800';
+                  } else {
+                      badgeText = isLandscape ? '블로그 가로 (1px크롭)' : '블로그 세로 (1px크롭)';
+                      badgeClass = isLandscape ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
+                  }
+
+                  let baseName = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase()
+                      .replace(/[\s_]+/g, '-').replace(/[^a-z0-9가-힣-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                  if (!baseName) baseName = `image-${Date.now()}`;
+                  
+                  const suffix = (mode === 'hq') ? '-home' : '-blog';
+                  const newName = baseName + suffix + '.webp';
+                  
+                  const result = {
+                      badgeText: badgeText,
+                      badgeClass: badgeClass,
+                      newName: newName,
+                      originalSize: file.size,
+                      newSize: resultData.blob.size,
+                      originalWidth: resultData.originalWidth, // 크롭 전 순수 원본
+                      originalHeight: resultData.originalHeight,
+                      finalWidth: resultData.width,
+                      finalHeight: resultData.height,
+                      blob: resultData.blob,
+                      url: URL.createObjectURL(resultData.blob)
+                  };
+                  
+                  convertedFiles.push(result);
+                  addResultToTable(result);
+              } catch (error) {
+                  console.error("변환 실패:", file.name, error);
+              }
+          }
+
+          setTimeout(() => {
+              progressContainer.classList.add('hidden');
+              resultCount.textContent = convertedFiles.length;
+              fileHq.value = '';
+              fileBlog.value = '';
+          }, 500);
+      }
+
+      // 테이블 출력
+      function addResultToTable(result) {
+          const tr = document.createElement('tr');
+          tr.className = 'bg-white border-b hover:bg-gray-50 transition-colors';
+          
+          const isReduced = result.newSize < result.originalSize;
+          const sizeClass = isReduced ? 'text-green-600' : 'text-red-600';
+          const percentage = Math.round(Math.abs(result.originalSize - result.newSize) / result.originalSize * 100);
+
+          let resChangeHtml = '';
+          // 원본 해상도와 결과 해상도가 다르면 변경된 것으로 표시 (1px 크롭 포함)
+          if (result.originalWidth !== result.finalWidth) {
+              resChangeHtml = `<div class="text-[10px] text-gray-500 mt-1">해상도 변경: <span class="line-through">${result.originalWidth}px</span> ➔ <span class="font-bold text-blue-600">${result.finalWidth}px</span></div>`;
+              if (result.badgeText.includes('블로그')) {
+                  // 블로그용인데 너비가 원본 - 2px 보다 작으면 20MB 제한에 걸려 미세 축소된 것
+                  if (result.finalWidth < result.originalWidth - 2) {
+                      resChangeHtml += `<div class="text-[10px] text-red-500 font-bold mt-1">※ 20MB 제한으로 자동 미세 축소됨</div>`;
+                  } else {
+                      resChangeHtml += `<div class="text-[10px] text-indigo-500 font-bold mt-1">※ 유사 회피 (1px 크롭 완료)</div>`;
+                  }
+              }
+          } else {
+              resChangeHtml = `<div class="text-[10px] text-gray-500 mt-1">해상도 100% 보존됨</div>`;
+          }
+
+          tr.innerHTML = `
+              <td class="px-4 py-3">
+                  <span class="${result.badgeClass} text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">${result.badgeText}</span>
+              </td>
+              <td class="px-4 py-3">
+                  <img src="${result.url}" alt="미리보기" class="h-10 w-10 object-cover rounded border border-gray-200">
+              </td>
+              <td class="px-4 py-3 font-medium text-gray-900">
+                  <div class="truncate max-w-[150px]" title="${result.newName}">${result.newName}</div>
+              </td>
+              <td class="px-4 py-3">
+                  <div class="text-xs text-gray-400 line-through">${formatBytes(result.originalSize)}</div>
+                  <div class="font-bold ${sizeClass}">${formatBytes(result.newSize)} <span class="text-xs">(-${percentage}%)</span></div>
+                  ${resChangeHtml}
+              </td>
+              <td class="px-4 py-3">
+                  <a href="${result.url}" download="${result.newName}" class="text-gray-600 hover:text-black font-bold hover:underline text-sm">
+                      다운로드
+                  </a>
+              </td>
+          `;
+          resultList.prepend(tr);
+      }
+    }
+
+    function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
 
     // ============================================
     // 키워드조합기 로직 (제공된 코드를 Vanilla JS로 변환)
@@ -854,6 +1034,20 @@
       applyTheme();
       renderMenus();
       renderPanels();
+
+      // 실시간 편집 저장 이벤트 등록
+      const main = document.getElementById("main-content");
+      if (main) {
+        const saveContent = (e) => {
+          if (e.target.id === "home-content") {
+            localStorage.setItem("homeContent", e.target.innerHTML);
+          } else if (e.target.id === "about-content") {
+            localStorage.setItem("aboutContent", e.target.innerHTML);
+          }
+        };
+        main.addEventListener("input", saveContent);
+        main.addEventListener("blur", saveContent, true);
+      }
     }
 
     window.addEventListener("load", initApp);
