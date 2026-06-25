@@ -578,7 +578,39 @@
       if (id === "negative-words") return getNegativeWordsHTML();
       if (id === "html-analysis") return getHtmlAnalysisHTML();
       if (id === "about") {
-        return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">소개</h2><p class="text-gray-600 dark-mode:text-gray-300 font-semibold" id="about-content">cho가만든곳입니다 수정하지마셈</p></div>`;
+        return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
+          <h2 class="text-3xl font-bold mb-4 text-gray-800 dark-mode:text-gray-100">소개</h2>
+          <p class="text-gray-600 dark-mode:text-gray-300 font-bold mb-6" id="about-content">cho가만든곳입니다 수정하지마셈</p>
+          
+          <div class="border-t border-gray-150 dark-mode:border-gray-700 pt-6 mt-6">
+            <h3 class="text-lg font-bold text-gray-800 dark-mode:text-gray-150 mb-4">◆ 메뉴 기능</h3>
+            <div class="space-y-4">
+              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">1. 키워드조합기</h4>
+                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 여러 단어를 키워드로 조합해줌. 파워링크 등.</p>
+              </div>
+              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">2. 키워드조회수</h4>
+                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 네이버검색 월 평균 조회수가 궁금한 키워드 검색 / 기본: 검색한 키워드만 보임 , 연관:연관키워드도 출력됨.</p>
+              </div>
+              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">3. 부정단어찾기</h4>
+                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 원고 내에 부정단어가 있으면 표시해줌</p>
+              </div>
+              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">4. html분석</h4>
+                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 홈페이지 seo 코드 있는지 없는지 수정해야할것 표시. 스키마, meta, og 등</p>
+              </div>
+              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">5. webP변환</h4>
+                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= jpg,png 파일을 webP로 변환해줌.</p>
+                <p class="text-[11px] text-gray-500 dark-mode:text-gray-400 mt-1 leading-relaxed">
+                  * webP사용 = 홈피: 최저용량, 미확대 퀄리티 유지 / 블로그: 20메가에 최대한 근접, 퀄리티 유지, 확대 퀄리티 유지
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>`;
       }
       return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8"><h2 class="text-3xl font-bold mb-4">${name}</h2></div>`;
     }
@@ -1449,8 +1481,8 @@
 
           lastNaverResults = data.keywordList;
           
-          // Populate query set with trimmed, lowercased user-inputted keywords
-          lastQuerySet = new Set(keywords.map(kw => kw.toLowerCase().trim()));
+          // Populate query set with trimmed, space-stripped, lowercased user-inputted keywords
+          lastQuerySet = new Set(keywords.map(kw => kw.toLowerCase().trim().replace(/\s+/g, "")));
           
           // Sort results: matching user keywords first, then others sorted by total volume descending
           lastNaverResults.sort((a, b) => {

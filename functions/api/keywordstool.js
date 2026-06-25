@@ -24,7 +24,7 @@ export async function onRequestGet(context) {
   const uri = "/keywordstool";
 
   const allKeywords = keywords.split(",")
-    .map(k => k.trim())
+    .map(k => k.trim().replace(/\s+/g, ""))
     .filter(k => k.length > 0);
 
   // Group keywords into chunks of 5 (Naver API limit per request)
