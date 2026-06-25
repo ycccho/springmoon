@@ -116,8 +116,7 @@
       { id: "negative-words", name: "부정단어찾기", protected: true },
       { id: "html-analysis", name: "html분석", protected: true },
       { id: "url-extraction", name: "도메인 url추출", protected: true },
-      { id: "image-generator", name: "사진생성기", protected: true },
-      { id: "powercontent", name: "파컨 키워드", protected: true },
+            { id: "powercontent", name: "파컨 키워드", protected: true },
       { id: "about", name: "소개", protected: false }
     ];
 
@@ -164,14 +163,9 @@
         const idx = menus.findIndex(m => m.id === "html-analysis");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "url-extraction", name: "도메인 url추출", protected: true });
       }
-      // Ensure image-generator exists
-      if (!menus.some(m => m.id === "image-generator")) {
-        const idx = menus.findIndex(m => m.id === "url-extraction");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "image-generator", name: "사진생성기", protected: true });
-      }
       // Ensure powercontent exists
       if (!menus.some(m => m.id === "powercontent")) {
-        const idx = menus.findIndex(m => m.id === "image-generator");
+        const idx = menus.findIndex(m => m.id === "url-extraction");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "powercontent", name: "파컨 키워드", protected: true });
       }
       return menus;
@@ -601,7 +595,6 @@
         setupNegativeWords();
         setupHtmlAnalysis();
         setupUrlExtraction();
-        setupImageGenerator();
         setupPowerContent();
       }, 100);
     }
@@ -613,7 +606,6 @@
       if (id === "negative-words") return getNegativeWordsHTML();
       if (id === "html-analysis") return getHtmlAnalysisHTML();
       if (id === "url-extraction") return getUrlExtractionHTML();
-      if (id === "image-generator") return getImageGeneratorHTML();
       if (id === "powercontent") return getPowerContentHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
@@ -651,11 +643,7 @@
                 <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 홈페이지url을 넣으면 해당 홈페이지의 모든 하위 url을 추출해서 표시해줌</p>
               </div>
               <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
-                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">7. 사진생성기</h4>
-                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 구글 Gemini API를 활용하여 병원 블로그용 일러스트 사진 8장을 상황별로 실시간 자동 생성 및 일괄 다운로드</p>
-              </div>
-              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
-                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">8. 파컨 키워드</h4>
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">7. 파컨 키워드</h4>
                 <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 엑셀을 업로드하면 중분류와 키워드를 추출하여 브라우저에 저장하고, 중분류별로 키워드가 포함된 단어들을 검색/추출해줌</p>
               </div>
             </div>
@@ -997,69 +985,6 @@
     }
 
     // ============================================
-    // 사진생성기 메뉴 UI
-    // ============================================
-    function getImageGeneratorHTML() {
-      return `<div class="max-w-6xl mx-auto space-y-6">
-        <!-- Header -->
-        <div class="flex flex-col md:flex-row justify-between items-center bg-white dark-mode:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark-mode:border-gray-700 gap-4">
-          <div>
-            <h1 class="text-2xl font-extrabold text-gray-800 dark-mode:text-gray-100">병원 블로그 일러스트 생성기 (회복 및 식단 관리 편)</h1>
-            <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-1">2D SD+플랫 / 글씨 없음 / 흰배경 / <span class="text-blue-500 font-bold">무표정 의사 & 담담/심플한 환자</span> / 1800x1800 PNG</p>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-stretch sm:items-center">
-            <div class="flex flex-col gap-1 min-w-[200px]">
-              <label class="text-xs font-bold text-gray-700 dark-mode:text-gray-300">🔑 Gemini API Key</label>
-              <input type="password" id="gemini-api-key" class="px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium" placeholder="API Key 입력" value="${localStorage.getItem("geminiApiKey") || ""}">
-            </div>
-            <div class="flex gap-2 self-end w-full sm:w-auto">
-              <button id="image-generate-all-btn" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-750 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md text-xs whitespace-nowrap active:scale-[0.98]">
-                ✨ 전체 8장 재생성
-              </button>
-              <button id="btn-download-all" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md text-xs flex items-center justify-center gap-2 whitespace-nowrap active:scale-[0.98]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                전체 일괄 다운로드 (.zip)
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Image Grid -->
-        <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <!-- Cards will be injected here by JS -->
-        </div>
-
-        <!-- API Info Section -->
-        <div class="mt-8 p-6 bg-blue-50 dark-mode:bg-blue-900 bg-opacity-50 dark-mode:bg-opacity-20 rounded-2xl border border-blue-100 dark-mode:border-blue-800 text-slate-700 dark-mode:text-slate-300">
-          <h3 class="font-extrabold text-blue-950 dark-mode:text-blue-200 text-sm mb-3 flex items-center gap-2">💡 Gemini API 안내 및 사용 방법</h3>
-          <ul class="space-y-3 text-xs leading-relaxed font-medium">
-            <li class="flex items-start gap-2">
-              <span class="text-blue-500 font-bold">•</span>
-              <div>
-                <strong>API 키 발급 방법 (무료):</strong> 
-                <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 dark-mode:text-blue-400 font-bold underline hover:text-blue-855">Google AI Studio</a>에 접속하여 로그인(구글 계정)한 뒤, 좌측 상단의 <strong>[Get API key]</strong> 버튼을 클릭하여 무료 API 키를 생성하고 상단 입력창에 붙여넣어 사용하세요.
-              </div>
-            </li>
-            <li class="flex items-start gap-2">
-              <span class="text-blue-500 font-bold">•</span>
-              <div>
-                <strong>이미지 8장 생성 시 비용:</strong> 
-                Google AI Studio 무료 티어(Free Tier) 범위 내에서는 <strong>100% 무료</strong>로 하루 수백 장의 이미지를 무상 생성할 수 있습니다. (분당 최대 15개 요청 등 기본 제공 한도 내). 유료(Pay-as-you-go) 플랜으로 이용 시 이미지당 약 $0.03 (약 40원) 수준으로, 8장을 모두 생성하는 경우 총 비용은 <strong>약 $0.24 (약 330원)</strong> 내외로 매우 경제적입니다.
-              </div>
-            </li>
-            <li class="flex items-start gap-2">
-              <span class="text-blue-500 font-bold">•</span>
-              <div>
-                <strong>무료 사용 방법:</strong> 
-                별도의 결제 카드 등록 없이 Google AI Studio에서 기본 생성된 API 키를 입력창에 넣어 사용하시는 것만으로 무료 티어로 계속해서 무료 사용이 가능합니다.
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>`;
-    }
-
-    // ============================================
     // 파컨 키워드 메뉴 UI
     // ============================================
     function getPowerContentHTML() {
@@ -1108,7 +1033,7 @@
             
             <!-- Right Panel: Filter & Search -->
             <div class="lg:col-span-2 space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">📁 중분류 선택</label>
                   <select id="power-category-select" class="w-full px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold">
@@ -1116,8 +1041,12 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">🔍 포함할 키워드 입력 (실시간 검색)</label>
+                  <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">🔍 포함할 키워드 1</label>
                   <input type="text" id="power-search-input" placeholder="예: 부산" class="w-full px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">🔍 포함할 키워드 2</label>
+                  <input type="text" id="power-search-input-2" placeholder="예: 인테리어" class="w-full px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
                 </div>
               </div>
               
@@ -2390,207 +2319,6 @@
     }
 
     // ============================================
-    // 사진생성기 기능 및 이벤트 설정
-    // ============================================
-    function setupImageGenerator() {
-      const apiKeyInput = document.getElementById("gemini-api-key");
-      const generateAllBtn = document.getElementById("image-generate-all-btn");
-      const downloadAllBtn = document.getElementById("btn-download-all");
-      const grid = document.getElementById("image-grid");
-
-      if (!grid) return;
-
-      const situations = [
-        { id: 1, title: "1. 회복 진료", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced friendly male doctor and a patient in a cozy hospital room, discussing health recovery politely, calm color palette, simple shapes" },
-        { id: 2, title: "2. 영양 가이드", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced friendly female doctor explaining nutritional guidelines to a patient, showing a plate of healthy food (vegetables, proteins), soft gentle colors" },
-        { id: 3, title: "3. 가벼운 운동", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced male doctor monitoring a patient's mild exercises (like gentle stretching or walking), encouraging and warm, light pastel colors" },
-        { id: 4, title: "4. 생체 신호 체크", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced female doctor checking a patient's vital signs (blood pressure/temperature) with care, cozy hospital ward environment, minimalist" },
-        { id: 5, title: "5. 건강한 식단", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a patient happily eating a delicious, balanced healthy meal in a cozy room, simple cute style" },
-        { id: 6, title: "6. 처방 및 조언", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced friendly doctor giving a prescription to a patient who is smiling gently, warm light, clean composition" },
-        { id: 7, title: "7. 병실 안의 휴식", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a patient resting comfortably in a neat bed with a warm blanket, a cup of warm tea on the side table, peaceful vibe" },
-        { id: 8, title: "8. 완치 퇴원", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced male doctor and a patient shaking hands warmly, celebrating full recovery and discharge from the hospital, happy clean setting" }
-      ];
-
-      // Keep generated images in memory
-      const generatedImages = {}; // id -> base64/title
-
-      // Save API key
-      if (apiKeyInput) {
-        apiKeyInput.addEventListener("change", (e) => {
-          localStorage.setItem("geminiApiKey", e.target.value.trim());
-        });
-      }
-
-      // Render cards
-      grid.innerHTML = situations.map(sit => `
-        <div class="bg-white dark-mode:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark-mode:border-gray-700 shadow-sm flex flex-col justify-between space-y-4">
-          <div>
-            <h3 class="text-sm font-extrabold text-gray-800 dark-mode:text-gray-150 mb-2">${sit.title}</h3>
-            <div class="aspect-square bg-gray-150 dark-mode:bg-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark-mode:border-gray-750 overflow-hidden relative" id="preview-container-${sit.id}">
-              <span class="text-xs text-gray-400 font-bold" id="preview-text-${sit.id}">아직 생성된 이미지가 없습니다.</span>
-              <img id="img-${sit.id}" class="hidden w-full h-full object-cover">
-              <div id="loading-${sit.id}" class="hidden absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white space-y-2">
-                <div class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
-                <span class="text-[10px] font-bold">생성 중...</span>
-              </div>
-            </div>
-          </div>
-          <div class="space-y-2">
-            <textarea id="prompt-${sit.id}" class="w-full px-2 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-gray-50 dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-200 text-[10px] font-medium resize-none focus:outline-none focus:ring-1 focus:ring-blue-500" rows="3">${sit.prompt}</textarea>
-            <div class="flex gap-2">
-              <button class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-755 text-white font-bold rounded-lg text-xs transition-colors btn-generate-single" data-id="${sit.id}">생성</button>
-              <button class="flex-1 py-1.5 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-gray-700 dark-mode:text-gray-200 font-bold rounded-lg text-xs transition-colors btn-download-single hidden" id="download-${sit.id}" data-id="${sit.id}">다운로드</button>
-            </div>
-          </div>
-        </div>
-      `).join("");
-
-      // Helper function to generate a single image
-      async function generateImage(id) {
-        const apiKey = (apiKeyInput ? apiKeyInput.value.trim() : "") || localStorage.getItem("geminiApiKey") || "";
-        if (!apiKey) {
-          alert("Gemini API Key를 입력해주세요.");
-          if (apiKeyInput) apiKeyInput.focus();
-          return;
-        }
-
-        const promptText = document.getElementById(`prompt-${id}`).value.trim();
-        const loading = document.getElementById(`loading-${id}`);
-        const img = document.getElementById(`img-${id}`);
-        const previewText = document.getElementById(`preview-text-${id}`);
-        const downloadBtn = document.getElementById(`download-${id}`);
-
-        loading.classList.remove("hidden");
-
-        try {
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${apiKey}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              prompt: promptText,
-              numberOfImages: 1,
-              outputMimeType: "image/png",
-              aspectRatio: "1:1"
-            })
-          });
-
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.error?.message || `API 호출 실패 (상태: ${response.status})`);
-          }
-
-          const base64Data = data.generatedImages?.[0]?.image?.imageBytes;
-          if (!base64Data) {
-            throw new Error("이미지 바이트 데이터를 받지 못했습니다.");
-          }
-
-          const dataUrl = `data:image/png;base64,${base64Data}`;
-          img.src = dataUrl;
-          img.classList.remove("hidden");
-          previewText.classList.add("hidden");
-          downloadBtn.classList.remove("hidden");
-
-          // Save to memory
-          generatedImages[id] = {
-            base64: base64Data,
-            title: situations.find(s => s.id === id).title
-          };
-
-        } catch (err) {
-          alert(`❌ [카드 ${id}] 생성 중 오류 발생: ${err.message}`);
-        } finally {
-          loading.classList.add("hidden");
-        }
-      }
-
-      // Event listener for generate buttons
-      grid.addEventListener("click", (e) => {
-        if (e.target.classList.contains("btn-generate-single")) {
-          const id = parseInt(e.target.getAttribute("data-id"));
-          generateImage(id);
-        } else if (e.target.classList.contains("btn-download-single")) {
-          const id = parseInt(e.target.getAttribute("data-id"));
-          const imgData = generatedImages[id];
-          if (!imgData) return;
-
-          // Trigger download
-          const a = document.createElement("a");
-          a.href = `data:image/png;base64,${imgData.base64}`;
-          a.download = `${imgData.title.replace(/[\s\.]+/g, "_")}.png`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        }
-      });
-
-      // Generate all
-      if (generateAllBtn) {
-        generateAllBtn.addEventListener("click", async () => {
-          generateAllBtn.disabled = true;
-          const originalText = generateAllBtn.textContent;
-          generateAllBtn.textContent = "⏳ 순차 생성 중...";
-
-          try {
-            for (const sit of situations) {
-              await generateImage(sit.id);
-            }
-          } finally {
-            generateAllBtn.disabled = false;
-            generateAllBtn.textContent = originalText;
-          }
-        });
-      }
-
-      // Download all as ZIP
-      if (downloadAllBtn) {
-        downloadAllBtn.addEventListener("click", async () => {
-          const keys = Object.keys(generatedImages);
-          if (keys.length === 0) {
-            alert("생성된 사진이 없습니다. 먼저 사진을 생성해주세요.");
-            return;
-          }
-
-          downloadAllBtn.disabled = true;
-          const originalText = downloadAllBtn.innerHTML;
-          downloadAllBtn.innerHTML = "압축 중...";
-
-          try {
-            const zip = new JSZip();
-            keys.forEach(id => {
-              const imgData = generatedImages[id];
-              // Convert base64 to binary helper
-              const binary = atob(imgData.base64);
-              const array = [];
-              for (let i = 0; i < binary.length; i++) {
-                array.push(binary.charCodeAt(i));
-              }
-              const blob = new Blob([new Uint8Array(array)], { type: "image/png" });
-              const filename = `${imgData.title.replace(/[\s\.]+/g, "_")}.png`;
-              zip.file(filename, blob);
-            });
-
-            const content = await zip.generateAsync({ type: "blob" });
-            const zipUrl = URL.createObjectURL(content);
-            const a = document.createElement("a");
-            a.href = zipUrl;
-            a.download = `hospital_illustration_pack_${new Date().toISOString().slice(0,10)}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(zipUrl);
-          } catch (err) {
-            alert(`ZIP 파일 생성 실패: ${err.message}`);
-          } finally {
-            downloadAllBtn.disabled = false;
-            downloadAllBtn.innerHTML = originalText;
-          }
-        });
-      }
-    }
-
-    // ============================================
     // 파컨 키워드 기능 및 이벤트 설정
     // ============================================
     function setupPowerContent() {
@@ -2607,6 +2335,7 @@
       
       const categorySelect = document.getElementById("power-category-select");
       const searchInput = document.getElementById("power-search-input");
+      const searchInput2 = document.getElementById("power-search-input-2");
       const filteredCountSpan = document.getElementById("power-filtered-count");
       const copyAllBtn = document.getElementById("power-copy-btn");
       const downloadBtn = document.getElementById("power-download-btn");
@@ -2904,6 +2633,7 @@
       async function performSearch() {
         const selectedCat = categorySelect.value;
         const queryText = searchInput.value.trim().toLowerCase();
+        const queryText2 = searchInput2 ? searchInput2.value.trim().toLowerCase() : "";
         
         resultsList.innerHTML = "";
         lastFilteredKeywords = [];
@@ -2953,7 +2683,12 @@
             });
           }
 
-          const matches = keywords.filter(kw => !queryText || kw.toLowerCase().includes(queryText));
+          const matches = keywords.filter(kw => {
+            const val = kw.toLowerCase();
+            const match1 = !queryText || val.includes(queryText);
+            const match2 = !queryText2 || val.includes(queryText2);
+            return match1 && match2;
+          });
           lastFilteredKeywords = matches;
           filteredCountSpan.textContent = matches.length.toLocaleString();
 
@@ -3014,6 +2749,9 @@
 
       categorySelect.addEventListener("change", performSearch);
       searchInput.addEventListener("input", performSearch);
+      if (searchInput2) {
+        searchInput2.addEventListener("input", performSearch);
+      }
 
       copyAllBtn.addEventListener("click", () => {
         if (lastFilteredKeywords.length === 0) return;
