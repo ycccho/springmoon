@@ -114,6 +114,7 @@
       { id: "keyword-search-count", name: "키워드조회수", protected: true },
       { id: "negative-words", name: "부정단어찾기", protected: true },
       { id: "html-analysis", name: "html분석", protected: true },
+      { id: "url-extraction", name: "도메인 url추출", protected: true },
       { id: "about", name: "소개", protected: false }
     ];
 
@@ -145,6 +146,11 @@
       if (!menus.some(m => m.id === "html-analysis")) {
         const idx = menus.findIndex(m => m.id === "negative-words");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "html-analysis", name: "html분석", protected: true });
+      }
+      // Ensure url-extraction exists
+      if (!menus.some(m => m.id === "url-extraction")) {
+        const idx = menus.findIndex(m => m.id === "html-analysis");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "url-extraction", name: "도메인 url추출", protected: true });
       }
       return menus;
     }
@@ -568,6 +574,7 @@
         setupKeywordSearchCount();
         setupNegativeWords();
         setupHtmlAnalysis();
+        setupUrlExtraction();
       }, 100);
     }
 
@@ -577,6 +584,7 @@
       if (id === "keyword-search-count") return getKeywordSearchCountHTML();
       if (id === "negative-words") return getNegativeWordsHTML();
       if (id === "html-analysis") return getHtmlAnalysisHTML();
+      if (id === "url-extraction") return getUrlExtractionHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
           <h2 class="text-3xl font-bold mb-4 text-gray-800 dark-mode:text-gray-100">소개</h2>
@@ -607,6 +615,10 @@
                 <p class="text-[11px] text-gray-500 dark-mode:text-gray-400 mt-1 leading-relaxed">
                   * webP사용 = 홈피: 최저용량, 미확대 퀄리티 유지 / 블로그: 20메가에 최대한 근접, 퀄리티 유지, 확대 퀄리티 유지
                 </p>
+              </div>
+              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">6. 도메인 url추출</h4>
+                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 홈페이지url을 넣으면 해당 홈페이지의 모든 하위 url을 추출해서 표시해줌</p>
               </div>
             </div>
           </div>
@@ -876,6 +888,70 @@
             <!-- detailed report -->
             <div class="bg-gray-50 dark-mode:bg-gray-900 rounded-xl p-6 border border-gray-200 dark-mode:border-gray-700 space-y-6" id="html-audit-details">
               <!-- filled by JS -->
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ============================================
+    // 도메인 url추출 메뉴 UI
+    // ============================================
+    function getUrlExtractionHTML() {
+      return `<div class="max-w-6xl mx-auto space-y-6">
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🔗 도메인 URL 추출기</h2>
+          <p class="text-sm text-gray-500 dark-mode:text-gray-400 mb-6 font-medium">대상 홈페이지의 URL 주소를 입력하면 해당 홈페이지에서 접근 가능한 모든 하위(내부) 링크 주소들을 분석하여 일괄 추출합니다.</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">🌐 대상 홈페이지 URL 입력</label>
+              <div class="flex gap-2">
+                <input type="text" id="url-extract-input" class="flex-grow px-4 py-3 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-850 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium" placeholder="예: https://abc.com">
+                <button id="url-extract-btn" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-750 text-white rounded-lg font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-[0.98]">
+                  <span>🔍 하위 URL 추출</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Loading Indicator -->
+          <div id="url-extract-loading" class="hidden mt-6 p-8 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-700 text-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">홈페이지를 분석하고 하위 URL 링크들을 추출하는 중입니다...</p>
+          </div>
+          
+          <!-- Error Box -->
+          <div id="url-extract-error" class="hidden mt-6 p-4 bg-red-50 dark-mode:bg-red-950 border border-red-200 dark-mode:border-red-800 rounded-xl text-sm text-red-650 dark-mode:text-red-300 font-semibold"></div>
+          
+          <!-- Results Section -->
+          <div id="url-extract-result" class="hidden mt-6 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+              <h3 class="text-sm font-bold text-gray-800 dark-mode:text-gray-200">📋 추출 완료 (<span id="url-extract-count">0</span>개)</h3>
+              <div class="flex gap-2 w-full sm:w-auto">
+                <input type="text" id="url-result-search" class="px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs font-medium" placeholder="결과 내 검색...">
+                <button id="url-copy-all-btn" class="px-3 py-1.5 bg-gray-850 hover:bg-black dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                  📋 전체 복사
+                </button>
+                <button id="url-download-txt-btn" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                  📥 TXT 다운로드
+                </button>
+              </div>
+            </div>
+            
+            <div class="overflow-x-auto rounded-xl border border-gray-200 dark-mode:border-gray-700 bg-white dark-mode:bg-gray-800 shadow-inner max-h-[500px]">
+              <table class="w-full text-xs text-left text-gray-500 dark-mode:text-gray-400">
+                <thead class="text-[10px] text-gray-700 dark-mode:text-gray-300 uppercase bg-gray-100 dark-mode:bg-gray-700 border-b border-gray-200 dark-mode:border-gray-650 sticky top-0 font-bold">
+                  <tr>
+                    <th class="px-4 py-3 text-center w-12">번호</th>
+                    <th class="px-4 py-3">추출된 하위 URL 주소</th>
+                    <th class="px-4 py-3 text-center w-24">작업</th>
+                  </tr>
+                </thead>
+                <tbody id="url-extract-list" class="divide-y divide-gray-100 dark-mode:divide-gray-700 font-medium">
+                  <!-- filled dynamically -->
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -1975,6 +2051,145 @@
         detailsDiv.innerHTML = detailsHtml;
         resultDiv.classList.remove('hidden');
         resultDiv.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+
+    // ============================================
+    // 도메인 url추출 기능 및 이벤트 설정
+    // ============================================
+    let lastExtractedLinks = [];
+
+    function setupUrlExtraction() {
+      const urlInput = document.getElementById("url-extract-input");
+      const extractBtn = document.getElementById("url-extract-btn");
+      const loadingDiv = document.getElementById("url-extract-loading");
+      const errorDiv = document.getElementById("url-extract-error");
+      const resultDiv = document.getElementById("url-extract-result");
+      const countSpan = document.getElementById("url-extract-count");
+      const searchInput = document.getElementById("url-result-search");
+      const copyAllBtn = document.getElementById("url-copy-all-btn");
+      const downloadTxtBtn = document.getElementById("url-download-txt-btn");
+      const listTbody = document.getElementById("url-extract-list");
+
+      if (!extractBtn || !urlInput) return;
+
+      extractBtn.addEventListener("click", async () => {
+        const targetUrl = urlInput.value.trim();
+        if (!targetUrl) {
+          alert("추출할 URL 주소를 입력해주세요.");
+          urlInput.focus();
+          return;
+        }
+
+        // Reset display
+        loadingDiv.classList.remove("hidden");
+        errorDiv.classList.add("hidden");
+        resultDiv.classList.add("hidden");
+        extractBtn.disabled = true;
+
+        try {
+          const res = await fetch(`/api/extractlinks?url=${encodeURIComponent(targetUrl)}`);
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.error || `오류 발생 (상태 코드: ${res.status})`);
+          }
+
+          lastExtractedLinks = data.links || [];
+          renderExtractedLinks();
+          resultDiv.classList.remove("hidden");
+        } catch (err) {
+          errorDiv.textContent = `❌ 오류: ${err.message}`;
+          errorDiv.classList.remove("hidden");
+        } finally {
+          loadingDiv.classList.add("hidden");
+          extractBtn.disabled = false;
+        }
+      });
+
+      // Enter key binding
+      urlInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          extractBtn.click();
+        }
+      });
+
+      // Render function
+      function renderExtractedLinks() {
+        const query = searchInput.value.trim().toLowerCase();
+        listTbody.innerHTML = "";
+
+        const filtered = lastExtractedLinks.filter(lnk => lnk.toLowerCase().includes(query));
+        countSpan.textContent = filtered.length;
+
+        if (filtered.length === 0) {
+          listTbody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-gray-400 font-bold">추출된 하위 URL 주소가 없습니다.</td></tr>`;
+          return;
+        }
+
+        filtered.forEach((link, index) => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-gray-50 dark-mode:hover:bg-gray-900/50 transition-colors";
+          
+          tr.innerHTML = `
+            <td class="px-4 py-3 text-center text-gray-400 font-mono">${index + 1}</td>
+            <td class="px-4 py-3 text-gray-900 dark-mode:text-gray-100 font-mono break-all select-all">${link}</td>
+            <td class="px-4 py-3 text-center">
+              <button class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 rounded text-[11px] font-bold text-gray-700 dark-mode:text-gray-300 transition-colors copy-single-btn" data-url="${link}">
+                복사
+              </button>
+            </td>
+          `;
+
+          // Bind single copy button
+          tr.querySelector(".copy-single-btn").addEventListener("click", (e) => {
+            const urlToCopy = e.target.getAttribute("data-url");
+            navigator.clipboard.writeText(urlToCopy).then(() => {
+              const oldText = e.target.textContent;
+              e.target.textContent = "완료!";
+              e.target.classList.replace("bg-gray-100", "bg-green-100");
+              e.target.classList.replace("text-gray-700", "text-green-700");
+              setTimeout(() => {
+                e.target.textContent = oldText;
+                e.target.classList.replace("bg-green-100", "bg-gray-100");
+                e.target.classList.replace("text-green-700", "text-gray-700");
+              }, 1000);
+            });
+          });
+
+          listTbody.appendChild(tr);
+        });
+      }
+
+      // Search input event
+      searchInput.addEventListener("input", renderExtractedLinks);
+
+      // Copy all event
+      copyAllBtn.addEventListener("click", () => {
+        if (lastExtractedLinks.length === 0) return;
+        const text = lastExtractedLinks.join("\n");
+        navigator.clipboard.writeText(text).then(() => {
+          const oldText = copyAllBtn.textContent;
+          copyAllBtn.textContent = "📋 복사 완료!";
+          setTimeout(() => {
+            copyAllBtn.textContent = oldText;
+          }, 1500);
+        });
+      });
+
+      // Download TXT event
+      downloadTxtBtn.addEventListener("click", () => {
+        if (lastExtractedLinks.length === 0) return;
+        const text = lastExtractedLinks.join("\r\n");
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `extracted_urls_${new Date().toISOString().slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       });
     }
 
