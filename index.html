@@ -30,9 +30,22 @@
   </style>
 </head>
 <body class="text-gray-800 font-sans min-h-screen">
+  <!-- MOBILE HEADER -->
+  <header class="md:hidden flex items-center justify-between p-4 bg-orange-600 text-white shadow-md z-30 sticky top-0">
+    <div class="text-xl font-bold" id="mobile-brand-name">cho</div>
+    <button id="mobile-menu-toggle" class="p-2 rounded hover:bg-orange-700 focus:outline-none">
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </header>
+
+  <!-- MOBILE OVERLAY BACKDROP -->
+  <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden transition-opacity duration-300 md:hidden"></div>
+
   <div class="min-h-screen grid grid-cols-1 md:grid-cols-[240px_1fr]">
     <!-- LEFT SIDEBAR -->
-    <aside id="sidebar" style="background-color: #dd5828;" class="text-white p-4 md:p-6 overflow-y-auto flex flex-col max-h-screen">
+    <aside id="sidebar" style="background-color: #dd5828;" class="fixed inset-y-0 left-0 w-[240px] z-40 transform -translate-x-full md:relative md:translate-x-0 md:transform-none text-white p-4 md:p-6 overflow-y-auto flex flex-col max-h-screen transition-transform duration-300 ease-in-out">
       <div class="text-2xl font-bold mb-8 cursor-pointer editable" id="brand-name" contenteditable="true">cho</div>
       
       <!-- Date/Time & IP widgets above buttons -->
@@ -99,6 +112,8 @@
       { id: "webp", name: "webP변환", protected: true },
       { id: "keyword", name: "키워드조합기", protected: true },
       { id: "keyword-search-count", name: "키워드조회수", protected: true },
+      { id: "negative-words", name: "부정단어찾기", protected: true },
+      { id: "html-analysis", name: "html분석", protected: true },
       { id: "about", name: "소개", protected: false }
     ];
 
@@ -119,11 +134,17 @@
       // Ensure keyword-search-count exists
       if (!menus.some(m => m.id === "keyword-search-count")) {
         const idx = menus.findIndex(m => m.id === "keyword");
-        if (idx !== -1) {
-          menus.splice(idx + 1, 0, { id: "keyword-search-count", name: "키워드조회수", protected: true });
-        } else {
-          menus.push({ id: "keyword-search-count", name: "키워드조회수", protected: true });
-        }
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "keyword-search-count", name: "키워드조회수", protected: true });
+      }
+      // Ensure negative-words exists
+      if (!menus.some(m => m.id === "negative-words")) {
+        const idx = menus.findIndex(m => m.id === "keyword-search-count");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "negative-words", name: "부정단어찾기", protected: true });
+      }
+      // Ensure html-analysis exists
+      if (!menus.some(m => m.id === "html-analysis")) {
+        const idx = menus.findIndex(m => m.id === "negative-words");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "html-analysis", name: "html분석", protected: true });
       }
       return menus;
     }
@@ -136,7 +157,14 @@
     function loadAuthStatus() { return localStorage.getItem("authenticated") === "true"; }
     function saveAuthStatus() { localStorage.setItem("authenticated", isAuthenticated); }
     function saveBrandName(name) { localStorage.setItem("brandName", name); }
-    function loadBrandName() { return localStorage.getItem("brandName") || "cho"; }
+    function loadBrandName() {
+      let name = localStorage.getItem("brandName");
+      if (!name || name === "Portfolio") {
+        name = "cho";
+        localStorage.setItem("brandName", "cho");
+      }
+      return name;
+    }
 
     // ============================================
     // 테마 관리
@@ -413,6 +441,15 @@
       return btn;
     }
 
+    function closeMobileMenu() {
+      const sidebar = document.getElementById("sidebar");
+      const backdrop = document.getElementById("mobile-sidebar-backdrop");
+      if (sidebar && !sidebar.classList.contains("-translate-x-full")) {
+        sidebar.classList.add("-translate-x-full");
+        backdrop.classList.add("hidden");
+      }
+    }
+
     function selectMenu(menu) {
       if (!isAuthenticated && menu.protected) {
         showPasswordModal(menu);
@@ -432,6 +469,9 @@
           btn.classList.add("text-white");
         }
       });
+
+      // Auto close mobile drawer
+      closeMobileMenu();
     }
 
     function showPasswordModal(menu) {
@@ -526,6 +566,8 @@
         setupKeywordCombiner();
         setupWebP();
         setupKeywordSearchCount();
+        setupNegativeWords();
+        setupHtmlAnalysis();
       }, 100);
     }
 
@@ -533,6 +575,8 @@
       if (id === "webp") return getWebPHTML();
       if (id === "keyword") return getKeywordHTML();
       if (id === "keyword-search-count") return getKeywordSearchCountHTML();
+      if (id === "negative-words") return getNegativeWordsHTML();
+      if (id === "html-analysis") return getHtmlAnalysisHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg"><h2 class="text-3xl font-bold mb-4">소개</h2><p class="text-gray-600 dark-mode:text-gray-300 font-semibold" id="about-content">cho가만든곳입니다 수정하지마셈</p></div>`;
       }
@@ -671,11 +715,17 @@
             </div>
             
             <div class="md:col-span-2 space-y-4 flex flex-col min-h-[400px]">
-              <div class="flex justify-between items-center">
+              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <h3 class="text-sm font-bold text-gray-800 dark-mode:text-gray-200">📊 조회 결과 (<span id="naver-result-count">0</span>개)</h3>
-                <button id="naver-excel-btn" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 active:scale-[0.95]" disabled>
-                  <span>📥 엑셀(CSV) 다운로드</span>
-                </button>
+                <div class="flex items-center gap-2">
+                  <div class="flex bg-gray-100 dark-mode:bg-gray-700 p-1 rounded-lg border border-gray-200 dark-mode:border-gray-600">
+                    <button id="naver-mode-basic-btn" class="px-3 py-1 text-xs font-bold rounded transition-all text-gray-500 dark-mode:text-gray-400" data-mode="basic">기본</button>
+                    <button id="naver-mode-related-btn" class="px-3 py-1 text-xs font-bold rounded transition-all bg-white text-blue-600 shadow-sm dark-mode:bg-gray-800 dark-mode:text-blue-400" data-mode="related">연관</button>
+                  </div>
+                  <button id="naver-excel-btn" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 active:scale-[0.95]" disabled>
+                    <span>📥 엑셀(CSV) 다운로드</span>
+                  </button>
+                </div>
               </div>
               
               <div id="naver-loading-indicator" class="hidden flex-grow flex flex-col items-center justify-center text-center p-8 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-700 shadow-inner">
@@ -708,6 +758,92 @@
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ============================================
+    // 부정단어찾기 메뉴 UI
+    // ============================================
+    function getNegativeWordsHTML() {
+      return `<div class="max-w-6xl mx-auto space-y-6">
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🚫 부정 단어 검사기</h2>
+          <p class="text-sm text-gray-500 dark-mode:text-gray-400 mb-6 font-medium">원고(텍스트)를 입력하면 지정한 부정 단어 및 광고 심의 위반 소지 단어들을 감지하여 빨간색으로 표시합니다.</p>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Check Manuscript -->
+            <div class="lg:col-span-2 space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">📝 검사할 원고 입력</label>
+                <textarea id="neg-manuscript-input" rows="8" class="w-full px-4 py-3 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-850 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium" placeholder="여기에 검사할 원고(텍스트) 내용을 입력해 주세요."></textarea>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <button id="neg-check-btn" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow-md transition-all active:scale-[0.97]">
+                  <span>🔍 부정 단어 검사하기</span>
+                </button>
+                <div class="text-xs text-gray-500 dark-mode:text-gray-400 font-semibold">
+                  감지된 단어: <span id="neg-detected-count" class="text-red-650 font-bold">0</span>개 (종류: <span id="neg-unique-count" class="text-red-650 font-bold">0</span>종)
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">📋 검사 결과</label>
+                <div id="neg-output-display" class="w-full p-4 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-gray-50 dark-mode:bg-gray-900 text-gray-800 dark-mode:text-gray-100 text-sm min-h-[200px] whitespace-pre-wrap leading-relaxed shadow-inner" style="min-height: 200px;">원고를 입력하고 검증 버튼을 누르거나 실시간으로 입력하면 결과가 여기에 표시됩니다.</div>
+              </div>
+            </div>
+            
+            <!-- Right Column: Settings -->
+            <div class="lg:col-span-1 space-y-4">
+              <div class="bg-gray-50 dark-mode:bg-gray-900 p-5 rounded-xl border border-gray-200 dark-mode:border-gray-750">
+                <h3 class="text-sm font-bold text-gray-850 dark-mode:text-gray-200 mb-2 flex items-center gap-1.5">⚙️ 부정 단어 목록 관리</h3>
+                <p class="text-xs text-gray-400 mb-4 font-medium leading-relaxed">단어는 쉼표(,)나 줄바꿈(Enter)으로 구분하여 입력해 주세요. 저장 시 기존 목록에 덮어씌워지며 자동으로 중복은 정렬/제거됩니다.</p>
+                
+                <textarea id="neg-words-setting-input" rows="12" class="w-full px-3 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-850 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 text-xs font-medium resize-none leading-relaxed" placeholder="단어 1, 단어 2..."></textarea>
+                
+                <button id="neg-save-words-btn" class="w-full mt-3 py-2 bg-gray-850 hover:bg-black dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-white rounded-lg font-bold text-xs transition-colors">
+                  💾 부정 단어 목록 저장
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ============================================
+    // html분석 메뉴 UI
+    // ============================================
+    function getHtmlAnalysisHTML() {
+      return `<div class="max-w-6xl mx-auto space-y-6">
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🛠️ SEO HTML 분석기</h2>
+          <p class="text-sm text-gray-500 dark-mode:text-gray-400 mb-6 font-medium">홈페이지의 HTML 코드를 입력하면 메타태그, 오픈그래프, 스키마 마크업 등을 분석하여 SEO 개선 의견을 실시간으로 도출합니다.</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">📂 분석할 HTML 소스 코드 붙여넣기</label>
+              <textarea id="html-audit-input" rows="10" class="w-full px-4 py-3 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-850 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono" placeholder="<!DOCTYPE html>&#10;<html>&#10;<head>&#10;..."></textarea>
+            </div>
+            
+            <button id="html-audit-btn" class="w-full md:w-auto px-8 py-3 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-150 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+              <span>🔍 SEO 분석 시작하기</span>
+            </button>
+          </div>
+          
+          <!-- Report Output -->
+          <div id="html-audit-result" class="hidden mt-8 space-y-6">
+            <!-- summary cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="html-audit-scores">
+              <!-- filled by JS -->
+            </div>
+            
+            <!-- detailed report -->
+            <div class="bg-gray-50 dark-mode:bg-gray-900 rounded-xl p-6 border border-gray-200 dark-mode:border-gray-700 space-y-6" id="html-audit-details">
+              <!-- filled by JS -->
             </div>
           </div>
         </div>
@@ -1213,6 +1349,7 @@
     // ============================================
     let lastNaverResults = [];
     let lastQuerySet = new Set();
+    let naverFilterMode = "related"; // "basic" (input only) or "related" (all)
 
     function setupKeywordSearchCount() {
       const searchBtn = document.getElementById('naver-search-btn');
@@ -1225,6 +1362,8 @@
       const loadingStatus = document.getElementById('naver-loading-status');
       const errorBox = document.getElementById('naver-error-box');
       const tableContainer = document.getElementById('naver-table-container');
+      const basicBtn = document.getElementById('naver-mode-basic-btn');
+      const relatedBtn = document.getElementById('naver-mode-related-btn');
 
       if (!searchBtn || !keywordsInput || !customerIdInput) return;
 
@@ -1232,6 +1371,27 @@
       customerIdInput.addEventListener('input', () => {
         localStorage.setItem("naverCustomerId", customerIdInput.value.trim());
       });
+
+      // Filter Mode Toggles
+      function updateFilterMode(mode) {
+        naverFilterMode = mode;
+        if (mode === 'basic') {
+          if (basicBtn) basicBtn.className = "px-3 py-1 text-xs font-bold rounded transition-all bg-white text-blue-600 shadow-sm dark-mode:bg-gray-800 dark-mode:text-blue-400";
+          if (relatedBtn) relatedBtn.className = "px-3 py-1 text-xs font-bold rounded transition-all text-gray-500 dark-mode:text-gray-400";
+        } else {
+          if (relatedBtn) relatedBtn.className = "px-3 py-1 text-xs font-bold rounded transition-all bg-white text-blue-600 shadow-sm dark-mode:bg-gray-800 dark-mode:text-blue-400";
+          if (basicBtn) basicBtn.className = "px-3 py-1 text-xs font-bold rounded transition-all text-gray-500 dark-mode:text-gray-400";
+        }
+        
+        if (lastNaverResults.length > 0) {
+          renderNaverResults(lastNaverResults, lastQuerySet);
+        }
+      }
+
+      if (basicBtn && relatedBtn) {
+        basicBtn.addEventListener('click', () => updateFilterMode('basic'));
+        relatedBtn.addEventListener('click', () => updateFilterMode('related'));
+      }
 
       searchBtn.addEventListener('click', async () => {
         const customerId = customerIdInput.value.trim();
@@ -1292,19 +1452,20 @@
           // Populate query set with trimmed, lowercased user-inputted keywords
           lastQuerySet = new Set(keywords.map(kw => kw.toLowerCase().trim()));
           
-          // Sort results: matching user keywords first, then others
+          // Sort results: matching user keywords first, then others sorted by total volume descending
           lastNaverResults.sort((a, b) => {
             const aInQuery = lastQuerySet.has(a.relKeyword.toLowerCase().trim());
             const bInQuery = lastQuerySet.has(b.relKeyword.toLowerCase().trim());
             
             if (aInQuery && !bInQuery) return -1;
             if (!aInQuery && bInQuery) return 1;
-            return 0;
+            
+            const aVol = sumQcNumeric(a.monthlyPcQcCnt, a.monthlyMobileQcCnt);
+            const bVol = sumQcNumeric(b.monthlyPcQcCnt, b.monthlyMobileQcCnt);
+            return bVol - aVol;
           });
 
           renderNaverResults(lastNaverResults, lastQuerySet);
-          
-          resultCount.textContent = lastNaverResults.length;
           tableContainer.classList.remove('hidden');
           excelBtn.disabled = false;
         } catch (error) {
@@ -1320,10 +1481,15 @@
       excelBtn.addEventListener('click', () => {
         if (lastNaverResults.length === 0) return;
 
+        let displayList = lastNaverResults;
+        if (naverFilterMode === 'basic') {
+          displayList = lastNaverResults.filter(item => lastQuerySet.has(item.relKeyword.toLowerCase().trim()));
+        }
+
         let csvContent = "\uFEFF";
         csvContent += "구분,키워드,PC 검색수,모바일 검색수,합계 검색수,PC 클릭수,모바일 클릭수,PC CTR,모바일 CTR,경쟁 정도\n";
 
-        lastNaverResults.forEach(item => {
+        displayList.forEach(item => {
           const pcQc = item.monthlyPcQcCnt;
           const mobQc = item.monthlyMobileQcCnt;
           const totalQc = sumQc(pcQc, mobQc);
@@ -1350,6 +1516,12 @@
       });
     }
 
+    function sumQcNumeric(pc, mobile) {
+      const pcVal = typeof pc === 'string' && pc.startsWith('<') ? 5 : Number(pc || 0);
+      const mobVal = typeof mobile === 'string' && mobile.startsWith('<') ? 5 : Number(mobile || 0);
+      return (isNaN(pcVal) ? 0 : pcVal) + (isNaN(mobVal) ? 0 : mobVal);
+    }
+
     function sumQc(pc, mobile) {
       const pcVal = typeof pc === 'string' && pc.startsWith('<') ? 5 : Number(pc || 0);
       const mobVal = typeof mobile === 'string' && mobile.startsWith('<') ? 5 : Number(mobile || 0);
@@ -1370,9 +1542,24 @@
 
     function renderNaverResults(list, querySet) {
       const tbody = document.getElementById('naver-result-list');
+      const resultCount = document.getElementById('naver-result-count');
       tbody.innerHTML = '';
 
-      list.forEach(item => {
+      let displayList = list;
+      if (naverFilterMode === 'basic') {
+        displayList = list.filter(item => querySet && querySet.has(item.relKeyword.toLowerCase().trim()));
+      }
+
+      if (resultCount) {
+        resultCount.textContent = displayList.length;
+      }
+
+      if (displayList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-20 text-center text-gray-400 dark-mode:text-gray-500 font-bold">표시할 데이터가 없습니다.</td></tr>`;
+        return;
+      }
+
+      displayList.forEach(item => {
         const tr = document.createElement('tr');
         tr.className = 'border-b border-gray-150 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-750 text-gray-700 dark-mode:text-gray-200';
 
@@ -1419,6 +1606,346 @@
       return num.toLocaleString();
     }
 
+
+
+    // ============================================
+    // 부정단어찾기 및 html분석 스크립트 설정
+    // ============================================
+    function setupNegativeWords() {
+      const input = document.getElementById('neg-manuscript-input');
+      const output = document.getElementById('neg-output-display');
+      const settingsInput = document.getElementById('neg-words-setting-input');
+      const checkBtn = document.getElementById('neg-check-btn');
+      const saveBtn = document.getElementById('neg-save-words-btn');
+      const countLabel = document.getElementById('neg-detected-count');
+      const uniqueLabel = document.getElementById('neg-unique-count');
+
+      if (!input || !output || !settingsInput || !checkBtn || !saveBtn) return;
+
+      const defaultWordsStr = "최고, 무조건, 핵심, 단순히, 단순한, 넘어, 전액 무료, 무료 제공, 선착순 혜택, 사은품 증정, 교통비 지원, 완치, 완벽해결, 치료효과 보장, 영구적인 효과, 세계 최초, 국내 최초, 최저가, 유일, 1위, 제일, 대표적, 부작용 없음, 부작용 제로, 통증 없음, 붓기와 멍이 전혀 없음, 특히, 체험단, 할인, 무료, 무통증, 병원, 전문병원, 가장, 추천";
+
+      let savedWordsStr = localStorage.getItem("negativeWords");
+      if (!savedWordsStr) {
+        savedWordsStr = defaultWordsStr;
+        localStorage.setItem("negativeWords", defaultWordsStr);
+      }
+      settingsInput.value = savedWordsStr;
+
+      function getWordsArray() {
+        const raw = settingsInput.value || "";
+        return raw.split(/[\n,]+/)
+          .map(w => w.trim())
+          .filter(w => w.length > 0);
+      }
+
+      function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function checkText() {
+        const text = input.value;
+        if (!text) {
+          output.innerHTML = "원고를 입력하고 검증 버튼을 누르거나 실시간으로 입력하면 결과가 여기에 표시됩니다.";
+          if (countLabel) countLabel.textContent = "0";
+          if (uniqueLabel) uniqueLabel.textContent = "0";
+          return;
+        }
+
+        const words = getWordsArray();
+        if (words.length === 0) {
+          output.textContent = text;
+          if (countLabel) countLabel.textContent = "0";
+          if (uniqueLabel) uniqueLabel.textContent = "0";
+          return;
+        }
+
+        words.sort((a, b) => b.length - a.length);
+
+        const escapedWords = words.map(w => escapeRegExp(w));
+        const pattern = escapedWords.join('|');
+        const regex = new RegExp(`(${pattern})`, 'gi');
+
+        const escapedText = escapeHtml(text);
+        
+        let detectedCount = 0;
+        const uniqueDetected = new Set();
+
+        const highlighted = escapedText.replace(regex, (match) => {
+          detectedCount++;
+          uniqueDetected.add(match.toLowerCase().trim());
+          return `<mark class="bg-red-100 dark-mode:bg-red-950 text-red-600 dark-mode:text-red-400 font-bold border border-red-300 dark-mode:border-red-800 px-1 rounded transition-colors">${match}</mark>`;
+        });
+
+        output.innerHTML = highlighted;
+        if (countLabel) countLabel.textContent = detectedCount;
+        if (uniqueLabel) uniqueLabel.textContent = uniqueDetected.size;
+      }
+
+      input.addEventListener('input', checkText);
+      checkBtn.addEventListener('click', checkText);
+
+      saveBtn.addEventListener('click', () => {
+        const words = getWordsArray();
+        const uniqueWords = [...new Set(words)];
+        const cleanStr = uniqueWords.join(", ");
+        localStorage.setItem("negativeWords", cleanStr);
+        settingsInput.value = cleanStr;
+        alert("부정 단어 목록이 저장되었습니다.");
+        checkText();
+      });
+    }
+
+    function setupHtmlAnalysis() {
+      const input = document.getElementById('html-audit-input');
+      const auditBtn = document.getElementById('html-audit-btn');
+      const resultDiv = document.getElementById('html-audit-result');
+      const scoresDiv = document.getElementById('html-audit-scores');
+      const detailsDiv = document.getElementById('html-audit-details');
+
+      if (!input || !auditBtn || !resultDiv || !scoresDiv || !detailsDiv) return;
+
+      auditBtn.addEventListener('click', () => {
+        const code = input.value.trim();
+        if (!code) {
+          alert("HTML 코드를 입력해 주세요.");
+          return;
+        }
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(code, "text/html");
+
+        let goodCount = 0;
+        let warnCount = 0;
+        let errorCount = 0;
+
+        const report = [];
+
+        function addFinding(status, title, description, details = "") {
+          if (status === 'good') goodCount++;
+          else if (status === 'warn') warnCount++;
+          else if (status === 'error') errorCount++;
+          
+          report.push({ status, title, description, details });
+        }
+
+        // 1. Meta Title
+        const titleNode = doc.querySelector('title');
+        const titleText = titleNode ? titleNode.textContent.trim() : "";
+        if (!titleText) {
+          addFinding('error', '페이지 제목 (&lt;title&gt;)', '제목 태그가 누락되었거나 비어 있습니다.', '검색엔진 결과 페이지(SERP)에 제목이 노출되지 않아 클릭율이 치명적으로 저하됩니다. 30~60자 사이의 핵심 키워드를 포함한 제목을 추가하세요.');
+        } else {
+          const len = titleText.length;
+          let msg = `현재 설정된 제목: "${titleText}" (글자수: ${len}자)`;
+          if (len < 20 || len > 60) {
+            addFinding('warn', '페이지 제목 (&lt;title&gt;)', `${msg} - 적정 글자수 범위를 벗어났습니다.`, '제목의 적정 글자수는 공백 포함 30~60자 사이입니다. 너무 짧으면 검색 노출 확률이 줄고, 너무 길면 검색 결과창에서 뒷부분이 잘려 보일 수 있습니다.');
+          } else {
+            addFinding('good', '페이지 제목 (&lt;title&gt;)', `${msg} - 매우 적절합니다.`, '검색 결과에 정확하고 간결하게 표시하기 적합한 형태입니다.');
+          }
+        }
+
+        // 2. Meta Description
+        const descNode = doc.querySelector('meta[name="description"]');
+        const descText = descNode ? descNode.getAttribute('content') : "";
+        if (!descText) {
+          addFinding('error', '메타 설명태그 (meta description)', '설명 태그가 누락되어 있습니다.', '검색엔진이 원고 본문을 임의로 수집하여 노출하므로 사이트 의도와 다른 텍스트가 표시될 수 있습니다. 110~150자 사이의 핵심 매력 포인트를 정리한 메타 설명을 추가하세요.');
+        } else {
+          const len = descText.length;
+          let msg = `현재 설명: "${descText}" (글자수: ${len}자)`;
+          if (len < 50 || len > 160) {
+            addFinding('warn', '메타 설명태그 (meta description)', `${msg} - 적정 글자수 범위를 벗어났습니다.`, '적정 글자수는 공백 포함 110~150자 사이입니다. 너무 길면 검색 결과 요약문에서 잘리며, 너무 짧으면 페이지 유용성이 떨어져 보일 수 있습니다.');
+          } else {
+            addFinding('good', '메타 설명태그 (meta description)', `${msg} - 매우 적절합니다.`, '검색 결과창에서 요약문으로 최적화되어 노출되기 적합합니다.');
+          }
+        }
+
+        // 3. Robots
+        const robotsNode = doc.querySelector('meta[name="robots"]');
+        const robotsText = robotsNode ? robotsNode.getAttribute('content') : "";
+        if (!robotsText) {
+          addFinding('good', '검색 로봇 제어 (meta robots)', '기본 설정 상태 (Index, Follow)', '명시적인 제어가 없으므로 검색엔진 로봇이 페이지를 정상적으로 수집 및 색인(index) 처리합니다.');
+        } else {
+          addFinding('good', '검색 로봇 제어 (meta robots)', `설정 상태: "${robotsText}"`, '로봇 검색 수집 범위가 지정되어 있습니다.');
+        }
+
+        // 4. Canonical Link
+        const canonicalNode = doc.querySelector('link[rel="canonical"]');
+        const canonicalUrl = canonicalNode ? canonicalNode.getAttribute('href') : "";
+        if (!canonicalUrl) {
+          addFinding('warn', '대표 URL 링크 (canonical link)', '대표 주소(Canonical) 설정이 없습니다.', '유사한 URL 주소나 파라미터 유입 시 중복 콘텐츠 분산 위험이 있습니다. 검색엔진의 정확한 평가를 위해 대표주소 태그를 헤더에 배치하는 것을 추천합니다.');
+        } else {
+          addFinding('good', '대표 URL 링크 (canonical link)', `설정된 대표 URL: ${canonicalUrl}`, '중복 콘텐츠 이슈를 회피하고 도메인 가치를 하나의 주소로 집중할 수 있게 올바르게 적용되어 있습니다.');
+        }
+
+        // 5. Open Graph
+        const ogTags = {};
+        ['title', 'description', 'image', 'url', 'type'].forEach(prop => {
+          const node = doc.querySelector(`meta[property="og:${prop}"]`);
+          ogTags[prop] = node ? node.getAttribute('content') : '';
+        });
+
+        const missingOg = Object.keys(ogTags).filter(k => !ogTags[k]);
+        if (missingOg.length > 0) {
+          addFinding('warn', '오픈그래프 태그 (Open Graph)', `일부 태그가 누락되었습니다: ${missingOg.map(k => `og:${k}`).join(', ')}`, 'SNS(카카오톡, 네이버 블로그 등)나 메신저에 링크 공유 시 미리보기 제목, 이미지, 요약문이 불완전하게 표시될 수 있습니다.');
+        } else {
+          addFinding('good', '오픈그래프 태그 (Open Graph)', '모든 필수 오픈그래프 태그가 올바르게 적용되었습니다.', 'SNS 공유 시 완전한 정보와 미리보기 이미지가 나타나므로 유입 확률을 크게 높일 수 있습니다.');
+        }
+
+        // 6. Schema.org Markup
+        const jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
+        if (jsonLdNodes.length === 0) {
+          addFinding('error', '스키마 마크업 (ld+json)', 'Schema.org 구조화 데이터 마크업이 발견되지 않았습니다.', '검색 결과창에서 별점, 가격, 리뷰 등 풍부한 정보(Rich Snippet)를 표현할 기회를 잃게 됩니다. 사이트 성격에 맞는 구조화 데이터(Organization, WebSite 등)를 추가해 보세요.');
+        } else {
+          let isValid = true;
+          let types = [];
+          jsonLdNodes.forEach(node => {
+            try {
+              const data = JSON.parse(node.textContent);
+              types.push(data['@type'] || data['type'] || '알 수 없음');
+            } catch (e) {
+              isValid = false;
+            }
+          });
+          
+          if (!isValid) {
+            addFinding('error', '스키마 마크업 (ld+json)', 'JSON 문법 오류가 감지되었습니다.', '입력된 Schema.org 구조화 데이터 코드에 JSON 포맷 오류가 있어 검색 로봇이 정상적으로 분석할 수 없습니다. 쉼표(,)나 따옴표 매칭을 검토하세요.');
+          } else {
+            addFinding('good', '스키마 마크업 (ld+json)', `구조화 데이터 감지됨 (타입: ${types.join(', ')})`, '주요 검색엔진이 페이지 성격과 구조를 더 명확하게 이해하여 리치 검색 결과 노출 확률을 높입니다.');
+          }
+        }
+
+        // 7. Heading 1
+        const h1Nodes = doc.querySelectorAll('h1');
+        if (h1Nodes.length === 0) {
+          addFinding('error', '헤딩 계층 구조 (h1)', 'H1 타이틀 태그가 존재하지 않습니다.', 'H1 태그는 페이지에서 가장 중요한 단 하나의 주제를 담아야 합니다. H1이 없으면 검색엔진이 문서의 중심 테마를 이해하기 어려워집니다.');
+        } else if (h1Nodes.length > 1) {
+          addFinding('warn', '헤딩 계층 구조 (h1)', `H1 태그가 ${h1Nodes.length}개 존재합니다.`, '한 페이지에는 하나의 H1 태그만 존재하고, 하위 세부 단락들은 H2, H3 순서로 계층화하는 것이 권장됩니다.');
+        } else {
+          addFinding('good', '헤딩 계층 구조 (h1)', `올바르게 1개의 H1이 존재합니다: "${h1Nodes[0].textContent.trim()}"`, '문서의 대표 핵심 테마가 정확하게 기재되었습니다.');
+        }
+
+        // 8. Image Alt Attributes
+        const imgNodes = doc.querySelectorAll('img');
+        if (imgNodes.length === 0) {
+          addFinding('good', '이미지 대체 텍스트 (img alt)', '페이지에 이미지가 존재하지 않습니다.', '분석 제외 대상입니다.');
+        } else {
+          let noAltCount = 0;
+          imgNodes.forEach(img => {
+            if (!img.hasAttribute('alt') || !img.getAttribute('alt').trim()) {
+              noAltCount++;
+            }
+          });
+          
+          if (noAltCount > 0) {
+            addFinding('warn', '이미지 대체 텍스트 (img alt)', `총 ${imgNodes.length}개의 이미지 중 alt 속성이 없거나 비어 있는 이미지가 ${noAltCount}개 있습니다.`, 'alt 속성(대체 텍스트)은 검색봇이 이미지 의미를 해독하는 중요한 평가 항목입니다. alt="설명" 형태로 보완해 주세요.');
+          } else {
+            addFinding('good', '이미지 대체 텍스트 (img alt)', `모든 이미지(${imgNodes.length}개)에 alt 속성이 적용되어 있습니다.`, '웹 접근성을 만족하고 이미지 검색 노출 경쟁력에 우수합니다.');
+          }
+        }
+
+        // 9. Viewport Mobile Optimization
+        const viewportNode = doc.querySelector('meta[name="viewport"]');
+        if (!viewportNode) {
+          addFinding('error', '모바일 화면 최적화 (meta viewport)', '모바일 반응형 뷰포트 태그가 누락되었습니다.', '모바일 기기로 접속 시 화면이 깨지거나 축소되어 노출됩니다. viewport 메타태그를 꼭 기재하세요.');
+        } else {
+          addFinding('good', '모바일 화면 최적화 (meta viewport)', `설정 값: "${viewportNode.getAttribute('content') || ''}"`, '모바일 기기 화면 비율에 맞추어 레이아웃이 반응형으로 렌더링되도록 설정되어 있습니다.');
+        }
+
+        // 10. Temporal Year Check (2026 기준 조언)
+        const copyrightMatches = code.match(/(copyright|©)\s*(20[0-2][0-5])/i) || code.match(/(20[0-2][0-5])(년)/);
+        if (copyrightMatches) {
+          addFinding('warn', '2026년 최신성 검사 (KST 시간 기준)', `코드 내에 과거 연도 표시가 남아 있을 가능성이 있습니다 (예: ${copyrightMatches[0]}).`, '현재 시점은 2026년입니다. 저작권 표시나 헤더의 연도 표시 등이 작년 이전 정보로 고정되어 있으면 사용자 신뢰도와 로봇 수집 최신 점수에 마이너스가 될 수 있습니다. 2026년으로 교체하는 것을 적극 추천합니다.');
+        } else {
+          addFinding('good', '2026년 최신성 검사 (KST 시간 기준)', '과거 연도(2025년 이전) 표기가 감지되지 않았습니다.', '최신성 유지가 우수합니다.');
+        }
+
+        // Calculate and Render Score Cards
+        scoresDiv.innerHTML = `
+          <div class="bg-green-50 dark-mode:bg-green-950/30 p-5 rounded-xl border border-green-200 dark-mode:border-green-800 flex items-center justify-between shadow-sm">
+            <div>
+              <div class="text-[10px] text-green-700 dark-mode:text-green-300 font-bold uppercase tracking-wider mb-1">✅ 양호 항목</div>
+              <div class="text-3xl font-extrabold text-green-800 dark-mode:text-green-200">${goodCount} <span class="text-sm font-semibold">건</span></div>
+            </div>
+            <div class="text-green-500 text-3xl font-bold">😊</div>
+          </div>
+          
+          <div class="bg-yellow-50 dark-mode:bg-yellow-950/30 p-5 rounded-xl border border-yellow-200 dark-mode:border-yellow-800 flex items-center justify-between shadow-sm">
+            <div>
+              <div class="text-[10px] text-yellow-750 dark-mode:text-yellow-300 font-bold uppercase tracking-wider mb-1">⚠️ 개선 권장</div>
+              <div class="text-3xl font-extrabold text-yellow-800 dark-mode:text-yellow-200">${warnCount} <span class="text-sm font-semibold">건</span></div>
+            </div>
+            <div class="text-yellow-500 text-3xl font-bold">🤨</div>
+          </div>
+          
+          <div class="bg-red-50 dark-mode:bg-red-950/30 p-5 rounded-xl border border-red-200 dark-mode:border-red-800 flex items-center justify-between shadow-sm">
+            <div>
+              <div class="text-[10px] text-red-700 dark-mode:text-red-300 font-bold uppercase tracking-wider mb-1">❌ 위험/누락</div>
+              <div class="text-3xl font-extrabold text-red-800 dark-mode:text-red-200">${errorCount} <span class="text-sm font-semibold">건</span></div>
+            </div>
+            <div class="text-red-500 text-3xl font-bold">😱</div>
+          </div>
+        `;
+
+        // Render Details
+        let detailsHtml = `<h3 class="text-lg font-bold text-gray-800 dark-mode:text-gray-200 border-b border-gray-250 dark-mode:border-gray-700 pb-3 flex items-center gap-2">🔍 상세 진단 보고서</h3>`;
+        
+        report.forEach(item => {
+          let badgeHtml = '';
+          let bgClass = '';
+          if (item.status === 'good') {
+            badgeHtml = `<span class="bg-green-100 dark-mode:bg-green-950 text-green-800 dark-mode:text-green-200 text-[10px] font-bold px-2 py-0.5 rounded-full">✅ 양호</span>`;
+            bgClass = 'bg-white dark-mode:bg-gray-800 border-green-250 dark-mode:border-green-900';
+          } else if (item.status === 'warn') {
+            badgeHtml = `<span class="bg-yellow-100 dark-mode:bg-yellow-950 text-yellow-800 dark-mode:text-yellow-200 text-[10px] font-bold px-2 py-0.5 rounded-full">⚠️ 권장</span>`;
+            bgClass = 'bg-white dark-mode:bg-gray-800 border-yellow-250 dark-mode:border-yellow-900';
+          } else if (item.status === 'error') {
+            badgeHtml = `<span class="bg-red-100 dark-mode:bg-red-950 text-red-800 dark-mode:text-red-200 text-[10px] font-bold px-2 py-0.5 rounded-full">❌ 위험</span>`;
+            bgClass = 'bg-white dark-mode:bg-gray-800 border-red-200 dark-mode:border-red-900';
+          }
+
+          detailsHtml += `
+            <div class="p-4 rounded-xl border ${bgClass} shadow-sm space-y-2">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-extrabold text-gray-800 dark-mode:text-gray-100">${item.title}</h4>
+                ${badgeHtml}
+              </div>
+              <p class="text-xs font-bold text-gray-600 dark-mode:text-gray-300 leading-relaxed">${item.description}</p>
+              ${item.details ? `<p class="text-[11px] text-gray-500 dark-mode:text-gray-400 bg-gray-50 dark-mode:bg-gray-900 border border-gray-150 dark-mode:border-gray-850 p-2.5 rounded-lg leading-relaxed">${item.details}</p>` : ''}
+            </div>
+          `;
+        });
+
+        // Open Graph Simulation
+        if (ogTags.title || ogTags.image || ogTags.description) {
+          detailsHtml += `
+            <div class="mt-6 p-4 rounded-xl border border-blue-200 dark-mode:border-blue-900 bg-blue-50/20 dark-mode:bg-blue-950/10 space-y-3">
+              <h4 class="text-xs font-extrabold text-blue-700 dark-mode:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">📱 SNS 링크 미리보기 시뮬레이션</h4>
+              <div class="max-w-md bg-white dark-mode:bg-gray-800 border border-gray-250 dark-mode:border-gray-700 rounded-lg overflow-hidden shadow-sm">
+                ${ogTags.image ? `<img src="${ogTags.image}" alt="og:image" class="w-full h-44 object-cover">` : `<div class="w-full h-44 bg-gray-100 dark-mode:bg-gray-700 flex items-center justify-center text-xs text-gray-400 font-bold">이미지 없음</div>`}
+                <div class="p-3.5 space-y-1 bg-gray-50/80 dark-mode:bg-gray-800">
+                  <div class="text-[11px] text-gray-400 dark-mode:text-gray-500 font-semibold truncate">${ogTags.url || 'website.com'}</div>
+                  <div class="text-sm font-bold text-gray-850 dark-mode:text-gray-100 truncate">${ogTags.title || titleText || '대표 제목 없음'}</div>
+                  <div class="text-xs text-gray-500 dark-mode:text-gray-400 line-clamp-2 leading-relaxed">${ogTags.description || descText || '대표 설명 내용 없음'}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        detailsDiv.innerHTML = detailsHtml;
+        resultDiv.classList.remove('hidden');
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+
     // ============================================
     // 초기화
     // ============================================
@@ -1427,7 +1954,40 @@
       isAuthenticated = loadAuthStatus();
       currentMenus = loadMenuOrder();
 
-      document.getElementById("brand-name").textContent = loadBrandName();
+      // Sync brand name and add save listeners
+      const brandNameElem = document.getElementById("brand-name");
+      const mobileBrandNameElem = document.getElementById("mobile-brand-name");
+      const brandVal = loadBrandName();
+      if (brandNameElem) brandNameElem.textContent = brandVal;
+      if (mobileBrandNameElem) mobileBrandNameElem.textContent = brandVal;
+
+      if (brandNameElem) {
+        const saveBrand = () => {
+          const newBrand = brandNameElem.textContent.trim();
+          if (newBrand) {
+            saveBrandName(newBrand);
+            if (mobileBrandNameElem) mobileBrandNameElem.textContent = newBrand;
+          }
+        };
+        brandNameElem.addEventListener("input", saveBrand);
+        brandNameElem.addEventListener("blur", saveBrand);
+      }
+
+      // Mobile menu toggle listeners
+      const mobileToggle = document.getElementById("mobile-menu-toggle");
+      const sidebar = document.getElementById("sidebar");
+      const backdrop = document.getElementById("mobile-sidebar-backdrop");
+
+      function toggleMobileMenu() {
+        sidebar.classList.toggle("-translate-x-full");
+        backdrop.classList.toggle("hidden");
+      }
+
+      if (mobileToggle && sidebar && backdrop) {
+        mobileToggle.addEventListener("click", toggleMobileMenu);
+        backdrop.addEventListener("click", toggleMobileMenu);
+      }
+
       applyTheme();
       renderMenus();
       renderPanels();
