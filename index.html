@@ -17,6 +17,7 @@
   <meta name="twitter:image" content="https://postfiles.pstatic.net/MjAyMzAyMDVfMjE5/MDAxNjc1NTgzNzc1NjIy.tp4jWdSCOsJ_jnbG2n2t6Px8a18tTAo-kiCzee6Ejfsg.MeWoKTInJaRI6E336xXWJqSlANleK0uD6gWnmYn3cC0g.JPEG.babolang/DD241D85-98E1-4FC2-91D9-EFF6CBBBD441.jpeg?type=w966" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body.dark-mode { @apply bg-gray-900 text-white; }
     .menu-item { cursor: grab; }
@@ -115,6 +116,8 @@
       { id: "negative-words", name: "부정단어찾기", protected: true },
       { id: "html-analysis", name: "html분석", protected: true },
       { id: "url-extraction", name: "도메인 url추출", protected: true },
+      { id: "image-generator", name: "사진생성기", protected: true },
+      { id: "powercontent", name: "파컨 키워드", protected: true },
       { id: "about", name: "소개", protected: false }
     ];
 
@@ -129,9 +132,18 @@
     function loadMenuOrder() {
       let menus = JSON.parse(localStorage.getItem("menuOrder") || JSON.stringify(defaultMenus));
       
-      // Clean up deleted default menus
-      menus = menus.filter(m => m.id !== "stats" && m.id !== "marketing" && m.id !== "home");
+      // Clean up deleted default menus and menus named "1"
+      menus = menus.filter(m => m.id !== "stats" && m.id !== "marketing" && m.id !== "home" && m.name !== "1" && m.id !== "1");
       
+      // Clean up orphaned category IDs to avoid hidden menus
+      const cats = loadCategories();
+      const catIds = new Set(cats.map(c => c.id));
+      menus.forEach(m => {
+        if (m.categoryId && !catIds.has(m.categoryId)) {
+          m.categoryId = null;
+        }
+      });
+
       // Ensure keyword-search-count exists
       if (!menus.some(m => m.id === "keyword-search-count")) {
         const idx = menus.findIndex(m => m.id === "keyword");
@@ -152,11 +164,24 @@
         const idx = menus.findIndex(m => m.id === "html-analysis");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "url-extraction", name: "도메인 url추출", protected: true });
       }
+      // Ensure image-generator exists
+      if (!menus.some(m => m.id === "image-generator")) {
+        const idx = menus.findIndex(m => m.id === "url-extraction");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "image-generator", name: "사진생성기", protected: true });
+      }
+      // Ensure powercontent exists
+      if (!menus.some(m => m.id === "powercontent")) {
+        const idx = menus.findIndex(m => m.id === "image-generator");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "powercontent", name: "파컨 키워드", protected: true });
+      }
       return menus;
     }
 
     function saveMenuOrder() { localStorage.setItem("menuOrder", JSON.stringify(currentMenus)); }
-    function loadCategories() { return JSON.parse(localStorage.getItem("categories") || "[]"); }
+    function loadCategories() { 
+      let cats = JSON.parse(localStorage.getItem("categories") || "[]");
+      return cats.filter(c => c.name !== "1" && c.id !== "1");
+    }
     function saveCategories() { localStorage.setItem("categories", JSON.stringify(currentCategories)); }
     function loadDarkMode() { return localStorage.getItem("darkMode") === "true"; }
     function saveDarkMode() { localStorage.setItem("darkMode", isDarkMode); }
@@ -265,12 +290,13 @@
         catHeader.className = "category-header flex items-center justify-between text-xs font-bold text-gray-200 uppercase tracking-wider px-2 py-1.5 mb-1 group cursor-grab active:cursor-grabbing";
         catHeader.draggable = true;
         catHeader.innerHTML = `
-          <span class="flex items-center gap-1.5">📁 ${cat.name}</span>
+          <span class="flex items-center gap-1.5">📁 <span class="cat-name-text"></span></span>
           <div class="opacity-0 group-hover:opacity-100 flex gap-1.5 transition-opacity">
             <button class="cat-edit-btn text-white hover:text-gray-300 text-[10px]">✏️</button>
             <button class="cat-delete-btn text-red-300 hover:text-red-500 text-[10px]">❌</button>
           </div>
         `;
+        catHeader.querySelector(".cat-name-text").textContent = cat.name;
 
         // Edit / Delete Category events
         catHeader.querySelector(".cat-edit-btn").addEventListener("click", (e) => {
@@ -575,6 +601,8 @@
         setupNegativeWords();
         setupHtmlAnalysis();
         setupUrlExtraction();
+        setupImageGenerator();
+        setupPowerContent();
       }, 100);
     }
 
@@ -585,6 +613,8 @@
       if (id === "negative-words") return getNegativeWordsHTML();
       if (id === "html-analysis") return getHtmlAnalysisHTML();
       if (id === "url-extraction") return getUrlExtractionHTML();
+      if (id === "image-generator") return getImageGeneratorHTML();
+      if (id === "powercontent") return getPowerContentHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
           <h2 class="text-3xl font-bold mb-4 text-gray-800 dark-mode:text-gray-100">소개</h2>
@@ -619,6 +649,14 @@
               <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
                 <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">6. 도메인 url추출</h4>
                 <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 홈페이지url을 넣으면 해당 홈페이지의 모든 하위 url을 추출해서 표시해줌</p>
+              </div>
+              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">7. 사진생성기</h4>
+                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 구글 Gemini API를 활용하여 병원 블로그용 일러스트 사진 8장을 상황별로 실시간 자동 생성 및 일괄 다운로드</p>
+              </div>
+              <div class="p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-850">
+                <h4 class="font-bold text-sm text-orange-600 dark-mode:text-orange-400 mb-1">8. 파컨 키워드</h4>
+                <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">= 엑셀을 업로드하면 중분류와 키워드를 추출하여 브라우저에 저장하고, 중분류별로 키워드가 포함된 단어들을 검색/추출해줌</p>
               </div>
             </div>
           </div>
@@ -744,7 +782,7 @@
             <div class="md:col-span-1 space-y-4">
               <div>
                 <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">🔑 Naver Customer ID</label>
-                <input type="text" id="naver-customer-id" class="w-full px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium" placeholder="예: 1234567" value="${localStorage.getItem("naverCustomerId") || ""}">
+                <input type="text" id="naver-customer-id" class="w-full px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium" placeholder="예: 1610516" value="${localStorage.getItem("naverCustomerId") || "1610516"}">
                 <p class="text-[10px] text-gray-400 mt-1 font-medium">네이버 검색광고 로그인 후 [도구 > API 사용 관리]에서 확인할 수 있는 고유 ID입니다. 입력 시 브라우저에 안전하게 자동 저장됩니다.</p>
               </div>
               
@@ -952,6 +990,170 @@
                   <!-- filled dynamically -->
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ============================================
+    // 사진생성기 메뉴 UI
+    // ============================================
+    function getImageGeneratorHTML() {
+      return `<div class="max-w-6xl mx-auto space-y-6">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center bg-white dark-mode:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark-mode:border-gray-700 gap-4">
+          <div>
+            <h1 class="text-2xl font-extrabold text-gray-800 dark-mode:text-gray-100">병원 블로그 일러스트 생성기 (회복 및 식단 관리 편)</h1>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-1">2D SD+플랫 / 글씨 없음 / 흰배경 / <span class="text-blue-500 font-bold">무표정 의사 & 담담/심플한 환자</span> / 1800x1800 PNG</p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-stretch sm:items-center">
+            <div class="flex flex-col gap-1 min-w-[200px]">
+              <label class="text-xs font-bold text-gray-700 dark-mode:text-gray-300">🔑 Gemini API Key</label>
+              <input type="password" id="gemini-api-key" class="px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium" placeholder="API Key 입력" value="${localStorage.getItem("geminiApiKey") || ""}">
+            </div>
+            <div class="flex gap-2 self-end w-full sm:w-auto">
+              <button id="image-generate-all-btn" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-750 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md text-xs whitespace-nowrap active:scale-[0.98]">
+                ✨ 전체 8장 재생성
+              </button>
+              <button id="btn-download-all" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md text-xs flex items-center justify-center gap-2 whitespace-nowrap active:scale-[0.98]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                전체 일괄 다운로드 (.zip)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Grid -->
+        <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Cards will be injected here by JS -->
+        </div>
+
+        <!-- API Info Section -->
+        <div class="mt-8 p-6 bg-blue-50 dark-mode:bg-blue-900 bg-opacity-50 dark-mode:bg-opacity-20 rounded-2xl border border-blue-100 dark-mode:border-blue-800 text-slate-700 dark-mode:text-slate-300">
+          <h3 class="font-extrabold text-blue-950 dark-mode:text-blue-200 text-sm mb-3 flex items-center gap-2">💡 Gemini API 안내 및 사용 방법</h3>
+          <ul class="space-y-3 text-xs leading-relaxed font-medium">
+            <li class="flex items-start gap-2">
+              <span class="text-blue-500 font-bold">•</span>
+              <div>
+                <strong>API 키 발급 방법 (무료):</strong> 
+                <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 dark-mode:text-blue-400 font-bold underline hover:text-blue-855">Google AI Studio</a>에 접속하여 로그인(구글 계정)한 뒤, 좌측 상단의 <strong>[Get API key]</strong> 버튼을 클릭하여 무료 API 키를 생성하고 상단 입력창에 붙여넣어 사용하세요.
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-500 font-bold">•</span>
+              <div>
+                <strong>이미지 8장 생성 시 비용:</strong> 
+                Google AI Studio 무료 티어(Free Tier) 범위 내에서는 <strong>100% 무료</strong>로 하루 수백 장의 이미지를 무상 생성할 수 있습니다. (분당 최대 15개 요청 등 기본 제공 한도 내). 유료(Pay-as-you-go) 플랜으로 이용 시 이미지당 약 $0.03 (약 40원) 수준으로, 8장을 모두 생성하는 경우 총 비용은 <strong>약 $0.24 (약 330원)</strong> 내외로 매우 경제적입니다.
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-500 font-bold">•</span>
+              <div>
+                <strong>무료 사용 방법:</strong> 
+                별도의 결제 카드 등록 없이 Google AI Studio에서 기본 생성된 API 키를 입력창에 넣어 사용하시는 것만으로 무료 티어로 계속해서 무료 사용이 가능합니다.
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>`;
+    }
+
+    // ============================================
+    // 파컨 키워드 메뉴 UI
+    // ============================================
+    function getPowerContentHTML() {
+      return `<div class="max-w-6xl mx-auto space-y-6">
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📊 파워콘텐츠 키워드 도구</h2>
+          <p class="text-sm text-gray-500 dark-mode:text-gray-400 mb-6 font-medium">엑셀 파일(.xlsx, .xls, .csv)을 업로드하여 키워드와 중분류 데이터를 저장한 뒤, 중분류를 선택하고 특정 단어가 포함된 키워드만 실시간으로 추출합니다.</p>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Panel: Excel Upload & Stats -->
+            <div class="lg:col-span-1 space-y-4">
+              <div class="p-5 border-2 border-dashed border-gray-300 dark-mode:border-gray-600 rounded-xl bg-gray-50 dark-mode:bg-gray-850 hover:bg-gray-100 dark-mode:hover:bg-gray-800 transition-all flex flex-col items-center justify-center text-center cursor-pointer relative" id="power-dropzone">
+                <input type="file" id="power-excel-input" accept=".xlsx, .xls, .csv" class="hidden">
+                <span class="text-3xl mb-2">📂</span>
+                <span class="text-xs font-bold text-gray-700 dark-mode:text-gray-300">엑셀 파일 업로드</span>
+                <span class="text-[10px] text-gray-400 mt-1">드래그 앤 드롭 또는 클릭하여 선택</span>
+              </div>
+              
+              <!-- Progress Bar -->
+              <div id="power-progress-section" class="hidden space-y-1">
+                <div class="flex justify-between text-[10px] font-bold text-gray-500 dark-mode:text-gray-400">
+                  <span id="power-progress-status">엑셀 파일을 불러오는 중...</span>
+                  <span id="power-progress-percent">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 dark-mode:bg-gray-700 h-2 rounded-full overflow-hidden">
+                  <div id="power-progress-bar" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
+                </div>
+              </div>
+
+              <!-- Local Storage Stats -->
+              <div class="p-4 bg-slate-50 dark-mode:bg-gray-900 rounded-xl border border-slate-200 dark-mode:border-gray-750 text-xs text-slate-600 dark-mode:text-slate-350 space-y-2 font-medium">
+                <p class="font-bold text-slate-800 dark-mode:text-slate-100 text-xs flex items-center gap-1">🗄️ 데이터 저장 상태 <span id="power-storage-mode" class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-250 text-gray-500 dark-mode:bg-gray-750 dark-mode:text-gray-300">확인 중...</span></p>
+                <div class="flex justify-between">
+                  <span>총 저장된 키워드:</span>
+                  <span id="power-total-keywords" class="font-bold text-blue-650 dark-mode:text-blue-450">0개</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>등록된 중분류 수:</span>
+                  <span id="power-total-categories" class="font-bold text-blue-650 dark-mode:text-blue-450">0개</span>
+                </div>
+                <div class="text-[10px] text-slate-400 dark-mode:text-slate-500 border-t border-slate-200 dark-mode:border-slate-700 pt-2 mt-1">
+                  * 엑셀에서 "중분류" 및 "키워드" 열을 자동 인식하여 브라우저 로컬 데이터베이스(IndexedDB)에 안전하게 영구 저장합니다.
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right Panel: Filter & Search -->
+            <div class="lg:col-span-2 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">📁 중분류 선택</label>
+                  <select id="power-category-select" class="w-full px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold">
+                    <option value="">-- 중분류를 선택하세요 --</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">🔍 포함할 키워드 입력 (실시간 검색)</label>
+                  <input type="text" id="power-search-input" placeholder="예: 부산" class="w-full px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                </div>
+              </div>
+              
+              <!-- Filter Results Actions -->
+              <div class="flex items-center justify-between bg-slate-50 dark-mode:bg-gray-900 px-4 py-3 rounded-xl border border-slate-150 dark-mode:border-gray-750">
+                <div class="text-xs font-bold text-gray-650 dark-mode:text-gray-350">
+                  추출 결과: <span id="power-filtered-count" class="text-blue-600 dark-mode:text-blue-400 font-extrabold text-sm">0</span> 건
+                </div>
+                <div class="flex gap-2">
+                  <button id="power-copy-btn" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                    📋 전체 복사
+                  </button>
+                  <button id="power-download-btn" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                    📥 TXT 다운로드
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Results List -->
+              <div class="overflow-x-auto rounded-xl border border-gray-200 dark-mode:border-gray-700 bg-white dark-mode:bg-gray-800 shadow-inner max-h-[400px]">
+                <table class="w-full text-xs text-left text-gray-500 dark-mode:text-gray-400">
+                  <thead class="text-[10px] text-gray-700 dark-mode:text-gray-300 uppercase bg-gray-100 dark-mode:bg-gray-700 border-b border-gray-200 dark-mode:border-gray-650 sticky top-0 font-bold">
+                    <tr>
+                      <th class="px-4 py-3 text-center w-12">번호</th>
+                      <th class="px-4 py-3">중분류</th>
+                      <th class="px-4 py-3">추출된 키워드</th>
+                      <th class="px-4 py-3 text-center w-24">작업</th>
+                    </tr>
+                  </thead>
+                  <tbody id="power-results-list" class="divide-y divide-gray-100 dark-mode:divide-gray-700 font-medium">
+                    <tr>
+                      <td colspan="4" class="px-4 py-8 text-center text-gray-400 font-bold">중분류를 선택하거나 키워드를 검색하여 결과를 확인하세요.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -1502,14 +1704,8 @@
       }
 
       searchBtn.addEventListener('click', async () => {
-        const customerId = customerIdInput.value.trim();
+        const customerId = customerIdInput.value.trim() || "1610516";
         const keywordsText = keywordsInput.value.trim();
-
-        if (!customerId) {
-          alert("Naver Customer ID를 입력해 주세요.");
-          customerIdInput.focus();
-          return;
-        }
 
         if (!keywordsText) {
           alert("조회할 키워드를 입력해 주세요.");
@@ -2191,6 +2387,661 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
+    }
+
+    // ============================================
+    // 사진생성기 기능 및 이벤트 설정
+    // ============================================
+    function setupImageGenerator() {
+      const apiKeyInput = document.getElementById("gemini-api-key");
+      const generateAllBtn = document.getElementById("image-generate-all-btn");
+      const downloadAllBtn = document.getElementById("btn-download-all");
+      const grid = document.getElementById("image-grid");
+
+      if (!grid) return;
+
+      const situations = [
+        { id: 1, title: "1. 회복 진료", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced friendly male doctor and a patient in a cozy hospital room, discussing health recovery politely, calm color palette, simple shapes" },
+        { id: 2, title: "2. 영양 가이드", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced friendly female doctor explaining nutritional guidelines to a patient, showing a plate of healthy food (vegetables, proteins), soft gentle colors" },
+        { id: 3, title: "3. 가벼운 운동", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced male doctor monitoring a patient's mild exercises (like gentle stretching or walking), encouraging and warm, light pastel colors" },
+        { id: 4, title: "4. 생체 신호 체크", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced female doctor checking a patient's vital signs (blood pressure/temperature) with care, cozy hospital ward environment, minimalist" },
+        { id: 5, title: "5. 건강한 식단", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a patient happily eating a delicious, balanced healthy meal in a cozy room, simple cute style" },
+        { id: 6, title: "6. 처방 및 조언", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced friendly doctor giving a prescription to a patient who is smiling gently, warm light, clean composition" },
+        { id: 7, title: "7. 병실 안의 휴식", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a patient resting comfortably in a neat bed with a warm blanket, a cup of warm tea on the side table, peaceful vibe" },
+        { id: 8, title: "8. 완치 퇴원", prompt: "A 2D SD simple flat digital illustration, no text, clean white background, a blank-faced male doctor and a patient shaking hands warmly, celebrating full recovery and discharge from the hospital, happy clean setting" }
+      ];
+
+      // Keep generated images in memory
+      const generatedImages = {}; // id -> base64/title
+
+      // Save API key
+      if (apiKeyInput) {
+        apiKeyInput.addEventListener("change", (e) => {
+          localStorage.setItem("geminiApiKey", e.target.value.trim());
+        });
+      }
+
+      // Render cards
+      grid.innerHTML = situations.map(sit => `
+        <div class="bg-white dark-mode:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark-mode:border-gray-700 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <h3 class="text-sm font-extrabold text-gray-800 dark-mode:text-gray-150 mb-2">${sit.title}</h3>
+            <div class="aspect-square bg-gray-150 dark-mode:bg-gray-900 rounded-xl flex items-center justify-center border border-gray-200 dark-mode:border-gray-750 overflow-hidden relative" id="preview-container-${sit.id}">
+              <span class="text-xs text-gray-400 font-bold" id="preview-text-${sit.id}">아직 생성된 이미지가 없습니다.</span>
+              <img id="img-${sit.id}" class="hidden w-full h-full object-cover">
+              <div id="loading-${sit.id}" class="hidden absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white space-y-2">
+                <div class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                <span class="text-[10px] font-bold">생성 중...</span>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <textarea id="prompt-${sit.id}" class="w-full px-2 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-gray-50 dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-200 text-[10px] font-medium resize-none focus:outline-none focus:ring-1 focus:ring-blue-500" rows="3">${sit.prompt}</textarea>
+            <div class="flex gap-2">
+              <button class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-755 text-white font-bold rounded-lg text-xs transition-colors btn-generate-single" data-id="${sit.id}">생성</button>
+              <button class="flex-1 py-1.5 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-gray-700 dark-mode:text-gray-200 font-bold rounded-lg text-xs transition-colors btn-download-single hidden" id="download-${sit.id}" data-id="${sit.id}">다운로드</button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      // Helper function to generate a single image
+      async function generateImage(id) {
+        const apiKey = (apiKeyInput ? apiKeyInput.value.trim() : "") || localStorage.getItem("geminiApiKey") || "";
+        if (!apiKey) {
+          alert("Gemini API Key를 입력해주세요.");
+          if (apiKeyInput) apiKeyInput.focus();
+          return;
+        }
+
+        const promptText = document.getElementById(`prompt-${id}`).value.trim();
+        const loading = document.getElementById(`loading-${id}`);
+        const img = document.getElementById(`img-${id}`);
+        const previewText = document.getElementById(`preview-text-${id}`);
+        const downloadBtn = document.getElementById(`download-${id}`);
+
+        loading.classList.remove("hidden");
+
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${apiKey}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              prompt: promptText,
+              numberOfImages: 1,
+              outputMimeType: "image/png",
+              aspectRatio: "1:1"
+            })
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error?.message || `API 호출 실패 (상태: ${response.status})`);
+          }
+
+          const base64Data = data.generatedImages?.[0]?.image?.imageBytes;
+          if (!base64Data) {
+            throw new Error("이미지 바이트 데이터를 받지 못했습니다.");
+          }
+
+          const dataUrl = `data:image/png;base64,${base64Data}`;
+          img.src = dataUrl;
+          img.classList.remove("hidden");
+          previewText.classList.add("hidden");
+          downloadBtn.classList.remove("hidden");
+
+          // Save to memory
+          generatedImages[id] = {
+            base64: base64Data,
+            title: situations.find(s => s.id === id).title
+          };
+
+        } catch (err) {
+          alert(`❌ [카드 ${id}] 생성 중 오류 발생: ${err.message}`);
+        } finally {
+          loading.classList.add("hidden");
+        }
+      }
+
+      // Event listener for generate buttons
+      grid.addEventListener("click", (e) => {
+        if (e.target.classList.contains("btn-generate-single")) {
+          const id = parseInt(e.target.getAttribute("data-id"));
+          generateImage(id);
+        } else if (e.target.classList.contains("btn-download-single")) {
+          const id = parseInt(e.target.getAttribute("data-id"));
+          const imgData = generatedImages[id];
+          if (!imgData) return;
+
+          // Trigger download
+          const a = document.createElement("a");
+          a.href = `data:image/png;base64,${imgData.base64}`;
+          a.download = `${imgData.title.replace(/[\s\.]+/g, "_")}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      });
+
+      // Generate all
+      if (generateAllBtn) {
+        generateAllBtn.addEventListener("click", async () => {
+          generateAllBtn.disabled = true;
+          const originalText = generateAllBtn.textContent;
+          generateAllBtn.textContent = "⏳ 순차 생성 중...";
+
+          try {
+            for (const sit of situations) {
+              await generateImage(sit.id);
+            }
+          } finally {
+            generateAllBtn.disabled = false;
+            generateAllBtn.textContent = originalText;
+          }
+        });
+      }
+
+      // Download all as ZIP
+      if (downloadAllBtn) {
+        downloadAllBtn.addEventListener("click", async () => {
+          const keys = Object.keys(generatedImages);
+          if (keys.length === 0) {
+            alert("생성된 사진이 없습니다. 먼저 사진을 생성해주세요.");
+            return;
+          }
+
+          downloadAllBtn.disabled = true;
+          const originalText = downloadAllBtn.innerHTML;
+          downloadAllBtn.innerHTML = "압축 중...";
+
+          try {
+            const zip = new JSZip();
+            keys.forEach(id => {
+              const imgData = generatedImages[id];
+              // Convert base64 to binary helper
+              const binary = atob(imgData.base64);
+              const array = [];
+              for (let i = 0; i < binary.length; i++) {
+                array.push(binary.charCodeAt(i));
+              }
+              const blob = new Blob([new Uint8Array(array)], { type: "image/png" });
+              const filename = `${imgData.title.replace(/[\s\.]+/g, "_")}.png`;
+              zip.file(filename, blob);
+            });
+
+            const content = await zip.generateAsync({ type: "blob" });
+            const zipUrl = URL.createObjectURL(content);
+            const a = document.createElement("a");
+            a.href = zipUrl;
+            a.download = `hospital_illustration_pack_${new Date().toISOString().slice(0,10)}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(zipUrl);
+          } catch (err) {
+            alert(`ZIP 파일 생성 실패: ${err.message}`);
+          } finally {
+            downloadAllBtn.disabled = false;
+            downloadAllBtn.innerHTML = originalText;
+          }
+        });
+      }
+    }
+
+    // ============================================
+    // 파컨 키워드 기능 및 이벤트 설정
+    // ============================================
+    function setupPowerContent() {
+      const dropzone = document.getElementById("power-dropzone");
+      const fileInput = document.getElementById("power-excel-input");
+      const progressSection = document.getElementById("power-progress-section");
+      const progressStatus = document.getElementById("power-progress-status");
+      const progressBar = document.getElementById("power-progress-bar");
+      const progressPercent = document.getElementById("power-progress-percent");
+      
+      const totalKeywordsSpan = document.getElementById("power-total-keywords");
+      const totalCategoriesSpan = document.getElementById("power-total-categories");
+      const storageModeSpan = document.getElementById("power-storage-mode");
+      
+      const categorySelect = document.getElementById("power-category-select");
+      const searchInput = document.getElementById("power-search-input");
+      const filteredCountSpan = document.getElementById("power-filtered-count");
+      const copyAllBtn = document.getElementById("power-copy-btn");
+      const downloadBtn = document.getElementById("power-download-btn");
+      const resultsList = document.getElementById("power-results-list");
+
+      if (!dropzone || !fileInput) return;
+
+      let db;
+      let lastFilteredKeywords = [];
+      let isServerStorage = false;
+      let serverCategories = [];
+      let serverKeywordsCache = {};
+
+      // Initialize Storage Mode
+      async function initStorage() {
+        try {
+          const res = await fetch("/api/powercontent");
+          if (res.ok) {
+            const data = await res.json();
+            isServerStorage = true;
+            if (storageModeSpan) {
+              storageModeSpan.textContent = "서버 저장소";
+              storageModeSpan.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 dark-mode:bg-green-950/50 dark-mode:text-green-400 ml-2";
+            }
+            serverCategories = data.categories || [];
+            updateServerStats(data.totalKeywordsCount || 0);
+            populateCategories(serverCategories);
+          } else {
+            throw new Error("Server storage config missing");
+          }
+        } catch (err) {
+          console.warn("Server storage unavailable, falling back to local IndexedDB:", err);
+          isServerStorage = false;
+          if (storageModeSpan) {
+            storageModeSpan.textContent = "로컬 브라우저 저장소";
+            storageModeSpan.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-750 dark-mode:bg-yellow-950/50 dark-mode:text-yellow-400 ml-2";
+          }
+          initIndexedDB();
+        }
+      }
+
+      function updateServerStats(totalCount) {
+        if (totalKeywordsSpan) totalKeywordsSpan.textContent = totalCount.toLocaleString() + "개";
+        if (totalCategoriesSpan) totalCategoriesSpan.textContent = serverCategories.length.toLocaleString() + "개";
+      }
+
+      function initIndexedDB() {
+        const request = indexedDB.open("PowerContentDB", 1);
+        request.onupgradeneeded = (e) => {
+          const dbInstance = e.target.result;
+          if (!dbInstance.objectStoreNames.contains("keywords")) {
+            const store = dbInstance.createObjectStore("keywords", { keyPath: "id", autoIncrement: true });
+            store.createIndex("category", "category", { unique: false });
+            store.createIndex("keyword", "keyword", { unique: false });
+          }
+        };
+        request.onsuccess = (e) => {
+          db = e.target.result;
+          updateLocalStats();
+          const categories = JSON.parse(localStorage.getItem("powerCategories") || "[]");
+          populateCategories(categories);
+        };
+        request.onerror = (e) => {
+          console.error("IndexedDB open error:", e.target.error);
+        };
+      }
+
+      function updateLocalStats() {
+        if (!db) return;
+        const transaction = db.transaction(["keywords"], "readonly");
+        const store = transaction.objectStore("keywords");
+        const countRequest = store.count();
+        countRequest.onsuccess = () => {
+          if (totalKeywordsSpan) totalKeywordsSpan.textContent = countRequest.result.toLocaleString() + "개";
+          const categories = JSON.parse(localStorage.getItem("powerCategories") || "[]");
+          if (totalCategoriesSpan) totalCategoriesSpan.textContent = categories.length.toLocaleString() + "개";
+        };
+      }
+
+      function populateCategories(categories) {
+        categorySelect.innerHTML = '<option value="">-- 중분류를 선택하세요 --</option>';
+        categories.forEach(cat => {
+          const opt = document.createElement("option");
+          opt.value = cat;
+          opt.textContent = cat;
+          categorySelect.appendChild(opt);
+        });
+      }
+
+      // Dropzone interaction
+      dropzone.addEventListener("click", () => fileInput.click());
+      dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.classList.add("bg-gray-150", "dark-mode:bg-gray-800");
+      });
+      dropzone.addEventListener("dragleave", () => {
+        dropzone.classList.remove("bg-gray-150", "dark-mode:bg-gray-800");
+      });
+      dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("bg-gray-150", "dark-mode:bg-gray-800");
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          handleFile(files[0]);
+        }
+      });
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files.length > 0) {
+          handleFile(e.target.files[0]);
+        }
+      });
+
+      function handleFile(file) {
+        progressSection.classList.remove("hidden");
+        progressStatus.textContent = "엑셀 파일을 읽는 중...";
+        progressBar.style.width = "10%";
+        progressPercent.textContent = "10%";
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            progressStatus.textContent = "엑셀 데이터를 분석하는 중...";
+            progressBar.style.width = "30%";
+            progressPercent.textContent = "30%";
+
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            
+            // 버그 없는 엑셀 헤더 동적 검출 및 파싱
+            const range = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            let headerRowIndex = -1;
+            let keywordColIndex = -1;
+            let categoryColIndex = -1;
+
+            // Find the header row
+            for (let i = 0; i < Math.min(20, range.length); i++) {
+              const row = range[i];
+              if (row) {
+                const kwIdx = row.findIndex(cell => String(cell || "").includes("키워드"));
+                const catIdx = row.findIndex(cell => String(cell || "").includes("중분류"));
+                if (kwIdx !== -1 && catIdx !== -1) {
+                  headerRowIndex = i;
+                  keywordColIndex = kwIdx;
+                  categoryColIndex = catIdx;
+                  break;
+                }
+              }
+            }
+
+            if (headerRowIndex === -1) {
+              // Fallback to index 0 and 2 if not found
+              keywordColIndex = 0;
+              categoryColIndex = 2;
+              headerRowIndex = 5; // default skip
+            }
+
+            const records = [];
+            for (let i = headerRowIndex + 1; i < range.length; i++) {
+              const row = range[i];
+              if (row) {
+                const keyword = String(row[keywordColIndex] || "").trim();
+                const category = String(row[categoryColIndex] || "").trim();
+                if (keyword || category) {
+                  records.push({ keyword, category });
+                }
+              }
+            }
+
+            if (records.length === 0) {
+              throw new Error("유효한 키워드 또는 중분류 데이터를 찾을 수 없습니다.");
+            }
+
+            if (isServerStorage) {
+              progressStatus.textContent = "서버 전송용 데이터 구성 중...";
+              progressBar.style.width = "60%";
+              progressPercent.textContent = "60%";
+
+              const grouped = {};
+              const categoriesSet = new Set();
+              records.forEach(rec => {
+                if (rec.category) {
+                  categoriesSet.add(rec.category);
+                  if (!grouped[rec.category]) grouped[rec.category] = [];
+                  grouped[rec.category].push(rec.keyword);
+                }
+              });
+
+              const categoriesArray = Array.from(categoriesSet).sort();
+
+              progressStatus.textContent = "서버로 데이터 저장 중...";
+              progressBar.style.width = "75%";
+              progressPercent.textContent = "75%";
+
+              const uploadRes = await fetch("/api/powercontent", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  categories: categoriesArray,
+                  grouped: grouped,
+                  totalKeywordsCount: records.length
+                })
+              });
+
+              if (!uploadRes.ok) {
+                const errData = await uploadRes.json();
+                throw new Error(errData.error || "서버 저장 실패");
+              }
+
+              serverCategories = categoriesArray;
+              serverKeywordsCache = {}; // reset cache
+              
+              progressBar.style.width = "100%";
+              progressPercent.textContent = "100%";
+              progressStatus.textContent = "서버 저장 완료!";
+
+              setTimeout(() => {
+                progressSection.classList.add("hidden");
+                updateServerStats(records.length);
+                populateCategories(serverCategories);
+              }, 1000);
+
+            } else {
+              // Local IndexedDB Mode
+              progressStatus.textContent = "기존 로컬 데이터 삭제 중...";
+              progressBar.style.width = "60%";
+              progressPercent.textContent = "60%";
+
+              // Clear database
+              const tx = db.transaction(["keywords"], "readwrite");
+              const store = tx.objectStore("keywords");
+              await new Promise((res, rej) => {
+                const req = store.clear();
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+              });
+
+              progressStatus.textContent = "로컬 DB 저장 중...";
+              progressBar.style.width = "70%";
+              progressPercent.textContent = "70%";
+
+              const batchSize = 1000;
+              const categoriesSet = new Set();
+              
+              for (let i = 0; i < records.length; i += batchSize) {
+                const batch = records.slice(i, i + batchSize);
+                const batchTx = db.transaction(["keywords"], "readwrite");
+                const batchStore = batchTx.objectStore("keywords");
+                
+                batch.forEach(rec => {
+                  batchStore.put(rec);
+                  if (rec.category) categoriesSet.add(rec.category);
+                });
+
+                await new Promise((res, rej) => {
+                  batchTx.oncomplete = () => res();
+                  batchTx.onerror = () => rej(batchTx.error);
+                });
+
+                const pct = 70 + Math.round((i / records.length) * 25);
+                progressBar.style.width = `${pct}%`;
+                progressPercent.textContent = `${pct}%`;
+                progressStatus.textContent = `저장 중... (${Math.min(i + batchSize, records.length).toLocaleString()} / ${records.length.toLocaleString()})`;
+              }
+
+              const categoriesArray = Array.from(categoriesSet).sort();
+              localStorage.setItem("powerCategories", JSON.stringify(categoriesArray));
+
+              progressBar.style.width = "100%";
+              progressPercent.textContent = "100%";
+              progressStatus.textContent = "저장 완료!";
+              
+              setTimeout(() => {
+                progressSection.classList.add("hidden");
+                updateLocalStats();
+                populateCategories(categoriesArray);
+              }, 1000);
+            }
+
+          } catch (err) {
+            alert(`엑셀 처리 오류: ${err.message}`);
+            progressSection.classList.add("hidden");
+          }
+        };
+        reader.onerror = () => {
+          alert("파일을 읽는 도중 오류가 발생했습니다.");
+          progressSection.classList.add("hidden");
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      async function performSearch() {
+        const selectedCat = categorySelect.value;
+        const queryText = searchInput.value.trim().toLowerCase();
+        
+        resultsList.innerHTML = "";
+        lastFilteredKeywords = [];
+
+        if (!selectedCat) {
+          resultsList.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 font-bold">중분류를 선택해주세요.</td></tr>`;
+          filteredCountSpan.textContent = "0";
+          return;
+        }
+
+        resultsList.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 font-bold flex items-center justify-center gap-2">
+          <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+          검색 중...
+        </td></tr>`;
+
+        try {
+          let keywords = [];
+
+          if (isServerStorage) {
+            if (!serverKeywordsCache[selectedCat]) {
+              const res = await fetch(`/api/powercontent?category=${encodeURIComponent(selectedCat)}`);
+              if (!res.ok) throw new Error("서버 키워드 조회 실패");
+              const data = await res.json();
+              serverKeywordsCache[selectedCat] = data.keywords || [];
+            }
+            keywords = serverKeywordsCache[selectedCat];
+          } else {
+            // Local IndexedDB Mode
+            const transaction = db.transaction(["keywords"], "readonly");
+            const store = transaction.objectStore("keywords");
+            const index = store.index("category");
+            const request = index.openCursor(IDBKeyRange.only(selectedCat));
+
+            keywords = await new Promise((resolve, reject) => {
+              const list = [];
+              request.onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) {
+                  const item = cursor.value;
+                  list.push(item.keyword);
+                  cursor.continue();
+                } else {
+                  resolve(list);
+                }
+              };
+              request.onerror = () => reject(request.error);
+            });
+          }
+
+          const matches = keywords.filter(kw => !queryText || kw.toLowerCase().includes(queryText));
+          lastFilteredKeywords = matches;
+          filteredCountSpan.textContent = matches.length.toLocaleString();
+
+          if (matches.length === 0) {
+            resultsList.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 font-bold">추출된 키워드가 없습니다.</td></tr>`;
+            return;
+          }
+
+          resultsList.innerHTML = "";
+          const renderLimit = Math.min(200, matches.length);
+          for (let i = 0; i < renderLimit; i++) {
+            const kw = matches[i];
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-gray-50 dark-mode:hover:bg-gray-900/50 transition-colors";
+            tr.innerHTML = `
+              <td class="px-4 py-3 text-center text-gray-400 font-mono">${i + 1}</td>
+              <td class="px-4 py-3 text-gray-900 dark-mode:text-gray-100 font-semibold">${selectedCat}</td>
+              <td class="px-4 py-3 text-gray-900 dark-mode:text-gray-100 font-mono select-all">${kw}</td>
+              <td class="px-4 py-3 text-center">
+                <button class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 rounded text-[11px] font-bold text-gray-700 dark-mode:text-gray-300 transition-colors copy-single-btn" data-keyword="${kw}">
+                  복사
+                </button>
+              </td>
+            `;
+
+            tr.querySelector(".copy-single-btn").addEventListener("click", (e) => {
+              const kwVal = e.target.getAttribute("data-keyword");
+              navigator.clipboard.writeText(kwVal).then(() => {
+                const oldText = e.target.textContent;
+                e.target.textContent = "완료!";
+                e.target.classList.replace("bg-gray-100", "bg-green-150");
+                e.target.classList.replace("text-gray-700", "text-green-700");
+                setTimeout(() => {
+                  e.target.textContent = oldText;
+                  e.target.classList.replace("bg-green-150", "bg-gray-100");
+                  e.target.classList.replace("text-green-700", "text-gray-700");
+                }, 1000);
+              });
+            });
+
+            resultsList.appendChild(tr);
+          }
+
+          if (matches.length > 200) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td colspan="4" class="px-4 py-3 text-center text-gray-400 font-medium">
+                ... 외 ${(matches.length - 200).toLocaleString()}개의 키워드가 더 존재합니다. 전체 복사 또는 TXT 다운로드를 통해 전체 목록을 저장하세요.
+              </td>
+            `;
+            resultsList.appendChild(tr);
+          }
+
+        } catch (err) {
+          resultsList.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-red-500 font-bold">오류 발생: ${err.message}</td></tr>`;
+        }
+      }
+
+      categorySelect.addEventListener("change", performSearch);
+      searchInput.addEventListener("input", performSearch);
+
+      copyAllBtn.addEventListener("click", () => {
+        if (lastFilteredKeywords.length === 0) return;
+        const text = lastFilteredKeywords.join("\n");
+        navigator.clipboard.writeText(text).then(() => {
+          const oldText = copyAllBtn.textContent;
+          copyAllBtn.textContent = "📋 복사 완료!";
+          setTimeout(() => {
+            copyAllBtn.textContent = oldText;
+          }, 1500);
+        });
+      });
+
+      downloadBtn.addEventListener("click", () => {
+        if (lastFilteredKeywords.length === 0) return;
+        const text = lastFilteredKeywords.join("\r\n");
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `power_keywords_${new Date().toISOString().slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      initStorage();
     }
 
     // ============================================

@@ -133,32 +133,9 @@ export async function onRequestGet(context) {
     const finalFilteredLinks = Array.from(allCrawledLinks).filter(lnk => {
       try {
         const u = new URL(lnk);
-        const segments = u.pathname.split("/").filter(Boolean);
-        const segsCount = segments.length;
-
-        // Exclude типичный post/detail indicators in path
-        if (/\/detail\//i.test(u.pathname) || /\/view\//i.test(u.pathname) || /\/post\//i.test(u.pathname) || /\/read\//i.test(u.pathname)) {
-          return false;
-        }
 
         // Exclude standard asset extensions
         if (/\.(jpg|png|webp|gif|css|js|pdf|zip|svg)$/i.test(u.pathname)) {
-          return false;
-        }
-
-        // If any segment is purely numeric, it's highly likely a post/item detail ID
-        if (segments.some(seg => /^\d+$/.test(seg))) {
-          return false;
-        }
-
-        // Exclude sub-items under specific list-only categories (e.g. /blog/post-slug, /news/post-slug)
-        const detailPrefixes = ['blog', 'news', 'notice', 'board', 'posts', 'article', 'articles', 'story', 'stories', 'qna', 'faq', 'event', 'events'];
-        if (segments.length > 1 && detailPrefixes.includes(segments[0].toLowerCase())) {
-          return false;
-        }
-
-        // Exclude deep paths (segments > baseSegments + 2)
-        if (segsCount > baseSegments + 2) {
           return false;
         }
 

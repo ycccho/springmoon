@@ -1,17 +1,10 @@
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const keywords = url.searchParams.get("keywords") || "";
-  const customerId = url.searchParams.get("customerId") || "";
+  const customerId = url.searchParams.get("customerId") || "1610516";
 
   if (!keywords) {
     return new Response(JSON.stringify({ error: "조회할 키워드를 입력해주세요." }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-
-  if (!customerId) {
-    return new Response(JSON.stringify({ error: "Customer ID가 제공되지 않았습니다. 홈페이지 화면에서 입력해주세요." }), {
       status: 400,
       headers: { "Content-Type": "application/json" }
     });
