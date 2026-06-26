@@ -1113,27 +1113,39 @@
     // ============================================
     // 누락판별 메뉴 UI
     // ============================================
-    function getOmissionCheckHTML() {
+        function getOmissionCheckHTML() {
       return `<div class="max-w-6xl mx-auto space-y-6">
         <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
           <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🔍 네이버 블로그 누락 판별기</h2>
-          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">네이버 블로그 ID를 입력하면 최신 게시글 10개를 가져와 네이버 검색 노출 상태(반영/미반영)를 판별합니다. IP 차단을 방지하기 위해 각 검색 사이에 대기 시간을 적용합니다.</p>
+          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">네이버 블로그 ID를 입력하면 최신 게시글(최대 100개)을 가져와 네이버 검색 노출 상태를 판별합니다. IP 차단을 방지하기 위해 10개씩 묶어서 검색하며, 배치 간 대기 시간을 적용합니다.</p>
           
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-6">
             <!-- Blog ID Input -->
             <div class="space-y-1">
               <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">네이버 블로그 ID</label>
               <input type="text" id="omission-blog-id" placeholder="아이디만 입력 (예: dudu8882)" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
               <div class="text-[10px] text-gray-400 mt-1 font-semibold">주소 예시: <span id="omission-url-preview" class="text-orange-555 font-bold">blog.naver.com/</span></div>
             </div>
+
+            <!-- Omission Count Select -->
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">검사할 포스트 수</label>
+              <select id="omission-count" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-semibold">
+                <option value="10" selected>최신 10개</option>
+                <option value="30">최신 30개</option>
+                <option value="50">최신 50개</option>
+                <option value="100">최신 100개</option>
+              </select>
+            </div>
             
             <!-- Interval Select -->
             <div class="space-y-1">
-              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">검색 간격 (IP 차단 방지)</label>
+              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">배치당 대기 시간 (IP 차단 방지)</label>
               <select id="omission-interval" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-semibold">
-                <option value="10000" selected>10초 대기 (권장)</option>
+                <option value="3000" selected>3초 대기 (권장)</option>
                 <option value="5000">5초 대기</option>
-                <option value="3000">3초 대기</option>
+                <option value="10000">10초 대기 (안전)</option>
+                <option value="15000">15초 대기 (매우 안전)</option>
               </select>
             </div>
             
@@ -1158,9 +1170,19 @@
 
         <!-- Result Table -->
         <div class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200 dark-mode:border-gray-700 flex justify-between items-center">
-            <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-1.5 text-base">📋 판별 결과</h3>
-            <div class="text-xs font-bold text-gray-550 dark-mode:text-gray-400" id="omission-summary-text">총 0건 (반영 0, 미반영 0)</div>
+          <div class="px-6 py-4 border-b border-gray-200 dark-mode:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-1.5 text-base">📋 판별 결과</h3>
+              <div class="text-xs font-bold text-gray-550 dark-mode:text-gray-400" id="omission-summary-text">총 0건 (반영 0, 미반영 0)</div>
+            </div>
+            <div class="flex gap-2" id="omission-download-container">
+              <button id="omission-txt-btn" disabled class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-650 text-gray-755 dark-mode:text-gray-200 text-xs font-bold rounded-lg transition-all active:scale-[0.97] opacity-50 cursor-not-allowed">
+                📋 TXT 다운로드
+              </button>
+              <button id="omission-excel-btn" disabled class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-all active:scale-[0.97] shadow-sm opacity-50 cursor-not-allowed">
+                📥 Excel 다운로드
+              </button>
+            </div>
           </div>
           
           <div class="overflow-x-auto">
@@ -1174,7 +1196,7 @@
                   <th class="px-6 py-3.5 w-24">바로가기</th>
                 </tr>
               </thead>
-              <tbody id="omission-result-body" class="divide-y divide-gray-150 dark-mode:divide-gray-750 text-gray-750 dark-mode:text-gray-300 font-medium">
+              <tbody id="omission-result-body" class="divide-y divide-gray-150 dark-mode:divide-gray-750 text-gray-755 dark-mode:text-gray-300 font-medium">
                 <tr>
                   <td colspan="5" class="px-6 py-12 text-center text-gray-400 dark-mode:text-gray-500 font-medium">
                     블로그 ID를 입력하고 검사를 시작해주세요.
@@ -1182,6 +1204,55 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- Simplified Omission Checker -->
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-6">
+          <div>
+            <h2 class="text-xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🔍 네이버 블로그 누락 판별기 간소화 (개별 검증)</h2>
+            <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">블로그 ID와 여러 개의 게시글 번호(logNo)를 입력하여 색인 노출 상태를 간편하게 판별합니다. (게시글 번호는 공백, 쉼표, 줄바꿈 등으로 구분)</p>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <!-- Blog ID Input -->
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">네이버 블로그 ID</label>
+              <input type="text" id="omission-simple-blog-id" placeholder="아이디만 입력 (예: dudu8882)" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+            </div>
+
+            <!-- Post IDs Textarea -->
+            <div class="space-y-1 md:col-span-2">
+              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">게시글 번호 (logNo)</label>
+              <input type="text" id="omission-simple-post-ids" placeholder="게시글 번호를 여러 개 입력 (예: 224235939408 224292510073)" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+            </div>
+          </div>
+          
+          <div class="flex justify-end">
+            <button id="omission-simple-start-btn" class="px-6 py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white text-sm font-bold rounded-xl shadow-sm">간편 검사 시작</button>
+          </div>
+          
+          <!-- Simple Result List -->
+          <div id="omission-simple-result-section" class="hidden border border-gray-200 dark-mode:border-gray-700 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 dark-mode:bg-gray-900 border-b border-gray-200 dark-mode:border-gray-700 flex justify-between items-center">
+              <span class="font-bold text-xs text-gray-700 dark-mode:text-gray-200">간편 검사 결과</span>
+              <span id="omission-simple-summary" class="text-[11px] font-bold text-gray-550 dark-mode:text-gray-400">총 0건 (반영 0, 미반영 0)</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-gray-50 dark-mode:bg-gray-900 border-b border-gray-150 dark-mode:border-gray-750 text-gray-500 dark-mode:text-gray-405 font-bold">
+                    <th class="px-6 py-3 w-16">번호</th>
+                    <th class="px-6 py-3 w-48">게시글 번호</th>
+                    <th class="px-6 py-3">판별 결과</th>
+                    <th class="px-6 py-3 w-24">바로가기</th>
+                  </tr>
+                </thead>
+                <tbody id="omission-simple-result-body" class="divide-y divide-gray-150 dark-mode:divide-gray-750 text-gray-755 dark-mode:text-gray-300 font-medium">
+                  <!-- Dynamic rows go here -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>`;
@@ -2883,29 +2954,55 @@
     // ============================================
     // 누락판별 기능 및 이벤트 설정
     // ============================================
-    function setupOmissionCheck() {
+        function setupOmissionCheck() {
       const blogInput = document.getElementById("omission-blog-id");
       const urlPreview = document.getElementById("omission-url-preview");
+      const countSelect = document.getElementById("omission-count");
+      const intervalSelect = document.getElementById("omission-interval");
       const startBtn = document.getElementById("omission-start-btn");
       const stopBtn = document.getElementById("omission-stop-btn");
-      const intervalSelect = document.getElementById("omission-interval");
       const resultBody = document.getElementById("omission-result-body");
       const progressSection = document.getElementById("omission-progress-section");
       const statusText = document.getElementById("omission-status-text");
       const progressPercent = document.getElementById("omission-progress-percent");
       const progressBar = document.getElementById("omission-progress-bar");
       const summaryText = document.getElementById("omission-summary-text");
+      const txtBtn = document.getElementById("omission-txt-btn");
+      const excelBtn = document.getElementById("omission-excel-btn");
 
       if (!blogInput) return; // Not rendered yet
 
       // Realtime URL Preview
       blogInput.addEventListener("input", (e) => {
         const val = e.target.value.trim();
-        urlPreview.textContent = `blog.naver.com/${val}`;
+        urlPreview.textContent = val ? `blog.naver.com/${val}` : "blog.naver.com/";
       });
 
       let isRunning = false;
       let checkTimeoutId = null;
+      let posts = [];
+      let resultsData = []; // To store reflection state for downloading
+
+      // Disable/Enable Download buttons helper
+      function toggleDownloadButtons(enable) {
+        if (enable && resultsData.length > 0) {
+          txtBtn.disabled = false;
+          txtBtn.classList.remove("opacity-50", "cursor-not-allowed");
+          txtBtn.classList.add("hover:bg-gray-200", "dark-mode:hover:bg-gray-650", "active:scale-[0.97]");
+          
+          excelBtn.disabled = false;
+          excelBtn.classList.remove("opacity-50", "cursor-not-allowed");
+          excelBtn.classList.add("hover:bg-green-700", "active:scale-[0.97]");
+        } else {
+          txtBtn.disabled = true;
+          txtBtn.classList.add("opacity-50", "cursor-not-allowed");
+          txtBtn.classList.remove("hover:bg-gray-200", "dark-mode:hover:bg-gray-650", "active:scale-[0.97]");
+          
+          excelBtn.disabled = true;
+          excelBtn.classList.add("opacity-50", "cursor-not-allowed");
+          excelBtn.classList.remove("hover:bg-green-700", "active:scale-[0.97]");
+        }
+      }
 
       // Handle Stop button
       stopBtn.addEventListener("click", () => {
@@ -2920,6 +3017,8 @@
         startBtn.className = "flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white text-sm font-bold rounded-xl shadow-sm";
         stopBtn.disabled = true;
         stopBtn.className = "px-4 py-2 bg-gray-300 dark-mode:bg-gray-700 text-gray-500 dark-mode:text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed";
+        
+        toggleDownloadButtons(true);
       });
 
       // Handle Start button
@@ -2930,7 +3029,12 @@
           return;
         }
 
+        const count = countSelect.value || "10";
         isRunning = true;
+        posts = [];
+        resultsData = [];
+        toggleDownloadButtons(false);
+
         startBtn.disabled = true;
         startBtn.className = "flex-1 px-4 py-2 bg-gray-300 dark-mode:bg-gray-700 text-gray-500 dark-mode:text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed";
         
@@ -2946,7 +3050,7 @@
 
         resultBody.innerHTML = `
           <tr>
-            <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark-mode:text-gray-450">
+            <td colspan="5" class="px-6 py-8 text-center text-gray-550 dark-mode:text-gray-455">
               <div class="flex items-center justify-center gap-2">
                 <svg class="animate-spin h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -2959,7 +3063,7 @@
         `;
 
         try {
-          const res = await fetch(`/api/blog-posts?blogId=${encodeURIComponent(blogId)}`);
+          const res = await fetch(`/api/blog-posts?blogId=${encodeURIComponent(blogId)}&count=${count}`);
           if (!res.ok) {
             throw new Error(`블로그 목록을 불러오지 못했습니다. (Status: ${res.status})`);
           }
@@ -2969,7 +3073,7 @@
             throw new Error(data.error || "블로그 목록을 불러오지 못했습니다.");
           }
 
-          const posts = data.posts || [];
+          posts = data.posts || [];
           if (posts.length === 0) {
             resultBody.innerHTML = `
               <tr>
@@ -2981,20 +3085,31 @@
             throw new Error("가져온 게시글이 없습니다.");
           }
 
+          // Initialize resultsData
+          resultsData = posts.map((post, index) => ({
+            index: index + 1,
+            title: post.title,
+            pubDate: post.pubDate,
+            logNo: post.logNo,
+            link: post.link,
+            status: "대기 중",
+            reflected: null
+          }));
+
           // Render initial rows as "Waiting"
           resultBody.innerHTML = "";
-          posts.forEach((post, index) => {
+          resultsData.forEach((item, index) => {
             const tr = document.createElement("tr");
             tr.id = `omission-row-${index}`;
             tr.className = "hover:bg-gray-50 dark-mode:hover:bg-gray-855 transition-colors";
             
             // Search query url
-            const queryUrl = `https://search.naver.com/search.naver?ssc=tab.blog.all&sm=tab_jum&query=${encodeURIComponent('"' + post.title + '"')}`;
+            const queryUrl = `https://search.naver.com/search.naver?ssc=tab.blog.all&sm=tab_jum&query=${encodeURIComponent('"' + item.title + '"')}`;
 
             tr.innerHTML = `
-              <td class="px-6 py-3.5 text-gray-400 dark-mode:text-gray-500 font-bold">${index + 1}</td>
-              <td class="px-6 py-3.5 font-semibold text-gray-850 dark-mode:text-gray-150 break-all">${post.title}</td>
-              <td class="px-6 py-3.5 text-gray-500 dark-mode:text-gray-400 font-medium">${post.pubDate || '-'}</td>
+              <td class="px-6 py-3.5 text-gray-400 dark-mode:text-gray-500 font-bold">${item.index}</td>
+              <td class="px-6 py-3.5 font-semibold text-gray-850 dark-mode:text-gray-150 break-all">${item.title}</td>
+              <td class="px-6 py-3.5 text-gray-500 dark-mode:text-gray-400 font-medium">${item.pubDate || '-'}</td>
               <td class="px-6 py-3.5" id="omission-status-${index}">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500 dark-mode:bg-gray-700 dark-mode:text-gray-455 border border-gray-200 dark-mode:border-gray-650">대기 중</span>
               </td>
@@ -3005,79 +3120,115 @@
             resultBody.appendChild(tr);
           });
 
-          // Begin sequential checks
+          // Begin batch checks
           const interval = parseInt(intervalSelect.value, 10) || 10000;
           let reflectedCount = 0;
           let omittedCount = 0;
 
-          const checkPost = async (idx) => {
+          // Group into batches of 3 to avoid Naver's domain collapsing (max 3 results per blog domain)
+          const batchSize = 3;
+          const batches = [];
+          for (let i = 0; i < posts.length; i += batchSize) {
+            batches.push(posts.slice(i, i + batchSize));
+          }
+
+          const checkBatch = async (batchIdx) => {
             if (!isRunning) return;
 
-            const post = posts[idx];
-            const statusCell = document.getElementById(`omission-status-${idx}`);
+            const batch = batches[batchIdx];
+            const startPostIdx = batchIdx * batchSize;
             
-            // Update UI status to checking
-            statusCell.innerHTML = `
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-600 dark-mode:bg-blue-950/20 dark-mode:text-blue-400 border border-blue-200 dark-mode:border-blue-900">
-                <svg class="animate-spin h-3.5 w-3.5 text-blue-500" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                조회 중
-              </span>
-            `;
+            // Update UI status for items in this batch to "조회 중"
+            batch.forEach((_, bOffset) => {
+              const globalIdx = startPostIdx + bOffset;
+              const statusCell = document.getElementById(`omission-status-${globalIdx}`);
+              if (statusCell) {
+                statusCell.innerHTML = `
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-600 dark-mode:bg-blue-950/20 dark-mode:text-blue-400 border border-blue-200 dark-mode:border-blue-900">
+                    <svg class="animate-spin h-3.5 w-3.5 text-blue-500" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    조회 중
+                  </span>
+                `;
+              }
+            });
 
             // Calculate progress percent
-            const progressVal = Math.round((idx / posts.length) * 100);
+            const progressVal = Math.round((startPostIdx / posts.length) * 100);
             progressBar.style.width = `${progressVal}%`;
             progressPercent.textContent = `${progressVal}%`;
-            statusText.textContent = `게시글 검사 중: ${idx + 1} / ${posts.length} 완료`;
+            statusText.textContent = `게시글 검사 중: ${startPostIdx} / ${posts.length} 완료`;
             statusText.className = "text-gray-550 dark-mode:text-gray-355";
 
             try {
-              const checkRes = await fetch(`/api/check-reflection?blogId=${encodeURIComponent(blogId)}&title=${encodeURIComponent(post.title)}`);
+              const logNos = batch.map(p => p.logNo).join(",");
+              const checkRes = await fetch(`/api/check-reflection?blogId=${encodeURIComponent(blogId)}&logNos=${encodeURIComponent(logNos)}`);
               if (!checkRes.ok) throw new Error("API 에러");
               
               const checkData = await checkRes.json();
               if (!checkData.success) throw new Error(checkData.error || "체크 실패");
 
-              if (checkData.reflected) {
-                reflectedCount++;
-                statusCell.innerHTML = `
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-600 dark-mode:bg-green-950/20 dark-mode:text-green-400 border border-green-200 dark-mode:border-green-900">반영</span>
-                `;
-              } else {
-                omittedCount++;
-                statusCell.innerHTML = `
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-650 dark-mode:bg-red-950/20 dark-mode:text-red-400 border border-red-200 dark-mode:border-red-900">미반영</span>
-                `;
-              }
+              // Update statuses for this batch
+              batch.forEach((post, bOffset) => {
+                const globalIdx = startPostIdx + bOffset;
+                const statusCell = document.getElementById(`omission-status-${globalIdx}`);
+                const isReflected = checkData.results && checkData.results[post.logNo] === true;
+                
+                resultsData[globalIdx].reflected = isReflected;
+
+                if (isReflected) {
+                  reflectedCount++;
+                  resultsData[globalIdx].status = "반영";
+                  if (statusCell) {
+                    statusCell.innerHTML = `
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-600 dark-mode:bg-green-950/20 dark-mode:text-green-400 border border-green-200 dark-mode:border-green-900">반영</span>
+                    `;
+                  }
+                } else {
+                  omittedCount++;
+                  resultsData[globalIdx].status = "미반영";
+                  if (statusCell) {
+                    statusCell.innerHTML = `
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-655 dark-mode:bg-red-950/20 dark-mode:text-red-400 border border-red-200 dark-mode:border-red-900">미반영</span>
+                    `;
+                  }
+                }
+              });
 
               // Update live summary
               summaryText.textContent = `총 ${posts.length}건 (반영 ${reflectedCount}, 미반영 ${omittedCount})`;
 
             } catch (err) {
               console.error(err);
-              statusCell.innerHTML = `
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600 dark-mode:bg-amber-950/20 dark-mode:text-amber-400 border border-amber-200 dark-mode:border-amber-900">에러</span>
-              `;
+              batch.forEach((_, bOffset) => {
+                const globalIdx = startPostIdx + bOffset;
+                const statusCell = document.getElementById(`omission-status-${globalIdx}`);
+                resultsData[globalIdx].status = "에러";
+                if (statusCell) {
+                  statusCell.innerHTML = `
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600 dark-mode:bg-amber-950/20 dark-mode:text-amber-400 border border-amber-200 dark-mode:border-amber-900">에러</span>
+                  `;
+                }
+              });
             }
 
-            // Move to next post or finish
-            const nextIdx = idx + 1;
-            if (nextIdx < posts.length) {
+            // Move to next batch or finish
+            const nextBatchIdx = batchIdx + 1;
+            if (nextBatchIdx < batches.length) {
               if (!isRunning) return;
 
               // Show countdown/waiting status
               let secondsLeft = Math.round(interval / 1000);
               const updateCountdown = () => {
                 if (!isRunning) return;
-                statusText.textContent = `다음 검색까지 ${secondsLeft}초 대기 중... (${nextIdx + 1}/${posts.length})`;
+                statusText.textContent = `다음 배치 검색까지 ${secondsLeft}초 대기 중... (${nextBatchIdx * batchSize}/${posts.length} 완료)`;
                 if (secondsLeft > 0) {
                   secondsLeft--;
                   checkTimeoutId = setTimeout(updateCountdown, 1000);
                 } else {
-                  checkPost(nextIdx);
+                  checkBatch(nextBatchIdx);
                 }
               };
               updateCountdown();
@@ -3095,11 +3246,13 @@
               
               stopBtn.disabled = true;
               stopBtn.className = "px-4 py-2 bg-gray-300 dark-mode:bg-gray-700 text-gray-500 dark-mode:text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed";
+              
+              toggleDownloadButtons(true);
             }
           };
 
-          // Start the first post check
-          checkPost(0);
+          // Start the first batch check
+          checkBatch(0);
 
         } catch (err) {
           console.error(err);
@@ -3112,8 +3265,207 @@
           
           stopBtn.disabled = true;
           stopBtn.className = "px-4 py-2 bg-gray-300 dark-mode:bg-gray-700 text-gray-500 dark-mode:text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed";
+          
+          toggleDownloadButtons(true);
         }
       });
+
+      // Handle TXT Download
+      txtBtn.addEventListener("click", () => {
+        if (resultsData.length === 0) return;
+        const blogId = blogInput.value.trim();
+        
+        let text = `네이버 블로그 누락 판별 결과 보고서\r\n`;
+        text += `블로그 ID: ${blogId}\r\n`;
+        text += `검사 일시: ${new Date().toLocaleString()}\r\n`;
+        text += `--------------------------------------------------\r\n\r\n`;
+        
+        resultsData.forEach((item) => {
+          text += `[${item.index}] 발행일: ${item.pubDate || '-'} | 결과: ${item.status}\r\n`;
+          text += `제목: ${item.title}\r\n`;
+          text += `링크: ${item.link}\r\n`;
+          text += `--------------------------------------------------\r\n`;
+        });
+
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `blog_omission_report_${blogId}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // Handle Excel Download
+      excelBtn.addEventListener("click", () => {
+        if (resultsData.length === 0) return;
+        const blogId = blogInput.value.trim();
+        
+        // Prepare excel rows
+        const sheetData = resultsData.map((item) => ({
+          "번호": item.index,
+          "게시글 제목": item.title,
+          "발행일": item.pubDate || '',
+          "글 ID": item.logNo,
+          "노출 여부": item.status,
+          "게시글 링크": item.link
+        }));
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(sheetData);
+        
+        // Column widths
+        ws["!cols"] = [
+          { wch: 6 },  // 번호
+          { wch: 50 }, // 게시글 제목
+          { wch: 15 }, // 발행일
+          { wch: 15 }, // 글 ID
+          { wch: 10 }, // 노출 여부
+          { wch: 40 }  // 게시글 링크
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, "누락 판별 결과");
+        XLSX.writeFile(wb, `blog_omission_report_${blogId}.xlsx`);
+      });
+
+      // ============================================
+      // 누락판별기 간소화 (개별 검증) 이벤트 및 동작
+      // ============================================
+      const simpleBlogInput = document.getElementById("omission-simple-blog-id");
+      const simplePostIdsInput = document.getElementById("omission-simple-post-ids");
+      const simpleStartBtn = document.getElementById("omission-simple-start-btn");
+      const simpleResultSection = document.getElementById("omission-simple-result-section");
+      const simpleResultBody = document.getElementById("omission-simple-result-body");
+      const simpleSummary = document.getElementById("omission-simple-summary");
+
+      if (simpleStartBtn) {
+        simpleStartBtn.addEventListener("click", async () => {
+          const blogId = simpleBlogInput.value.trim();
+          const rawIds = simplePostIdsInput.value.trim();
+          
+          if (!blogId) {
+            alert("블로그 ID를 입력해주세요.");
+            return;
+          }
+          if (!rawIds) {
+            alert("게시글 번호를 입력해주세요.");
+            return;
+          }
+
+          // Parse multiple logNos (separated by spaces, commas, or newlines)
+          const logNos = rawIds.split(/[\s,]+/).map(s => s.trim()).filter(s => /^\d+$/.test(s));
+          if (logNos.length === 0) {
+            alert("유효한 숫자 형태의 게시글 번호가 없습니다.");
+            return;
+          }
+
+          simpleStartBtn.disabled = true;
+          simpleStartBtn.textContent = "검사 중...";
+          simpleStartBtn.className = "px-6 py-2 bg-gray-300 dark-mode:bg-gray-700 text-gray-500 dark-mode:text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed shadow-sm";
+          simpleResultSection.classList.remove("hidden");
+          simpleResultBody.innerHTML = "";
+          simpleSummary.textContent = `총 ${logNos.length}건 (조회 중...)`;
+
+          let reflectedCount = 0;
+          let omittedCount = 0;
+
+          // Render placeholder rows in the table
+          logNos.forEach((logNo, index) => {
+            const tr = document.createElement("tr");
+            tr.id = `omission-simple-row-${index}`;
+            tr.className = "hover:bg-gray-50 dark-mode:hover:bg-gray-855 transition-colors";
+            
+            const queryUrl = `https://search.naver.com/search.naver?ssc=tab.blog.all&query=site:blog.naver.com/${blogId}/${logNo}`;
+
+            tr.innerHTML = `
+              <td class="px-6 py-3 text-gray-405 dark-mode:text-gray-500 font-bold">${index + 1}</td>
+              <td class="px-6 py-3 font-semibold text-gray-855 dark-mode:text-gray-150 select-all font-mono">${logNo}</td>
+              <td class="px-6 py-3" id="omission-simple-status-${index}">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-600 dark-mode:bg-blue-950/20 dark-mode:text-blue-400 border border-blue-200 dark-mode:border-blue-900">
+                  <svg class="animate-spin h-3.5 w-3.5 text-blue-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  조회 중
+                </span>
+              </td>
+              <td class="px-6 py-3">
+                <a href="${queryUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 px-2 py-1 text-[11px] font-bold text-orange-600 hover:text-orange-700 dark-mode:text-orange-400 dark-mode:hover:text-orange-355 border border-orange-200 dark-mode:border-orange-900 rounded bg-orange-50 dark-mode:bg-orange-950/20 active:scale-[0.95] transition-all">검색 ↗</a>
+              </td>
+            `;
+            simpleResultBody.appendChild(tr);
+          });
+
+          // Run checks in batches of 3
+          const batchSize = 3;
+          const batches = [];
+          for (let i = 0; i < logNos.length; i += batchSize) {
+            batches.push(logNos.slice(i, i + batchSize));
+          }
+
+          try {
+            for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+              const batch = batches[batchIdx];
+              const startIdx = batchIdx * batchSize;
+
+              // API call
+              const batchLogNos = batch.join(",");
+              const checkRes = await fetch(`/api/check-reflection?blogId=${encodeURIComponent(blogId)}&logNos=${encodeURIComponent(batchLogNos)}`);
+              
+              if (!checkRes.ok) throw new Error("API 통신 오류");
+              const checkData = await checkRes.json();
+              if (!checkData.success) throw new Error(checkData.error || "체크 실패");
+
+              // Update rows
+              batch.forEach((logNo, bOffset) => {
+                const globalIdx = startIdx + bOffset;
+                const statusCell = document.getElementById(`omission-simple-status-${globalIdx}`);
+                const isReflected = checkData.results && checkData.results[logNo] === true;
+
+                if (isReflected) {
+                  reflectedCount++;
+                  if (statusCell) {
+                    statusCell.innerHTML = `
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-600 dark-mode:bg-green-950/20 dark-mode:text-green-400 border border-green-200 dark-mode:border-green-900">반영</span>
+                    `;
+                  }
+                } else {
+                  omittedCount++;
+                  if (statusCell) {
+                    statusCell.innerHTML = `
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-655 dark-mode:bg-red-950/20 dark-mode:text-red-400 border border-red-200 dark-mode:border-red-900">미반영</span>
+                    `;
+                  }
+                }
+              });
+
+              simpleSummary.textContent = `총 ${logNos.length}건 (반영 ${reflectedCount}, 미반영 ${omittedCount})`;
+
+              // Wait 3 seconds before next batch unless it is the last batch
+              if (batchIdx < batches.length - 1) {
+                let secondsLeft = 3;
+                while (secondsLeft > 0) {
+                  simpleSummary.textContent = `총 ${logNos.length}건 (반영 ${reflectedCount}, 미반영 ${omittedCount}) - ${secondsLeft}초 대기 중...`;
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  secondsLeft--;
+                }
+              }
+            }
+
+            simpleSummary.textContent = `완료! 총 ${logNos.length}건 (반영 ${reflectedCount}, 미반영 ${omittedCount})`;
+          } catch (err) {
+            console.error(err);
+            alert(`간편 검사 중 오류 발생: ${err.message}`);
+            simpleSummary.textContent = "검사 중 오류 발생";
+          } finally {
+            simpleStartBtn.disabled = false;
+            simpleStartBtn.textContent = "간편 검사 시작";
+            simpleStartBtn.className = "px-6 py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white text-sm font-bold rounded-xl shadow-sm";
+          }
+        });
+      }
     }
 
     // ============================================

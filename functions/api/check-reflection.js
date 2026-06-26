@@ -1,17 +1,38 @@
 export async function onRequestGet(context) {
   const { searchParams } = new URL(context.request.url);
   const blogId = searchParams.get('blogId');
-  const title = searchParams.get('title');
+  const logNosParam = searchParams.get('logNos'); // Comma-separated list of logNos (up to 10)
+  const title = searchParams.get('title'); // Keep title fallback support for backward compatibility
 
-  if (!blogId || !title) {
-    return new Response(JSON.stringify({ success: false, error: 'blogId and title are required' }), {
+  if (!blogId) {
+    return new Response(JSON.stringify({ success: false, error: 'blogId is required' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }
     });
   }
 
   try {
-    const query = `"${title}"`;
+    let query = '';
+    let logNos = [];
+
+    if (logNosParam) {
+      logNos = logNosParam.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    if (logNos.length > 0) {
+      // Batch mode: site:blog.naver.com/blogId (logNo1 | logNo2 | ...)
+      const orClause = logNos.join(' | ');
+      query = `site:blog.naver.com/${blogId} (${orClause})`;
+    } else if (title) {
+      // Title mode (fallback)
+      query = `"${title}"`;
+    } else {
+      return new Response(JSON.stringify({ success: false, error: 'Either logNos or title is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const searchUrl = `https://search.naver.com/search.naver?ssc=tab.blog.all&sm=tab_jum&query=${encodeURIComponent(query)}`;
     
     const response = await fetch(searchUrl, {
@@ -38,26 +59,42 @@ export async function onRequestGet(context) {
     if (mainPackMatch) {
       searchArea = mainPackMatch[1];
     } else {
-      // Fallback search area extractor
       const mainPackStart = html.indexOf('id="main_pack"');
       if (mainPackStart !== -1) {
-        searchArea = html.substring(mainPackStart, mainPackStart + 150000); // Take a large chunk of content
+        searchArea = html.substring(mainPackStart, mainPackStart + 150000);
       }
     }
 
-    // Check if blogId appears in search results
     const normalizedHtml = searchArea.toLowerCase();
-    const target1 = 'blog.naver.com/' + blogId.toLowerCase();
-    const target2 = 'blogid=' + blogId.toLowerCase();
-    
-    const reflected = normalizedHtml.includes(target1) || normalizedHtml.includes(target2);
 
-    return new Response(JSON.stringify({ success: true, reflected, query }), {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+    if (logNos.length > 0) {
+      // Batch mode output
+      const results = {};
+      logNos.forEach(logNo => {
+        const target1 = `blog.naver.com/${blogId.toLowerCase()}/${logNo}`;
+        const target2 = `logno=${logNo}`;
+        results[logNo] = normalizedHtml.includes(target1) || normalizedHtml.includes(target2);
+      });
+
+      return new Response(JSON.stringify({ success: true, results, query }), {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    } else {
+      // Title mode output
+      const target1 = 'blog.naver.com/' + blogId.toLowerCase();
+      const target2 = 'blogid=' + blogId.toLowerCase();
+      const reflected = normalizedHtml.includes(target1) || normalizedHtml.includes(target2);
+
+      return new Response(JSON.stringify({ success: true, reflected, query }), {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
 
   } catch (err) {
     return new Response(JSON.stringify({ success: false, error: err.message }), {
