@@ -19,6 +19,27 @@ export async function onRequestGet(context) {
   }
 
   try {
+    // Check if client is requesting ALL keywords combined
+    if (category === "__ALL__") {
+      const jsonUrl = new URL("/powercontent_data.json", url.origin).toString();
+      const res = await fetch(jsonUrl);
+      if (!res.ok) {
+        throw new Error(`Failed to load static fallback JSON: ${res.status}`);
+      }
+      const staticData = await res.json();
+      let allKeywords = [];
+      for (const cat in staticData.grouped) {
+        allKeywords = allKeywords.concat(staticData.grouped[cat]);
+      }
+      return new Response(JSON.stringify({ keywords: allKeywords }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
+      });
+    }
+
     if (useStaticFallback) {
       // Fetch the static json file from the host
       const jsonUrl = new URL("/powercontent_data.json", url.origin).toString();

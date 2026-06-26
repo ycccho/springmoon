@@ -2586,6 +2586,13 @@
 
       function populateCategories(categories) {
         categorySelect.innerHTML = '<option value="">-- 중분류를 선택하세요 --</option>';
+        
+        // Add "All" option at the top
+        const allOpt = document.createElement("option");
+        allOpt.value = "__ALL__";
+        allOpt.textContent = "📂 전체 키워드 검색";
+        categorySelect.appendChild(allOpt);
+
         categories.forEach(cat => {
           const opt = document.createElement("option");
           opt.value = cat;
@@ -2833,8 +2840,9 @@
             // Local IndexedDB Mode
             const transaction = db.transaction(["keywords"], "readonly");
             const store = transaction.objectStore("keywords");
-            const index = store.index("category");
-            const request = index.openCursor(IDBKeyRange.only(selectedCat));
+            const request = selectedCat === "__ALL__"
+              ? store.openCursor()
+              : store.index("category").openCursor(IDBKeyRange.only(selectedCat));
 
             keywords = await new Promise((resolve, reject) => {
               const list = [];
@@ -2868,13 +2876,14 @@
 
           resultsList.innerHTML = "";
           const renderLimit = Math.min(200, matches.length);
+          const displayCat = selectedCat === "__ALL__" ? "전체" : selectedCat;
           for (let i = 0; i < renderLimit; i++) {
             const kw = matches[i];
             const tr = document.createElement("tr");
             tr.className = "hover:bg-gray-50 dark-mode:hover:bg-gray-900/50 transition-colors";
             tr.innerHTML = `
               <td class="px-4 py-3 text-center text-gray-400 font-mono">${i + 1}</td>
-              <td class="px-4 py-3 text-gray-900 dark-mode:text-gray-100 font-semibold">${selectedCat}</td>
+              <td class="px-4 py-3 text-gray-900 dark-mode:text-gray-100 font-semibold">${displayCat}</td>
               <td class="px-4 py-3 text-gray-900 dark-mode:text-gray-100 font-mono select-all">${kw}</td>
               <td class="px-4 py-3 text-center">
                 <button class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 rounded text-[11px] font-bold text-gray-700 dark-mode:text-gray-300 transition-colors copy-single-btn" data-keyword="${kw}">
