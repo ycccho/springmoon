@@ -1,18 +1,58 @@
 export async function onRequestGet(context) {
   const kv = context.env.POWER_CONTENT_KV;
-  if (!kv) {
-    return new Response(JSON.stringify({ error: "POWER_CONTENT_KV binding not found" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-
   const url = new URL(context.request.url);
   const category = url.searchParams.get("category");
 
+  let useStaticFallback = false;
+
+  if (!kv) {
+    useStaticFallback = true;
+  } else {
+    try {
+      const totalCountStr = await kv.get("totalKeywordsCount");
+      if (!totalCountStr) {
+        useStaticFallback = true;
+      }
+    } catch (e) {
+      useStaticFallback = true;
+    }
+  }
+
   try {
+    if (useStaticFallback) {
+      // Fetch the static json file from the host
+      const jsonUrl = new URL("/powercontent_data.json", url.origin).toString();
+      const res = await fetch(jsonUrl);
+      if (!res.ok) {
+        throw new Error(`Failed to load static fallback JSON: ${res.status}`);
+      }
+      const staticData = await res.json();
+      
+      if (!category) {
+        return new Response(JSON.stringify({
+          categories: staticData.categories,
+          totalKeywordsCount: staticData.totalKeywordsCount
+        }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          }
+        });
+      } else {
+        const keywords = staticData.grouped[category] || [];
+        return new Response(JSON.stringify({ keywords }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          }
+        });
+      }
+    }
+
+    // Otherwise, use KV
     if (!category) {
-      // Return list of categories and total count
       const categoriesStr = await kv.get("categories");
       const categories = categoriesStr ? JSON.parse(categoriesStr) : [];
       const totalCountStr = await kv.get("totalKeywordsCount");
@@ -26,7 +66,6 @@ export async function onRequestGet(context) {
         }
       });
     } else {
-      // Return keywords for a specific category
       const keywordsStr = await kv.get(`category:${category}`);
       const keywords = keywordsStr ? JSON.parse(keywordsStr) : [];
       return new Response(JSON.stringify({ keywords }), {
@@ -51,7 +90,7 @@ export async function onRequestGet(context) {
 export async function onRequestPost(context) {
   const kv = context.env.POWER_CONTENT_KV;
   if (!kv) {
-    return new Response(JSON.stringify({ error: "POWER_CONTENT_KV binding not found" }), {
+    return new Response(JSON.stringify({ error: "POWER_CONTENT_KV binding not found. Cannot write to KV." }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });
