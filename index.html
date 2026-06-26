@@ -16,6 +16,16 @@
   <meta name="twitter:description" content="webP 이미지 최적화, 키워드 조합기, 방문자 통계 등 다양한 도구를 제공합니다." />
   <meta name="twitter:image" content="https://postfiles.pstatic.net/MjAyMzAyMDVfMjE5/MDAxNjc1NTgzNzc1NjIy.tp4jWdSCOsJ_jnbG2n2t6Px8a18tTAo-kiCzee6Ejfsg.MeWoKTInJaRI6E336xXWJqSlANleK0uD6gWnmYn3cC0g.JPEG.babolang/DD241D85-98E1-4FC2-91D9-EFF6CBBBD441.jpeg?type=w966" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      plugins: [
+        function({ addVariant }) {
+          addVariant('dark-mode', '.dark-mode &');
+        }
+      ]
+    }
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -581,8 +591,11 @@
         main.appendChild(section);
       });
 
-      // Default: show the first unprotected panel (or first panel if authenticated)
-      const defaultMenu = currentMenus.find(m => isAuthenticated || !m.protected) || currentMenus[0];
+      // Default: show the first unprotected panel (or first panel if authenticated), or pre-selected menu from query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryMenuId = urlParams.get("menu");
+      const queryMenu = queryMenuId ? currentMenus.find(m => m.id === queryMenuId) : null;
+      const defaultMenu = queryMenu || currentMenus.find(m => isAuthenticated || !m.protected) || currentMenus[0];
       if (defaultMenu) {
         selectMenu(defaultMenu);
       }
