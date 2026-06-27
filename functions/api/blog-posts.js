@@ -2,7 +2,11 @@ export async function onRequestGet(context) {
   const { searchParams } = new URL(context.request.url);
   const blogId = searchParams.get('blogId');
   const countParam = searchParams.get('count') || '10';
-  const targetCount = Math.min(Math.max(parseInt(countParam, 10) || 10, 10), 100);
+  let targetCount = parseInt(countParam, 10);
+  if (isNaN(targetCount) || targetCount < 1) {
+    targetCount = 10;
+  }
+  targetCount = Math.min(targetCount, 100);
 
   if (!blogId) {
     return new Response(JSON.stringify({ success: false, error: 'blogId is required' }), {
