@@ -1341,11 +1341,12 @@
                   <th class="px-6 py-3.5 w-32">발행일</th>
                   <th class="px-6 py-3.5 w-32">판별 결과</th>
                   <th class="px-6 py-3.5 w-24">바로가기</th>
+                  <th class="px-6 py-3.5 w-24">링크 복사</th>
                 </tr>
               </thead>
               <tbody id="omission-result-body" class="divide-y divide-gray-150 dark-mode:divide-gray-750 text-gray-755 dark-mode:text-gray-300 font-medium">
                 <tr>
-                  <td colspan="5" class="px-6 py-12 text-center text-gray-400 dark-mode:text-gray-500 font-medium">
+                  <td colspan="6" class="px-6 py-12 text-center text-gray-400 dark-mode:text-gray-500 font-medium">
                     블로그 ID를 입력하고 검사를 시작해주세요.
                   </td>
                 </tr>
@@ -3252,7 +3253,7 @@
 
         resultBody.innerHTML = `
           <tr>
-            <td colspan="5" class="px-6 py-8 text-center text-gray-550 dark-mode:text-gray-455">
+            <td colspan="6" class="px-6 py-8 text-center text-gray-550 dark-mode:text-gray-455">
               <div class="flex items-center justify-center gap-2">
                 <svg class="animate-spin h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -3279,7 +3280,7 @@
           if (posts.length === 0) {
             resultBody.innerHTML = `
               <tr>
-                <td colspan="5" class="px-6 py-8 text-center text-gray-550 dark-mode:text-gray-400">
+                <td colspan="6" class="px-6 py-8 text-center text-gray-550 dark-mode:text-gray-400">
                   게시글이 존재하지 않거나 비공개 상태입니다.
                 </td>
               </tr>
@@ -3317,6 +3318,9 @@
               </td>
               <td class="px-6 py-3.5">
                 <a href="${queryUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 px-2 py-1 text-[11px] font-bold text-orange-600 hover:text-orange-700 dark-mode:text-orange-400 dark-mode:hover:text-orange-355 border border-orange-200 dark-mode:border-orange-900 rounded bg-orange-50 dark-mode:bg-orange-950/20 active:scale-[0.95] transition-all">검색 ↗</a>
+              </td>
+              <td class="px-6 py-3.5">
+                <button data-url="${item.link}" class="omission-copy-url-btn inline-flex items-center gap-0.5 px-2 py-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark-mode:text-blue-400 dark-mode:hover:text-blue-355 border border-blue-200 dark-mode:border-blue-900 rounded bg-blue-50 dark-mode:bg-blue-950/20 active:scale-[0.95] transition-all">🔗 복사</button>
               </td>
             `;
             resultBody.appendChild(tr);
@@ -3530,6 +3534,27 @@
 
         XLSX.utils.book_append_sheet(wb, ws, "누락 판별 결과");
         XLSX.writeFile(wb, `blog_omission_report_${blogId}.xlsx`);
+      });
+
+      // Copy URL button event delegation
+      resultBody.addEventListener("click", (e) => {
+        const copyBtn = e.target.closest(".omission-copy-url-btn");
+        if (copyBtn) {
+          const url = copyBtn.getAttribute("data-url");
+          navigator.clipboard.writeText(url).then(() => {
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = "복사 완료!";
+            copyBtn.classList.replace("text-blue-600", "text-green-600");
+            copyBtn.classList.replace("border-blue-200", "border-green-200");
+            copyBtn.classList.replace("bg-blue-50", "bg-green-50");
+            setTimeout(() => {
+              copyBtn.innerHTML = originalText;
+              copyBtn.classList.replace("text-green-600", "text-blue-600");
+              copyBtn.classList.replace("border-green-200", "border-blue-200");
+              copyBtn.classList.replace("bg-green-50", "bg-blue-50");
+            }, 1000);
+          });
+        }
       });
 
       // ============================================
