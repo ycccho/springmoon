@@ -5354,35 +5354,27 @@
               <a id="backlink-moz" href="https://moz.com/link-explorer" target="_blank" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center text-[10px] font-bold text-orange-600 dark-mode:text-orange-400">Moz LinkExplorer ↗</a>
             </div>
           </div>
-        <!-- Google Custom Search Engine Widget -->
-        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
-          <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-2">🔍 구글 커스텀 검색 (GCS) 위젯</h3>
-          <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">검색 봇 차단 걱정 없이 안전하게 구글 검색 색인에서 도메인 언급 페이지(백링크)를 검색할 수 있습니다. (검색창이 나타나지 않으면 페이지를 새로고침하거나 잠시 기다려주세요)</p>
-          <div id="cse-widget-container" class="border border-gray-150 dark-mode:border-gray-750 p-4 rounded-xl bg-gray-50 dark-mode:bg-gray-900 min-h-[80px]">
-            <div class="gcse-search" data-gname="backlink-search"></div>
-          </div>
-        </div>
-
         <!-- Scraped Results List -->
         <div class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200 dark-mode:border-gray-700 flex justify-between items-center">
-            <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">📋 수집된 연동 백링크 리스트 (최대 30개)</h3>
+            <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">📋 수집된 연동 외부 백링크 리스트 (최대 30개)</h3>
             <span id="backlink-summary" class="text-xs font-bold text-gray-550 dark-mode:text-gray-400">조회 전</span>
           </div>
 
           <div class="overflow-x-auto max-h-[400px]">
             <table class="w-full text-left text-xs border-collapse">
               <thead>
-                <tr class="bg-gray-50 dark-mode:bg-gray-900 border-b border-gray-150 dark-mode:border-gray-750 text-gray-500 dark-mode:text-gray-405 font-bold">
+                <tr class="bg-gray-50 dark-mode:bg-gray-900 border-b border-gray-150 dark-mode:border-gray-750 text-gray-500 dark-mode:text-gray-455 font-bold">
                   <th class="px-6 py-3 w-16">번호</th>
-                  <th class="px-6 py-3">백링크 URL 주소</th>
-                  <th class="px-6 py-3 w-32">출처 엔진</th>
+                  <th class="px-6 py-3 w-48">백링크 도메인</th>
+                  <th class="px-6 py-3">대표 언급 페이지 URL</th>
+                  <th class="px-6 py-3 w-28">출처 엔진</th>
                   <th class="px-6 py-3 w-24">바로가기</th>
                 </tr>
               </thead>
               <tbody id="backlink-result-body" class="divide-y divide-gray-150 dark-mode:divide-gray-750 text-gray-755 dark-mode:text-gray-300 font-medium">
                 <tr>
-                  <td colspan="4" class="px-6 py-12 text-center text-gray-400 dark-mode:text-gray-500 font-medium">
+                  <td colspan="5" class="px-6 py-12 text-center text-gray-400 dark-mode:text-gray-500 font-medium">
                     도메인을 입력하고 검사를 진행해주세요.
                   </td>
                 </tr>
@@ -5419,15 +5411,6 @@
 
       if (!domInput) return;
 
-      // Dynamically load Google Custom Search script if not already present
-      if (!document.getElementById("gcs-script")) {
-        const script = document.createElement("script");
-        script.id = "gcs-script";
-        script.async = true;
-        script.src = "https://cse.google.com/cse.js?cx=f5cb5113d87ee4368";
-        document.head.appendChild(script);
-      }
-
       // Update direct links dynamically
       domInput.addEventListener("input", (e) => {
         const val = e.target.value.trim().replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].toLowerCase();
@@ -5449,26 +5432,18 @@
 
         const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].toLowerCase();
 
-        // Programmatically execute Google Custom Search
-        if (window.google && window.google.search && window.google.search.cse && window.google.search.cse.element) {
-          const cseElement = window.google.search.cse.element.getElement('backlink-search');
-          if (cseElement) {
-            cseElement.execute(`"${cleanDomain}"`);
-          }
-        }
-
         searchBtn.disabled = true;
         searchBtn.textContent = "추출 중...";
         summary.textContent = "백링크 데이터 수집 중...";
         resultBody.innerHTML = `
           <tr>
-            <td colspan="4" class="px-6 py-8 text-center text-gray-550 dark-mode:text-gray-455">
+            <td colspan="5" class="px-6 py-8 text-center text-gray-550 dark-mode:text-gray-455 font-semibold">
               <div class="flex items-center justify-center gap-2">
                 <svg class="animate-spin h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>검색 색인에서 백링크 목록을 수집하는 중... (약 5~10초 소요)</span>
+                <span>검색 API를 통해 외부 백링크 목록을 추출하고 있습니다...</span>
               </div>
             </td>
           </tr>
@@ -5479,7 +5454,7 @@
           if (!res.ok) throw new Error("API 통신 오류");
           
           const data = await res.json();
-          if (!data.success) throw new Error(data.error);
+          if (!data.success) throw new Error(data.error || "수집 실패");
 
           resultBody.innerHTML = "";
           const links = data.links || [];
@@ -5487,8 +5462,8 @@
           if (links.length === 0) {
             resultBody.innerHTML = `
               <tr>
-                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                  ${data.warning || '검색된 외부 백링크가 없습니다. 아래의 직접 조회 링크 또는 전문 도구를 활용하세요.'}
+                <td colspan="5" class="px-6 py-8 text-center text-gray-500 font-semibold">
+                  검색된 외부 백링크가 없습니다. 입력 도메인을 제외한 외부 언급 사이트만 수집됩니다.
                 </td>
               </tr>
             `;
@@ -5501,7 +5476,8 @@
             tr.className = "hover:bg-gray-50 dark-mode:hover:bg-gray-855 transition-colors";
             tr.innerHTML = `
               <td class="px-6 py-3.5 text-gray-400 dark-mode:text-gray-500 font-bold">${idx + 1}</td>
-              <td class="px-6 py-3.5 font-semibold text-gray-855 dark-mode:text-gray-150 break-all select-all font-mono">${item.url}</td>
+              <td class="px-6 py-3.5 font-bold text-gray-850 dark-mode:text-gray-200 font-mono select-all">${item.domain}</td>
+              <td class="px-6 py-3.5 text-gray-600 dark-mode:text-gray-400 font-semibold truncate max-w-xs break-all select-all font-mono">${item.url}</td>
               <td class="px-6 py-3.5">
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.source === 'Google' ? 'bg-blue-50 text-blue-600 dark-mode:bg-blue-950/20 dark-mode:text-blue-400 border border-blue-200 dark-mode:border-blue-900' : 'bg-green-50 text-green-600 dark-mode:bg-green-950/20 dark-mode:text-green-400 border border-green-200 dark-mode:border-green-900'}">${item.source}</span>
               </td>
@@ -5512,13 +5488,13 @@
             resultBody.appendChild(tr);
           });
 
-          summary.textContent = `총 ${links.length}건 수집 완료 ${data.warning ? '(일부 제한됨)' : ''}`;
+          summary.textContent = `총 ${links.length}건 수집 완료`;
 
         } catch (e) {
           console.error(e);
           resultBody.innerHTML = `
             <tr>
-              <td colspan="4" class="px-6 py-8 text-center text-red-500 font-bold">
+              <td colspan="5" class="px-6 py-8 text-center text-red-500 font-bold">
                 백링크 조회 실패: ${e.message}
               </td>
             </tr>
