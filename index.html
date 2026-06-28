@@ -4346,9 +4346,15 @@
             body: JSON.stringify({ image: base64 })
           });
 
-          if (!res.ok) throw new Error("서버 API 오류");
-          const resJson = await res.json();
-          if (!resJson.success) throw new Error(resJson.error);
+          let resJson;
+          try {
+            resJson = await res.json();
+          } catch(e) {
+            throw new Error(`서버 응답 오류 (상태 코드: ${res.status})`);
+          }
+          if (!res.ok || !resJson.success) {
+            throw new Error(resJson.error || `서버 에러 (상태 코드: ${res.status})`);
+          }
 
           const annotations = resJson.data.responses[0]?.textAnnotations || [];
           if (annotations.length <= 1) {
@@ -4607,7 +4613,7 @@
           <hr class="border-gray-100 dark-mode:border-gray-700">
 
           <div>
-            <h3 class="font-bold text-sm text-gray-800 dark-mode:text-gray-200 mb-4">🏠 스키마 마크업 (JSON-LD) 용 추가 비즈니스 정보</h3>
+            <h3 class="font-bold text-sm text-gray-800 dark-mode:text-gray-200 mb-4">🏠 고급 스키마 마크업 (JSON-LD) 추가 정보</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-1">
                 <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">회사 대표 전화번호</label>
@@ -4620,6 +4626,32 @@
               <div class="space-y-1 md:col-span-2">
                 <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">회사 상세 주소</label>
                 <input type="text" id="seo-address" placeholder="부산광역시 해운대구 우동 123-45" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+              
+              <!-- Extra SEO Fields -->
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">지도 위도 (Latitude) <span class="text-[10px] text-gray-400 font-semibold">(구글맵 위치 매칭용)</span></label>
+                <input type="text" id="seo-latitude" placeholder="35.1595" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">지도 경도 (Longitude)</label>
+                <input type="text" id="seo-longitude" placeholder="129.1625" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">영업 시간 <span class="text-[10px] text-gray-400 font-semibold">(예: Mo-Fr 09:00-18:00)</span></label>
+                <input type="text" id="seo-hours" placeholder="Mo-Fr 09:00-18:00" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">공식 네이버 블로그 주소</label>
+                <input type="text" id="seo-blog-url" placeholder="https://blog.naver.com/id" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">공식 인스타그램 주소</label>
+                <input type="text" id="seo-instagram-url" placeholder="https://instagram.com/id" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">공식 유튜브 채널 주소</label>
+                <input type="text" id="seo-youtube-url" placeholder="https://youtube.com/channel/id" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
               </div>
             </div>
           </div>
@@ -4725,6 +4757,14 @@
       const phoneInput = document.getElementById("seo-phone");
       const logoInput = document.getElementById("seo-logo");
       const addrInput = document.getElementById("seo-address");
+      
+      const latInput = document.getElementById("seo-latitude");
+      const lngInput = document.getElementById("seo-longitude");
+      const hoursInput = document.getElementById("seo-hours");
+      const blogUrlInput = document.getElementById("seo-blog-url");
+      const instaUrlInput = document.getElementById("seo-instagram-url");
+      const ytUrlInput = document.getElementById("seo-youtube-url");
+
       const metaOut = document.getElementById("seo-output-meta");
       const schemaOut = document.getElementById("seo-output-schema");
       const cpyMeta = document.getElementById("seo-copy-meta");
@@ -4739,6 +4779,13 @@
         const phone = phoneInput.value.trim();
         const logo = logoInput.value.trim();
         const addr = addrInput.value.trim();
+        
+        const lat = latInput.value.trim();
+        const lng = lngInput.value.trim();
+        const hours = hoursInput.value.trim();
+        const blogUrl = blogUrlInput.value.trim();
+        const instaUrl = instaUrlInput.value.trim();
+        const ytUrl = ytUrlInput.value.trim();
 
         // 1. Meta / OG HTML code
         let metaHtml = `<!-- 기본 메타 태그 -->\n`;
@@ -4756,30 +4803,106 @@
         
         metaOut.value = metaHtml;
 
-        // 2. JSON-LD Schema markup
-        const schemaObj = {
+        // 2. Premium Linked Graph Schema
+        const socialProfiles = [blogUrl, instaUrl, ytUrl].filter(Boolean);
+
+        const schemaGraph = {
           "@context": "https://schema.org",
-          "@type": "LocalBusiness",
-          "name": name,
-          "description": desc,
-          "url": dom
+          "@graph": [
+            // Organization Schema
+            {
+              "@type": "Organization",
+              "@id": `${dom}/#organization`,
+              "name": name,
+              "url": dom,
+              "logo": logo || undefined,
+              "sameAs": socialProfiles.length > 0 ? socialProfiles : undefined
+            },
+            // WebSite Schema
+            {
+              "@type": "WebSite",
+              "@id": `${dom}/#website`,
+              "url": dom,
+              "name": name,
+              "description": desc,
+              "publisher": {
+                "@id": `${dom}/#organization`
+              },
+              "potentialAction": [{
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": `${dom}/?s={search_term_string}`
+                },
+                "query-input": "required name=search_term_string"
+              }]
+            },
+            // WebPage Schema
+            {
+              "@type": "WebPage",
+              "@id": `${dom}/#webpage`,
+              "url": dom,
+              "name": name,
+              "description": desc,
+              "isPartOf": {
+                "@id": `${dom}/#website`
+              },
+              "about": {
+                "@id": `${dom}/#organization`
+              }
+            }
+          ]
         };
-        if (logo) schemaObj["logo"] = logo;
-        if (phone) schemaObj["telephone"] = phone;
-        if (addr) {
-          schemaObj["address"] = {
-            "@type": "PostalAddress",
-            "streetAddress": addr,
-            "addressLocality": "Busan",
-            "addressCountry": "KR"
+
+        // LocalBusiness Schema
+        if (addr || phone || lat || lng || hours) {
+          const localBusinessObj = {
+            "@type": "LocalBusiness",
+            "@id": `${dom}/#localbusiness`,
+            "name": name,
+            "url": dom,
+            "telephone": phone || undefined,
+            "priceRange": "$$",
+            "image": logo || undefined,
+            "address": addr ? {
+              "@type": "PostalAddress",
+              "streetAddress": addr,
+              "addressLocality": "Busan",
+              "addressCountry": "KR"
+            } : undefined,
+            "geo": (lat && lng) ? {
+              "@type": "GeoCoordinates",
+              "latitude": parseFloat(lat),
+              "longitude": parseFloat(lng)
+            } : undefined,
+            "openingHoursSpecification": hours ? [{
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+              "opens": hours.split(" ")[1]?.split("-")[0] || "09:00",
+              "closes": hours.split(" ")[1]?.split("-")[1] || "18:00"
+            }] : undefined,
+            "sameAs": socialProfiles.length > 0 ? socialProfiles : undefined
+          };
+
+          schemaGraph["@graph"].push(localBusinessObj);
+          
+          // Connect Page to LocalBusiness
+          schemaGraph["@graph"][2]["about"] = {
+            "@id": `${dom}/#localbusiness`
           };
         }
 
-        schemaOut.value = `<script type="application/ld+json">\n${JSON.stringify(schemaObj, null, 2)}\n<\/script>`;
+        // Remove undefined fields
+        const cleanObj = JSON.parse(JSON.stringify(schemaGraph));
+
+        schemaOut.value = `<script type="application/ld+json">\n${JSON.stringify(cleanObj, null, 2)}\n<\/script>`;
       }
 
       // Input listeners
-      [domInput, nameInput, descInput, phoneInput, logoInput, addrInput].forEach(inp => {
+      [
+        domInput, nameInput, descInput, phoneInput, logoInput, addrInput,
+        latInput, lngInput, hoursInput, blogUrlInput, instaUrlInput, ytUrlInput
+      ].forEach(inp => {
         inp.addEventListener("input", generateCodes);
       });
 
@@ -4848,6 +4971,13 @@
               <a id="backlink-moz" href="https://moz.com/link-explorer" target="_blank" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center text-[10px] font-bold text-orange-600 dark-mode:text-orange-400">Moz LinkExplorer ↗</a>
             </div>
           </div>
+        <!-- Google Custom Search Engine Widget -->
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+          <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-2">🔍 구글 커스텀 검색 (GCS) 위젯</h3>
+          <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">검색 봇 차단 걱정 없이 안전하게 구글 검색 색인에서 도메인 언급 페이지(백링크)를 검색할 수 있습니다. (검색창이 나타나지 않으면 페이지를 새로고침하거나 잠시 기다려주세요)</p>
+          <div id="cse-widget-container" class="border border-gray-150 dark-mode:border-gray-750 p-4 rounded-xl bg-gray-50 dark-mode:bg-gray-900 min-h-[80px]">
+            <div class="gcse-search" data-gname="backlink-search"></div>
+          </div>
         </div>
 
         <!-- Scraped Results List -->
@@ -4906,6 +5036,15 @@
 
       if (!domInput) return;
 
+      // Dynamically load Google Custom Search script if not already present
+      if (!document.getElementById("gcs-script")) {
+        const script = document.createElement("script");
+        script.id = "gcs-script";
+        script.async = true;
+        script.src = "https://cse.google.com/cse.js?cx=f5cb5113d87ee4368";
+        document.head.appendChild(script);
+      }
+
       // Update direct links dynamically
       domInput.addEventListener("input", (e) => {
         const val = e.target.value.trim().replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].toLowerCase();
@@ -4926,6 +5065,14 @@
         }
 
         const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].toLowerCase();
+
+        // Programmatically execute Google Custom Search
+        if (window.google && window.google.search && window.google.search.cse && window.google.search.cse.element) {
+          const cseElement = window.google.search.cse.element.getElement('backlink-search');
+          if (cseElement) {
+            cseElement.execute(`"${cleanDomain}"`);
+          }
+        }
 
         searchBtn.disabled = true;
         searchBtn.textContent = "추출 중...";
