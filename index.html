@@ -129,7 +129,11 @@
       { id: "html-analysis", name: "html분석", protected: true },
       { id: "url-extraction", name: "도메인 url추출", protected: true },
       { id: "powercontent", name: "파컨 키워드", protected: true },
-      { id: "omission-check", name: "누락판별", protected: true },
+      { id: "omission-check", name: "네이버블로그", protected: true },
+      { id: "interior-intro", name: "인테리어", categoryId: "cat-interior", protected: true },
+      { id: "cad-conversion", name: "스케치도면 캐드변환", categoryId: "cat-interior", protected: true },
+      { id: "homepage-seo", name: "홈페이지 코드세팅", protected: true },
+      { id: "backlink-check", name: "백링크검사", protected: true },
       { id: "about", name: "소개", protected: false }
     ];
 
@@ -147,15 +151,6 @@
       // Clean up deleted default menus and menus named "1"
       menus = menus.filter(m => m.id !== "stats" && m.id !== "marketing" && m.id !== "home" && m.name !== "1" && m.id !== "1");
       
-      // Clean up orphaned category IDs to avoid hidden menus
-      const cats = loadCategories();
-      const catIds = new Set(cats.map(c => c.id));
-      menus.forEach(m => {
-        if (m.categoryId && !catIds.has(m.categoryId)) {
-          m.categoryId = null;
-        }
-      });
-
       // Ensure keyword-search-count exists
       if (!menus.some(m => m.id === "keyword-search-count")) {
         const idx = menus.findIndex(m => m.id === "keyword");
@@ -184,15 +179,55 @@
       // Ensure omission-check exists
       if (!menus.some(m => m.id === "omission-check")) {
         const idx = menus.findIndex(m => m.id === "powercontent");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "omission-check", name: "누락판별", protected: true });
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "omission-check", name: "네이버블로그", protected: true });
       }
+      // Ensure new menus exist
+      if (!menus.some(m => m.id === "interior-intro")) {
+        const idx = menus.findIndex(m => m.id === "omission-check");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "interior-intro", name: "인테리어", categoryId: "cat-interior", protected: true });
+      }
+      if (!menus.some(m => m.id === "cad-conversion")) {
+        const idx = menus.findIndex(m => m.id === "interior-intro");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "스케치도면 캐드변환", categoryId: "cat-interior", protected: true });
+      }
+      if (!menus.some(m => m.id === "homepage-seo")) {
+        const idx = menus.findIndex(m => m.id === "cad-conversion");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "homepage-seo", name: "홈페이지 코드세팅", protected: true });
+      }
+      if (!menus.some(m => m.id === "backlink-check")) {
+        const idx = menus.findIndex(m => m.id === "homepage-seo");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "backlink-check", name: "백링크검사", protected: true });
+      }
+
+      // Automatically rename omission-check
+      menus.forEach(m => {
+        if (m.id === "omission-check") {
+          m.name = "네이버블로그";
+        }
+      });
+
+      // Clean up orphaned category IDs to avoid hidden menus
+      const cats = loadCategories();
+      const catIds = new Set(cats.map(c => c.id));
+      menus.forEach(m => {
+        if (m.categoryId && !catIds.has(m.categoryId)) {
+          m.categoryId = null;
+        }
+      });
+
       return menus;
     }
 
     function saveMenuOrder() { localStorage.setItem("menuOrder", JSON.stringify(currentMenus)); }
     function loadCategories() { 
       let cats = JSON.parse(localStorage.getItem("categories") || "[]");
-      return cats.filter(c => c.name !== "1" && c.id !== "1");
+      // Ensure cat-interior exists and default it to collapsed
+      if (!cats.some(c => c.id === "cat-interior")) {
+        cats.push({ id: "cat-interior", name: "인테리어", collapsed: true });
+      }
+      // Filter out invalid categories
+      cats = cats.filter(c => c.name !== "1" && c.id !== "1");
+      return cats;
     }
     function saveCategories() { localStorage.setItem("categories", JSON.stringify(currentCategories)); }
     function loadDarkMode() { return localStorage.getItem("darkMode") === "true"; }
@@ -297,18 +332,28 @@
         catDiv.className = "category-group border border-white border-opacity-10 rounded-xl p-2 bg-white bg-opacity-5 transition-all my-2";
         catDiv.dataset.categoryId = cat.id;
 
+        const isCollapsed = cat.collapsed === true;
+        const arrow = isCollapsed ? "▶" : "▼";
+
         // Category Header
         const catHeader = document.createElement("div");
-        catHeader.className = "category-header flex items-center justify-between text-xs font-bold text-gray-200 uppercase tracking-wider px-2 py-1.5 mb-1 group cursor-grab active:cursor-grabbing";
+        catHeader.className = "category-header flex items-center justify-between text-xs font-bold text-gray-200 uppercase tracking-wider px-2 py-1.5 mb-1 group";
         catHeader.draggable = true;
         catHeader.innerHTML = `
-          <span class="flex items-center gap-1.5">📁 <span class="cat-name-text"></span></span>
+          <span class="flex items-center gap-1.5 cursor-pointer select-none cat-toggle-click">📁 ${arrow} <span class="cat-name-text"></span></span>
           <div class="opacity-0 group-hover:opacity-100 flex gap-1.5 transition-opacity">
             <button class="cat-edit-btn text-white hover:text-gray-300 text-[10px]">✏️</button>
             <button class="cat-delete-btn text-red-300 hover:text-red-500 text-[10px]">❌</button>
           </div>
         `;
         catHeader.querySelector(".cat-name-text").textContent = cat.name;
+
+        // Toggle category fold
+        catHeader.querySelector(".cat-toggle-click").addEventListener("click", () => {
+          cat.collapsed = !cat.collapsed;
+          saveCategories();
+          renderMenus();
+        });
 
         // Edit / Delete Category events
         catHeader.querySelector(".cat-edit-btn").addEventListener("click", (e) => {
@@ -383,6 +428,9 @@
         const catMenus = currentMenus.filter(m => m.categoryId === cat.id);
         catMenus.forEach((menu) => {
           const btn = createMenuButton(menu, currentMenus.indexOf(menu));
+          if (isCollapsed) {
+            btn.classList.add("hidden");
+          }
           catDiv.appendChild(btn);
         });
 
@@ -618,6 +666,10 @@
         setupUrlExtraction();
         setupPowerContent();
         setupOmissionCheck();
+        setupInteriorIntro();
+        setupCadConversion();
+        setupHomepageSeo();
+        setupBacklinkCheck();
       }, 100);
     }
 
@@ -630,6 +682,10 @@
       if (id === "url-extraction") return getUrlExtractionHTML();
       if (id === "powercontent") return getPowerContentHTML();
       if (id === "omission-check") return getOmissionCheckHTML();
+      if (id === "interior-intro") return getInteriorIntroHTML();
+      if (id === "cad-conversion") return getCadConversionHTML();
+      if (id === "homepage-seo") return getHomepageSeoHTML();
+      if (id === "backlink-check") return getBacklinkCheckHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
           <h2 class="text-3xl font-bold mb-4 text-gray-800 dark-mode:text-gray-100">소개</h2>
@@ -1257,13 +1313,14 @@
     // ============================================
     // 누락판별 메뉴 UI
     // ============================================
-        function getOmissionCheckHTML() {
-      return `<div class="max-w-6xl mx-auto space-y-6">
+    function getOmissionCheckHTML() {
+      return `<div class="max-w-7xl mx-auto space-y-6">
+        <!-- Search Controls -->
         <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🔍 네이버 블로그 누락 판별기</h2>
-          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">네이버 블로그 ID를 입력하면 최신 게시글(최대 100개)을 가져와 네이버 검색 노출 상태를 판별합니다. IP 차단을 방지하기 위해 10개씩 묶어서 검색하며, 배치 간 대기 시간을 적용합니다.</p>
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📂 네이버 블로그 조회 및 누락 판별기</h2>
+          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">네이버 블로그 ID를 입력하면 프로필 상세 정보, 개설일, 일별 방문자 히스토리를 불러오고 포스트 누락 여부까지 원스톱으로 판별합니다.</p>
           
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <!-- Blog ID Input -->
             <div class="space-y-1">
               <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">네이버 블로그 ID</label>
@@ -1298,60 +1355,126 @@
             
             <!-- Actions -->
             <div class="flex gap-2">
-              <button id="omission-start-btn" class="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white text-sm font-bold rounded-xl shadow-sm">검사 시작</button>
+              <button id="omission-start-btn" class="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white text-sm font-bold rounded-xl shadow-sm">조회 및 검사 시작</button>
               <button id="omission-stop-btn" disabled class="px-4 py-2 bg-gray-300 dark-mode:bg-gray-700 text-gray-500 dark-mode:text-gray-400 text-sm font-bold rounded-xl cursor-not-allowed">중단</button>
-            </div>
-          </div>
-          
-          <!-- Progress Info -->
-          <div id="omission-progress-section" class="hidden p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-855 space-y-2">
-            <div class="flex justify-between items-center text-xs font-bold text-gray-550 dark-mode:text-gray-355">
-              <span id="omission-status-text">대기 중...</span>
-              <span id="omission-progress-percent">0%</span>
-            </div>
-            <div class="w-full bg-gray-200 dark-mode:bg-gray-750 h-2 rounded-full overflow-hidden">
-              <div id="omission-progress-bar" class="bg-orange-500 h-full w-0 transition-all duration-300"></div>
             </div>
           </div>
         </div>
 
-        <!-- Result Table -->
-        <div class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200 dark-mode:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-4">
-              <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-1.5 text-base">📋 판별 결과</h3>
-              <div class="text-xs font-bold text-gray-550 dark-mode:text-gray-400" id="omission-summary-text">총 0건 (반영 0, 미반영 0)</div>
+        <!-- Dashboard Layout -->
+        <div id="omission-dashboard" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Left Side: Profile Card & Visitor Graph -->
+          <div class="lg:col-span-4 space-y-6">
+            
+            <!-- Blog Profile Card -->
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+              <div class="flex items-center gap-4">
+                <img id="omission-profile-img" src="" alt="프로필 이미지" class="w-16 h-16 rounded-full border-2 border-orange-500 object-cover bg-gray-100">
+                <div>
+                  <h3 id="omission-display-name" class="font-bold text-gray-800 dark-mode:text-gray-100 text-base leading-tight"></h3>
+                  <span id="omission-nickname" class="text-xs text-gray-500 dark-mode:text-gray-405 font-semibold"></span>
+                </div>
+              </div>
+              
+              <div class="border-t border-gray-100 dark-mode:border-gray-700 pt-4 space-y-2 text-xs font-semibold text-gray-650 dark-mode:text-gray-300">
+                <div class="flex justify-between">
+                  <span>📅 블로그 개설일</span>
+                  <span id="omission-creation-date" class="text-gray-800 dark-mode:text-gray-100 font-bold"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span>📂 카테고리 주제</span>
+                  <span id="omission-blog-category" class="text-gray-800 dark-mode:text-gray-100 font-bold"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span>📝 총 등록 글 수</span>
+                  <span id="omission-total-posts" class="text-gray-800 dark-mode:text-gray-100 font-bold"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span>👥 이웃 (구독자) 수</span>
+                  <span id="omission-subscribers" class="text-gray-800 dark-mode:text-gray-100 font-bold"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span>📈 오늘 방문자 수</span>
+                  <span id="omission-today-visitors" class="text-orange-500 font-bold"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span>📊 누적 방문자 수</span>
+                  <span id="omission-total-visitors" class="text-gray-800 dark-mode:text-gray-100 font-bold"></span>
+                </div>
+              </div>
             </div>
-            <div class="flex gap-2" id="omission-download-container">
-              <button id="omission-txt-btn" disabled class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-650 text-gray-755 dark-mode:text-gray-200 text-xs font-bold rounded-lg transition-all active:scale-[0.97] opacity-50 cursor-not-allowed">
-                📋 TXT 다운로드
-              </button>
-              <button id="omission-excel-btn" disabled class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-all active:scale-[0.97] shadow-sm opacity-50 cursor-not-allowed">
-                📥 Excel 다운로드
-              </button>
+
+            <!-- Visitor Trend Chart -->
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+              <div class="flex justify-between items-center">
+                <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-1.5">📈 방문자 수 추이</h4>
+                <input type="month" id="omission-history-month" class="px-2 py-1 text-xs border border-gray-350 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-1 focus:ring-orange-500 font-bold">
+              </div>
+              
+              <!-- SVG Chart -->
+              <div class="w-full h-48 bg-gray-50 dark-mode:bg-gray-900 rounded-xl p-2 relative flex items-center justify-center">
+                <svg id="omission-chart-svg" class="w-full h-full" viewBox="0 0 300 150" preserveAspectRatio="none">
+                  <!-- Dynamic SVG components will go here -->
+                </svg>
+                <div id="omission-chart-empty" class="absolute text-[10px] text-gray-400 font-bold hidden">기록된 방문자 히스토리가 없습니다.</div>
+              </div>
+              <div class="text-[10px] text-gray-400 text-center font-bold">※ 내 사이트에서 조회된 블로그의 일별 방문자 수가 매일 자동 기록됩니다.</div>
             </div>
           </div>
-          
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr class="bg-gray-50 dark-mode:bg-gray-900 border-b border-gray-150 dark-mode:border-gray-750 text-gray-500 dark-mode:text-gray-405 font-bold">
-                  <th class="px-6 py-3.5 w-16">번호</th>
-                  <th class="px-6 py-3.5">게시글 제목</th>
-                  <th class="px-6 py-3.5 w-32">발행일</th>
-                  <th class="px-6 py-3.5 w-32">판별 결과</th>
-                  <th class="px-6 py-3.5 w-24">바로가기</th>
-                  <th class="px-6 py-3.5 w-24">링크 복사</th>
-                </tr>
-              </thead>
-              <tbody id="omission-result-body" class="divide-y divide-gray-150 dark-mode:divide-gray-750 text-gray-755 dark-mode:text-gray-300 font-medium">
-                <tr>
-                  <td colspan="6" class="px-6 py-12 text-center text-gray-400 dark-mode:text-gray-500 font-medium">
-                    블로그 ID를 입력하고 검사를 시작해주세요.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+          <!-- Right Side: Omission Result Table -->
+          <div class="lg:col-span-8 space-y-6">
+            <!-- Progress Section (within card) -->
+            <div id="omission-progress-section" class="hidden p-4 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-100 dark-mode:border-gray-855 space-y-2">
+              <div class="flex justify-between items-center text-xs font-bold text-gray-550 dark-mode:text-gray-355">
+                <span id="omission-status-text">대기 중...</span>
+                <span id="omission-progress-percent">0%</span>
+              </div>
+              <div class="w-full bg-gray-200 dark-mode:bg-gray-750 h-2 rounded-full overflow-hidden">
+                <div id="omission-progress-bar" class="bg-orange-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+
+            <!-- Result Card -->
+            <div class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-200 dark-mode:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-1.5 text-base">📋 판별 결과</h3>
+                  <div class="text-xs font-bold text-gray-550 dark-mode:text-gray-400" id="omission-summary-text">총 0건 (반영 0, 미반영 0)</div>
+                </div>
+                <div class="flex gap-2" id="omission-download-container">
+                  <button id="omission-txt-btn" disabled class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-650 text-gray-755 dark-mode:text-gray-200 text-xs font-bold rounded-lg transition-all active:scale-[0.97] opacity-50 cursor-not-allowed">
+                    📋 TXT 다운로드
+                  </button>
+                  <button id="omission-excel-btn" disabled class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-all active:scale-[0.97] shadow-sm opacity-50 cursor-not-allowed">
+                    📥 Excel 다운로드
+                  </button>
+                </div>
+              </div>
+              
+              <div class="overflow-x-auto max-h-[500px]">
+                <table class="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr class="bg-gray-50 dark-mode:bg-gray-900 border-b border-gray-150 dark-mode:border-gray-750 text-gray-500 dark-mode:text-gray-405 font-bold sticky top-0">
+                      <th class="px-6 py-3.5 w-16">번호</th>
+                      <th class="px-6 py-3.5">게시글 제목</th>
+                      <th class="px-6 py-3.5 w-32">발행일</th>
+                      <th class="px-6 py-3.5 w-32">판별 결과</th>
+                      <th class="px-6 py-3.5 w-24">바로가기</th>
+                      <th class="px-6 py-3.5 w-24">링크 복사</th>
+                    </tr>
+                  </thead>
+                  <tbody id="omission-result-body" class="divide-y divide-gray-150 dark-mode:divide-gray-750 text-gray-755 dark-mode:text-gray-300 font-medium">
+                    <tr>
+                      <td colspan="6" class="px-6 py-12 text-center text-gray-400 dark-mode:text-gray-500 font-medium">
+                        블로그 ID를 입력하고 검사를 시작해주세요.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3157,7 +3280,7 @@
     // ============================================
     // 누락판별 기능 및 이벤트 설정
     // ============================================
-        function setupOmissionCheck() {
+    function setupOmissionCheck() {
       const blogInput = document.getElementById("omission-blog-id");
       const urlPreview = document.getElementById("omission-url-preview");
       const countSelect = document.getElementById("omission-count");
@@ -3172,6 +3295,7 @@
       const summaryText = document.getElementById("omission-summary-text");
       const txtBtn = document.getElementById("omission-txt-btn");
       const excelBtn = document.getElementById("omission-excel-btn");
+      const monthInput = document.getElementById("omission-history-month");
 
       if (!blogInput) return; // Not rendered yet
 
@@ -3185,6 +3309,143 @@
       let checkTimeoutId = null;
       let posts = [];
       let resultsData = []; // To store reflection state for downloading
+      let historyData = {}; // To store visitor counts map YYYY-MM-DD -> count
+
+      // SVG Chart drawing helper
+      function drawVisitorChart(dataMap, selectedMonth) {
+        const svg = document.getElementById("omission-chart-svg");
+        const emptyEl = document.getElementById("omission-chart-empty");
+        if (!svg) return;
+        svg.innerHTML = "";
+
+        const dates = Object.keys(dataMap || {})
+          .filter(d => d.startsWith(selectedMonth))
+          .sort();
+
+        if (dates.length === 0) {
+          emptyEl.classList.remove("hidden");
+          return;
+        }
+        emptyEl.classList.add("hidden");
+
+        const vals = dates.map(d => dataMap[d]);
+        const maxVal = Math.max(...vals, 10);
+        const minVal = Math.min(...vals, 0);
+        const valRange = maxVal - minVal;
+
+        const width = 300;
+        const height = 150;
+        const paddingLeft = 35;
+        const paddingRight = 10;
+        const paddingTop = 15;
+        const paddingBottom = 20;
+
+        const chartWidth = width - paddingLeft - paddingRight;
+        const chartHeight = height - paddingTop - paddingBottom;
+
+        // Draw horizontal grid lines
+        const gridCount = 3;
+        for (let i = 0; i <= gridCount; i++) {
+          const y = paddingTop + (chartHeight / gridCount) * i;
+          const gridVal = Math.round(maxVal - (valRange / gridCount) * i);
+          
+          // Line
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", paddingLeft);
+          line.setAttribute("y1", y);
+          line.setAttribute("x2", width - paddingRight);
+          line.setAttribute("y2", y);
+          line.setAttribute("stroke", isDarkMode ? "#374151" : "#E5E7EB");
+          line.setAttribute("stroke-dasharray", "3,3");
+          svg.appendChild(line);
+
+          // Text label
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", paddingLeft - 5);
+          text.setAttribute("y", y + 3);
+          text.setAttribute("text-anchor", "end");
+          text.setAttribute("fill", isDarkMode ? "#9CA3AF" : "#6B7280");
+          text.setAttribute("font-size", "7px");
+          text.setAttribute("font-weight", "bold");
+          text.textContent = gridVal.toLocaleString();
+          svg.appendChild(text);
+        }
+
+        // Map coordinates
+        const points = dates.map((date, idx) => {
+          const x = paddingLeft + (dates.length > 1 ? (chartWidth / (dates.length - 1)) * idx : chartWidth / 2);
+          const y = paddingTop + chartHeight - (valRange > 0 ? (chartHeight * (dataMap[date] - minVal)) / valRange : chartHeight / 2);
+          return { x, y, date, val: dataMap[date] };
+        });
+
+        // Draw line path
+        let pathD = "";
+        points.forEach((pt, idx) => {
+          if (idx === 0) pathD += `M ${pt.x} ${pt.y}`;
+          else pathD += ` L ${pt.x} ${pt.y}`;
+        });
+
+        if (pathD) {
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", pathD);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", "#F97316");
+          path.setAttribute("stroke-width", "1.5");
+          svg.appendChild(path);
+        }
+
+        // Draw dots
+        points.forEach((pt) => {
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", pt.x);
+          circle.setAttribute("cy", pt.y);
+          circle.setAttribute("r", "2.5");
+          circle.setAttribute("fill", "#F97316");
+          circle.setAttribute("stroke", isDarkMode ? "#1F2937" : "#FFFFFF");
+          circle.setAttribute("stroke-width", "1");
+          svg.appendChild(circle);
+
+          if (points.length <= 12) {
+            const valTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            valTxt.setAttribute("x", pt.x);
+            valTxt.setAttribute("y", pt.y - 5);
+            valTxt.setAttribute("text-anchor", "middle");
+            valTxt.setAttribute("fill", "#F97316");
+            valTxt.setAttribute("font-size", "6px");
+            valTxt.setAttribute("font-weight", "bold");
+            valTxt.textContent = pt.val;
+            svg.appendChild(valTxt);
+          }
+        });
+
+        // X-Axis labels
+        if (points.length > 0) {
+          const labelIndices = [0];
+          if (points.length > 2) labelIndices.push(Math.floor(points.length / 2));
+          if (points.length > 1) labelIndices.push(points.length - 1);
+
+          labelIndices.forEach(idx => {
+            const pt = points[idx];
+            const dateStr = pt.date.split("-")[2] + "일";
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", pt.x);
+            text.setAttribute("y", height - 5);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("fill", isDarkMode ? "#9CA3AF" : "#6B7280");
+            text.setAttribute("font-size", "7px");
+            text.setAttribute("font-weight", "bold");
+            text.textContent = dateStr;
+            svg.appendChild(text);
+          });
+        }
+      }
+
+      // Add month picker listener
+      if (monthInput) {
+        monthInput.addEventListener("change", (e) => {
+          drawVisitorChart(historyData, e.target.value);
+        });
+      }
 
       // Disable/Enable Download buttons helper
       function toggleDownloadButtons(enable) {
@@ -3245,7 +3506,7 @@
         stopBtn.className = "px-4 py-2 bg-red-500 hover:bg-red-600 active:scale-[0.98] transition-all text-white text-sm font-bold rounded-xl shadow-sm";
 
         progressSection.classList.remove("hidden");
-        statusText.textContent = "최신 게시글 목록을 불러오는 중...";
+        statusText.textContent = "블로그 정보를 조회하는 중...";
         statusText.className = "text-gray-550 dark-mode:text-gray-355";
         progressPercent.textContent = "0%";
         progressBar.style.width = "0%";
@@ -3259,13 +3520,47 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>네이버 블로그에서 글을 가져오는 중입니다...</span>
+                <span>블로그 프로필 및 방문 기록을 동기화하는 중...</span>
               </div>
             </td>
           </tr>
         `;
 
+        // 1. Fetch Blog Profile Info & visitor stats
         try {
+          const profileRes = await fetch(`/api/naver-blog?action=info&blogId=${encodeURIComponent(blogId)}`);
+          if (profileRes.ok) {
+            const pData = await profileRes.json();
+            if (pData.success) {
+              // Display Dashboard
+              document.getElementById("omission-dashboard").classList.remove("hidden");
+              
+              // Set Profile
+              document.getElementById("omission-profile-img").src = pData.info.profileImage || '';
+              document.getElementById("omission-display-name").textContent = pData.info.blogName || '제목 없음';
+              document.getElementById("omission-nickname").textContent = `${pData.info.nickName} (${pData.info.blogId})`;
+              document.getElementById("omission-creation-date").textContent = pData.info.creationDate || '알 수 없음';
+              document.getElementById("omission-blog-category").textContent = pData.info.blogCategory || '분류 없음';
+              document.getElementById("omission-total-posts").textContent = pData.info.totalPosts.toLocaleString();
+              document.getElementById("omission-subscribers").textContent = pData.info.subscribers.toLocaleString();
+              document.getElementById("omission-today-visitors").textContent = pData.info.todayVisitors.toLocaleString();
+              document.getElementById("omission-total-visitors").textContent = pData.info.totalVisitors.toLocaleString();
+
+              // Draw visitor graph
+              historyData = pData.history || {};
+              const kstDate = new Date(Date.now() + (9 * 60 * 60 * 1000));
+              const currentMonth = kstDate.toISOString().slice(0, 7);
+              if (monthInput) monthInput.value = currentMonth;
+              drawVisitorChart(historyData, currentMonth);
+            }
+          }
+        } catch (e) {
+          console.error("Profile load failure:", e);
+        }
+
+        // 2. Fetch Blog Posts
+        try {
+          statusText.textContent = "최신 게시글 목록을 불러오는 중...";
           const res = await fetch(`/api/blog-posts?blogId=${encodeURIComponent(blogId)}&count=${count}`);
           if (!res.ok) {
             throw new Error(`블로그 목록을 불러오지 못했습니다. (Status: ${res.status})`);
@@ -3756,6 +4051,926 @@
         main.addEventListener("input", saveContent);
         main.addEventListener("blur", saveContent, true);
       }
+    }
+
+    // ============================================
+    // 인테리어 관련 기능
+    // ============================================
+    function getInteriorIntroHTML() {
+      return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-6">
+        <h2 class="text-3xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📁 인테리어 도구 소개 및 워크플로우</h2>
+        <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">현장 작업 효율을 극대화하기 위해 제공되는 인테리어 설계 전용 보조 도구 모음입니다. 현장 실측 스케치를 정밀한 CAD 도면으로 신속하게 다듬고 변환할 수 있습니다.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
+            <div class="text-2xl">📸 1단계: 실측 및 촬영</div>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">현장 드로잉 업로드</h4>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">실측 후 종이에 작성한 수치 도면을 카메라로 반듯하게 촬영하여 드래그 앤 드롭으로 업로드합니다.</p>
+          </div>
+          <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
+            <div class="text-2xl">🔍 2단계: 수치 및 선 검토</div>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">AI OCR 문자 검출</h4>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">Google Cloud Vision AI가 이미지 속의 숫자를 감지해 좌표와 오버레이를 만듭니다. 누락된 치수나 깨진 선을 캔버스에서 더블 클릭/드래그하여 수정하세요.</p>
+          </div>
+          <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
+            <div class="text-2xl">📥 3단계: CAD DXF 내보내기</div>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">즉시 사용가능한 도면</h4>
+            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">내보내기 클릭 시 좌표 보정된 선 정보와 텍스트 레이어가 포함된 DXF 파일을 제공하여 AutoCAD에서 즉시 편집이 가능합니다.</p>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function setupInteriorIntro() {
+      // No active javascript needed for intro panel
+    }
+
+    function getCadConversionHTML() {
+      return `<div class="max-w-6xl mx-auto space-y-6">
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📐 스케치도면 캐드변환 (AI OCR & DXF)</h2>
+          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">종이에 그려서 촬영한 스케치 이미지를 업로드하세요. 선을 선명하게 다듬고 비전 API로 감지된 수치 치수를 수정한 뒤 AutoCAD(DXF) 파일로 저장합니다.</p>
+          
+          <!-- Upload Area -->
+          <div id="cad-dropzone" class="border-2 border-dashed border-gray-300 dark-mode:border-gray-655 hover:border-orange-500 dark-mode:hover:border-orange-400 rounded-xl p-8 text-center cursor-pointer transition-colors bg-gray-50 dark-mode:bg-gray-900/50">
+            <div class="text-4xl mb-2">📐</div>
+            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 스케치 도면 이미지 드래그 또는 클릭하여 업로드</p>
+            <p class="text-xs text-gray-400 mt-1 font-semibold">지원 포맷: PNG, JPG, JPEG (최대 10MB)</p>
+            <input type="file" id="cad-file-input" class="hidden" accept="image/*">
+          </div>
+        </div>
+
+        <!-- Canvas Workspace -->
+        <div id="cad-workspace" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Canvas area -->
+          <div class="lg:col-span-8 bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-1.5">🖥️ 도면 보정 및 캔버스 검토</h3>
+              <div class="flex gap-2">
+                <button id="cad-tool-line" class="px-2 py-1 bg-orange-500 text-white rounded text-xs font-bold shadow-sm">✏️ 선 그리기</button>
+                <button id="cad-tool-erase" class="px-2 py-1 bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300 rounded text-xs font-bold hover:bg-gray-300 transition-all">🧹 선 지우기</button>
+                <button id="cad-clear-btn" class="px-2 py-1 bg-red-100 hover:bg-red-200 dark-mode:bg-red-950/20 text-red-600 dark-mode:text-red-400 rounded text-xs font-bold transition-all">🗑️ 전체 초기화</button>
+              </div>
+            </div>
+
+            <!-- Canvas wrapping container -->
+            <div class="relative overflow-auto border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-100 dark-mode:bg-gray-900 flex justify-center items-center p-4 min-h-[400px]">
+              <canvas id="cad-canvas" class="max-w-full shadow-lg cursor-crosshair bg-white"></canvas>
+            </div>
+            
+            <div class="text-[10px] text-gray-400 font-semibold leading-relaxed">
+              ※ **사용 방법**<br>
+              - 캔버스에서 마우스를 드래그하여 **직선 선 세그먼트**를 추가하거나 지울 수 있습니다.<br>
+              - 비전 API로 검출된 텍스트 박스를 **클릭**하면 오른쪽 사이드바에서 치수 값을 수정할 수 있습니다.
+            </div>
+          </div>
+
+          <!-- Configuration and Exporter sidebar -->
+          <div class="lg:col-span-4 space-y-6">
+            <!-- Image Filters -->
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">이진화 필터 세정</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between text-xs font-bold text-gray-655 dark-mode:text-gray-355">
+                  <span>흑백 경계 임계값</span>
+                  <span id="cad-threshold-val">128</span>
+                </div>
+                <input type="range" id="cad-threshold-slider" min="0" max="255" value="128" class="w-full accent-orange-500">
+              </div>
+            </div>
+
+            <!-- Detected values list -->
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[300px]">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">수치 치수 목록 (OCR)</h4>
+              <div id="cad-text-list" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
+                <div class="text-center text-gray-400 py-12">텍스트가 없습니다.</div>
+              </div>
+            </div>
+
+            <!-- Exporter -->
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">파일 다운로드</h4>
+              <button id="cad-export-dxf" class="w-full py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white rounded-xl text-sm font-bold shadow-sm">📥 AutoCAD (.DXF) 다운로드</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function setupCadConversion() {
+      const dropzone = document.getElementById("cad-dropzone");
+      const fileInput = document.getElementById("cad-file-input");
+      const workspace = document.getElementById("cad-workspace");
+      const canvas = document.getElementById("cad-canvas");
+      const thresholdSlider = document.getElementById("cad-threshold-slider");
+      const thresholdVal = document.getElementById("cad-threshold-val");
+      const textListContainer = document.getElementById("cad-text-list");
+      const toolLine = document.getElementById("cad-tool-line");
+      const toolErase = document.getElementById("cad-tool-erase");
+      const clearBtn = document.getElementById("cad-clear-btn");
+      const exportBtn = document.getElementById("cad-export-dxf");
+
+      if (!dropzone) return;
+
+      let ctx = canvas.getContext("2d");
+      let originalImage = null;
+      let ocrTexts = [];      // [{text, x, y, w, h}]
+      let userLines = [];     // [{x1, y1, x2, y2}]
+      let activeTool = "line"; // "line", "erase"
+      let isDrawing = false;
+      let startX = 0;
+      let startY = 0;
+
+      // Dropzone events
+      dropzone.addEventListener("click", () => fileInput.click());
+      dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.classList.add("border-orange-500", "bg-opacity-10");
+      });
+      dropzone.addEventListener("dragleave", () => {
+        dropzone.classList.remove("border-orange-500", "bg-opacity-10");
+      });
+      dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("border-orange-500", "bg-opacity-10");
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) {
+          processImageFile(file);
+        }
+      });
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) processImageFile(file);
+      });
+
+      function processImageFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const img = new Image();
+          img.onload = function() {
+            originalImage = img;
+            
+            // Set canvas size (keep Aspect Ratio, limit max width to 800)
+            const maxW = 800;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxW) {
+              h = Math.round((maxW * h) / w);
+              w = maxW;
+            }
+            canvas.width = w;
+            canvas.height = h;
+
+            userLines = [];
+            ocrTexts = [];
+            workspace.classList.remove("hidden");
+            
+            // Apply initial binarization filter
+            applyBinarization();
+            
+            // Request vision OCR
+            const base64Str = evt.target.result.split(",")[1];
+            fetchOcrData(base64Str);
+          };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Perform binarization filter on canvas
+      function applyBinarization() {
+        if (!originalImage) return;
+        
+        // Draw original scaled image
+        ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+        
+        // Extract pixel data
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        const threshold = parseInt(thresholdSlider.value, 10);
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i+1];
+          const b = data[i+2];
+          // Grayscale luminance
+          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          // Apply threshold
+          const val = gray >= threshold ? 255 : 0;
+          data[i] = val;
+          data[i+1] = val;
+          data[i+2] = val;
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        // Draw overlays (user custom lines & OCR textboxes)
+        drawOverlays();
+      }
+
+      function drawOverlays() {
+        // Draw user drawn lines
+        ctx.strokeStyle = "#F97316";
+        ctx.lineWidth = 2;
+        userLines.forEach(line => {
+          ctx.beginPath();
+          ctx.moveTo(line.x1, line.y1);
+          ctx.lineTo(line.x2, line.y2);
+          ctx.stroke();
+        });
+
+        // Draw OCR text bounding boxes
+        ctx.strokeStyle = "rgba(59, 130, 246, 0.6)"; // Blue bounding box
+        ctx.lineWidth = 1;
+        ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+        ctx.font = "bold 10px monospace";
+        
+        ocrTexts.forEach(item => {
+          ctx.fillRect(item.x, item.y, item.w, item.h);
+          ctx.strokeRect(item.x, item.y, item.w, item.h);
+          
+          // Draw a small orange text on top
+          ctx.fillStyle = "#F97316";
+          ctx.fillText(item.text, item.x, item.y - 2);
+          ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
+        });
+      }
+
+      // Slider listener
+      thresholdSlider.addEventListener("input", (e) => {
+        thresholdVal.textContent = e.target.value;
+        applyBinarization();
+      });
+
+      // API OCR fetcher
+      async function fetchOcrData(base64) {
+        textListContainer.innerHTML = `<div class="text-center text-gray-400 py-12 flex justify-center items-center gap-1">
+          <svg class="animate-spin h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>AI OCR 치수 검출 중...</span>
+        </div>`;
+
+        try {
+          const res = await fetch("/api/vision-ocr", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64 })
+          });
+
+          if (!res.ok) throw new Error("서버 API 오류");
+          const resJson = await res.json();
+          if (!resJson.success) throw new Error(resJson.error);
+
+          const annotations = resJson.data.responses[0]?.textAnnotations || [];
+          if (annotations.length <= 1) {
+            textListContainer.innerHTML = `<div class="text-center text-gray-400 py-12">검출된 숫자가 없습니다.</div>`;
+            return;
+          }
+
+          // Skip the first element which is the entire combined text block
+          const words = annotations.slice(1);
+          
+          // Map to canvas coordinate system
+          ocrTexts = words
+            .filter(w => /^\d+(\.\d+)?$/.test(w.description.trim())) // Keep numbers only
+            .map(w => {
+              const vertices = w.boundingPoly.vertices;
+              // Get coordinate bounding box
+              const xs = vertices.map(v => v.x || 0);
+              const ys = vertices.map(v => v.y || 0);
+              const minX = Math.min(...xs);
+              const maxX = Math.max(...xs);
+              const minY = Math.min(...ys);
+              const maxY = Math.max(...ys);
+
+              // Map coordinates based on original image ratio vs canvas scale
+              const scaleX = canvas.width / originalImage.width;
+              const scaleY = canvas.height / originalImage.height;
+
+              return {
+                text: w.description.trim(),
+                x: Math.round(minX * scaleX),
+                y: Math.round(minY * scaleY),
+                w: Math.max(Math.round((maxX - minX) * scaleX), 10),
+                h: Math.max(Math.round((maxY - minY) * scaleY), 10)
+              };
+            });
+
+          renderTextList();
+          applyBinarization();
+
+        } catch (e) {
+          textListContainer.innerHTML = `<div class="text-center text-red-500 py-12 font-semibold">OCR 수집 실패: ${e.message}</div>`;
+        }
+      }
+
+      function renderTextList() {
+        textListContainer.innerHTML = "";
+        if (ocrTexts.length === 0) {
+          textListContainer.innerHTML = `<div class="text-center text-gray-400 py-12">검출된 수치 텍스트가 없습니다.</div>`;
+          return;
+        }
+
+        ocrTexts.forEach((item, idx) => {
+          const row = document.createElement("div");
+          row.className = "flex justify-between items-center p-2 border border-gray-150 dark-mode:border-gray-700 rounded-lg hover:bg-gray-50 dark-mode:hover:bg-gray-750/30 transition-colors";
+          row.innerHTML = `
+            <span class="font-mono text-gray-400">#${idx+1}</span>
+            <input type="text" value="${item.text}" class="w-24 px-2 py-0.5 border border-gray-300 dark-mode:border-gray-600 rounded bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-center font-bold font-mono focus:outline-none focus:ring-1 focus:ring-orange-500" data-idx="${idx}">
+            <span class="text-[10px] text-gray-400 font-semibold font-mono">(${item.x}, ${item.y})</span>
+          `;
+          row.querySelector("input").addEventListener("input", (e) => {
+            ocrTexts[idx].text = e.target.value.trim();
+            applyBinarization();
+          });
+          textListContainer.appendChild(row);
+        });
+      }
+
+      // Drawing Tools
+      toolLine.addEventListener("click", () => {
+        activeTool = "line";
+        toolLine.className = "px-2 py-1 bg-orange-500 text-white rounded text-xs font-bold shadow-sm";
+        toolErase.className = "px-2 py-1 bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300 rounded text-xs font-bold hover:bg-gray-300 transition-all";
+      });
+
+      toolErase.addEventListener("click", () => {
+        activeTool = "erase";
+        toolErase.className = "px-2 py-1 bg-orange-500 text-white rounded text-xs font-bold shadow-sm";
+        toolLine.className = "px-2 py-1 bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300 rounded text-xs font-bold hover:bg-gray-300 transition-all";
+      });
+
+      clearBtn.addEventListener("click", () => {
+        if (confirm("정말로 그린 선들과 OCR 목록을 전부 지우시겠습니까?")) {
+          userLines = [];
+          ocrTexts = [];
+          renderTextList();
+          applyBinarization();
+        }
+      });
+
+      // Canvas Interactive Drawing
+      canvas.addEventListener("mousedown", (e) => {
+        if (!originalImage) return;
+        const rect = canvas.getBoundingClientRect();
+        
+        // Scale factor in case canvas clientWidth differs from canvas.width
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        
+        startX = (e.clientX - rect.left) * scaleX;
+        startY = (e.clientY - rect.top) * scaleY;
+        isDrawing = true;
+      });
+
+      canvas.addEventListener("mousemove", (e) => {
+        if (!isDrawing) return;
+        
+        // Draw temporary line indicator on top of binarized canvas
+        applyBinarization();
+        
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const currX = (e.clientX - rect.left) * scaleX;
+        const currY = (e.clientY - rect.top) * scaleY;
+        
+        ctx.strokeStyle = activeTool === "erase" ? "rgba(239, 68, 68, 0.7)" : "rgba(249, 115, 22, 0.7)";
+        ctx.lineWidth = activeTool === "erase" ? 6 : 2;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(currX, currY);
+        ctx.stroke();
+      });
+
+      canvas.addEventListener("mouseup", (e) => {
+        if (!isDrawing) return;
+        isDrawing = false;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const endX = (e.clientX - rect.left) * scaleX;
+        const endY = (e.clientY - rect.top) * scaleY;
+
+        if (activeTool === "line") {
+          // Add line
+          // Only add lines with substantial length
+          const dist = Math.hypot(endX - startX, endY - startY);
+          if (dist > 3) {
+            userLines.push({ x1: startX, y1: startY, x2: endX, y2: endY });
+          }
+        } else if (activeTool === "erase") {
+          // Erase intersecting lines
+          userLines = userLines.filter(line => {
+            // Simple distance check of line middle point to mouse click path
+            const midX = (line.x1 + line.x2) / 2;
+            const midY = (line.y1 + line.y2) / 2;
+            const dist = Math.hypot(midX - endX, midY - endY);
+            return dist > 20; // Radius of erasure
+          });
+        }
+        applyBinarization();
+      });
+
+      // Also support OCR box click events
+      canvas.addEventListener("click", (e) => {
+        if (isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clickX = (e.clientX - rect.left) * scaleX;
+        const clickY = (e.clientY - rect.top) * scaleY;
+
+        // Find clicked text box
+        const clickedIdx = ocrTexts.findIndex(item => {
+          return clickX >= item.x && clickX <= item.x + item.w &&
+                 clickY >= item.y && clickY <= item.y + item.h;
+        });
+
+        if (clickedIdx !== -1) {
+          const newText = prompt("검출된 치수 수정:", ocrTexts[clickedIdx].text);
+          if (newText !== null) {
+            ocrTexts[clickedIdx].text = newText.trim();
+            renderTextList();
+            applyBinarization();
+          }
+        }
+      });
+
+      // DXF Exporter
+      exportBtn.addEventListener("click", () => {
+        if (!originalImage) return;
+
+        // Create standard minimal DXF file string
+        // Header
+        let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
+        // Tables
+        dxf += `0\nSECTION\n2\nTABLES\n0\nENDSEC\n`;
+        // Blocks
+        dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
+        // Entities Section
+        dxf += `0\nSECTION\n2\nENTITIES\n`;
+
+        // Export Lines
+        userLines.forEach(line => {
+          // DXF coordinates typically start bottom-left, so we flip the Y axis
+          const y1 = canvas.height - line.y1;
+          const y2 = canvas.height - line.y2;
+          
+          dxf += `0\nLINE\n8\nSketchLines\n`;
+          dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`; // Point 1
+          dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`; // Point 2
+        });
+
+        // Export Texts
+        ocrTexts.forEach(item => {
+          const textY = canvas.height - (item.y + item.h); // Flip Y
+          dxf += `0\nTEXT\n8\nSketchDimensions\n`;
+          dxf += `10\n${item.x.toFixed(3)}\n20\n${textY.toFixed(3)}\n30\n0.0\n`; // Location
+          dxf += `40\n10.0\n`; // Text height
+          dxf += `1\n${item.text}\n`; // Value
+          dxf += `50\n0.0\n`; // Rotation
+        });
+
+        dxf += `0\nENDSEC\n0\nEOF\n`;
+
+        // Download Blob
+        const blob = new Blob([dxf], { type: "application/dxf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `converted_sketch.dxf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // ============================================
+    // 홈페이지 코드세팅 기능
+    // ============================================
+    function getHomepageSeoHTML() {
+      return `<div class="max-w-5xl mx-auto space-y-6">
+        <!-- Site configuration form -->
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🛠️ 홈페이지 필수 코드 및 SEO 세팅 가이드</h2>
+            <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">도메인과 비즈니스 기본 정보를 입력하면 검색엔진 친화적인 메타태그와 구조화 스키마 마크업을 자동으로 생성합니다.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">홈페이지 도메인 URL</label>
+              <input type="text" id="seo-domain" placeholder="https://example.com" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-semibold">
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">사이트/상호 이름</label>
+              <input type="text" id="seo-site-name" placeholder="인디디자인" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-semibold">
+            </div>
+            <div class="space-y-1 md:col-span-2">
+              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">사이트 한 줄 설명</label>
+              <input type="text" id="seo-desc" placeholder="부산 아파트 인테리어 및 상업공간 3D 설계 전문 업체" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+            </div>
+          </div>
+
+          <hr class="border-gray-100 dark-mode:border-gray-700">
+
+          <div>
+            <h3 class="font-bold text-sm text-gray-800 dark-mode:text-gray-200 mb-4">🏠 스키마 마크업 (JSON-LD) 용 추가 비즈니스 정보</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">회사 대표 전화번호</label>
+                <input type="text" id="seo-phone" placeholder="051-123-4567" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">대표 로고 이미지 URL</label>
+                <input type="text" id="seo-logo" placeholder="https://example.com/logo.png" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+              <div class="space-y-1 md:col-span-2">
+                <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">회사 상세 주소</label>
+                <input type="text" id="seo-address" placeholder="부산광역시 해운대구 우동 123-45" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Generator Outputs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Meta Tags Box -->
+          <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col">
+            <div class="flex justify-between items-center">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">🌐 메타 태그 & 오픈 그래프 (OG)</h4>
+              <button id="seo-copy-meta" class="px-2.5 py-1 bg-orange-500 hover:bg-orange-655 text-white text-xs font-bold rounded-lg shadow-sm">📋 복사</button>
+            </div>
+            <textarea id="seo-output-meta" readonly class="flex-1 w-full p-3 font-mono text-xs border border-gray-200 dark-mode:border-gray-700 rounded-lg bg-gray-50 dark-mode:bg-gray-900 text-gray-600 dark-mode:text-gray-300 focus:outline-none resize-none min-h-[150px]"></textarea>
+          </div>
+
+          <!-- Schema markup Box -->
+          <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col">
+            <div class="flex justify-between items-center">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">🏠 스키마 마크업 (JSON-LD)</h4>
+              <button id="seo-copy-schema" class="px-2.5 py-1 bg-orange-500 hover:bg-orange-655 text-white text-xs font-bold rounded-lg shadow-sm">📋 복사</button>
+            </div>
+            <textarea id="seo-output-schema" readonly class="flex-1 w-full p-3 font-mono text-xs border border-gray-200 dark-mode:border-gray-700 rounded-lg bg-gray-50 dark-mode:bg-gray-900 text-gray-600 dark-mode:text-gray-300 focus:outline-none resize-none min-h-[150px]"></textarea>
+          </div>
+        </div>
+
+        <!-- Checklists & Guides (Accordions) -->
+        <div class="space-y-4">
+          <!-- Webmaster Console guide -->
+          <details class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm group">
+            <summary class="px-6 py-4 font-bold text-gray-800 dark-mode:text-gray-100 flex items-center justify-between cursor-pointer select-none">
+              <span>🚀 1단계: 검색엔진 및 로그 수집기 등록 체크리스트</span>
+              <span class="text-orange-500 font-bold transition-transform group-open:rotate-180">▼</span>
+            </summary>
+            <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark-mode:border-gray-700 space-y-4 text-xs font-medium text-gray-655 dark-mode:text-gray-350 leading-relaxed">
+              <div class="space-y-2">
+                <h5 class="font-bold text-gray-800 dark-mode:text-gray-200 text-sm">1. 네이버 서치어드바이저 (Naver Search Advisor)</h5>
+                <p>네이버 노출을 위해 사이트 소유 인증을 마친 뒤 **sitemap.xml** 및 **rss** 등록을 최우선적으로 완료해야 합니다.</p>
+              </div>
+              <div class="space-y-2">
+                <h5 class="font-bold text-gray-800 dark-mode:text-gray-200 text-sm">2. 구글 서치콘솔 (Google Search Console)</h5>
+                <p>구글 노출을 위해 도메인 소유권을 확인하고 sitemap.xml을 접수합니다. 구글은 사이트 속도와 모바일 사용자 편의성을 중시합니다.</p>
+              </div>
+              <div class="space-y-2">
+                <h5 class="font-bold text-gray-800 dark-mode:text-gray-200 text-sm">3. 네이버 애널리틱스 & GA4 (Google Analytics 4)</h5>
+                <p>방문자의 유입 경로와 키워드 통계를 얻기 위해 사이트의 공통 헤더에 추적 스크립트를 삽입합니다.</p>
+              </div>
+              <div class="space-y-2">
+                <h5 class="font-bold text-gray-800 dark-mode:text-gray-200 text-sm">4. 마이크로소프트 클레어리티 (Microsoft Clarity)</h5>
+                <p>방문자가 홈페이지에서 행동하는 화면을 그대로 리플레이하고 히트맵을 생성해 주는 무료 행동 분석기입니다. 꼭 연동하는 것이 웹마스터들에게 큰 도움이 됩니다.</p>
+              </div>
+            </div>
+          </details>
+
+          <!-- GTM Guide -->
+          <details class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm group">
+            <summary class="px-6 py-4 font-bold text-gray-800 dark-mode:text-gray-100 flex items-center justify-between cursor-pointer select-none">
+              <span>🏷️ GTM(구글 태그 매니저) 이해 및 설치 방법</span>
+              <span class="text-orange-500 font-bold transition-transform group-open:rotate-180">▼</span>
+            </summary>
+            <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark-mode:border-gray-700 space-y-4 text-xs font-medium text-gray-655 dark-mode:text-gray-355 leading-relaxed">
+              <div class="space-y-2">
+                <h5 class="font-bold text-gray-800 dark-mode:text-gray-200 text-sm">구글 태그 매니저(GTM)가 꼭 필요한 이유</h5>
+                <p>홈페이지 소스 코드를 건드리지 않고도 메타/구글 광고 픽셀, GA4 추적 코드, 상담 위젯 설치 등을 원격 대시보드(GTM)에서 마우스 클릭만으로 배포할 수 있는 초강력 웹 마케팅 관리 툴입니다.</p>
+              </div>
+              <div class="space-y-2">
+                <h5 class="font-bold text-gray-800 dark-mode:text-gray-200 text-sm">설치 절차</h5>
+                <ol class="list-decimal list-inside space-y-1">
+                  <li>구글 태그 매니저 가입 후 컨테이너를 생성합니다.</li>
+                  <li>제공되는 첫 번째 GTM 스크립트 코드(Javascript)를 사이트의 <strong>&lt;head&gt;</strong> 가장 윗부분에 넣습니다.</li>
+                  <li>두 번째 노스크립트 코드(NoScript)를 사이트의 <strong>&lt;body&gt;</strong> 태그 시작 바로 아랫부분에 삽입합니다.</li>
+                  <li>GTM 대시보드에서 원하는 태그(예: GA4 연결)를 설정하고 [제출(Submit)]을 누르면 사이트에 실시간으로 배포됩니다.</li>
+                </ol>
+              </div>
+            </div>
+          </details>
+
+          <!-- Useful Links -->
+          <details class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm group">
+            <summary class="px-6 py-4 font-bold text-gray-800 dark-mode:text-gray-100 flex items-center justify-between cursor-pointer select-none">
+              <span>🔗 전문가가 챙기는 필수 도구 링크 모음</span>
+              <span class="text-orange-500 font-bold transition-transform group-open:rotate-180">▼</span>
+            </summary>
+            <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark-mode:border-gray-700 text-xs font-bold text-orange-600 dark-mode:text-orange-400 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <a href="https://advisor.naver.com/" target="_blank" rel="noopener" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center">네이버 서치어드바이저 ↗</a>
+              <a href="https://search.google.com/search-console/about" target="_blank" rel="noopener" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center">구글 서치콘솔 ↗</a>
+              <a href="https://tagmanager.google.com/" target="_blank" rel="noopener" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center">구글 태그 매니저 (GTM) ↗</a>
+              <a href="https://analytics.google.com/" target="_blank" rel="noopener" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center">구글 애널리틱스 (GA4) ↗</a>
+              <a href="https://clarity.microsoft.com/" target="_blank" rel="noopener" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center">MS Clarity 행동분석 ↗</a>
+              <a href="https://validator.schema.org/" target="_blank" rel="noopener" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center">스키마 마크업 검증 도구 ↗</a>
+              <a href="https://search.google.com/test/rich-results" target="_blank" rel="noopener" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center">구글 리치 결과 테스트 ↗</a>
+              <a href="https://analytics.naver.com/" target="_blank" rel="noopener" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center">네이버 애널리틱스 ↗</a>
+            </div>
+          </details>
+        </div>
+      </div>`;
+    }
+
+    function setupHomepageSeo() {
+      const domInput = document.getElementById("seo-domain");
+      const nameInput = document.getElementById("seo-site-name");
+      const descInput = document.getElementById("seo-desc");
+      const phoneInput = document.getElementById("seo-phone");
+      const logoInput = document.getElementById("seo-logo");
+      const addrInput = document.getElementById("seo-address");
+      const metaOut = document.getElementById("seo-output-meta");
+      const schemaOut = document.getElementById("seo-output-schema");
+      const cpyMeta = document.getElementById("seo-copy-meta");
+      const cpySchema = document.getElementById("seo-copy-schema");
+
+      if (!domInput) return;
+
+      function generateCodes() {
+        const dom = domInput.value.trim() || "https://example.com";
+        const name = nameInput.value.trim() || "상호명";
+        const desc = descInput.value.trim() || "사이트 설명";
+        const phone = phoneInput.value.trim();
+        const logo = logoInput.value.trim();
+        const addr = addrInput.value.trim();
+
+        // 1. Meta / OG HTML code
+        let metaHtml = `<!-- 기본 메타 태그 -->\n`;
+        metaHtml += `<title>${name}</title>\n`;
+        metaHtml += `<meta name="description" content="${desc}">\n\n`;
+        metaHtml += `<!-- 네이버 & 구글 오픈 그래프 (Open Graph) 태그 -->\n`;
+        metaHtml += `<meta property="og:type" content="website">\n`;
+        metaHtml += `<meta property="og:title" content="${name}">\n`;
+        metaHtml += `<meta property="og:description" content="${desc}">\n`;
+        metaHtml += `<meta property="og:url" content="${dom}">\n`;
+        if (logo) {
+          metaHtml += `<meta property="og:image" content="${logo}">\n`;
+        }
+        metaHtml += `<link rel="canonical" href="${dom}">\n`;
+        
+        metaOut.value = metaHtml;
+
+        // 2. JSON-LD Schema markup
+        const schemaObj = {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": name,
+          "description": desc,
+          "url": dom
+        };
+        if (logo) schemaObj["logo"] = logo;
+        if (phone) schemaObj["telephone"] = phone;
+        if (addr) {
+          schemaObj["address"] = {
+            "@type": "PostalAddress",
+            "streetAddress": addr,
+            "addressLocality": "Busan",
+            "addressCountry": "KR"
+          };
+        }
+
+        schemaOut.value = `<script type="application/ld+json">\n${JSON.stringify(schemaObj, null, 2)}\n<\/script>`;
+      }
+
+      // Input listeners
+      [domInput, nameInput, descInput, phoneInput, logoInput, addrInput].forEach(inp => {
+        inp.addEventListener("input", generateCodes);
+      });
+
+      // Initial gen
+      generateCodes();
+
+      // Copy helpers
+      cpyMeta.addEventListener("click", () => {
+        navigator.clipboard.writeText(metaOut.value).then(() => {
+          cpyMeta.textContent = "복사 완료!";
+          setTimeout(() => cpyMeta.textContent = "📋 복사", 1200);
+        });
+      });
+      cpySchema.addEventListener("click", () => {
+        navigator.clipboard.writeText(schemaOut.value).then(() => {
+          cpySchema.textContent = "복사 완료!";
+          setTimeout(() => cpySchema.textContent = "📋 복사", 1200);
+        });
+      });
+    }
+
+    // ============================================
+    // 백링크 검사 기능
+    // ============================================
+    function getBacklinkCheckHTML() {
+      return `<div class="max-w-6xl mx-auto space-y-6">
+        <!-- Input site -->
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🔗 외부 백링크 검사기</h2>
+          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">조회하려는 도메인 주소를 입력하세요. 백엔드 가벼운 검색결과 수집과 더불어, 차단 위험이 전혀 없는 브라우저용 직접 확인 쿼리 및 글로벌 전문 도구 링크를 제공합니다.</p>
+          
+          <div class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="flex-1 space-y-1">
+              <label class="block text-xs font-bold text-gray-650 dark-mode:text-gray-300">검색할 도메인 주소</label>
+              <input type="text" id="backlink-domain" placeholder="example.com" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-semibold">
+            </div>
+            <button id="backlink-search-btn" class="px-6 py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white text-sm font-bold rounded-xl shadow-sm">백링크 추출 시작</button>
+          </div>
+        </div>
+
+        <!-- Risks and explanations -->
+        <div class="bg-yellow-50 dark-mode:bg-yellow-950/20 border border-yellow-200 dark-mode:border-yellow-900/50 p-4 rounded-xl space-y-1.5 text-xs text-yellow-800 dark-mode:text-yellow-400 leading-relaxed font-medium">
+          <h4 class="font-bold flex items-center gap-1">⚠️ 검색엔진 봇 차단 정책 및 안정성 경고</h4>
+          <p>구글과 네이버는 서버에서 짧은 시간에 대량의 자동화 검색(Scraping)을 감지하면 즉시 캡차(CAPTCHA) 페이지를 띄우거나 서버 IP를 차단합니다. 본 도구는 일부 수집 제한(429/Block) 시 하단의 수동 조회 링크와 전문 백링크 분석 도구를 연계하여 가장 확실하고 영구적인 백링크 상태 조회를 지원합니다.</p>
+        </div>
+
+        <!-- Hybrid Search Widgets -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Client direct links -->
+          <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+            <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">💡 브라우저 직접 확인 (차단 걱정 없음)</h3>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">본인 브라우저를 통해 안전하고 확실하게 구글 및 네이버 검색 색인에 색인된 언급 페이지를 조회합니다.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <a id="backlink-google-direct" href="#" target="_blank" class="px-4 py-2 border border-orange-200 dark-mode:border-orange-900 rounded-xl text-center text-xs font-bold text-orange-600 dark-mode:text-orange-400 bg-orange-50 dark-mode:bg-orange-950/20 active:scale-[0.97] transition-transform">구글 백링크 확인 ↗</a>
+              <a id="backlink-naver-direct" href="#" target="_blank" class="px-4 py-2 border border-orange-200 dark-mode:border-orange-900 rounded-xl text-center text-xs font-bold text-orange-600 dark-mode:text-orange-400 bg-orange-50 dark-mode:bg-orange-950/20 active:scale-[0.97] transition-transform">네이버 백링크 확인 ↗</a>
+            </div>
+          </div>
+
+          <!-- Professional Tools -->
+          <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+            <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">🏢 글로벌 전문 백링크 분석 도구</h3>
+            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">Ahrefs, Moz 등 대기업 크롤러를 통해 수집된 상세 링크 점수(Domain Authority 등)와 소스 도메인을 검토합니다.</p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <a id="backlink-ahrefs" href="https://ahrefs.com/backlink-checker" target="_blank" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center text-[10px] font-bold text-orange-600 dark-mode:text-orange-400">Ahrefs Checker ↗</a>
+              <a id="backlink-moz" href="https://moz.com/link-explorer" target="_blank" class="p-2 border border-gray-100 dark-mode:border-gray-700 hover:bg-gray-50 dark-mode:hover:bg-gray-900 rounded-lg text-center text-[10px] font-bold text-orange-600 dark-mode:text-orange-400">Moz LinkExplorer ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scraped Results List -->
+        <div class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 dark-mode:border-gray-700 flex justify-between items-center">
+            <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm">📋 수집된 연동 백링크 리스트 (최대 30개)</h3>
+            <span id="backlink-summary" class="text-xs font-bold text-gray-550 dark-mode:text-gray-400">조회 전</span>
+          </div>
+
+          <div class="overflow-x-auto max-h-[400px]">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-gray-50 dark-mode:bg-gray-900 border-b border-gray-150 dark-mode:border-gray-750 text-gray-500 dark-mode:text-gray-405 font-bold">
+                  <th class="px-6 py-3 w-16">번호</th>
+                  <th class="px-6 py-3">백링크 URL 주소</th>
+                  <th class="px-6 py-3 w-32">출처 엔진</th>
+                  <th class="px-6 py-3 w-24">바로가기</th>
+                </tr>
+              </thead>
+              <tbody id="backlink-result-body" class="divide-y divide-gray-150 dark-mode:divide-gray-750 text-gray-755 dark-mode:text-gray-300 font-medium">
+                <tr>
+                  <td colspan="4" class="px-6 py-12 text-center text-gray-400 dark-mode:text-gray-500 font-medium">
+                    도메인을 입력하고 검사를 진행해주세요.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Google API Custom Search Guide -->
+        <details class="bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm group">
+          <summary class="px-6 py-4 font-bold text-gray-800 dark-mode:text-gray-100 flex items-center justify-between cursor-pointer select-none">
+            <span>⚙️ [고급] 차단 차단 0%! 구글 Custom Search API 무료 연동 안내</span>
+            <span class="text-orange-500 font-bold transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark-mode:border-gray-700 space-y-3 text-xs font-medium text-gray-655 dark-mode:text-gray-355 leading-relaxed">
+            <p>서버 IP 차단을 완벽하게 우회하고 합법적으로 구글 검색 색인을 가져오려면 구글이 제공하는 <strong>Custom Search JSON API</strong>를 연동할 수 있습니다. (하루 100회 검색 무료)</p>
+            <ol class="list-decimal list-inside space-y-1">
+              <li><a href="https://console.cloud.google.com/" target="_blank" class="text-orange-500 underline">Google Cloud Console</a>에서 Custom Search API를 활성화하고 API 키를 발급받습니다.</li>
+              <li><a href="https://programmablesearchengine.google.com/" target="_blank" class="text-orange-500 underline">Programmable Search Engine</a>에서 사이트를 등록해 검색엔진 ID(cx)를 발급받습니다.</li>
+              <li>서버 환경변수에 API Key와 cx 값을 연동하면 차단 오류 없이 영구적으로 백링크 리스트를 깔끔하게 추출할 수 있습니다.</li>
+            </ol>
+          </div>
+        </details>
+      </div>`;
+    }
+
+    function setupBacklinkCheck() {
+      const domInput = document.getElementById("backlink-domain");
+      const searchBtn = document.getElementById("backlink-search-btn");
+      const resultBody = document.getElementById("backlink-result-body");
+      const summary = document.getElementById("backlink-summary");
+      const googleDirect = document.getElementById("backlink-google-direct");
+      const naverDirect = document.getElementById("backlink-naver-direct");
+
+      if (!domInput) return;
+
+      // Update direct links dynamically
+      domInput.addEventListener("input", (e) => {
+        const val = e.target.value.trim().replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].toLowerCase();
+        if (val) {
+          googleDirect.href = `https://www.google.com/search?q=%22${encodeURIComponent(val)}%22`;
+          naverDirect.href = `https://search.naver.com/search.naver?query=site%3A${encodeURIComponent(val)}`;
+        } else {
+          googleDirect.href = "#";
+          naverDirect.href = "#";
+        }
+      });
+
+      searchBtn.addEventListener("click", async () => {
+        const domain = domInput.value.trim();
+        if (!domain) {
+          alert("도메인 주소를 입력해 주세요.");
+          return;
+        }
+
+        const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].toLowerCase();
+
+        searchBtn.disabled = true;
+        searchBtn.textContent = "추출 중...";
+        summary.textContent = "백링크 데이터 수집 중...";
+        resultBody.innerHTML = `
+          <tr>
+            <td colspan="4" class="px-6 py-8 text-center text-gray-550 dark-mode:text-gray-455">
+              <div class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>검색 색인에서 백링크 목록을 수집하는 중... (약 5~10초 소요)</span>
+              </div>
+            </td>
+          </tr>
+        `;
+
+        try {
+          const res = await fetch(`/api/backlink?domain=${encodeURIComponent(cleanDomain)}`);
+          if (!res.ok) throw new Error("API 통신 오류");
+          
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error);
+
+          resultBody.innerHTML = "";
+          const links = data.links || [];
+
+          if (links.length === 0) {
+            resultBody.innerHTML = `
+              <tr>
+                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                  ${data.warning || '검색된 외부 백링크가 없습니다. 아래의 직접 조회 링크 또는 전문 도구를 활용하세요.'}
+                </td>
+              </tr>
+            `;
+            summary.textContent = `총 0건 수집 완료`;
+            return;
+          }
+
+          links.forEach((item, idx) => {
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-gray-50 dark-mode:hover:bg-gray-855 transition-colors";
+            tr.innerHTML = `
+              <td class="px-6 py-3.5 text-gray-400 dark-mode:text-gray-500 font-bold">${idx + 1}</td>
+              <td class="px-6 py-3.5 font-semibold text-gray-855 dark-mode:text-gray-150 break-all select-all font-mono">${item.url}</td>
+              <td class="px-6 py-3.5">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.source === 'Google' ? 'bg-blue-50 text-blue-600 dark-mode:bg-blue-950/20 dark-mode:text-blue-400 border border-blue-200 dark-mode:border-blue-900' : 'bg-green-50 text-green-600 dark-mode:bg-green-950/20 dark-mode:text-green-400 border border-green-200 dark-mode:border-green-900'}">${item.source}</span>
+              </td>
+              <td class="px-6 py-3.5">
+                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 px-2 py-1 text-[11px] font-bold text-orange-600 hover:text-orange-700 dark-mode:text-orange-400 dark-mode:hover:text-orange-355 border border-orange-200 dark-mode:border-orange-900 rounded bg-orange-50 dark-mode:bg-orange-950/20 active:scale-[0.95] transition-all">이동 ↗</a>
+              </td>
+            `;
+            resultBody.appendChild(tr);
+          });
+
+          summary.textContent = `총 ${links.length}건 수집 완료 ${data.warning ? '(일부 제한됨)' : ''}`;
+
+        } catch (e) {
+          console.error(e);
+          resultBody.innerHTML = `
+            <tr>
+              <td colspan="4" class="px-6 py-8 text-center text-red-500 font-bold">
+                백링크 조회 실패: ${e.message}
+              </td>
+            </tr>
+          `;
+          summary.textContent = "에러 발생";
+        } finally {
+          searchBtn.disabled = false;
+          searchBtn.textContent = "백링크 추출 시작";
+        }
+      });
     }
 
     window.addEventListener("load", initApp);

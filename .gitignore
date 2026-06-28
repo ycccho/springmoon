@@ -6,3 +6,7 @@ dist
 dist/
 *.log
 *.xlsx
+.dev.vars
+.env
+scratch/
+scratch_*
