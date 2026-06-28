@@ -4498,7 +4498,31 @@
           }
         }
 
-        userLines = detectedLines;
+        // Apply grid snapping (8px) and orthogonal snapping (0 / 90 degrees) to force 1-shape straight lines
+        const gridSize = 8;
+        const snappedLines = detectedLines.map(line => {
+          let x1 = Math.round(line.x1 / gridSize) * gridSize;
+          let y1 = Math.round(line.y1 / gridSize) * gridSize;
+          let x2 = Math.round(line.x2 / gridSize) * gridSize;
+          let y2 = Math.round(line.y2 / gridSize) * gridSize;
+
+          const dx = Math.abs(x2 - x1);
+          const dy = Math.abs(y2 - y1);
+
+          if (dx > dy) {
+            y2 = y1; // Force horizontal (1자 선)
+          } else {
+            x2 = x1; // Force vertical (1자 선)
+          }
+
+          return { x1, y1, x2, y2 };
+        });
+
+        // Filter out zero-length lines
+        userLines = snappedLines.filter(line => {
+          return !(line.x1 === line.x2 && line.y1 === line.y2);
+        });
+
         applyBinarization();
       }
 
@@ -4711,7 +4735,24 @@
         if (activeTool === "line") {
           const dist = Math.hypot(endX - startX, endY - startY);
           if (dist > 3) {
-            userLines.push({ x1: startX, y1: startY, x2: endX, y2: endY });
+            const gridSize = 8;
+            let sx = Math.round(startX / gridSize) * gridSize;
+            let sy = Math.round(startY / gridSize) * gridSize;
+            let ex = Math.round(endX / gridSize) * gridSize;
+            let ey = Math.round(endY / gridSize) * gridSize;
+
+            const dx = Math.abs(ex - sx);
+            const dy = Math.abs(ey - sy);
+
+            if (dx > dy) {
+              ey = sy; // Force perfectly horizontal
+            } else {
+              ex = sx; // Force perfectly vertical
+            }
+
+            if (!(sx === ex && sy === ey)) {
+              userLines.push({ x1: sx, y1: sy, x2: ex, y2: ey });
+            }
           }
         } else if (activeTool === "erase") {
           userLines = userLines.filter(line => {
