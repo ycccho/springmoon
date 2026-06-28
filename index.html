@@ -4457,6 +4457,13 @@
         const tempCtx = tempCanvas.getContext("2d");
         tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         
+        // Draw white rectangles over all OCR text boxes to mask them out from line detection!
+        tempCtx.fillStyle = "#FFFFFF";
+        const padding = 6;
+        ocrTexts.forEach(box => {
+          tempCtx.fillRect(box.x - padding, box.y - padding, box.w + padding * 2, box.h + padding * 2);
+        });
+        
         const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
         const w = canvas.width;
@@ -4815,9 +4822,12 @@
           const midY = canvas.height - (item.y + item.h / 2); // Flip Y of the center point
           const dxfAngle = -(item.angle || 0.0); // Invert screen Y rotation for Cartesian space
           
+          // Scale down text height to look proportional (just like in the original sketch)
+          const textHeight = Math.max(item.h * 0.22, 2.8);
+          
           dxf += `0\nTEXT\n8\nSketchDimensions\n`;
           dxf += `10\n${midX.toFixed(3)}\n20\n${midY.toFixed(3)}\n30\n0.0\n`; // Location (base point)
-          dxf += `40\n${item.h.toFixed(3)}\n`; // Dynamic text height from bounding box height
+          dxf += `40\n${textHeight.toFixed(3)}\n`; // Dynamic text height
           dxf += `1\n${item.text}\n`; // Text value
           dxf += `50\n${dxfAngle.toFixed(3)}\n`; // Rotation angle in degrees
           dxf += `72\n4\n`; // Middle-center horizontal alignment
