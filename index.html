@@ -4134,7 +4134,8 @@
           <div class="lg:col-span-8 bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
             <div class="flex justify-between items-center">
               <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-1.5">🖥️ 도면 보정 및 캔버스 검토</h3>
-              <div class="flex gap-2">
+              <div class="flex gap-2 font-semibold">
+                <button id="cad-auto-detect-btn" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold shadow-sm active:scale-[0.98] transition-all">🤖 자동 선 감지</button>
                 <button id="cad-tool-line" class="px-2 py-1 bg-orange-500 text-white rounded text-xs font-bold shadow-sm">✏️ 선 그리기</button>
                 <button id="cad-tool-erase" class="px-2 py-1 bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300 rounded text-xs font-bold hover:bg-gray-300 transition-all">🧹 선 지우기</button>
                 <button id="cad-clear-btn" class="px-2 py-1 bg-red-100 hover:bg-red-200 dark-mode:bg-red-950/20 text-red-600 dark-mode:text-red-400 rounded text-xs font-bold transition-all">🗑️ 전체 초기화</button>
@@ -4148,7 +4149,8 @@
             
             <div class="text-[10px] text-gray-400 font-semibold leading-relaxed">
               ※ **사용 방법**<br>
-              - 캔버스에서 마우스를 드래그하여 **직선 선 세그먼트**를 추가하거나 지울 수 있습니다.<br>
+              - **[🤖 자동 선 감지]** 버튼을 누르면 흑백 필터 상태에 따라 이미지 속 벽면과 도면 선을 자동으로 선 세그먼트(LINE)로 추출합니다.<br>
+              - 캔버스에서 마우스를 드래그하여 **직선 선 세그먼트**를 직접 추가하거나 지울 수 있습니다.<br>
               - 비전 API로 검출된 텍스트 박스를 **클릭**하면 오른쪽 사이드바에서 치수 값을 수정할 수 있습니다.
             </div>
           </div>
@@ -4193,6 +4195,7 @@
       const thresholdSlider = document.getElementById("cad-threshold-slider");
       const thresholdVal = document.getElementById("cad-threshold-val");
       const textListContainer = document.getElementById("cad-text-list");
+      const autoDetectBtn = document.getElementById("cad-auto-detect-btn");
       const toolLine = document.getElementById("cad-tool-line");
       const toolErase = document.getElementById("cad-tool-erase");
       const clearBtn = document.getElementById("cad-clear-btn");
@@ -4202,7 +4205,7 @@
 
       let ctx = canvas.getContext("2d");
       let originalImage = null;
-      let ocrTexts = [];      // [{text, x, y, w, h}]
+      let ocrTexts = [];      // [{text, x, y, w, h, angle}]
       let userLines = [];     // [{x1, y1, x2, y2}]
       let activeTool = "line"; // "line", "erase"
       let isDrawing = false;
@@ -4296,7 +4299,7 @@
       }
 
       function drawOverlays() {
-        // Draw user drawn lines
+        // Draw user drawn/detected lines
         ctx.strokeStyle = "#F97316";
         ctx.lineWidth = 2;
         userLines.forEach(line => {
@@ -4306,20 +4309,32 @@
           ctx.stroke();
         });
 
-        // Draw OCR text bounding boxes
-        ctx.strokeStyle = "rgba(59, 130, 246, 0.6)"; // Blue bounding box
-        ctx.lineWidth = 1;
-        ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+        // Draw OCR text bounding boxes (with rotation support)
         ctx.font = "bold 10px monospace";
         
         ocrTexts.forEach(item => {
-          ctx.fillRect(item.x, item.y, item.w, item.h);
-          ctx.strokeRect(item.x, item.y, item.w, item.h);
+          ctx.save();
+          // Translate to bounding box center
+          const midX = item.x + item.w / 2;
+          const midY = item.y + item.h / 2;
+          ctx.translate(midX, midY);
+          // Rotate canvas context
+          ctx.rotate((item.angle || 0) * Math.PI / 180);
           
-          // Draw a small orange text on top
+          // Draw rect centered
+          ctx.strokeStyle = "rgba(59, 130, 246, 0.6)";
+          ctx.lineWidth = 1;
+          ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+          ctx.fillRect(-item.w / 2, -item.h / 2, item.w, item.h);
+          ctx.strokeRect(-item.w / 2, -item.h / 2, item.w, item.h);
+          
+          // Draw text centered above box
           ctx.fillStyle = "#F97316";
-          ctx.fillText(item.text, item.x, item.y - 2);
-          ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillText(item.text, 0, -item.h / 2 - 2);
+          
+          ctx.restore();
         });
       }
 
@@ -4328,6 +4343,144 @@
         thresholdVal.textContent = e.target.value;
         applyBinarization();
       });
+
+      // Automatic Raster-to-Vector Line detection
+      function detectLines() {
+        if (!originalImage) return;
+
+        // Draw image clean onto temporary canvas to get raw thresholded pixels
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext("2d");
+        tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+        
+        const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        const w = canvas.width;
+        const h = canvas.height;
+        const threshold = parseInt(thresholdSlider.value, 10);
+
+        function isBlack(x, y) {
+          if (x < 0 || x >= w || y < 0 || y >= h) return false;
+          const idx = (y * w + x) * 4;
+          const gray = 0.299 * data[idx] + 0.587 * data[idx+1] + 0.114 * data[idx+2];
+          return gray < threshold;
+        }
+
+        const minLineLength = 40;
+        const rawHorizontal = [];
+        const rawVertical = [];
+
+        // Scan Horizontal lines
+        for (let y = 0; y < h; y += 2) {
+          let startX = -1;
+          for (let x = 0; x < w; x++) {
+            if (isBlack(x, y)) {
+              if (startX === -1) startX = x;
+            } else {
+              if (startX !== -1) {
+                const len = x - startX;
+                if (len >= minLineLength) {
+                  rawHorizontal.push({ x1: startX, y1: y, x2: x - 1, y2: y });
+                }
+                startX = -1;
+              }
+            }
+          }
+          if (startX !== -1) {
+            const len = w - startX;
+            if (len >= minLineLength) {
+              rawHorizontal.push({ x1: startX, y1: y, x2: w - 1, y2: y });
+            }
+          }
+        }
+
+        // Scan Vertical lines
+        for (let x = 0; x < w; x += 2) {
+          let startY = -1;
+          for (let y = 0; y < h; y++) {
+            if (isBlack(x, y)) {
+              if (startY === -1) startY = y;
+            } else {
+              if (startY !== -1) {
+                const len = y - startY;
+                if (len >= minLineLength) {
+                  rawVertical.push({ x1: x, y1: startY, x2: x, y2: y - 1 });
+                }
+                startY = -1;
+              }
+            }
+          }
+          if (startY !== -1) {
+            const len = h - startY;
+            if (len >= minLineLength) {
+              rawVertical.push({ x1: x, y1: startY, x2: x, y2: h - 1 });
+            }
+          }
+        }
+
+        // Merge horizontal overlaps
+        const mergedHorizontal = [];
+        const hTolerance = 8;
+        const overlapTolerance = 10;
+
+        rawHorizontal.forEach(line => {
+          let merged = false;
+          for (let i = 0; i < mergedHorizontal.length; i++) {
+            const active = mergedHorizontal[i];
+            if (Math.abs(active.y1 - line.y1) <= hTolerance) {
+              const maxStart = Math.max(active.x1, line.x1);
+              const minEnd = Math.min(active.x2, line.x2);
+              if (minEnd - maxStart >= -overlapTolerance) {
+                active.x1 = Math.min(active.x1, line.x1);
+                active.x2 = Math.max(active.x2, line.x2);
+                active.y1 = Math.round((active.y1 + line.y1) / 2);
+                active.y2 = active.y1;
+                merged = true;
+                break;
+              }
+            }
+          }
+          if (!merged) {
+            mergedHorizontal.push({ ...line });
+          }
+        });
+
+        // Merge vertical overlaps
+        const mergedVertical = [];
+        const vTolerance = 8;
+
+        rawVertical.forEach(line => {
+          let merged = false;
+          for (let i = 0; i < mergedVertical.length; i++) {
+            const active = mergedVertical[i];
+            if (Math.abs(active.x1 - line.x1) <= vTolerance) {
+              const maxStart = Math.max(active.y1, line.y1);
+              const minEnd = Math.min(active.y2, line.y2);
+              if (minEnd - maxStart >= -overlapTolerance) {
+                active.y1 = Math.min(active.y1, line.y1);
+                active.y2 = Math.max(active.y2, line.y2);
+                active.x1 = Math.round((active.x1 + line.x1) / 2);
+                active.x2 = active.x1;
+                merged = true;
+                break;
+              }
+            }
+          }
+          if (!merged) {
+            mergedVertical.push({ ...line });
+          }
+        });
+
+        userLines = [...mergedHorizontal, ...mergedVertical];
+        applyBinarization();
+      }
+
+      // Auto detect button listener
+      if (autoDetectBtn) {
+        autoDetectBtn.addEventListener("click", detectLines);
+      }
 
       // API OCR fetcher
       async function fetchOcrData(base64) {
@@ -4356,41 +4509,85 @@
             throw new Error(resJson.error || `서버 에러 (상태 코드: ${res.status})`);
           }
 
+          const fullText = resJson.data.responses[0]?.fullTextAnnotation;
           const annotations = resJson.data.responses[0]?.textAnnotations || [];
-          if (annotations.length <= 1) {
-            textListContainer.innerHTML = `<div class="text-center text-gray-400 py-12">검출된 숫자가 없습니다.</div>`;
-            return;
+          let wordsList = [];
+
+          // Parse at Word-token level from fullTextAnnotation to avoid merging adjacent dimensions
+          if (fullText && fullText.pages) {
+            fullText.pages.forEach(page => {
+              page.blocks.forEach(block => {
+                block.paragraphs.forEach(paragraph => {
+                  paragraph.words.forEach(word => {
+                    const text = word.symbols.map(s => s.text).join("");
+                    const cleanText = text.replace(/,/g, "").trim();
+                    if (/^\d+(\.\d+)?$/.test(cleanText)) {
+                      const vertices = word.boundingBox.vertices;
+                      const v = vertices.map(vertex => ({
+                        x: vertex.x || 0,
+                        y: vertex.y || 0
+                      }));
+
+                      const xs = v.map(pt => pt.x);
+                      const ys = v.map(pt => pt.y);
+                      const minX = Math.min(...xs);
+                      const maxX = Math.max(...xs);
+                      const minY = Math.min(...ys);
+                      const maxY = Math.max(...ys);
+
+                      const scaleX = canvas.width / originalImage.width;
+                      const scaleY = canvas.height / originalImage.height;
+
+                      let angle = 0;
+                      if (v.length >= 2) {
+                        const dx = v[1].x - v[0].x;
+                        const dy = v[1].y - v[0].y;
+                        angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                      }
+
+                      wordsList.push({
+                        text: cleanText,
+                        x: Math.round(minX * scaleX),
+                        y: Math.round(minY * scaleY),
+                        w: Math.max(Math.round((maxX - minX) * scaleX), 10),
+                        h: Math.max(Math.round((maxY - minY) * scaleY), 10),
+                        angle: angle
+                      });
+                    }
+                  });
+                });
+              });
+            });
           }
 
-          // Skip the first element which is the entire combined text block
-          const words = annotations.slice(1);
-          
-          // Map to canvas coordinate system
-          ocrTexts = words
-            .filter(w => /^\d+(\.\d+)?$/.test(w.description.trim())) // Keep numbers only
-            .map(w => {
-              const vertices = w.boundingPoly.vertices;
-              // Get coordinate bounding box
-              const xs = vertices.map(v => v.x || 0);
-              const ys = vertices.map(v => v.y || 0);
-              const minX = Math.min(...xs);
-              const maxX = Math.max(...xs);
-              const minY = Math.min(...ys);
-              const maxY = Math.max(...ys);
+          // Fallback to textAnnotations if fullText is empty
+          if (wordsList.length === 0 && annotations.length > 1) {
+            const words = annotations.slice(1);
+            wordsList = words
+              .filter(w => /^\d+(\.\d+)?$/.test(w.description.trim().replace(/,/g, "")))
+              .map(w => {
+                const vertices = w.boundingPoly.vertices;
+                const xs = vertices.map(v => v.x || 0);
+                const ys = vertices.map(v => v.y || 0);
+                const minX = Math.min(...xs);
+                const maxX = Math.max(...xs);
+                const minY = Math.min(...ys);
+                const maxY = Math.max(...ys);
+                const scaleX = canvas.width / originalImage.width;
+                const scaleY = canvas.height / originalImage.height;
 
-              // Map coordinates based on original image ratio vs canvas scale
-              const scaleX = canvas.width / originalImage.width;
-              const scaleY = canvas.height / originalImage.height;
+                return {
+                  text: w.description.trim().replace(/,/g, ""),
+                  x: Math.round(minX * scaleX),
+                  y: Math.round(minY * scaleY),
+                  w: Math.max(Math.round((maxX - minX) * scaleX), 10),
+                  h: Math.max(Math.round((maxY - minY) * scaleY), 10),
+                  angle: 0
+                };
+              });
+          }
 
-              return {
-                text: w.description.trim(),
-                x: Math.round(minX * scaleX),
-                y: Math.round(minY * scaleY),
-                w: Math.max(Math.round((maxX - minX) * scaleX), 10),
-                h: Math.max(Math.round((maxY - minY) * scaleY), 10)
-              };
-            });
-
+          ocrTexts = wordsList;
           renderTextList();
           applyBinarization();
 
@@ -4448,8 +4645,6 @@
       canvas.addEventListener("mousedown", (e) => {
         if (!originalImage) return;
         const rect = canvas.getBoundingClientRect();
-        
-        // Scale factor in case canvas clientWidth differs from canvas.width
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
         
@@ -4461,7 +4656,6 @@
       canvas.addEventListener("mousemove", (e) => {
         if (!isDrawing) return;
         
-        // Draw temporary line indicator on top of binarized canvas
         applyBinarization();
         
         const rect = canvas.getBoundingClientRect();
@@ -4489,26 +4683,22 @@
         const endY = (e.clientY - rect.top) * scaleY;
 
         if (activeTool === "line") {
-          // Add line
-          // Only add lines with substantial length
           const dist = Math.hypot(endX - startX, endY - startY);
           if (dist > 3) {
             userLines.push({ x1: startX, y1: startY, x2: endX, y2: endY });
           }
         } else if (activeTool === "erase") {
-          // Erase intersecting lines
           userLines = userLines.filter(line => {
-            // Simple distance check of line middle point to mouse click path
             const midX = (line.x1 + line.x2) / 2;
             const midY = (line.y1 + line.y2) / 2;
             const dist = Math.hypot(midX - endX, midY - endY);
-            return dist > 20; // Radius of erasure
+            return dist > 20;
           });
         }
         applyBinarization();
       });
 
-      // Also support OCR box click events
+      // OCR box click events
       canvas.addEventListener("click", (e) => {
         if (isDrawing) return;
         const rect = canvas.getBoundingClientRect();
@@ -4517,7 +4707,6 @@
         const clickX = (e.clientX - rect.left) * scaleX;
         const clickY = (e.clientY - rect.top) * scaleY;
 
-        // Find clicked text box
         const clickedIdx = ocrTexts.findIndex(item => {
           return clickX >= item.x && clickX <= item.x + item.w &&
                  clickY >= item.y && clickY <= item.y + item.h;
@@ -4533,23 +4722,18 @@
         }
       });
 
-      // DXF Exporter
+      // DXF Exporter (Now exports both detected/drawn walls and rotated dimensions)
       exportBtn.addEventListener("click", () => {
         if (!originalImage) return;
 
-        // Create standard minimal DXF file string
-        // Header
+        // Create standard minimal DXF structure
         let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
-        // Tables
         dxf += `0\nSECTION\n2\nTABLES\n0\nENDSEC\n`;
-        // Blocks
         dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
-        // Entities Section
         dxf += `0\nSECTION\n2\nENTITIES\n`;
 
-        // Export Lines
+        // Export Lines (detected/drawn wall vectors)
         userLines.forEach(line => {
-          // DXF coordinates typically start bottom-left, so we flip the Y axis
           const y1 = canvas.height - line.y1;
           const y2 = canvas.height - line.y2;
           
@@ -4558,14 +4742,16 @@
           dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`; // Point 2
         });
 
-        // Export Texts
+        // Export Texts (correctly rotated dimensions)
         ocrTexts.forEach(item => {
-          const textY = canvas.height - (item.y + item.h); // Flip Y
+          const textY = canvas.height - (item.y + item.h);
+          const dxfAngle = -(item.angle || 0.0); // Invert screen Y rotation for Cartesian space
+          
           dxf += `0\nTEXT\n8\nSketchDimensions\n`;
           dxf += `10\n${item.x.toFixed(3)}\n20\n${textY.toFixed(3)}\n30\n0.0\n`; // Location
           dxf += `40\n10.0\n`; // Text height
           dxf += `1\n${item.text}\n`; // Value
-          dxf += `50\n0.0\n`; // Rotation
+          dxf += `50\n${dxfAngle.toFixed(3)}\n`; // Rotation angle in degrees
         });
 
         dxf += `0\nENDSEC\n0\nEOF\n`;
