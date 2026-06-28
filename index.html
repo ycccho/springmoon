@@ -5519,6 +5519,17 @@
     function getKeywordScreenshotHTML() {
       return `
         <div class="max-w-4xl mx-auto space-y-6">
+          <!-- HTTPS Mixed Content Warning Banner -->
+          <div id="https-warning-banner" class="hidden bg-red-50 dark-mode:bg-red-950/20 border border-red-200 dark-mode:border-red-900/50 p-4 rounded-xl space-y-2 text-xs text-red-800 dark-mode:text-red-400 leading-relaxed font-semibold">
+            <h4 class="font-bold flex items-center gap-1">⚠️ 브라우저 보안 정책(Mixed Content) 경고</h4>
+            <p>현재 사이트가 <strong>HTTPS(보안 접속)</strong> 상태입니다. 브라우저 보안 규정상 HTTPS 웹페이지에서 로컬 HTTP API(http://localhost:3888)를 직접 호출하면 차단(Failed to fetch)이 발생합니다.</p>
+            <p class="font-bold">💡 해결 방법 (택 1):</p>
+            <ol class="list-decimal list-inside space-y-1 pl-1">
+              <li>로컬 개발 주소인 <a href="http://localhost:8788?menu=keyword-screenshot" class="underline text-orange-600 dark-mode:text-orange-400 font-extrabold">http://localhost:8788 (클릭하여 이동)</a> 로 접속하여 실행해 주세요. (가장 확실하고 간편한 권장 방식)</li>
+              <li>또는 크롬 주소창 왼쪽의 <strong>[설정 아이콘]</strong>(조절기 모양 또는 자물쇠) 클릭 -> <strong>[사이트 설정]</strong> 클릭 -> <strong>[안전하지 않은 콘텐츠 (Insecure content)]</strong> 항목을 <strong>[허용 (Allow)]</strong>으로 변경한 후 이 페이지를 새로고침(F5) 해주세요.</li>
+            </ol>
+          </div>
+
           <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
             <h2 class="text-xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📸 네이버 키워드 검색 풀스크린 캡처</h2>
             <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium leading-relaxed">
@@ -5583,14 +5594,20 @@
       const progressList = document.getElementById("screenshot-progress-list");
       const summary = document.getElementById("screenshot-summary");
       const folderPath = document.getElementById("screenshot-folder-path");
+      const warningBanner = document.getElementById("https-warning-banner");
 
       if (!startBtn) return;
+
+      // Show Mixed Content warning banner if accessing via HTTPS
+      if (window.location.protocol === 'https:' && warningBanner) {
+        warningBanner.classList.remove("hidden");
+      }
 
       // Periodically check local backend helper status
       let serverOnline = false;
       async function checkServerStatus() {
         try {
-          const res = await fetch("http://localhost:3888/api/screenshot", { method: "OPTIONS" }).catch(() => null);
+          await fetch("http://localhost:3888/api/screenshot", { method: "OPTIONS" });
           serverOnline = true;
           statusText.innerHTML = `
             <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
@@ -5599,9 +5616,10 @@
           startBtn.disabled = false;
         } catch (e) {
           serverOnline = false;
+          const isHttps = window.location.protocol === 'https:';
           statusText.innerHTML = `
             <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-            <span class="text-red-500 font-bold">로컬 백서버 미연결 (D:\\ 드라이브 저장 불가)</span>
+            <span class="text-red-500 font-bold">로컬 백서버 미연결 ${isHttps ? '(HTTPS 보안 차단 주의)' : ''}</span>
           `;
         }
       }
