@@ -4545,8 +4545,9 @@
                 block.paragraphs.forEach(paragraph => {
                   paragraph.words.forEach(word => {
                     const text = word.symbols.map(s => s.text).join("");
-                    const cleanText = text.replace(/,/g, "").trim();
-                    if (/^\d+(\.\d+)?$/.test(cleanText)) {
+                    const cleanText = text.trim();
+                    // Extract text that contains at least one Korean character, English letter, or number
+                    if (/[a-zA-Z0-9가-힣]+/.test(cleanText)) {
                       const vertices = word.boundingBox.vertices;
                       const v = vertices.map(vertex => ({
                         x: vertex.x || 0,
@@ -4589,7 +4590,7 @@
           if (wordsList.length === 0 && annotations.length > 1) {
             const words = annotations.slice(1);
             wordsList = words
-              .filter(w => /^\d+(\.\d+)?$/.test(w.description.trim().replace(/,/g, "")))
+              .filter(w => /[a-zA-Z0-9가-힣]+/.test(w.description.trim()))
               .map(w => {
                 const vertices = w.boundingPoly.vertices;
                 const xs = vertices.map(v => v.x || 0);
@@ -4767,16 +4768,20 @@
           dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`; // Point 2
         });
 
-        // Export Texts (correctly rotated dimensions)
+        // Export Texts (correctly rotated and positioned at bounding box center)
         ocrTexts.forEach(item => {
-          const textY = canvas.height - (item.y + item.h);
+          const midX = item.x + item.w / 2;
+          const midY = canvas.height - (item.y + item.h / 2); // Flip Y of the center point
           const dxfAngle = -(item.angle || 0.0); // Invert screen Y rotation for Cartesian space
           
           dxf += `0\nTEXT\n8\nSketchDimensions\n`;
-          dxf += `10\n${item.x.toFixed(3)}\n20\n${textY.toFixed(3)}\n30\n0.0\n`; // Location
-          dxf += `40\n10.0\n`; // Text height
-          dxf += `1\n${item.text}\n`; // Value
+          dxf += `10\n${midX.toFixed(3)}\n20\n${midY.toFixed(3)}\n30\n0.0\n`; // Location (base point)
+          dxf += `40\n${item.h.toFixed(3)}\n`; // Dynamic text height from bounding box height
+          dxf += `1\n${item.text}\n`; // Text value
           dxf += `50\n${dxfAngle.toFixed(3)}\n`; // Rotation angle in degrees
+          dxf += `72\n4\n`; // Middle-center horizontal alignment
+          dxf += `73\n2\n`; // Middle vertical alignment
+          dxf += `11\n${midX.toFixed(3)}\n21\n${midY.toFixed(3)}\n31\n0.0\n`; // Alignment point (required for MC)
         });
 
         dxf += `0\nENDSEC\n0\nEOF\n`;
