@@ -147,62 +147,76 @@
     // ============================================
     function loadMenuOrder() {
       let menus = JSON.parse(localStorage.getItem("menuOrder") || JSON.stringify(defaultMenus));
+      let changed = false;
       
       // Clean up deleted default menus and menus named "1"
+      const originalLen = menus.length;
       menus = menus.filter(m => m.id !== "stats" && m.id !== "marketing" && m.id !== "home" && m.name !== "1" && m.id !== "1");
+      if (menus.length !== originalLen) changed = true;
       
       // Ensure keyword-search-count exists
       if (!menus.some(m => m.id === "keyword-search-count")) {
         const idx = menus.findIndex(m => m.id === "keyword");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "keyword-search-count", name: "키워드조회수", protected: true });
+        changed = true;
       }
       // Ensure negative-words exists
       if (!menus.some(m => m.id === "negative-words")) {
         const idx = menus.findIndex(m => m.id === "keyword-search-count");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "negative-words", name: "부정단어찾기", protected: true });
+        changed = true;
       }
       // Ensure html-analysis exists
       if (!menus.some(m => m.id === "html-analysis")) {
         const idx = menus.findIndex(m => m.id === "negative-words");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "html-analysis", name: "html분석", protected: true });
+        changed = true;
       }
       // Ensure url-extraction exists
       if (!menus.some(m => m.id === "url-extraction")) {
         const idx = menus.findIndex(m => m.id === "html-analysis");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "url-extraction", name: "도메인 url추출", protected: true });
+        changed = true;
       }
       // Ensure powercontent exists
       if (!menus.some(m => m.id === "powercontent")) {
         const idx = menus.findIndex(m => m.id === "url-extraction");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "powercontent", name: "파컨 키워드", protected: true });
+        changed = true;
       }
       // Ensure omission-check exists
       if (!menus.some(m => m.id === "omission-check")) {
         const idx = menus.findIndex(m => m.id === "powercontent");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "omission-check", name: "네이버블로그", protected: true });
+        changed = true;
       }
       // Ensure new menus exist
       if (!menus.some(m => m.id === "interior-intro")) {
         const idx = menus.findIndex(m => m.id === "omission-check");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "interior-intro", name: "인테리어", categoryId: "cat-interior", protected: true });
+        changed = true;
       }
       if (!menus.some(m => m.id === "cad-conversion")) {
         const idx = menus.findIndex(m => m.id === "interior-intro");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "스케치도면 캐드변환", categoryId: "cat-interior", protected: true });
+        changed = true;
       }
       if (!menus.some(m => m.id === "homepage-seo")) {
         const idx = menus.findIndex(m => m.id === "cad-conversion");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "homepage-seo", name: "홈페이지 코드세팅", protected: true });
+        changed = true;
       }
       if (!menus.some(m => m.id === "backlink-check")) {
         const idx = menus.findIndex(m => m.id === "homepage-seo");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "backlink-check", name: "백링크검사", protected: true });
+        changed = true;
       }
 
       // Automatically rename omission-check
       menus.forEach(m => {
-        if (m.id === "omission-check") {
+        if (m.id === "omission-check" && m.name !== "네이버블로그") {
           m.name = "네이버블로그";
+          changed = true;
         }
       });
 
@@ -212,8 +226,13 @@
       menus.forEach(m => {
         if (m.categoryId && !catIds.has(m.categoryId)) {
           m.categoryId = null;
+          changed = true;
         }
       });
+
+      if (changed) {
+        localStorage.setItem("menuOrder", JSON.stringify(menus));
+      }
 
       return menus;
     }
@@ -221,12 +240,20 @@
     function saveMenuOrder() { localStorage.setItem("menuOrder", JSON.stringify(currentMenus)); }
     function loadCategories() { 
       let cats = JSON.parse(localStorage.getItem("categories") || "[]");
+      let changed = false;
       // Ensure cat-interior exists and default it to collapsed
       if (!cats.some(c => c.id === "cat-interior")) {
         cats.push({ id: "cat-interior", name: "인테리어", collapsed: true });
+        changed = true;
       }
       // Filter out invalid categories
+      const lenBefore = cats.length;
       cats = cats.filter(c => c.name !== "1" && c.id !== "1");
+      if (cats.length !== lenBefore) changed = true;
+
+      if (changed) {
+        localStorage.setItem("categories", JSON.stringify(cats));
+      }
       return cats;
     }
     function saveCategories() { localStorage.setItem("categories", JSON.stringify(currentCategories)); }
@@ -3997,6 +4024,7 @@
       isDarkMode = loadDarkMode();
       isAuthenticated = loadAuthStatus();
       currentMenus = loadMenuOrder();
+      currentCategories = loadCategories();
 
       // Sync brand name and add save listeners
       const brandNameElem = document.getElementById("brand-name");
