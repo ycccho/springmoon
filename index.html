@@ -4259,6 +4259,9 @@
             // Apply initial binarization filter
             applyBinarization();
             
+            // Run auto line detection immediately on upload!
+            detectLines();
+            
             // Request vision OCR
             const base64Str = evt.target.result.split(",")[1];
             fetchOcrData(base64Str);
@@ -4344,6 +4347,105 @@
         applyBinarization();
       });
 
+      // Helper for perpendicular distance from point to line (for RDP algorithm)
+      function getPerpendicularDistance(pt, lineStart, lineEnd) {
+        const dx = lineEnd.x - lineStart.x;
+        const dy = lineEnd.y - lineStart.y;
+        if (dx === 0 && dy === 0) {
+          return Math.hypot(pt.x - lineStart.x, pt.y - lineStart.y);
+        }
+        const num = Math.abs(dy * pt.x - dx * pt.y + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x);
+        const den = Math.hypot(dx, dy);
+        return num / den;
+      }
+
+      // Ramer-Douglas-Peucker path simplification
+      function ramerDouglasPeucker(points, epsilon) {
+        if (points.length <= 2) return points;
+        let maxDistance = 0;
+        let index = 0;
+        const end = points.length - 1;
+        for (let i = 1; i < end; i++) {
+          const dist = getPerpendicularDistance(points[i], points[0], points[end]);
+          if (dist > maxDistance) {
+            maxDistance = dist;
+            index = i;
+          }
+        }
+        if (maxDistance > epsilon) {
+          const results1 = ramerDouglasPeucker(points.slice(0, index + 1), epsilon);
+          const results2 = ramerDouglasPeucker(points.slice(index), epsilon);
+          return results1.slice(0, results1.length - 1).concat(results2);
+        } else {
+          return [points[0], points[end]];
+        }
+      }
+
+      // 8-connected neighbor line path tracer
+      function tracePath(startX, startY, w, h, data, visited, threshold) {
+        const path = [{ x: startX, y: startY }];
+        visited[startY * w + startX] = 1;
+        let cx = startX;
+        let cy = startY;
+        let tracing = true;
+
+        function isBlackAndUnvisited(x, y) {
+          if (x < 0 || x >= w || y < 0 || y >= h) return false;
+          if (visited[y * w + x]) return false;
+          const idx = (y * w + x) * 4;
+          const gray = 0.299 * data[idx] + 0.587 * data[idx+1] + 0.114 * data[idx+2];
+          return gray < threshold;
+        }
+
+        while (tracing) {
+          let foundNext = false;
+          const dirs = [
+            { dx: 1, dy: 0 }, { dx: 1, dy: 1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 1 },
+            { dx: -1, dy: 0 }, { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 }
+          ];
+          for (let i = 0; i < dirs.length; i++) {
+            const nx = cx + dirs[i].dx;
+            const ny = cy + dirs[i].dy;
+            if (isBlackAndUnvisited(nx, ny)) {
+              cx = nx;
+              cy = ny;
+              path.push({ x: cx, y: cy });
+              visited[cy * w + cx] = 1;
+              foundNext = true;
+              break;
+            }
+          }
+          // Jump small 2px gaps (noise/sketch gaps)
+          if (!foundNext) {
+            const outerDirs = [
+              { dx: 2, dy: 0 }, { dx: 2, dy: 1 }, { dx: 2, dy: 2 }, { dx: 1, dy: 2 },
+              { dx: 0, dy: 2 }, { dx: -1, dy: 2 }, { dx: -2, dy: 2 }, { dx: -2, dy: 1 },
+              { dx: -2, dy: 0 }, { dx: -2, dy: -1 }, { dx: -2, dy: -2 }, { dx: -1, dy: -2 },
+              { dx: 0, dy: -2 }, { dx: 1, dy: -2 }, { dx: 2, dy: -2 }, { dx: 2, dy: -1 }
+            ];
+            for (let i = 0; i < outerDirs.length; i++) {
+              const nx = cx + outerDirs[i].dx;
+              const ny = cy + outerDirs[i].dy;
+              if (isBlackAndUnvisited(nx, ny)) {
+                const mx = Math.round((cx + nx) / 2);
+                const my = Math.round((cy + ny) / 2);
+                visited[my * w + mx] = 1;
+                cx = nx;
+                cy = ny;
+                path.push({ x: cx, y: cy });
+                visited[cy * w + cx] = 1;
+                foundNext = true;
+                break;
+              }
+            }
+          }
+          if (!foundNext) {
+            tracing = false;
+          }
+        }
+        return path;
+      }
+
       // Automatic Raster-to-Vector Line detection
       function detectLines() {
         if (!originalImage) return;
@@ -4361,6 +4463,9 @@
         const h = canvas.height;
         const threshold = parseInt(thresholdSlider.value, 10);
 
+        const visited = new Uint8Array(w * h);
+        const detectedLines = [];
+
         function isBlack(x, y) {
           if (x < 0 || x >= w || y < 0 || y >= h) return false;
           const idx = (y * w + x) * 4;
@@ -4368,112 +4473,32 @@
           return gray < threshold;
         }
 
-        const minLineLength = 40;
-        const rawHorizontal = [];
-        const rawVertical = [];
-
-        // Scan Horizontal lines
-        for (let y = 0; y < h; y += 2) {
-          let startX = -1;
-          for (let x = 0; x < w; x++) {
-            if (isBlack(x, y)) {
-              if (startX === -1) startX = x;
-            } else {
-              if (startX !== -1) {
-                const len = x - startX;
-                if (len >= minLineLength) {
-                  rawHorizontal.push({ x1: startX, y1: y, x2: x - 1, y2: y });
+        // Trace paths across the grid
+        for (let y = 0; y < h; y += 3) {
+          for (let x = 0; x < w; x += 3) {
+            if (isBlack(x, y) && !visited[y * w + x]) {
+              const path = tracePath(x, y, w, h, data, visited, threshold);
+              
+              // Only keep paths with a minimum length
+              if (path.length >= 15) {
+                // Simplify path using Ramer-Douglas-Peucker algorithm
+                const simplified = ramerDouglasPeucker(path, 3.5);
+                
+                // Convert simplified path vertices into line segments
+                for (let i = 0; i < simplified.length - 1; i++) {
+                  detectedLines.push({
+                    x1: simplified[i].x,
+                    y1: simplified[i].y,
+                    x2: simplified[i+1].x,
+                    y2: simplified[i+1].y
+                  });
                 }
-                startX = -1;
               }
-            }
-          }
-          if (startX !== -1) {
-            const len = w - startX;
-            if (len >= minLineLength) {
-              rawHorizontal.push({ x1: startX, y1: y, x2: w - 1, y2: y });
             }
           }
         }
 
-        // Scan Vertical lines
-        for (let x = 0; x < w; x += 2) {
-          let startY = -1;
-          for (let y = 0; y < h; y++) {
-            if (isBlack(x, y)) {
-              if (startY === -1) startY = y;
-            } else {
-              if (startY !== -1) {
-                const len = y - startY;
-                if (len >= minLineLength) {
-                  rawVertical.push({ x1: x, y1: startY, x2: x, y2: y - 1 });
-                }
-                startY = -1;
-              }
-            }
-          }
-          if (startY !== -1) {
-            const len = h - startY;
-            if (len >= minLineLength) {
-              rawVertical.push({ x1: x, y1: startY, x2: x, y2: h - 1 });
-            }
-          }
-        }
-
-        // Merge horizontal overlaps
-        const mergedHorizontal = [];
-        const hTolerance = 8;
-        const overlapTolerance = 10;
-
-        rawHorizontal.forEach(line => {
-          let merged = false;
-          for (let i = 0; i < mergedHorizontal.length; i++) {
-            const active = mergedHorizontal[i];
-            if (Math.abs(active.y1 - line.y1) <= hTolerance) {
-              const maxStart = Math.max(active.x1, line.x1);
-              const minEnd = Math.min(active.x2, line.x2);
-              if (minEnd - maxStart >= -overlapTolerance) {
-                active.x1 = Math.min(active.x1, line.x1);
-                active.x2 = Math.max(active.x2, line.x2);
-                active.y1 = Math.round((active.y1 + line.y1) / 2);
-                active.y2 = active.y1;
-                merged = true;
-                break;
-              }
-            }
-          }
-          if (!merged) {
-            mergedHorizontal.push({ ...line });
-          }
-        });
-
-        // Merge vertical overlaps
-        const mergedVertical = [];
-        const vTolerance = 8;
-
-        rawVertical.forEach(line => {
-          let merged = false;
-          for (let i = 0; i < mergedVertical.length; i++) {
-            const active = mergedVertical[i];
-            if (Math.abs(active.x1 - line.x1) <= vTolerance) {
-              const maxStart = Math.max(active.y1, line.y1);
-              const minEnd = Math.min(active.y2, line.y2);
-              if (minEnd - maxStart >= -overlapTolerance) {
-                active.y1 = Math.min(active.y1, line.y1);
-                active.y2 = Math.max(active.y2, line.y2);
-                active.x1 = Math.round((active.x1 + line.x1) / 2);
-                active.x2 = active.x1;
-                merged = true;
-                break;
-              }
-            }
-          }
-          if (!merged) {
-            mergedVertical.push({ ...line });
-          }
-        });
-
-        userLines = [...mergedHorizontal, ...mergedVertical];
+        userLines = detectedLines;
         applyBinarization();
       }
 
