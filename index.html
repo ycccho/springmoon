@@ -4508,9 +4508,8 @@
           }
         }
 
-        // Adaptive angle snapping: only straighten lines that are roughly horizontal/vertical (within 12 degrees)
-        // This preserves the original room coordinates and proportions perfectly without grid distortion.
-        const snappedLines = detectedLines.map(line => {
+        // 1. Separate and straighten lines (adaptive angle snapping)
+        const straightenedLines = detectedLines.map(line => {
           let x1 = line.x1;
           let y1 = line.y1;
           let x2 = line.x2;
@@ -4520,18 +4519,94 @@
           const dy = y2 - y1;
           const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI); // Range: [0, 180]
 
-          if (angle < 12 || angle > 168) {
+          const isH = (angle < 12 || angle > 168);
+          const isV = (Math.abs(angle - 90) < 12);
+
+          if (isH) {
             const avgY = (y1 + y2) / 2;
             y1 = avgY;
             y2 = avgY; // Force perfectly horizontal
-          } else if (Math.abs(angle - 90) < 12) {
+          } else if (isV) {
             const avgX = (x1 + x2) / 2;
             x1 = avgX;
             x2 = avgX; // Force perfectly vertical
           }
 
-          return { x1, y1, x2, y2 };
+          return { x1, y1, x2, y2, isHorizontal: isH, isVertical: isV };
         });
+
+        // 2. Snap close endpoints of horizontal & vertical lines to form exact corners
+        const tolerance = 15;
+        const close = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y) <= tolerance;
+
+        // Separate the groups
+        const horizontal = straightenedLines.filter(l => l.isHorizontal);
+        const vertical = straightenedLines.filter(l => l.isVertical);
+        const other = straightenedLines.filter(l => !l.isHorizontal && !l.isVertical);
+
+        // Snap H <-> V intersections (e.g. wall corners)
+        horizontal.forEach(hLine => {
+          vertical.forEach(vLine => {
+            const hStart = { x: hLine.x1, y: hLine.y1 };
+            const hEnd = { x: hLine.x2, y: hLine.y2 };
+            const vStart = { x: vLine.x1, y: vLine.y1 };
+            const vEnd = { x: vLine.x2, y: vLine.y2 };
+
+            if (close(hStart, vStart)) {
+              hLine.x1 = vLine.x1;
+              vLine.y1 = hLine.y1;
+            } else if (close(hStart, vEnd)) {
+              hLine.x1 = vLine.x1;
+              vLine.y2 = hLine.y1;
+            } else if (close(hEnd, vStart)) {
+              hLine.x2 = vLine.x1;
+              vLine.y1 = hLine.y2;
+            } else if (close(hEnd, vEnd)) {
+              hLine.x2 = vLine.x1;
+              vLine.y2 = hLine.y2;
+            }
+          });
+        });
+
+        // Snap H <-> H end-to-end
+        for (let i = 0; i < horizontal.length; i++) {
+          for (let j = i + 1; j < horizontal.length; j++) {
+            const h1 = horizontal[i];
+            const h2 = horizontal[j];
+            if (Math.hypot(h1.x2 - h2.x1, h1.y2 - h2.y1) <= tolerance) {
+              const avgY = (h1.y2 + h2.y1) / 2;
+              h1.y1 = h1.y2 = avgY;
+              h2.y1 = h2.y2 = avgY;
+              h1.x2 = h2.x1 = (h1.x2 + h2.x1) / 2;
+            } else if (Math.hypot(h1.x1 - h2.x2, h1.y1 - h2.y2) <= tolerance) {
+              const avgY = (h1.y1 + h2.y2) / 2;
+              h1.y1 = h1.y2 = avgY;
+              h2.y1 = h2.y2 = avgY;
+              h1.x1 = h2.x2 = (h1.x1 + h2.x2) / 2;
+            }
+          }
+        }
+
+        // Snap V <-> V end-to-end
+        for (let i = 0; i < vertical.length; i++) {
+          for (let j = i + 1; j < vertical.length; j++) {
+            const v1 = vertical[i];
+            const v2 = vertical[j];
+            if (Math.hypot(v1.x2 - v2.x1, v1.y2 - v2.y1) <= tolerance) {
+              const avgX = (v1.x2 + v2.x1) / 2;
+              v1.x1 = v1.x2 = avgX;
+              v2.x1 = v2.x2 = avgX;
+              v1.y2 = v2.y1 = (v1.y2 + v2.y1) / 2;
+            } else if (Math.hypot(v1.x1 - v2.x2, v1.y1 - v2.y2) <= tolerance) {
+              const avgX = (v1.x1 + v2.x2) / 2;
+              v1.x1 = v1.x2 = avgX;
+              v2.x1 = v2.x2 = avgX;
+              v1.y1 = v2.y2 = (v1.y1 + v2.y2) / 2;
+            }
+          }
+        }
+
+        const snappedLines = [...horizontal, ...vertical, ...other];
 
         // Filter out zero-length lines
         userLines = snappedLines.filter(line => {
