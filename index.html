@@ -4489,8 +4489,8 @@
             if (isBlack(x, y) && !visited[y * w + x]) {
               const path = tracePath(x, y, w, h, data, visited, threshold);
               
-              // Only keep paths with a minimum length
-              if (path.length >= 15) {
+              // Only keep paths with a minimum length (ignores small strokes like digits)
+              if (path.length >= 35) {
                 // Simplify path using Ramer-Douglas-Peucker algorithm
                 const simplified = ramerDouglasPeucker(path, 3.5);
                 
@@ -4608,9 +4608,34 @@
 
         const snappedLines = [...horizontal, ...vertical, ...other];
 
-        // Filter out zero-length lines
-        userLines = snappedLines.filter(line => {
+        // Filter out zero-length lines and isolated short lines (which are usually noise or digit strokes)
+        const validLines = snappedLines.filter(line => {
           return !(line.x1 === line.x2 && line.y1 === line.y2);
+        });
+
+        userLines = validLines.filter((l1, idx1) => {
+          // Keep if the line is long enough (meaning it is a real wall even if isolated)
+          const length = Math.hypot(l1.x2 - l1.x1, l1.y2 - l1.y1);
+          if (length >= 80) return true;
+
+          // Otherwise, check if it connects to at least one other line
+          let hasConnection = false;
+          const tol = 18; // connection distance threshold
+          for (let idx2 = 0; idx2 < validLines.length; idx2++) {
+            if (idx1 === idx2) continue;
+            const l2 = validLines[idx2];
+            
+            const d11 = Math.hypot(l1.x1 - l2.x1, l1.y1 - l2.y1);
+            const d12 = Math.hypot(l1.x1 - l2.x2, l1.y1 - l2.y2);
+            const d21 = Math.hypot(l1.x2 - l2.x1, l1.y2 - l2.y1);
+            const d22 = Math.hypot(l1.x2 - l2.x2, l1.y2 - l2.y2);
+
+            if (d11 <= tol || d12 <= tol || d21 <= tol || d22 <= tol) {
+              hasConnection = true;
+              break;
+            }
+          }
+          return hasConnection;
         });
 
         applyBinarization();
