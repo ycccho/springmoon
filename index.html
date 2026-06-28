@@ -4135,6 +4135,7 @@
             <div class="flex justify-between items-center">
               <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-1.5">🖥️ 도면 보정 및 캔버스 검토</h3>
               <div class="flex gap-2 font-semibold">
+                <button id="cad-ocr-btn" class="px-2.5 py-1 bg-green-655 hover:bg-green-600 dark-mode:bg-green-700 dark-mode:hover:bg-green-800 text-white rounded text-xs font-bold shadow-sm active:scale-[0.98] transition-all">🔍 AI OCR 감지</button>
                 <button id="cad-auto-detect-btn" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold shadow-sm active:scale-[0.98] transition-all">🤖 자동 선 감지</button>
                 <button id="cad-tool-line" class="px-2 py-1 bg-orange-500 text-white rounded text-xs font-bold shadow-sm">✏️ 선 그리기</button>
                 <button id="cad-tool-erase" class="px-2 py-1 bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300 rounded text-xs font-bold hover:bg-gray-300 transition-all">🧹 선 지우기</button>
@@ -4149,7 +4150,8 @@
             
             <div class="text-[10px] text-gray-400 font-semibold leading-relaxed">
               ※ **사용 방법**<br>
-              - **[🤖 자동 선 감지]** 버튼을 누르면 흑백 필터 상태에 따라 이미지 속 벽면과 도면 선을 자동으로 선 세그먼트(LINE)로 추출합니다.<br>
+              - **[🔍 AI OCR 감지]** 버튼을 누르면 현재 보정된 흑백 이미지 상태로 텍스트/치수를 다시 분석하여 검출합니다.<br>
+              - **[🤖 자동 선 감지]** 버튼을 누르면 흑백 필터 상태에 따라 이미지 속 벽면과 도면 선을 비율 왜곡 없이 자동으로 추출합니다.<br>
               - 캔버스에서 마우스를 드래그하여 **직선 선 세그먼트**를 직접 추가하거나 지울 수 있습니다.<br>
               - 비전 API로 검출된 텍스트 박스를 **클릭**하면 오른쪽 사이드바에서 치수 값을 수정할 수 있습니다.
             </div>
@@ -4196,6 +4198,7 @@
       const thresholdVal = document.getElementById("cad-threshold-val");
       const textListContainer = document.getElementById("cad-text-list");
       const autoDetectBtn = document.getElementById("cad-auto-detect-btn");
+      const ocrBtn = document.getElementById("cad-ocr-btn");
       const toolLine = document.getElementById("cad-tool-line");
       const toolErase = document.getElementById("cad-tool-erase");
       const clearBtn = document.getElementById("cad-clear-btn");
@@ -4505,21 +4508,26 @@
           }
         }
 
-        // Apply grid snapping (8px) and orthogonal snapping (0 / 90 degrees) to force 1-shape straight lines
-        const gridSize = 8;
+        // Adaptive angle snapping: only straighten lines that are roughly horizontal/vertical (within 12 degrees)
+        // This preserves the original room coordinates and proportions perfectly without grid distortion.
         const snappedLines = detectedLines.map(line => {
-          let x1 = Math.round(line.x1 / gridSize) * gridSize;
-          let y1 = Math.round(line.y1 / gridSize) * gridSize;
-          let x2 = Math.round(line.x2 / gridSize) * gridSize;
-          let y2 = Math.round(line.y2 / gridSize) * gridSize;
+          let x1 = line.x1;
+          let y1 = line.y1;
+          let x2 = line.x2;
+          let y2 = line.y2;
 
-          const dx = Math.abs(x2 - x1);
-          const dy = Math.abs(y2 - y1);
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI); // Range: [0, 180]
 
-          if (dx > dy) {
-            y2 = y1; // Force horizontal (1자 선)
-          } else {
-            x2 = x1; // Force vertical (1자 선)
+          if (angle < 12 || angle > 168) {
+            const avgY = (y1 + y2) / 2;
+            y1 = avgY;
+            y2 = avgY; // Force perfectly horizontal
+          } else if (Math.abs(angle - 90) < 12) {
+            const avgX = (x1 + x2) / 2;
+            x1 = avgX;
+            x2 = avgX; // Force perfectly vertical
           }
 
           return { x1, y1, x2, y2 };
@@ -4536,6 +4544,16 @@
       // Auto detect button listener
       if (autoDetectBtn) {
         autoDetectBtn.addEventListener("click", detectLines);
+      }
+
+      // AI OCR detection button listener (extracts from the current binarized canvas)
+      if (ocrBtn) {
+        ocrBtn.addEventListener("click", () => {
+          if (!originalImage) return;
+          // Capture current canvas image state (applies current binarization threshold)
+          const base64Str = canvas.toDataURL("image/png").split(",")[1];
+          fetchOcrData(base64Str);
+        });
       }
 
       // API OCR fetcher
@@ -4742,24 +4760,22 @@
         if (activeTool === "line") {
           const dist = Math.hypot(endX - startX, endY - startY);
           if (dist > 3) {
-            const gridSize = 8;
-            let sx = Math.round(startX / gridSize) * gridSize;
-            let sy = Math.round(startY / gridSize) * gridSize;
-            let ex = Math.round(endX / gridSize) * gridSize;
-            let ey = Math.round(endY / gridSize) * gridSize;
+            let sx = startX;
+            let sy = startY;
+            let ex = endX;
+            let ey = endY;
 
-            const dx = Math.abs(ex - sx);
-            const dy = Math.abs(ey - sy);
+            const dx = ex - sx;
+            const dy = ey - sy;
+            const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI); // Range: [0, 180]
 
-            if (dx > dy) {
+            if (angle < 12 || angle > 168) {
               ey = sy; // Force perfectly horizontal
-            } else {
+            } else if (Math.abs(angle - 90) < 12) {
               ex = sx; // Force perfectly vertical
             }
 
-            if (!(sx === ex && sy === ey)) {
-              userLines.push({ x1: sx, y1: sy, x2: ex, y2: ey });
-            }
+            userLines.push({ x1: sx, y1: sy, x2: ex, y2: ey });
           }
         } else if (activeTool === "erase") {
           userLines = userLines.filter(line => {
