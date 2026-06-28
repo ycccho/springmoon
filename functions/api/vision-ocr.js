@@ -1,10 +1,8 @@
 export async function onRequestPost(context) {
-  const apiKey = context.env.GOOGLE_VISION_API_KEY;
+  let apiKey = context.env.GOOGLE_VISION_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ success: false, error: 'Google Vision API Key is not configured on the server.' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Fallback to the user's provided API key
+    apiKey = "AIzaSyA8IWoPG8vHeVQISBiI9i4-csuluwsV_no";
   }
 
   try {
