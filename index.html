@@ -5531,10 +5531,10 @@
           </div>
 
           <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
-            <h2 class="text-xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📸 네이버 키워드 검색 풀스크린 캡처</h2>
+            <h2 class="text-xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📸 네이버 / 구글 키워드 검색 풀스크린 캡처</h2>
             <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium leading-relaxed">
-              입력하신 키워드들을 네이버에서 자동으로 검색한 후, 페이지 최하단까지 부드럽게 스크롤하며 누락 없이 이미지 파일 한 장으로 저장하는 자동화 기능입니다.<br>
-              ※ 저장 기본 경로는 <code>D:\\rank</code> 폴더이며, <code>[키워드] [실행날짜].jpg</code> 형식으로 자동 저장됩니다.
+              입력하신 키워드들을 검색엔진에서 자동으로 검색한 후, 페이지 최하단까지 부드럽게 스크롤하며 누락 없이 이미지 파일 한 장으로 저장하는 자동화 기능입니다.<br>
+              ※ 저장 기본 경로는 <code>D:\\rank</code> 폴더이며, <code>[키워드] [실행날짜].jpg</code> (구글은 <code>[키워드] 구글 [실행날짜].jpg</code>) 형식으로 자동 저장됩니다.
             </p>
             
             <div class="space-y-3">
@@ -5545,9 +5545,15 @@
                 </div>
               </div>
 
-              <div>
-                <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-1.5">🔑 대상 키워드 입력 (줄바꿈 또는 쉼표 구분)</label>
-                <textarea id="screenshot-keywords" rows="5" class="w-full px-4 py-3 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예시:\n강남 맛집\n인테리어 도면\n화장실 리모델링"></textarea>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-green-600 dark-mode:text-green-400 mb-1.5">🔑 네이버(Naver) 대상 키워드 입력 (줄바꿈/쉼표 구분)</label>
+                  <textarea id="screenshot-keywords-naver" rows="5" class="w-full px-4 py-3 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예시:\\n부산인테리어\\n화장실 리모델링"></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-blue-600 dark-mode:text-blue-400 mb-1.5">🔑 구글(Google) 대상 키워드 입력 (줄바꿈/쉼표 구분)</label>
+                  <textarea id="screenshot-keywords-google" rows="5" class="w-full px-4 py-3 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예시:\\n부산인테리어 디자인\\n화장실 리모델링 추천"></textarea>
+                </div>
               </div>
 
               <div class="flex justify-between items-center pt-2">
@@ -5565,7 +5571,7 @@
           <!-- Scheduling Card -->
           <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
             <h3 class="text-sm font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">⏰ 매일 지정 시각 자동 수집 설정 (예약 기능)</h3>
-            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">
+            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">
               로컬 서버(CMD)를 켜둔 상태라면 브라우저를 닫아놓아도 지정된 시각에 매일 1회 자동으로 키워드 수집을 백그라운드에서 진행합니다. (D:\\rank에 저장)
             </p>
             
@@ -5581,9 +5587,15 @@
                 </div>
               </div>
               
-              <div>
-                <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-1.5">📋 자동 예약 수집할 키워드 목록 (줄바꿈 또는 쉼표 구분)</label>
-                <textarea id="schedule-keywords" rows="3" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예시:\n부산사무실인테리어\n부산학원인테리어"></textarea>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-green-600 dark-mode:text-green-400 mb-1.5">📋 예약할 네이버(Naver) 키워드 목록 (줄바꿈/쉼표 구분)</label>
+                  <textarea id="schedule-keywords-naver" rows="4" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예시:\\n부산인테리어\\n부산학원인테리어"></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-blue-600 dark-mode:text-blue-400 mb-1.5">📋 예약할 구글(Google) 키워드 목록 (줄바꿈/쉼표 구분)</label>
+                  <textarea id="schedule-keywords-google" rows="4" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예시:\\n부산인테리어 디자인\\n부산학원인테리어 견적"></textarea>
+                </div>
               </div>
 
               <div class="flex justify-end">
@@ -5605,7 +5617,7 @@
               <!-- Folder info -->
               <div class="p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-750 flex items-center justify-between text-xs font-bold text-gray-700 dark-mode:text-gray-300">
                 <span>📁 저장 폴더 위치:</span>
-                <span id="screenshot-folder-path" class="font-mono text-gray-900 dark-mode:text-gray-100 break-all select-all font-mono">D:\\rank</span>
+                <span id="screenshot-folder-path" class="font-mono text-gray-900 dark-mode:text-gray-100 break-all select-all font-mono">D:\\\\rank</span>
               </div>
 
               <!-- Keywords processing list -->
@@ -5620,7 +5632,8 @@
 
     function setupKeywordScreenshot() {
       const startBtn = document.getElementById("screenshot-start-btn");
-      const keywordsArea = document.getElementById("screenshot-keywords");
+      const naverArea = document.getElementById("screenshot-keywords-naver");
+      const googleArea = document.getElementById("screenshot-keywords-google");
       const statusText = document.getElementById("screenshot-server-status");
       const resultCard = document.getElementById("screenshot-result-card");
       const progressList = document.getElementById("screenshot-progress-list");
@@ -5630,7 +5643,8 @@
 
       const scheduleEnabledInput = document.getElementById("schedule-enabled");
       const scheduleTimeInput = document.getElementById("schedule-time");
-      const scheduleKeywordsArea = document.getElementById("schedule-keywords");
+      const scheduleNaverArea = document.getElementById("schedule-keywords-naver");
+      const scheduleGoogleArea = document.getElementById("schedule-keywords-google");
       const scheduleSaveBtn = document.getElementById("schedule-save-btn");
 
       if (!startBtn) return;
@@ -5652,7 +5666,8 @@
             if (data.success && data.config) {
               if (scheduleEnabledInput) scheduleEnabledInput.checked = !!data.config.scheduleEnabled;
               if (scheduleTimeInput) scheduleTimeInput.value = data.config.scheduleTime || "09:00";
-              if (scheduleKeywordsArea) scheduleKeywordsArea.value = (data.config.keywords || []).join("\n");
+              if (scheduleNaverArea) scheduleNaverArea.value = (data.config.naverKeywords || []).join("\n");
+              if (scheduleGoogleArea) scheduleGoogleArea.value = (data.config.googleKeywords || []).join("\n");
             }
           }
         } catch (e) {
@@ -5680,7 +5695,7 @@
           const isHttps = window.location.protocol === 'https:';
           statusText.innerHTML = `
             <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-            <span class="text-red-500 font-bold">로컬 백서버 미연결 ${isHttps ? '(HTTPS 보안 차단 주의)' : ''}</span>
+            <span class="text-red-500 font-bold">로컬 백서버 미연결 \${isHttps ? '(HTTPS 보안 차단 주의)' : ''}</span>
           `;
         }
       }
@@ -5707,12 +5722,11 @@
 
           const enabled = scheduleEnabledInput.checked;
           const time = scheduleTimeInput.value;
-          const rawKeywords = scheduleKeywordsArea.value.trim();
+          const rawNaver = scheduleNaverArea.value.trim();
+          const rawGoogle = scheduleGoogleArea.value.trim();
 
-          const keywords = rawKeywords
-            .split(/[\n,]/)
-            .map(k => k.trim())
-            .filter(k => k.length > 0);
+          const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+          const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
 
           try {
             const res = await fetch("http://127.0.0.1:3888/api/config", {
@@ -5721,7 +5735,8 @@
               body: JSON.stringify({
                 scheduleEnabled: enabled,
                 scheduleTime: time,
-                keywords: keywords
+                naverKeywords,
+                googleKeywords
               })
             });
 
@@ -5732,26 +5747,20 @@
 
             alert("⏰ 매일 지정 시각 자동 수집 예약 설정이 성공적으로 저장되었습니다!");
           } catch (e) {
-            alert(`예약 설정 저장 중 에러: ${e.message}`);
+            alert(`예약 설정 저장 중 에러: \${e.message}`);
           }
         });
       }
 
       startBtn.addEventListener("click", async () => {
-        const rawKeywords = keywordsArea.value.trim();
-        if (!rawKeywords) {
-          alert("최소 한 개 이상의 키워드를 입력해 주세요.");
-          return;
-        }
+        const rawNaver = naverArea.value.trim();
+        const rawGoogle = googleArea.value.trim();
 
-        // Split by newlines or commas
-        const keywords = rawKeywords
-          .split(/[\n,]/)
-          .map(k => k.trim())
-          .filter(k => k.length > 0);
+        const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+        const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
 
-        if (keywords.length === 0) {
-          alert("유효한 키워드가 없습니다.");
+        if (naverKeywords.length === 0 && googleKeywords.length === 0) {
+          alert("최소 한 개 이상의 키워드를 네이버 또는 구글에 입력해 주세요.");
           return;
         }
 
@@ -5769,13 +5778,25 @@
         startBtn.disabled = true;
         startBtn.textContent = "캡처 작업 중...";
 
+        // Create tasks array
+        const tasks = [];
+        naverKeywords.forEach(k => tasks.push({ keyword: k, platform: 'naver' }));
+        googleKeywords.forEach(k => tasks.push({ keyword: k, platform: 'google' }));
+
         // Create initial progress placeholders
-        keywords.forEach((keyword, index) => {
+        tasks.forEach((task, index) => {
           const item = document.createElement("div");
-          item.id = `ss-item-${index}`;
+          item.id = `ss-item-\${index}`;
           item.className = "flex justify-between items-center p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-750 text-xs";
+          const platformLabel = task.platform === 'naver' 
+            ? '<span class="px-1.5 py-0.5 bg-green-150 text-green-700 dark-mode:bg-green-950/40 dark-mode:text-green-400 rounded-md text-[9px] font-extrabold mr-1">네이버</span>' 
+            : '<span class="px-1.5 py-0.5 bg-blue-150 text-blue-700 dark-mode:bg-blue-950/40 dark-mode:text-blue-400 rounded-md text-[9px] font-extrabold mr-1">구글</span>';
+          
           item.innerHTML = `
-            <span class="font-bold text-gray-700 dark-mode:text-gray-300">${keyword}</span>
+            <div class="flex items-center">
+              \${platformLabel}
+              <span class="font-bold text-gray-700 dark-mode:text-gray-300">\${task.keyword}</span>
+            </div>
             <span class="font-semibold text-gray-455 flex items-center gap-1">
               <svg class="animate-spin h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -5789,13 +5810,14 @@
 
         // Trigger request to local helper server
         try {
-          summary.textContent = `진행 중 (0 / ${keywords.length})`;
+          summary.textContent = `진행 중 (0 / \${tasks.length})`;
           
           const res = await fetch("http://127.0.0.1:3888/api/screenshot", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              keywords: keywords
+              naverKeywords,
+              googleKeywords
             })
           });
 
@@ -5812,32 +5834,42 @@
           // Update statuses
           let successCount = 0;
           data.results.forEach((resItem, idx) => {
-            const itemElement = document.getElementById(`ss-item-${idx}`);
+            const itemElement = document.getElementById(`ss-item-\${idx}`);
             if (itemElement) {
+              const platformLabel = resItem.platform === 'naver' 
+                ? '<span class="px-1.5 py-0.5 bg-green-150 text-green-700 dark-mode:bg-green-950/40 dark-mode:text-green-400 rounded-md text-[9px] font-extrabold mr-1">네이버</span>' 
+                : '<span class="px-1.5 py-0.5 bg-blue-150 text-blue-700 dark-mode:bg-blue-950/40 dark-mode:text-blue-400 rounded-md text-[9px] font-extrabold mr-1">구글</span>';
+
               if (resItem.success) {
                 successCount++;
                 itemElement.innerHTML = `
-                  <span class="font-bold text-gray-800 dark-mode:text-gray-200">${resItem.keyword}</span>
+                  <div class="flex items-center">
+                    \${platformLabel}
+                    <span class="font-bold text-gray-800 dark-mode:text-gray-200">\${resItem.keyword}</span>
+                  </div>
                   <span class="font-bold text-green-600 dark-mode:text-green-400 flex items-center gap-1">
                     <span>✓ 저장 완료</span>
                   </span>
                 `;
               } else {
                 itemElement.innerHTML = `
-                  <span class="font-bold text-gray-500">${resItem.keyword}</span>
-                  <span class="font-bold text-red-500">✗ 실패 (${resItem.error || '오류'})</span>
+                  <div class="flex items-center font-bold text-gray-500">
+                    \${platformLabel}
+                    <span>\${resItem.keyword}</span>
+                  </div>
+                  <span class="font-bold text-red-500">✗ 실패 (\${resItem.error || '오류'})</span>
                 `;
               }
             }
           });
 
-          summary.textContent = `완료 (성공 ${successCount} / 전체 ${keywords.length})`;
+          summary.textContent = `완료 (성공 \${successCount} / 전체 \${tasks.length})`;
 
         } catch (e) {
           console.error(e);
           summary.textContent = "에러 발생";
           folderPath.textContent = "저장 실패";
-          alert(`작업 중 에러 발생: ${e.message}`);
+          alert(`작업 중 에러 발생: \${e.message}`);
         } finally {
           startBtn.disabled = false;
           startBtn.textContent = "📸 즉시 캡처 시작";

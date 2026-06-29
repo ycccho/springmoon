@@ -1,4 +1,4 @@
-// Naver Search Full-Page Screenshot Helper & Local Web Server
+// Naver & Google Search Full-Page Screenshot Helper & Local Web Server
 // Starts a local HTTP server on port 3888 to bypass browser filesystem sandbox limitations.
 // Auto-installs its own dependencies if missing.
 
@@ -30,6 +30,7 @@ const cors = require('cors');
 const puppeteer = require('puppeteer-core');
 
 const app = express();
+app.use(cors());
 
 // Bypass Chrome Private Network Access (PNA) restrictions when accessed from public HTTPS sites
 // MUST be registered BEFORE cors() so it attaches to preflight OPTIONS requests!
@@ -39,7 +40,6 @@ app.use((req, res, next) => {
 });
 
 app.use(cors());
-
 app.use(express.json({ limit: '50mb' })); // support large OCR payloads
 
 // Serve index.html directly from local port 3888 (same origin)
@@ -53,7 +53,8 @@ const CONFIG_FILE = path.join(__dirname, 'config.json');
 let globalConfig = {
   scheduleEnabled: false,
   scheduleTime: '09:00',
-  keywords: [],
+  naverKeywords: [],
+  googleKeywords: [],
   lastRunDate: ''
 };
 
@@ -61,7 +62,14 @@ function loadConfig() {
   try {
     if (fs.existsSync(CONFIG_FILE)) {
       const data = fs.readFileSync(CONFIG_FILE, 'utf8');
-      globalConfig = { ...globalConfig, ...JSON.parse(data) };
+      const loaded = JSON.parse(data);
+      
+      // Backward compatibility mapping for old 'keywords' array
+      if (loaded.keywords && Array.isArray(loaded.keywords) && loaded.naverKeywords === undefined) {
+        loaded.naverKeywords = loaded.keywords;
+      }
+
+      globalConfig = { ...globalConfig, ...loaded };
       console.log(`[설정 로드] 자동 예약 실행 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}`);
     }
   } catch (e) {
@@ -86,7 +94,7 @@ app.get('/api/config', (req, res) => {
 
 // Save config endpoint
 app.post('/api/config', (req, res) => {
-  const { scheduleEnabled, scheduleTime, keywords } = req.body;
+  const { scheduleEnabled, scheduleTime, naverKeywords, googleKeywords } = req.body;
 
   if (scheduleTime && !/^\d{2}:\d{2}$/.test(scheduleTime)) {
     return res.status(400).json({ success: false, error: '시간 형식은 HH:MM 이어야 합니다.' });
@@ -94,10 +102,11 @@ app.post('/api/config', (req, res) => {
 
   globalConfig.scheduleEnabled = !!scheduleEnabled;
   if (scheduleTime) globalConfig.scheduleTime = scheduleTime;
-  if (Array.isArray(keywords)) globalConfig.keywords = keywords;
+  if (Array.isArray(naverKeywords)) globalConfig.naverKeywords = naverKeywords;
+  if (Array.isArray(googleKeywords)) globalConfig.googleKeywords = googleKeywords;
 
   saveConfig();
-  console.log(`[설정 변경] 예약 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}, 키워드: ${globalConfig.keywords.length}개`);
+  console.log(`[설정 변경] 예약 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}, 네이버: ${globalConfig.naverKeywords.length}개, 구글: ${globalConfig.googleKeywords.length}개`);
   res.json({ success: true, config: globalConfig });
 });
 
@@ -160,6 +169,7 @@ function getBrowserPath() {
   }
 
   const edgePaths = [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // fallback in case
     'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
     'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'
   ];
@@ -186,7 +196,7 @@ function getKstDateString() {
   return `${yyyy}.${mm}.${dd}`;
 }
 
-// Scroll to bottom gradually to trigger all Naver lazy-loaded content/images
+// Scroll to bottom gradually to trigger all Naver/Google lazy-loaded content/images
 async function autoScroll(page) {
   await page.evaluate(async () => {
     await new Promise((resolve) => {
@@ -207,7 +217,8 @@ async function autoScroll(page) {
 }
 
 // Shared capture method
-async function executeScreenshotList(keywords, finalDir, dateStr) {
+async function executeScreenshotList(tasks, finalDir, dateStr) {
+  // tasks: Array of { keyword: string, platform: 'naver' | 'google' }
   const results = [];
   let browser = null;
 
@@ -226,21 +237,48 @@ async function executeScreenshotList(keywords, finalDir, dateStr) {
     const page = await browser.newPage();
     await page.setViewport({ width: 1350, height: 900 });
 
-    for (const keyword of keywords) {
-      const cleanKeyword = keyword.trim();
+    for (const task of tasks) {
+      const cleanKeyword = task.keyword.trim();
       if (!cleanKeyword) continue;
+      const platform = task.platform || 'naver';
 
       try {
-        console.log(`[작업 진행] 검색 및 스크롤: "${cleanKeyword}"`);
-        const url = `https://search.naver.com/search.naver?query=${encodeURIComponent(cleanKeyword)}`;
+        console.log(`[작업 진행] [${platform.toUpperCase()}] 검색 및 스크롤: "${cleanKeyword}"`);
+        let url = '';
+        if (platform === 'naver') {
+          url = `https://search.naver.com/search.naver?query=${encodeURIComponent(cleanKeyword)}`;
+        } else {
+          url = `https://www.google.com/search?q=${encodeURIComponent(cleanKeyword)}`;
+        }
         
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // Google Cookie Consent Bypass if exists
+        if (platform === 'google') {
+          try {
+            const consentBtn = await page.$('button[aria-label="Accept all"], button[aria-label="동의"], #L2AGLb');
+            if (consentBtn) {
+              await consentBtn.click();
+              await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => null);
+            }
+          } catch (e) {}
+        }
+
         await autoScroll(page);
         await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1500)));
 
         const safeFilename = cleanKeyword.replace(/[\\/:*?"<>|]/g, '_');
-        // File saved as [Keyword] [YYYY.MM.DD].jpg
-        const filepath = path.join(finalDir, `${safeFilename} ${dateStr}.jpg`);
+        
+        // File saved as:
+        // Naver: [Keyword] [YYYY.MM.DD].jpg
+        // Google: [Keyword] 구글 [YYYY.MM.DD].jpg
+        let filename = '';
+        if (platform === 'naver') {
+          filename = `${safeFilename} ${dateStr}.jpg`;
+        } else {
+          filename = `${safeFilename} 구글 ${dateStr}.jpg`;
+        }
+        const filepath = path.join(finalDir, filename);
 
         await page.screenshot({
           path: filepath,
@@ -249,11 +287,11 @@ async function executeScreenshotList(keywords, finalDir, dateStr) {
           fullPage: true
         });
 
-        console.log(`[저장 완료] 파일 경로: ${filepath}`);
-        results.push({ keyword: cleanKeyword, success: true, path: filepath });
+        console.log(`[저장 완료] [${platform.toUpperCase()}] 파일 경로: ${filepath}`);
+        results.push({ keyword: cleanKeyword, platform, success: true, path: filepath });
       } catch (err) {
-        console.error(`[작업 실패] 키워드: "${cleanKeyword}", 사유:`, err);
-        results.push({ keyword: cleanKeyword, success: false, error: err.message });
+        console.error(`[작업 실패] [${platform.toUpperCase()}] 키워드: "${cleanKeyword}", 사유:`, err);
+        results.push({ keyword: cleanKeyword, platform, success: false, error: err.message });
       }
     }
   } finally {
@@ -266,10 +304,18 @@ async function executeScreenshotList(keywords, finalDir, dateStr) {
 }
 
 app.post('/api/screenshot', async (req, res) => {
-  const { keywords } = req.body;
+  const { naverKeywords, googleKeywords } = req.body;
 
-  if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
-    return res.status(400).json({ success: false, error: 'Keywords list is required' });
+  const tasks = [];
+  if (Array.isArray(naverKeywords)) {
+    naverKeywords.forEach(k => tasks.push({ keyword: k, platform: 'naver' }));
+  }
+  if (Array.isArray(googleKeywords)) {
+    googleKeywords.forEach(k => tasks.push({ keyword: k, platform: 'google' }));
+  }
+
+  if (tasks.length === 0) {
+    return res.status(400).json({ success: false, error: '수집할 키워드가 없습니다.' });
   }
 
   const dateStr = getKstDateString();
@@ -289,7 +335,7 @@ app.post('/api/screenshot', async (req, res) => {
   }
 
   try {
-    const results = await executeScreenshotList(keywords, finalDir, dateStr);
+    const results = await executeScreenshotList(tasks, finalDir, dateStr);
     res.json({
       success: true,
       folder: finalDir,
@@ -326,8 +372,19 @@ setInterval(async () => {
       if (!fs.existsSync(finalDir)) {
         fs.mkdirSync(finalDir, { recursive: true });
       }
-      await executeScreenshotList(globalConfig.keywords, finalDir, dateStr);
-      console.log(`[예약 자동 실행] 하루 1회 정기 키워드 수집을 성공적으로 완료하였습니다.`);
+
+      const tasks = [];
+      if (Array.isArray(globalConfig.naverKeywords)) {
+        globalConfig.naverKeywords.forEach(k => tasks.push({ keyword: k, platform: 'naver' }));
+      }
+      if (Array.isArray(globalConfig.googleKeywords)) {
+        globalConfig.googleKeywords.forEach(k => tasks.push({ keyword: k, platform: 'google' }));
+      }
+
+      if (tasks.length > 0) {
+        await executeScreenshotList(tasks, finalDir, dateStr);
+        console.log(`[예약 자동 실행] 하루 1회 정기 키워드 수집을 성공적으로 완료하였습니다.`);
+      }
     } catch (err) {
       console.error("[예약 자동 실행 실패]:", err);
     }
@@ -342,7 +399,7 @@ app.options('/api/screenshot', cors(), (req, res) => {
 const PORT = 3888;
 app.listen(PORT, () => {
   console.log(`================================================================`);
-  console.log(` [네이버 키워드 검색 풀스크린 캡처 통합 서버가 시작되었습니다]`);
+  console.log(` [네이버/구글 키워드 검색 풀스크린 캡처 통합 서버 시작되었습니다]`);
   console.log(` 접속용 웹페이지 주소: http://127.0.0.1:${PORT}`);
   console.log(` API Endpoint : http://127.0.0.1:${PORT}/api/screenshot`);
   console.log(` 저장 기본 경로: D:\\rank [파일명: 키워드 YYYY.MM.DD.jpg 저장]`);
