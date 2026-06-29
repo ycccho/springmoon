@@ -235,6 +235,8 @@ async function autoScroll(page) {
         }
       }, 120); // 120ms interval
     });
+    // Scroll back to top so that position:fixed elements (like the search header) align at the top of the screenshot!
+    window.scrollTo(0, 0);
   });
 }
 
