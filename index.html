@@ -5556,6 +5556,11 @@
                 </div>
               </div>
 
+              <div>
+                <label class="block text-xs font-bold text-orange-600 dark-mode:text-orange-400 mb-1.5">🎯 OCR 체크 단어 입력 (선택사항, 쉼표 구분)</label>
+                <input type="text" id="screenshot-ocr-keywords" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-805 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="예시: 인디컴퍼니, inde.co.kr (입력하면 이미지에서 완벽히 일치하는 단어를 찾아 굵은 빨간 동그라미를 그립니다)">
+              </div>
+
               <div class="flex justify-between items-center pt-2">
                 <div id="screenshot-server-status" class="text-[11px] font-bold text-red-500 flex items-center gap-1">
                   <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
@@ -5634,6 +5639,7 @@
       const startBtn = document.getElementById("screenshot-start-btn");
       const naverArea = document.getElementById("screenshot-keywords-naver");
       const googleArea = document.getElementById("screenshot-keywords-google");
+      const ocrArea = document.getElementById("screenshot-ocr-keywords");
       const statusText = document.getElementById("screenshot-server-status");
       const resultCard = document.getElementById("screenshot-result-card");
       const progressList = document.getElementById("screenshot-progress-list");
@@ -5666,8 +5672,8 @@
             if (data.success && data.config) {
               if (scheduleEnabledInput) scheduleEnabledInput.checked = !!data.config.scheduleEnabled;
               if (scheduleTimeInput) scheduleTimeInput.value = data.config.scheduleTime || "09:00";
-              if (scheduleNaverArea) scheduleNaverArea.value = (data.config.naverKeywords || []).join("\n");
-              if (scheduleGoogleArea) scheduleGoogleArea.value = (data.config.googleKeywords || []).join("\n");
+              if (scheduleNaverArea) scheduleNaverArea.value = (data.config.naverKeywords || []).join("\\n");
+              if (scheduleGoogleArea) scheduleGoogleArea.value = (data.config.googleKeywords || []).join("\\n");
             }
           }
         } catch (e) {
@@ -5725,8 +5731,8 @@
           const rawNaver = scheduleNaverArea.value.trim();
           const rawGoogle = scheduleGoogleArea.value.trim();
 
-          const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
-          const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+          const naverKeywords = rawNaver.split(/[\\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+          const googleKeywords = rawGoogle.split(/[\\n,]/).map(k => k.trim()).filter(k => k.length > 0);
 
           try {
             const res = await fetch("http://127.0.0.1:3888/api/config", {
@@ -5755,9 +5761,11 @@
       startBtn.addEventListener("click", async () => {
         const rawNaver = naverArea.value.trim();
         const rawGoogle = googleArea.value.trim();
+        const rawOcr = ocrArea.value.trim();
 
-        const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
-        const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+        const naverKeywords = rawNaver.split(/[\\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+        const googleKeywords = rawGoogle.split(/[\\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+        const ocrKeywords = rawOcr.split(/[,]/).map(k => k.trim()).filter(k => k.length > 0);
 
         if (naverKeywords.length === 0 && googleKeywords.length === 0) {
           alert("최소 한 개 이상의 키워드를 네이버 또는 구글에 입력해 주세요.");
@@ -5765,7 +5773,7 @@
         }
 
         if (!serverOnline) {
-          alert("로컬 백서버(node screenshot_server.js)가 실행 중이지 않습니다.\n터미널에서 먼저 실행해 주세요!");
+          alert("로컬 백서버(node screenshot_server.js)가 실행 중이지 않습니다.\\n터미널에서 먼저 실행해 주세요!");
           return;
         }
 
@@ -5787,7 +5795,7 @@
         tasks.forEach((task, index) => {
           const item = document.createElement("div");
           item.id = `ss-item-\${index}`;
-          item.className = "flex justify-between items-center p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-750 text-xs";
+          item.className = "flex justify-between items-center p-3 bg-gray-55 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-750 text-xs";
           const platformLabel = task.platform === 'naver' 
             ? '<span class="px-1.5 py-0.5 bg-green-150 text-green-700 dark-mode:bg-green-950/40 dark-mode:text-green-400 rounded-md text-[9px] font-extrabold mr-1">네이버</span>' 
             : '<span class="px-1.5 py-0.5 bg-blue-150 text-blue-700 dark-mode:bg-blue-950/40 dark-mode:text-blue-400 rounded-md text-[9px] font-extrabold mr-1">구글</span>';
@@ -5817,7 +5825,8 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               naverKeywords,
-              googleKeywords
+              googleKeywords,
+              ocrKeywords
             })
           });
 

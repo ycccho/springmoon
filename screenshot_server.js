@@ -217,7 +217,7 @@ async function autoScroll(page) {
 }
 
 // OCR 검출 및 매칭되는 단어에 빨간색 동그라미 그리기 함수
-async function detectAndDrawRedCircles(browser, buffer) {
+async function detectAndDrawRedCircles(browser, buffer, ocrKeywords) {
   try {
     const base64Image = buffer.toString('base64');
     const apiKey = "AIzaSyA8IWoPG8vHeVQISBiI9i4-csuluwsV_no";
@@ -253,17 +253,17 @@ async function detectAndDrawRedCircles(browser, buffer) {
       return buffer;
     }
 
-    const targetWords = ["인디컴퍼니", "inde.co.kr"];
+    const targetWords = (ocrKeywords && ocrKeywords.length > 0) ? ocrKeywords : ["인디컴퍼니", "inde.co.kr"];
     const matchedBoxes = [];
 
     for (let i = 1; i < textAnnotations.length; i++) {
       const annotation = textAnnotations[i];
       const originalText = annotation.description || "";
-      const text = originalText.toLowerCase().replace(/\s+/g, "");
+      const text = originalText.toLowerCase().replace(/[\s\-_]+/g, "");
 
       const matches = targetWords.some(target => {
-        const cleanTarget = target.toLowerCase().replace(/\s+/g, "");
-        return text.includes(cleanTarget) || (text.length >= 2 && cleanTarget.includes(text));
+        const cleanTarget = target.toLowerCase().replace(/[\s\-_]+/g, "");
+        return text === cleanTarget;
       });
 
       if (matches && annotation.boundingPoly && annotation.boundingPoly.vertices) {
@@ -285,7 +285,7 @@ async function detectAndDrawRedCircles(browser, buffer) {
     }
 
     if (matchedBoxes.length === 0) {
-      console.log("[OCR 검출] 지정된 특정 단어(인디컴퍼니, inde.co.kr)가 발견되지 않았습니다.");
+      console.log("[OCR 검출] 지정된 특정 단어가 발견되지 않았습니다.");
       return buffer;
     }
 
@@ -373,7 +373,7 @@ async function detectAndDrawRedCircles(browser, buffer) {
 }
 
 // Shared capture method
-async function executeScreenshotList(tasks, finalDir, dateStr) {
+async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
   // tasks: Array of { keyword: string, platform: 'naver' | 'google' }
   const results = [];
   let browser = null;
@@ -391,6 +391,13 @@ async function executeScreenshotList(tasks, finalDir, dateStr) {
     });
 
     const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
+    });
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    });
     await page.setViewport({ width: 1350, height: 900 });
 
     for (const task of tasks) {
@@ -400,17 +407,11 @@ async function executeScreenshotList(tasks, finalDir, dateStr) {
 
       try {
         console.log(`[작업 진행] [${platform.toUpperCase()}] 검색 및 스크롤: "${cleanKeyword}"`);
-        let url = '';
-        if (platform === 'naver') {
-          url = `https://search.naver.com/search.naver?query=${encodeURIComponent(cleanKeyword)}`;
-        } else {
-          url = `https://www.google.com/search?q=${encodeURIComponent(cleanKeyword)}`;
-        }
-        
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // Google Cookie Consent Bypass if exists
         if (platform === 'google') {
+          // Safe human-like navigation starting from the main search page
+          await page.goto('https://www.google.com', { waitUntil: 'networkidle2', timeout: 60000 });
+          
+          // Google Cookie Consent Bypass if exists
           try {
             const consentBtn = await page.$('button[aria-label="Accept all"], button[aria-label="동의"], #L2AGLb');
             if (consentBtn) {
@@ -418,6 +419,21 @@ async function executeScreenshotList(tasks, finalDir, dateStr) {
               await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => null);
             }
           } catch (e) {}
+
+          const searchBoxSelector = 'textarea[name="q"], input[name="q"]';
+          await page.waitForSelector(searchBoxSelector, { timeout: 10000 });
+          await page.click(searchBoxSelector);
+          
+          // Human-like typing with random character delays
+          for (const char of cleanKeyword) {
+            await page.type(searchBoxSelector, char);
+            await new Promise(resolve => setTimeout(resolve, 60 + Math.random() * 80));
+          }
+          await page.keyboard.press('Enter');
+          await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => null);
+        } else {
+          const url = `https://search.naver.com/search.naver?query=${encodeURIComponent(cleanKeyword)}`;
+          await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
         }
 
         await autoScroll(page);
@@ -443,7 +459,7 @@ async function executeScreenshotList(tasks, finalDir, dateStr) {
         });
 
         // Run OCR and draw red circles on it if target words are found
-        screenshotBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer);
+        screenshotBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer, ocrKeywords);
 
         fs.writeFileSync(filepath, screenshotBuffer);
 
@@ -464,7 +480,7 @@ async function executeScreenshotList(tasks, finalDir, dateStr) {
 }
 
 app.post('/api/screenshot', async (req, res) => {
-  const { naverKeywords, googleKeywords } = req.body;
+  const { naverKeywords, googleKeywords, ocrKeywords } = req.body;
 
   const tasks = [];
   if (Array.isArray(naverKeywords)) {
@@ -495,7 +511,7 @@ app.post('/api/screenshot', async (req, res) => {
   }
 
   try {
-    const results = await executeScreenshotList(tasks, finalDir, dateStr);
+    const results = await executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords);
     res.json({
       success: true,
       folder: finalDir,
