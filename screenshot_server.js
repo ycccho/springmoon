@@ -200,7 +200,7 @@ app.listen(PORT, () => {
   console.log(`================================================================`);
   console.log(` [네이버 키워드 검색 풀스크린 캡처 헬퍼 백서버가 시작되었습니다]`);
   console.log(` 로컬 접속 포트: ${PORT}`);
-  console.log(` API Endpoint : http://localhost:${PORT}/api/screenshot`);
+  console.log(` API Endpoint : http://127.0.0.1:${PORT}/api/screenshot`);
   console.log(` 저장 기본 경로: D:\\ [실행 날짜 YYYY.MM.DD 폴더로 저장]`);
   console.log(` 실행 종료는 터미널에서 Ctrl+C를 눌러주세요.`);
   console.log(`================================================================`);
