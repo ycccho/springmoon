@@ -5731,8 +5731,8 @@
           const rawNaver = scheduleNaverArea.value.trim();
           const rawGoogle = scheduleGoogleArea.value.trim();
 
-          const naverKeywords = rawNaver.split(/[\\n,]/).map(k => k.trim()).filter(k => k.length > 0);
-          const googleKeywords = rawGoogle.split(/[\\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+          const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+          const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
 
           try {
             const res = await fetch("http://127.0.0.1:3888/api/config", {
@@ -5763,8 +5763,8 @@
         const rawGoogle = googleArea.value.trim();
         const rawOcr = ocrArea.value.trim();
 
-        const naverKeywords = rawNaver.split(/[\\n,]/).map(k => k.trim()).filter(k => k.length > 0);
-        const googleKeywords = rawGoogle.split(/[\\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+        const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+        const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
         const ocrKeywords = rawOcr.split(/[,]/).map(k => k.trim()).filter(k => k.length > 0);
 
         if (naverKeywords.length === 0 && googleKeywords.length === 0) {

@@ -100,6 +100,9 @@ app.post('/api/config', (req, res) => {
     return res.status(400).json({ success: false, error: '시간 형식은 HH:MM 이어야 합니다.' });
   }
 
+  if (globalConfig.scheduleTime !== scheduleTime || globalConfig.scheduleEnabled !== !!scheduleEnabled) {
+    globalConfig.lastRunDate = ''; // Reset run date to allow same-day testing when time or status changes
+  }
   globalConfig.scheduleEnabled = !!scheduleEnabled;
   if (scheduleTime) globalConfig.scheduleTime = scheduleTime;
   if (Array.isArray(naverKeywords)) globalConfig.naverKeywords = naverKeywords;
