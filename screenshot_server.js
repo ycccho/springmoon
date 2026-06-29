@@ -3,35 +3,63 @@
 // Auto-installs its own dependencies if missing.
 
 const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 // 1. Auto-install required packages if missing
 try {
   require('express');
   require('cors');
-  require('puppeteer');
+  require('puppeteer-core');
 } catch (e) {
   console.log("==================================================");
-  console.log(" [안내] 필수 패키지(express, cors, puppeteer)가 없습니다.");
-  console.log(" 자동 설치를 진행하고 있습니다. 약 1~2분 소요될 수 있습니다...");
+  console.log(" [안내] 필수 패키지(express, cors, puppeteer-core)가 없습니다.");
+  console.log(" 자동 설치를 진행하고 있습니다. 약 10초 이내에 완료됩니다...");
   console.log("==================================================");
   try {
-    execSync('npm install express cors puppeteer --no-audit --no-fund', { stdio: 'inherit' });
+    execSync('npm install express cors puppeteer-core --no-audit --no-fund', { stdio: 'inherit' });
     console.log("\n>>> 패키지 설치 완료! 서버를 시작합니다.\n");
   } catch (err) {
-    console.error("패키지 자동 설치 실패. 터미널에서 'npm install express cors puppeteer'를 직접 입력해 주세요.", err);
+    console.error("패키지 자동 설치 실패. 터미널에서 'npm install express cors puppeteer-core'를 직접 입력해 주세요.", err);
     process.exit(1);
   }
 }
 
 const express = require('express');
 const cors = require('cors');
-const puppeteer = require('puppeteer');
-const fs = require('fs');
-const path = require('path');
+const puppeteer = require('puppeteer-core');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Helper: Find Google Chrome or Microsoft Edge on Windows
+function getBrowserPath() {
+  const chromePaths = [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    path.join(process.env.LOCALAPPDATA || 'C:\\Users\\' + (process.env.USERNAME || 'Default') + '\\AppData\\Local', 'Google\\Chrome\\Application\\chrome.exe')
+  ];
+  for (const p of chromePaths) {
+    if (fs.existsSync(p)) {
+      console.log(`[감지] 사용 브라우저: Chrome (${p})`);
+      return p;
+    }
+  }
+
+  const edgePaths = [
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'
+  ];
+  for (const p of edgePaths) {
+    if (fs.existsSync(p)) {
+      console.log(`[감지] 사용 브라우저: Microsoft Edge (${p})`);
+      return p;
+    }
+  }
+
+  return null;
+}
 
 // Helper: Get today's date in Korean Standard Time (KST) formatted as YYYY.MM.DD
 function getKstDateString() {
@@ -100,7 +128,13 @@ app.post('/api/screenshot', async (req, res) => {
   let browser = null;
 
   try {
+    const browserPath = getBrowserPath();
+    if (!browserPath) {
+      throw new Error("시스템에서 Chrome 또는 Edge 브라우저를 찾을 수 없습니다.");
+    }
+
     browser = await puppeteer.launch({
+      executablePath: browserPath,
       headless: "new",
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
