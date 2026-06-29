@@ -5765,7 +5765,7 @@
 
         const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
         const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
-        const ocrKeywords = rawOcr.split(/[,]/).map(k => k.trim()).filter(k => k.length > 0);
+        const ocrKeywords = rawOcr.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
 
         if (naverKeywords.length === 0 && googleKeywords.length === 0) {
           alert("최소 한 개 이상의 키워드를 네이버 또는 구글에 입력해 주세요.");

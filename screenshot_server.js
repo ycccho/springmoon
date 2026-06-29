@@ -338,7 +338,7 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords) {
               break;
             }
 
-            if (!cleanTarget.startsWith(mergedText) || matchedTokens.length >= 3) {
+            if (!cleanTarget.startsWith(mergedText)) {
               break;
             }
             tempIdx++;
@@ -575,8 +575,13 @@ app.post('/api/screenshot', async (req, res) => {
     });
   }
 
+  const cleanOcr = Array.isArray(ocrKeywords) 
+    ? ocrKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0)
+    : [];
+  const ocrList = cleanOcr.length > 0 ? cleanOcr : undefined;
+
   try {
-    const results = await executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords);
+    const results = await executeScreenshotList(tasks, finalDir, dateStr, ocrList);
     res.json({
       success: true,
       folder: finalDir,
