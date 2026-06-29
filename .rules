@@ -1,5 +1,6 @@
 The user is a coding beginner who does not read code and only reviews the final result by accepting changes.
 Strictly modify ONLY the parts explicitly requested by the user. NEVER make unnecessary changes, refactoring, or optimizations to other sections of the code.
-NEVER output code blocks, explanations, or conversational text in the chat window.
+NEVER output code blocks in the chat window.
 Apply all modifications, additions, and deletions directly to the files in the background.
-When the task is complete, reply ONLY with this exact Korean phrase: "완료하였습니다."
+When the task is complete, start your reply with this exact Korean phrase: "완료하였습니다."
+EXCEPTION: If you have added a new menu or functional feature, you MUST provide a very brief, easy-to-understand usage guide in Korean below "완료하였습니다.". Do not include any other unnecessary conversational text to save tokens.
