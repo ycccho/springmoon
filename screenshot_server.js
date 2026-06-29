@@ -31,6 +31,13 @@ const puppeteer = require('puppeteer-core');
 
 const app = express();
 app.use(cors());
+
+// Bypass Chrome Private Network Access (PNA) restrictions when accessed from public HTTPS sites
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
+  next();
+});
+
 app.use(express.json());
 
 // Helper: Find Google Chrome or Microsoft Edge on Windows
