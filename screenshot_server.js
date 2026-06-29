@@ -216,6 +216,162 @@ async function autoScroll(page) {
   });
 }
 
+// OCR 검출 및 매칭되는 단어에 빨간색 동그라미 그리기 함수
+async function detectAndDrawRedCircles(browser, buffer) {
+  try {
+    const base64Image = buffer.toString('base64');
+    const apiKey = "AIzaSyA8IWoPG8vHeVQISBiI9i4-csuluwsV_no";
+    const googleUrl = `https://vision.googleapis.com/v1/images:annotate?key=${encodeURIComponent(apiKey)}`;
+    
+    console.log("[OCR 검출] Google Vision API 호출 중...");
+    const googleResponse = await fetch(googleUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: [
+          {
+            image: { content: base64Image },
+            features: [{ type: 'DOCUMENT_TEXT_DETECTION' }]
+          }
+        ]
+      })
+    });
+
+    if (!googleResponse.ok) {
+      const errText = await googleResponse.text();
+      console.error(`Google Vision API 오류: ${googleResponse.status} - ${errText}`);
+      return buffer;
+    }
+
+    const data = await googleResponse.json();
+    const responses = data.responses || [];
+    const response = responses[0] || {};
+    const textAnnotations = response.textAnnotations || [];
+    
+    if (textAnnotations.length === 0) {
+      console.log("[OCR 검출] 이미지에서 텍스트가 발견되지 않았습니다.");
+      return buffer;
+    }
+
+    const targetWords = ["인디컴퍼니", "inde.co.kr"];
+    const matchedBoxes = [];
+
+    for (let i = 1; i < textAnnotations.length; i++) {
+      const annotation = textAnnotations[i];
+      const originalText = annotation.description || "";
+      const text = originalText.toLowerCase().replace(/\s+/g, "");
+
+      const matches = targetWords.some(target => {
+        const cleanTarget = target.toLowerCase().replace(/\s+/g, "");
+        return text.includes(cleanTarget) || (text.length >= 2 && cleanTarget.includes(text));
+      });
+
+      if (matches && annotation.boundingPoly && annotation.boundingPoly.vertices) {
+        const vertices = annotation.boundingPoly.vertices;
+        const v = vertices.map(vertex => ({
+          x: vertex.x || 0,
+          y: vertex.y || 0
+        }));
+
+        const xs = v.map(pt => pt.x);
+        const ys = v.map(pt => pt.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+
+        matchedBoxes.push({ minX, maxX, minY, maxY, text: originalText });
+      }
+    }
+
+    if (matchedBoxes.length === 0) {
+      console.log("[OCR 검출] 지정된 특정 단어(인디컴퍼니, inde.co.kr)가 발견되지 않았습니다.");
+      return buffer;
+    }
+
+    console.log(`[OCR 검출] 특정 단어 발견! 매칭 개수: ${matchedBoxes.length}. 빨간 동그라미 그리기 시작...`);
+
+    const page = await browser.newPage();
+    
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { margin: 0; padding: 0; overflow: hidden; background: white; }
+          canvas { display: block; }
+        </style>
+      </head>
+      <body>
+        <canvas id="canvas"></canvas>
+        <script>
+          window.drawImageAndCircles = function(base64Data, boxes) {
+            return new Promise((resolve, reject) => {
+              const img = new Image();
+              img.src = 'data:image/jpeg;base64,' + base64Data;
+              img.onload = function() {
+                const canvas = document.getElementById('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 6;
+
+                boxes.forEach(box => {
+                  const width = box.maxX - box.minX;
+                  const height = box.maxY - box.minY;
+                  const centerX = box.minX + width / 2;
+                  const centerY = box.minY + height / 2;
+                  const radius = Math.max(width, height) / 2 + 12;
+
+                  ctx.beginPath();
+                  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                  ctx.stroke();
+                });
+                
+                resolve({ width: canvas.width, height: canvas.height });
+              };
+              img.onerror = function(err) {
+                reject(err);
+              };
+            });
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    await page.setContent(htmlContent);
+    
+    const dimensions = await page.evaluate(async (imgBase64, boxes) => {
+      return await window.drawImageAndCircles(imgBase64, boxes);
+    }, base64Image, matchedBoxes);
+
+    await page.setViewport({
+      width: dimensions.width,
+      height: dimensions.height,
+      deviceScaleFactor: 1
+    });
+
+    const circledBuffer = await page.screenshot({
+      type: 'jpeg',
+      quality: 85,
+      fullPage: true
+    });
+
+    await page.close();
+    console.log("[OCR 검출] 빨간 동그라미 그리기 및 이미지 재저장 완료.");
+    return circledBuffer;
+
+  } catch (err) {
+    console.error("[OCR 검출/그리기 실패]:", err);
+    return buffer;
+  }
+}
+
 // Shared capture method
 async function executeScreenshotList(tasks, finalDir, dateStr) {
   // tasks: Array of { keyword: string, platform: 'naver' | 'google' }
@@ -280,12 +436,16 @@ async function executeScreenshotList(tasks, finalDir, dateStr) {
         }
         const filepath = path.join(finalDir, filename);
 
-        await page.screenshot({
-          path: filepath,
+        let screenshotBuffer = await page.screenshot({
           type: 'jpeg',
           quality: 85,
           fullPage: true
         });
+
+        // Run OCR and draw red circles on it if target words are found
+        screenshotBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer);
+
+        fs.writeFileSync(filepath, screenshotBuffer);
 
         console.log(`[저장 완료] [${platform.toUpperCase()}] 파일 경로: ${filepath}`);
         results.push({ keyword: cleanKeyword, platform, success: true, path: filepath });
