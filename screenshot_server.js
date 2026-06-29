@@ -280,30 +280,71 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords) {
 
     for (let i = 1; i < textAnnotations.length; i++) {
       const annotation = textAnnotations[i];
-      const originalText = annotation.description || "";
-      const text = originalText.toLowerCase().replace(/[\s\-_]+/g, "");
+      
+      targetWords.forEach(target => {
+        const cleanTarget = target.toLowerCase().replace(/[\s\-_.()]+/g, "");
+        const text = (annotation.description || "").toLowerCase().replace(/[\s\-_.()]+/g, "");
+        
+        if (!text) return;
 
-      const matches = targetWords.some(target => {
-        const cleanTarget = target.toLowerCase().replace(/[\s\-_]+/g, "");
-        return text.includes(cleanTarget);
+        // 1. Single token match
+        if (text.includes(cleanTarget)) {
+          if (annotation.boundingPoly && annotation.boundingPoly.vertices) {
+            const vertices = annotation.boundingPoly.vertices;
+            const xs = vertices.map(v => v.x || 0);
+            const ys = vertices.map(v => v.y || 0);
+            matchedBoxes.push({
+              minX: Math.min(...xs),
+              maxX: Math.max(...xs),
+              minY: Math.min(...ys),
+              maxY: Math.max(...ys),
+              text: annotation.description || ""
+            });
+          }
+          return;
+        }
+
+        // 2. Split token match (consecutive tokens merge loop)
+        if (cleanTarget.startsWith(text)) {
+          let mergedText = text;
+          let tempIdx = i + 1;
+          let matchedTokens = [annotation];
+
+          while (tempIdx < textAnnotations.length) {
+            const nextAnnotation = textAnnotations[tempIdx];
+            const nextText = (nextAnnotation.description || "").toLowerCase().replace(/[\s\-_.()]+/g, "");
+            mergedText += nextText;
+            matchedTokens.push(nextAnnotation);
+
+            if (mergedText.includes(cleanTarget)) {
+              // Found consecutive match!
+              const xs = [];
+              const ys = [];
+              matchedTokens.forEach(tok => {
+                if (tok.boundingPoly && tok.boundingPoly.vertices) {
+                  tok.boundingPoly.vertices.forEach(v => {
+                    xs.push(v.x || 0);
+                    ys.push(v.y || 0);
+                  });
+                }
+              });
+              matchedBoxes.push({
+                minX: Math.min(...xs),
+                maxX: Math.max(...xs),
+                minY: Math.min(...ys),
+                maxY: Math.max(...ys),
+                text: mergedText
+              });
+              break;
+            }
+
+            if (!cleanTarget.startsWith(mergedText) || matchedTokens.length >= 3) {
+              break;
+            }
+            tempIdx++;
+          }
+        }
       });
-
-      if (matches && annotation.boundingPoly && annotation.boundingPoly.vertices) {
-        const vertices = annotation.boundingPoly.vertices;
-        const v = vertices.map(vertex => ({
-          x: vertex.x || 0,
-          y: vertex.y || 0
-        }));
-
-        const xs = v.map(pt => pt.x);
-        const ys = v.map(pt => pt.y);
-        const minX = Math.min(...xs);
-        const maxX = Math.max(...xs);
-        const minY = Math.min(...ys);
-        const maxY = Math.max(...ys);
-
-        matchedBoxes.push({ minX, maxX, minY, maxY, text: originalText });
-      }
     }
 
     if (matchedBoxes.length === 0) {
