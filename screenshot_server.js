@@ -285,7 +285,7 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords) {
 
       const matches = targetWords.some(target => {
         const cleanTarget = target.toLowerCase().replace(/[\s\-_]+/g, "");
-        return text === cleanTarget;
+        return text.includes(cleanTarget);
       });
 
       if (matches && annotation.boundingPoly && annotation.boundingPoly.vertices) {
