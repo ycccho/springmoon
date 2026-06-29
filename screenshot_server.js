@@ -1,4 +1,4 @@
-// Naver Search Full-Page Screenshot Helper Server
+// Naver Search Full-Page Screenshot Helper & Local Web Server
 // Starts a local HTTP server on port 3888 to bypass browser filesystem sandbox limitations.
 // Auto-installs its own dependencies if missing.
 
@@ -38,7 +38,57 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // support large OCR payloads
+
+// Serve index.html directly from local port 3888 (same origin)
+app.use(express.static(__dirname));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Proxy helper function
+async function handleProxy(req, res, targetUrl) {
+  try {
+    const options = {
+      method: req.method,
+      headers: {
+        'content-type': 'application/json',
+        'accept': 'application/json, text/plain, */*'
+      }
+    };
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      options.body = JSON.stringify(req.body);
+    }
+    const response = await fetch(targetUrl, options);
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      res.status(response.status).json(data);
+    } else {
+      const data = await response.text();
+      res.status(response.status).send(data);
+    }
+  } catch (err) {
+    console.error(`Proxy to ${targetUrl} failed:`, err);
+    res.status(500).json({ error: `Proxy failed: ${err.message}` });
+  }
+}
+
+// Proxied Routes to Cloudflare Pages production serverless functions
+app.all('/api/powercontent', (req, res) => {
+  const target = 'https://springmoons.pages.dev/api/powercontent' + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');
+  handleProxy(req, res, target);
+});
+
+app.all('/api/vision-ocr', (req, res) => {
+  const target = 'https://springmoons.pages.dev/api/vision-ocr';
+  handleProxy(req, res, target);
+});
+
+app.all('/api/backlink', (req, res) => {
+  const target = 'https://springmoons.pages.dev/api/backlink' + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');
+  handleProxy(req, res, target);
+});
 
 // Helper: Find Google Chrome or Microsoft Edge on Windows
 function getBrowserPath() {
@@ -205,8 +255,8 @@ app.options('/api/screenshot', cors(), (req, res) => {
 const PORT = 3888;
 app.listen(PORT, () => {
   console.log(`================================================================`);
-  console.log(` [네이버 키워드 검색 풀스크린 캡처 헬퍼 백서버가 시작되었습니다]`);
-  console.log(` 로컬 접속 포트: ${PORT}`);
+  console.log(` [네이버 키워드 검색 풀스크린 캡처 통합 서버가 시작되었습니다]`);
+  console.log(` 접속용 웹페이지 주소: http://127.0.0.1:${PORT}`);
   console.log(` API Endpoint : http://127.0.0.1:${PORT}/api/screenshot`);
   console.log(` 저장 기본 경로: D:\\ [실행 날짜 YYYY.MM.DD 폴더로 저장]`);
   console.log(` 실행 종료는 터미널에서 Ctrl+C를 눌러주세요.`);
