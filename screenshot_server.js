@@ -30,13 +30,15 @@ const cors = require('cors');
 const puppeteer = require('puppeteer-core');
 
 const app = express();
-app.use(cors());
 
 // Bypass Chrome Private Network Access (PNA) restrictions when accessed from public HTTPS sites
+// MUST be registered BEFORE cors() so it attaches to preflight OPTIONS requests!
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Private-Network', 'true');
   next();
 });
+
+app.use(cors());
 
 app.use(express.json({ limit: '50mb' })); // support large OCR payloads
 
@@ -44,6 +46,59 @@ app.use(express.json({ limit: '50mb' })); // support large OCR payloads
 app.use(express.static(__dirname));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// --- Scheduling configuration load/save ---
+const CONFIG_FILE = path.join(__dirname, 'config.json');
+let globalConfig = {
+  scheduleEnabled: false,
+  scheduleTime: '09:00',
+  keywords: [],
+  lastRunDate: ''
+};
+
+function loadConfig() {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const data = fs.readFileSync(CONFIG_FILE, 'utf8');
+      globalConfig = { ...globalConfig, ...JSON.parse(data) };
+      console.log(`[설정 로드] 자동 예약 실행 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}`);
+    }
+  } catch (e) {
+    console.error("config.json 로드 실패:", e);
+  }
+}
+
+function saveConfig() {
+  try {
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(globalConfig, null, 2), 'utf8');
+  } catch (e) {
+    console.error("config.json 저장 실패:", e);
+  }
+}
+
+loadConfig();
+
+// Get config endpoint
+app.get('/api/config', (req, res) => {
+  res.json({ success: true, config: globalConfig });
+});
+
+// Save config endpoint
+app.post('/api/config', (req, res) => {
+  const { scheduleEnabled, scheduleTime, keywords } = req.body;
+
+  if (scheduleTime && !/^\d{2}:\d{2}$/.test(scheduleTime)) {
+    return res.status(400).json({ success: false, error: '시간 형식은 HH:MM 이어야 합니다.' });
+  }
+
+  globalConfig.scheduleEnabled = !!scheduleEnabled;
+  if (scheduleTime) globalConfig.scheduleTime = scheduleTime;
+  if (Array.isArray(keywords)) globalConfig.keywords = keywords;
+
+  saveConfig();
+  console.log(`[설정 변경] 예약 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}, 키워드: ${globalConfig.keywords.length}개`);
+  res.json({ success: true, config: globalConfig });
 });
 
 // Proxy helper function
@@ -151,36 +206,8 @@ async function autoScroll(page) {
   });
 }
 
-app.post('/api/screenshot', async (req, res) => {
-  const { keywords, saveDir } = req.body;
-
-  if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
-    return res.status(400).json({ success: false, error: 'Keywords list is required' });
-  }
-
-  const dateStr = getKstDateString();
-  let baseDir = saveDir ? saveDir.trim() : 'D:\\';
-  
-  // Normalize Windows path suffix
-  if (!baseDir.endsWith('\\') && !baseDir.endsWith('/')) {
-    baseDir += '\\';
-  }
-
-  const finalDir = path.join(baseDir, dateStr);
-
-  // Try creating directory
-  try {
-    if (!fs.existsSync(finalDir)) {
-      fs.mkdirSync(finalDir, { recursive: true });
-    }
-  } catch (e) {
-    console.error(`지정된 경로(${finalDir}) 폴더 생성 실패:`, e);
-    return res.status(500).json({ 
-      success: false, 
-      error: `저장 폴더를 생성할 수 없습니다. 경로가 올바르며 D: 드라이브 접근 권한이 있는지 확인하세요. (오류: ${e.message})` 
-    });
-  }
-
+// Shared capture method
+async function executeScreenshotList(keywords, finalDir, dateStr) {
   const results = [];
   let browser = null;
 
@@ -197,7 +224,6 @@ app.post('/api/screenshot', async (req, res) => {
     });
 
     const page = await browser.newPage();
-    // Use desktop viewport
     await page.setViewport({ width: 1350, height: 900 });
 
     for (const keyword of keywords) {
@@ -209,18 +235,17 @@ app.post('/api/screenshot', async (req, res) => {
         const url = `https://search.naver.com/search.naver?query=${encodeURIComponent(cleanKeyword)}`;
         
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-        
-        // Scroll step-by-step to load lazy images
         await autoScroll(page);
-        
-        // Wait another second for final image rendering
         await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1500)));
 
         const safeFilename = cleanKeyword.replace(/[\\/:*?"<>|]/g, '_');
-        const filepath = path.join(finalDir, `${safeFilename}.png`);
+        // File saved as [Keyword] [YYYY.MM.DD].jpg
+        const filepath = path.join(finalDir, `${safeFilename} ${dateStr}.jpg`);
 
         await page.screenshot({
           path: filepath,
+          type: 'jpeg',
+          quality: 85,
           fullPage: true
         });
 
@@ -231,21 +256,83 @@ app.post('/api/screenshot', async (req, res) => {
         results.push({ keyword: cleanKeyword, success: false, error: err.message });
       }
     }
-  } catch (e) {
-    console.error("Puppeteer 기동 오류:", e);
-    return res.status(500).json({ success: false, error: `브라우저 제어 모듈 실행 실패: ${e.message}` });
   } finally {
     if (browser) {
       await browser.close();
     }
   }
 
-  res.json({
-    success: true,
-    folder: finalDir,
-    results
-  });
+  return results;
+}
+
+app.post('/api/screenshot', async (req, res) => {
+  const { keywords } = req.body;
+
+  if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
+    return res.status(400).json({ success: false, error: 'Keywords list is required' });
+  }
+
+  const dateStr = getKstDateString();
+  const finalDir = 'D:\\rank';
+
+  // Try creating D:\rank directory
+  try {
+    if (!fs.existsSync(finalDir)) {
+      fs.mkdirSync(finalDir, { recursive: true });
+    }
+  } catch (e) {
+    console.error(`지정된 경로(${finalDir}) 폴더 생성 실패:`, e);
+    return res.status(500).json({ 
+      success: false, 
+      error: `D:\\rank 저장 폴더를 생성할 수 없습니다. 권한이 있는지 확인하세요. (오류: ${e.message})` 
+    });
+  }
+
+  try {
+    const results = await executeScreenshotList(keywords, finalDir, dateStr);
+    res.json({
+      success: true,
+      folder: finalDir,
+      results
+    });
+  } catch (e) {
+    console.error("작업 기동 에러:", e);
+    res.status(500).json({ success: false, error: e.message });
+  }
 });
+
+// Background automation scheduler loop (checks every 30 seconds)
+setInterval(async () => {
+  if (!globalConfig.scheduleEnabled) return;
+
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+  const kst = new Date(utc + (9 * 60 * 60 * 1000)); // KST
+
+  const hour = String(kst.getHours()).padStart(2, '0');
+  const minute = String(kst.getMinutes()).padStart(2, '0');
+  const currentTimeStr = `${hour}:${minute}`;
+
+  const dateStr = `${kst.getFullYear()}.${String(kst.getMonth() + 1).padStart(2, '0')}.${String(kst.getDate()).padStart(2, '0')}`;
+
+  // If time matches and not run today yet
+  if (currentTimeStr === globalConfig.scheduleTime && globalConfig.lastRunDate !== dateStr) {
+    globalConfig.lastRunDate = dateStr;
+    saveConfig();
+
+    console.log(`[예약 자동 실행] 예정된 시각(${globalConfig.scheduleTime})이 되어 수집을 자동 시작합니다.`);
+    const finalDir = 'D:\\rank';
+    try {
+      if (!fs.existsSync(finalDir)) {
+        fs.mkdirSync(finalDir, { recursive: true });
+      }
+      await executeScreenshotList(globalConfig.keywords, finalDir, dateStr);
+      console.log(`[예약 자동 실행] 하루 1회 정기 키워드 수집을 성공적으로 완료하였습니다.`);
+    } catch (err) {
+      console.error("[예약 자동 실행 실패]:", err);
+    }
+  }
+}, 30000);
 
 // OPTIONS preflight endpoint for client checks
 app.options('/api/screenshot', cors(), (req, res) => {
@@ -258,7 +345,7 @@ app.listen(PORT, () => {
   console.log(` [네이버 키워드 검색 풀스크린 캡처 통합 서버가 시작되었습니다]`);
   console.log(` 접속용 웹페이지 주소: http://127.0.0.1:${PORT}`);
   console.log(` API Endpoint : http://127.0.0.1:${PORT}/api/screenshot`);
-  console.log(` 저장 기본 경로: D:\\ [실행 날짜 YYYY.MM.DD 폴더로 저장]`);
+  console.log(` 저장 기본 경로: D:\\rank [파일명: 키워드 YYYY.MM.DD.jpg 저장]`);
   console.log(` 실행 종료는 터미널에서 Ctrl+C를 눌러주세요.`);
   console.log(`================================================================`);
 });
