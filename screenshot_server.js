@@ -351,7 +351,7 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords) {
 
     if (matchedBoxes.length === 0) {
       console.log("[OCR 검출] 지정된 특정 단어가 발견되지 않았습니다.");
-      return buffer;
+      return null;
     }
 
     console.log(`[OCR 검출] 특정 단어 발견! 매칭 개수: ${matchedBoxes.length}. 빨간 동그라미 그리기 시작...`);
@@ -433,7 +433,7 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords) {
 
   } catch (err) {
     console.error("[OCR 검출/그리기 실패]:", err);
-    return buffer;
+    return null;
   }
 }
 
@@ -524,12 +524,16 @@ async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
         });
 
         // Run OCR and draw red circles on it if target words are found
-        screenshotBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer, ocrKeywords);
+        const circledBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer, ocrKeywords);
 
-        fs.writeFileSync(filepath, screenshotBuffer);
-
-        console.log(`[저장 완료] [${platform.toUpperCase()}] 파일 경로: ${filepath}`);
-        results.push({ keyword: cleanKeyword, platform, success: true, path: filepath });
+        if (circledBuffer) {
+          fs.writeFileSync(filepath, circledBuffer);
+          console.log(`[저장 완료] [${platform.toUpperCase()}] 파일 경로: ${filepath}`);
+          results.push({ keyword: cleanKeyword, platform, success: true, skipped: false, path: filepath });
+        } else {
+          console.log(`[저장 제외] [${platform.toUpperCase()}] 키워드: "${cleanKeyword}" - 지정된 OCR 키워드가 이미지에 포함되지 않아 저장을 건너뜁니다.`);
+          results.push({ keyword: cleanKeyword, platform, success: true, skipped: true, path: null });
+        }
       } catch (err) {
         console.error(`[작업 실패] [${platform.toUpperCase()}] 키워드: "${cleanKeyword}", 사유:`, err);
         results.push({ keyword: cleanKeyword, platform, success: false, error: err.message });
