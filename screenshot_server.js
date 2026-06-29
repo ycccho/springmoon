@@ -70,6 +70,21 @@ function loadConfig() {
       }
 
       globalConfig = { ...globalConfig, ...loaded };
+
+      // Bulletproof split in case string elements contain newlines/commas
+      if (Array.isArray(globalConfig.naverKeywords)) {
+        globalConfig.naverKeywords = globalConfig.naverKeywords
+          .flatMap(k => k.split(/[\n,]/))
+          .map(k => k.trim())
+          .filter(k => k.length > 0);
+      }
+      if (Array.isArray(globalConfig.googleKeywords)) {
+        globalConfig.googleKeywords = globalConfig.googleKeywords
+          .flatMap(k => k.split(/[\n,]/))
+          .map(k => k.trim())
+          .filter(k => k.length > 0);
+      }
+
       console.log(`[설정 로드] 자동 예약 실행 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}`);
     }
   } catch (e) {
@@ -105,8 +120,12 @@ app.post('/api/config', (req, res) => {
   }
   globalConfig.scheduleEnabled = !!scheduleEnabled;
   if (scheduleTime) globalConfig.scheduleTime = scheduleTime;
-  if (Array.isArray(naverKeywords)) globalConfig.naverKeywords = naverKeywords;
-  if (Array.isArray(googleKeywords)) globalConfig.googleKeywords = googleKeywords;
+  if (Array.isArray(naverKeywords)) {
+    globalConfig.naverKeywords = naverKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0);
+  }
+  if (Array.isArray(googleKeywords)) {
+    globalConfig.googleKeywords = googleKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0);
+  }
 
   saveConfig();
   console.log(`[설정 변경] 예약 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}, 네이버: ${globalConfig.naverKeywords.length}개, 구글: ${globalConfig.googleKeywords.length}개`);
@@ -487,10 +506,12 @@ app.post('/api/screenshot', async (req, res) => {
 
   const tasks = [];
   if (Array.isArray(naverKeywords)) {
-    naverKeywords.forEach(k => tasks.push({ keyword: k, platform: 'naver' }));
+    const cleanNaver = naverKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0);
+    cleanNaver.forEach(k => tasks.push({ keyword: k, platform: 'naver' }));
   }
   if (Array.isArray(googleKeywords)) {
-    googleKeywords.forEach(k => tasks.push({ keyword: k, platform: 'google' }));
+    const cleanGoogle = googleKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0);
+    cleanGoogle.forEach(k => tasks.push({ keyword: k, platform: 'google' }));
   }
 
   if (tasks.length === 0) {
