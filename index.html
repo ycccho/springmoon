@@ -792,7 +792,7 @@
           <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 mb-6">
             <ul class="text-sm text-gray-700 list-disc list-inside space-y-1">
               <li><span class="font-bold text-gray-900">가로/세로 자동 리사이징:</span> 가로 사진은 <span class="font-bold">폭 1920px</span>, 세로 사진은 <span class="font-bold">폭 1080px</span> 한도 내에서 비율이 유지되며 축소됩니다.</li>
-              <li><span class="font-bold text-gray-900">포맷 및 품질:</span> WEBP / 최상급 품질 <span class="font-bold text-blue-600">95%</span> (용량은 대폭 줄이면서 무손실급 화질 유지)</li>
+              <li><span class="font-bold text-gray-900">포맷 및 품질:</span> WEBP / 초고화질 품질 <span class="font-bold text-blue-600">98%</span> (용량은 대폭 줄이면서 원본과 동등한 화질 유지)</li>
             </ul>
           </div>
           <div id="drop-zone-hq" class="border-2 border-dashed border-green-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-green-50 group bg-white">
@@ -815,7 +815,7 @@
           <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 mb-6">
             <ul class="text-sm text-blue-800 list-disc list-inside space-y-1">
               <li><span class="font-bold text-blue-900">원본 해상도 보존 (미세 크롭만 진행):</span> 사용자가 확대해도 텍스트가 깨지지 않도록 이미지 사이즈(폭/높이)를 강제로 줄이지 않습니다. (가장자리 1px 크롭만 적용)</li>
-              <li><span class="font-bold text-blue-900">새로운 파일 생성 (SEO):</span> 시각적 퀄리티는 유지하되, WEBP (95%) 확장자로 변환하여 검색엔진이 '새로운 파일'로 인식하게 만듭니다.</li>
+              <li><span class="font-bold text-blue-900">새로운 파일 생성 (SEO):</span> 시각적 퀄리티는 유지하되, WEBP (98%) 확장자로 변환하여 검색엔진이 '새로운 파일'로 인식하게 만듭니다.</li>
               <li><span class="font-bold text-blue-900">20MB 업로드 방어선:</span> 변환 용량이 블로그 제한 20MB를 넘길 경우, <span class="font-bold">19.9MB에 맞춰질 때까지만</span> 해상도를 미세하게 축소하여 업로드 불가 현상을 차단합니다.</li>
             </ul>
           </div>
@@ -1601,50 +1601,18 @@
                 }
 
                 let canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
                 let ctx = canvas.getContext('2d');
                 
-                // 다단계 축소
-                if (cropW / 2 > targetW) {
-                    let curW = Math.floor(cropW * 0.5);
-                    let curH = Math.floor(cropH * 0.5);
-                    canvas.width = curW; canvas.height = curH;
-                    
-                    // 최초 그리기 시 1px 크롭 적용 (drawImage의 소스 좌표 활용)
-                    if (flip) {
-                        ctx.translate(curW, 0);
-                        ctx.scale(-1, 1);
-                    }
-                    ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, curW, curH);
-                    if (flip) {
-                        ctx.setTransform(1, 0, 0, 1, 0, 0);
-                    }
-                    
-                    while (curW / 2 > targetW) {
-                        let nextW = Math.floor(curW * 0.5);
-                        let nextH = Math.floor(curH * 0.5);
-                        let tempCanvas = document.createElement('canvas');
-                        tempCanvas.width = nextW; tempCanvas.height = nextH;
-                        let tempCtx = tempCanvas.getContext('2d');
-                        tempCtx.drawImage(canvas, 0, 0, curW, curH, 0, 0, nextW, nextH);
-                        canvas = tempCanvas; curW = nextW; curH = nextH;
-                    }
-                    
-                    let finalCanvas = document.createElement('canvas');
-                    finalCanvas.width = targetW; finalCanvas.height = targetH;
-                    let finalCtx = finalCanvas.getContext('2d');
-                    finalCtx.imageSmoothingEnabled = true; finalCtx.imageSmoothingQuality = 'high';
-                    finalCtx.drawImage(canvas, 0, 0, curW, curH, 0, 0, targetW, targetH);
-                    canvas = finalCanvas;
-                } else {
-                    canvas.width = targetW; canvas.height = targetH;
-                    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-                    // 크기가 작아 바로 그릴 때도 1px 크롭 적용
-                    if (flip) {
-                        ctx.translate(targetW, 0);
-                        ctx.scale(-1, 1);
-                    }
-                    ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
+                if (flip) {
+                    ctx.translate(targetW, 0);
+                    ctx.scale(-1, 1);
                 }
+                ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
                 
                 canvas.toBlob((blob) => {
                     URL.revokeObjectURL(objectUrl);
@@ -1858,13 +1826,13 @@
                   let resultData;
                   
                   if (mode === 'hq') {
-                      resultData = await processWebpResizedAuto(file, 0.95, 1920, 1080, false);
+                      resultData = await processWebpResizedAuto(file, 0.98, 1920, 1080, false);
                   } else if (mode === 'hq-flip') {
-                      resultData = await processWebpResizedAuto(file, 0.95, 1920, 1080, true);
+                      resultData = await processWebpResizedAuto(file, 0.98, 1920, 1080, true);
                   } else if (mode === 'blog') {
-                      resultData = await processWebpBlogOriginal(file, 0.95, false);
+                      resultData = await processWebpBlogOriginal(file, 0.98, false);
                   } else if (mode === 'blog-flip') {
-                      resultData = await processWebpBlogOriginal(file, 0.95, true);
+                      resultData = await processWebpBlogOriginal(file, 0.98, true);
                   }
                   
                   const isLandscape = resultData.orientation === 'landscape';
