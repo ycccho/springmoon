@@ -792,7 +792,7 @@
           <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 mb-6">
             <ul class="text-sm text-gray-700 list-disc list-inside space-y-1">
               <li><span class="font-bold text-gray-900">가로/세로 자동 리사이징:</span> 가로 사진은 <span class="font-bold">폭 1920px</span>, 세로 사진은 <span class="font-bold">폭 1080px</span> 한도 내에서 비율이 유지되며 축소됩니다.</li>
-              <li><span class="font-bold text-gray-900">포맷 및 품질:</span> WEBP / 초고화질 품질 <span class="font-bold text-blue-600">98%</span> (용량은 대폭 줄이면서 원본과 동등한 화질 유지)</li>
+              <li><span class="font-bold text-gray-900">포맷 및 품질:</span> WEBP / 초고화질 품질 <span class="font-bold text-blue-600">100%</span> (화질 저하가 없는 무손실급 화질 유지)</li>
             </ul>
           </div>
           <div id="drop-zone-hq" class="border-2 border-dashed border-green-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-green-50 group bg-white">
@@ -815,7 +815,7 @@
           <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 mb-6">
             <ul class="text-sm text-blue-800 list-disc list-inside space-y-1">
               <li><span class="font-bold text-blue-900">원본 해상도 보존 (미세 크롭만 진행):</span> 사용자가 확대해도 텍스트가 깨지지 않도록 이미지 사이즈(폭/높이)를 강제로 줄이지 않습니다. (가장자리 1px 크롭만 적용)</li>
-              <li><span class="font-bold text-blue-900">새로운 파일 생성 (SEO):</span> 시각적 퀄리티는 유지하되, WEBP (98%) 확장자로 변환하여 검색엔진이 '새로운 파일'로 인식하게 만듭니다.</li>
+              <li><span class="font-bold text-blue-900">새로운 파일 생성 (SEO):</span> 시각적 퀄리티는 유지하되, WEBP (100%) 확장자로 변환하여 검색엔진이 '새로운 파일'로 인식하게 만듭니다.</li>
               <li><span class="font-bold text-blue-900">20MB 업로드 방어선:</span> 변환 용량이 블로그 제한 20MB를 넘길 경우, <span class="font-bold">19.9MB에 맞춰질 때까지만</span> 해상도를 미세하게 축소하여 업로드 불가 현상을 차단합니다.</li>
             </ul>
           </div>
@@ -1569,6 +1569,60 @@
     // ============================================
     let convertedFiles = [];
 
+    // Canvas Sharpening Filter (Unsharp Mask)
+    function sharpenCanvas(canvas, ctx, mix = 0.2) {
+        try {
+            const w = canvas.width;
+            const h = canvas.height;
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            const output = ctx.createImageData(w, h);
+            const outData = output.data;
+            
+            // 3x3 sharpen kernel:
+            //  0  -1   0
+            // -1   5  -1
+            //  0  -1   0
+            for (let y = 1; y < h - 1; y++) {
+                for (let x = 1; x < w - 1; x++) {
+                    const idx = (y * w + x) * 4;
+                    for (let c = 0; c < 3; c++) {
+                        const val = data[idx + c] * 5
+                                  - data[((y - 1) * w + x) * 4 + c]
+                                  - data[((y + 1) * w + x) * 4 + c]
+                                  - data[(y * w + (x - 1)) * 4 + c]
+                                  - data[(y * w + (x + 1)) * 4 + c];
+                        const original = data[idx + c];
+                        const sharpened = Math.min(255, Math.max(0, val));
+                        outData[idx + c] = original + (sharpened - original) * mix;
+                    }
+                    outData[idx + 3] = data[idx + 3]; // Keep alpha channel
+                }
+            }
+            
+            // Copy edge borders directly
+            for (let x = 0; x < w; x++) {
+                const topIdx = x * 4;
+                const bottomIdx = ((h - 1) * w + x) * 4;
+                for (let c = 0; c < 4; c++) {
+                    outData[topIdx + c] = data[topIdx + c];
+                    outData[bottomIdx + c] = data[bottomIdx + c];
+                }
+            }
+            for (let y = 0; y < h; y++) {
+                const leftIdx = y * w * 4;
+                const rightIdx = (y * w + (w - 1)) * 4;
+                for (let c = 0; c < 4; c++) {
+                    outData[leftIdx + c] = data[leftIdx + c];
+                    outData[rightIdx + c] = data[rightIdx + c];
+                }
+            }
+            ctx.putImageData(output, 0, 0);
+        } catch (e) {
+            console.error("Sharpening failed:", e);
+        }
+    }
+
     // [1번 기능] 홈페이지용: 1px 크롭 + 자동 리사이징
     function processWebpResizedAuto(file, quality, targetLandWidth, targetPortWidth, flip = false) {
         return new Promise((resolve, reject) => {
@@ -1593,11 +1647,13 @@
 
                 let targetW = cropW;
                 let targetH = cropH;
+                let isResized = false;
 
                 // 폭(Width) 기준 리사이징
                 if (cropW > targetWidthLimit) {
                     targetW = targetWidthLimit;
                     targetH = Math.round((cropH * targetWidthLimit) / cropW);
+                    isResized = true;
                 }
 
                 let canvas = document.createElement('canvas');
@@ -1613,6 +1669,11 @@
                     ctx.scale(-1, 1);
                 }
                 ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
+                
+                // Apply sharpening filter if image was downscaled to keep details crisp
+                if (isResized) {
+                    sharpenCanvas(canvas, ctx, 0.2);
+                }
                 
                 canvas.toBlob((blob) => {
                     URL.revokeObjectURL(objectUrl);
@@ -1826,13 +1887,13 @@
                   let resultData;
                   
                   if (mode === 'hq') {
-                      resultData = await processWebpResizedAuto(file, 0.98, 1920, 1080, false);
+                      resultData = await processWebpResizedAuto(file, 1.0, 1920, 1080, false);
                   } else if (mode === 'hq-flip') {
-                      resultData = await processWebpResizedAuto(file, 0.98, 1920, 1080, true);
+                      resultData = await processWebpResizedAuto(file, 1.0, 1920, 1080, true);
                   } else if (mode === 'blog') {
-                      resultData = await processWebpBlogOriginal(file, 0.98, false);
+                      resultData = await processWebpBlogOriginal(file, 1.0, false);
                   } else if (mode === 'blog-flip') {
-                      resultData = await processWebpBlogOriginal(file, 0.98, true);
+                      resultData = await processWebpBlogOriginal(file, 1.0, true);
                   }
                   
                   const isLandscape = resultData.orientation === 'landscape';
