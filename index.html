@@ -5669,6 +5669,26 @@
         warningBanner.classList.remove("hidden");
       }
 
+      // Persist immediate capture inputs in localStorage
+      if (naverArea) {
+        naverArea.value = localStorage.getItem("ss_immediate_naver") || "";
+        naverArea.addEventListener("input", () => {
+          localStorage.setItem("ss_immediate_naver", naverArea.value);
+        });
+      }
+      if (googleArea) {
+        googleArea.value = localStorage.getItem("ss_immediate_google") || "";
+        googleArea.addEventListener("input", () => {
+          localStorage.setItem("ss_immediate_google", googleArea.value);
+        });
+      }
+      if (ocrArea) {
+        ocrArea.value = localStorage.getItem("ss_immediate_ocr") || "";
+        ocrArea.addEventListener("input", () => {
+          localStorage.setItem("ss_immediate_ocr", ocrArea.value);
+        });
+      }
+
       // Periodically check local backend helper status
       let serverOnline = false;
       let hasLoadedConfig = false;
@@ -5686,40 +5706,40 @@
         const saveFolder = data.saveFolder || "D:\\\\search-rank";
 
         const taskHTML = `
-          <div class="schedule-task-item p-4 border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-50/30 dark-mode:bg-gray-850/30 space-y-3 relative pt-8" data-id="\${id}">
+          <div class="schedule-task-item p-4 border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-50/30 dark-mode:bg-gray-850/30 space-y-3 relative pt-8" data-id="${id}">
             <button class="remove-task-btn absolute top-3 right-3 text-red-500 hover:text-red-700 transition-colors focus:outline-none" title="삭제">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
             <div class="flex flex-wrap items-center gap-3">
               <label class="flex items-center gap-2 text-xs font-bold text-gray-700 dark-mode:text-gray-300 cursor-pointer">
-                <input type="checkbox" class="task-enabled w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500" \${enabled ? 'checked' : ''}>
+                <input type="checkbox" class="task-enabled w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500" ${enabled ? 'checked' : ''}>
                 <span>이 예약 자동 수집 활성화</span>
               </label>
               <div class="flex items-center gap-1.5 ml-auto">
                 <span class="text-xs font-bold text-gray-700 dark-mode:text-gray-300">수집 시각:</span>
-                <input type="time" class="task-time px-2 py-1 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-1 focus:ring-orange-500" value="\${time}">
+                <input type="time" class="task-time px-2 py-1 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-1 focus:ring-orange-500" value="${time}">
               </div>
             </div>
             
             <div>
               <label class="block text-[11px] font-bold text-gray-600 dark-mode:text-gray-400 mb-1">💾 저장할 폴더 경로</label>
-              <input type="text" class="task-save-folder w-full px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500" value="\${saveFolder}" placeholder="예: D:\\\\search-rank">
+              <input type="text" class="task-save-folder w-full px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500" value="${saveFolder}" placeholder="예: D:\\\\search-rank">
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label class="block text-[11px] font-bold text-green-600 dark-mode:text-green-400 mb-1">📋 네이버 키워드 (줄바꿈/쉼표 구분)</label>
-                <textarea class="task-keywords-naver w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 font-mono" rows="3" placeholder="예:\\n부산인테리어\\n부산학원인테리어">\${naverKeywords.join('\\n')}</textarea>
+                <textarea class="task-keywords-naver w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 font-mono" rows="3" placeholder="예:\\n부산인테리어\\n부산학원인테리어">${naverKeywords.join('\n')}</textarea>
               </div>
               <div>
                 <label class="block text-[11px] font-bold text-blue-600 dark-mode:text-blue-400 mb-1">📋 구글 키워드 (줄바꿈/쉼표 구분)</label>
-                <textarea class="task-keywords-google w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 font-mono" rows="3" placeholder="예:\\n부산인테리어 디자인\\n부산학원인테리어 견적">\${googleKeywords.join('\\n')}</textarea>
+                <textarea class="task-keywords-google w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 font-mono" rows="3" placeholder="예:\\n부산인테리어 디자인\\n부산학원인테리어 견적">${googleKeywords.join('\n')}</textarea>
               </div>
             </div>
 
             <div>
               <label class="block text-[11px] font-bold text-orange-600 dark-mode:text-orange-400 mb-1">🎯 OCR 체크 단어 (선택사항, 쉼표 구분)</label>
-              <input type="text" class="task-ocr-keywords w-full px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500" value="\${ocrKeywords.join(', ')}" placeholder="예시: 인디컴퍼니, inde.co.kr">
+              <input type="text" class="task-ocr-keywords w-full px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-805 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500" value="${ocrKeywords.join(', ')}" placeholder="예시: 인디컴퍼니, inde.co.kr">
             </div>
           </div>
         `;
