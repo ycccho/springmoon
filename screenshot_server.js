@@ -158,6 +158,254 @@ app.post('/api/config', (req, res) => {
   res.json({ success: true, config: globalConfig });
 });
 
+});
+
+// 블로그 전체 게시글 목록 가져오기 API
+app.get('/api/blog-posts/list', async (req, res) => {
+  const blogId = req.query.blogId;
+  if (!blogId) {
+    return res.status(400).json({ success: false, error: 'blogId가 누락되었습니다.' });
+  }
+
+  try {
+    // 1페이지 호출하여 전체 글 개수 파악
+    const fetchPage = async (p) => {
+      const apiUrl = `https://blog.naver.com/PostTitleListAsync.naver?blogId=${encodeURIComponent(blogId)}&viewdate=&parentCategoryNo=&categoryNo=&itemcount=5&authorid=&userSelectMenu=&parentCategoryCode=&currentPage=${p}`;
+      const response = await fetch(apiUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': `https://blog.naver.com/${encodeURIComponent(blogId)}`
+        }
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const rawText = await response.text();
+      const cleanedText = rawText.replace(/\\'/g, "'");
+      return JSON.parse(cleanedText);
+    };
+
+    const firstPage = await fetchPage(1);
+    if (firstPage.resultCode !== 'S' || !firstPage.postList) {
+      return res.status(400).json({ success: false, error: firstPage.resultMessage || '블로그 포스트 정보를 가져오지 못했습니다.' });
+    }
+
+    const totalCount = parseInt(firstPage.totalCount, 10) || 0;
+    const countPerPage = parseInt(firstPage.countPerPage, 10) || 5;
+    let allPosts = [...firstPage.postList];
+
+    if (totalCount > allPosts.length && countPerPage > 0) {
+      const totalPages = Math.ceil(totalCount / countPerPage);
+      
+      // 소켓 과부하를 방지하기 위해 15페이지 단위로 나누어 순차 병렬 처리
+      const batchSize = 15;
+      for (let i = 2; i <= totalPages; i += batchSize) {
+        const promises = [];
+        for (let p = i; p < i + batchSize && p <= totalPages; p++) {
+          promises.push(fetchPage(p).catch(err => {
+            console.error(`Page ${p} fetch failed:`, err);
+            return null;
+          }));
+        }
+        const results = await Promise.all(promises);
+        for (const pageData of results) {
+          if (pageData && pageData.resultCode === 'S' && pageData.postList) {
+            allPosts = allPosts.concat(pageData.postList);
+          }
+        }
+        // 네이버 서버 부하 방지를 위한 미세한 대기
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+
+    // 제목 디코딩 및 링크 포맷팅
+    const decodeNaverTitle = (title) => {
+      try {
+        return decodeURIComponent(title.replace(/\+/g, '%20'));
+      } catch (e) {
+        return title;
+      }
+    };
+
+    const formattedPosts = allPosts.map(post => {
+      const title = decodeNaverTitle(post.title);
+      const link = `https://m.blog.naver.com/PostView.naver?blogId=${encodeURIComponent(blogId)}&logNo=${post.logNo}`;
+      return {
+        logNo: post.logNo,
+        title: title,
+        link: link,
+        addDate: post.addDate || ''
+      };
+    });
+
+    // 최신글이 위에 오도록 정렬
+    formattedPosts.sort((a, b) => b.logNo.localeCompare(a.logNo));
+
+    res.json({ success: true, totalCount, posts: formattedPosts });
+  } catch (e) {
+    console.error("블로그 포스트 목록 추출 실패:", e);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// 단일 블로그 게시글 처리 API (텍스트 저장 및/또는 스크린샷 캡처)
+app.post('/api/blog-posts/process-one', async (req, res) => {
+  const { blogId, logNo, title, mode, saveFolder, ocrKeywords } = req.body;
+  
+  if (!blogId || !logNo || !title || !mode || !saveFolder) {
+    return res.status(400).json({ success: false, error: '필수 파라미터가 누락되었습니다.' });
+  }
+
+  // 저장 경로 생성
+  try {
+    if (!fs.existsSync(saveFolder)) {
+      fs.mkdirSync(saveFolder, { recursive: true });
+    }
+  } catch (e) {
+    return res.status(500).json({ success: false, error: `폴더 생성 실패: ${e.message}` });
+  }
+
+  const safeTitle = title.replace(/[\\/:*?"<>|]/g, '_').trim().slice(0, 80);
+  const postUrl = `https://m.blog.naver.com/PostView.naver?blogId=${encodeURIComponent(blogId)}&logNo=${logNo}`;
+
+  try {
+    // 1. 상세 페이지 HTML 가져오기 (절대 날짜 파싱 및 텍스트 추출용)
+    const htmlResponse = await fetch(postUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
+        'Referer': 'https://m.blog.naver.com/'
+      }
+    });
+
+    if (!htmlResponse.ok) {
+      throw new Error(`게시글 페이지 로드 실패 (HTTP ${htmlResponse.status})`);
+    }
+
+    const body = await htmlResponse.text();
+
+    // Unix timestamp를 사용해 절대 날짜 추출
+    let absoluteDate = '';
+    const addDateMatch = body.match(/addDate="(\d+)"/i);
+    if (addDateMatch) {
+      const timestamp = parseInt(addDateMatch[1], 10);
+      const date = new Date(timestamp);
+      const kstOffset = 9 * 60 * 60 * 1000;
+      const kstDate = new Date(date.getTime() + kstOffset);
+      const yyyy = kstDate.getUTCFullYear();
+      const mm = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(kstDate.getUTCDate()).padStart(2, '0');
+      absoluteDate = `${yyyy}.${mm}.${dd}`;
+    } else {
+      const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      absoluteDate = `${now.getUTCFullYear()}.${String(now.getUTCMonth()+1).padStart(2, '0')}.${String(now.getUTCDate()).padStart(2, '0')}`;
+    }
+
+    let textSaved = false;
+    let screenshotSaved = false;
+    let savedFiles = [];
+
+    // 1번(텍스트) 또는 4번(모두)의 경우 -> 본문 추출 및 저장
+    if (mode === "1" || mode === "4") {
+      let text = '';
+      const parts = body.split(/class="se-main-container"/i);
+      if (parts.length > 1) {
+        let contentHtml = parts[1].split(/class="post_footer"|id="post_share"|<div class="aside|class="post_tag"|class="reply_area"|class="reply_wrap"/i)[0];
+        if (contentHtml.startsWith('>')) contentHtml = contentHtml.slice(1);
+        text = contentHtml
+          .replace(/<style([\s\S]*?)<\/style>/gi, '')
+          .replace(/<script([\s\S]*?)<\/script>/gi, '')
+          .replace(/<[^>]*>/g, '\n')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#039;/g, "'")
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+          .join('\n');
+      }
+
+      const fileContent = `게시글 제목: ${title}\n게시글 작성 날짜: ${absoluteDate}\n\n게시글 내용:\n${text}`;
+      const txtFilename = `${absoluteDate}-${blogId}-${safeTitle}.txt`;
+      const txtPath = path.join(saveFolder, txtFilename);
+      fs.writeFileSync(txtPath, fileContent, 'utf8');
+      textSaved = true;
+      savedFiles.push(txtFilename);
+    }
+
+    // 2번(스샷), 3번(스샷+OCR), 4번(모두)의 경우 -> Puppeteer 스샷 촬영
+    if (mode === "2" || mode === "3" || mode === "4") {
+      const browserPath = getBrowserPath();
+      if (!browserPath) {
+        throw new Error("시스템에서 Chrome 또는 Edge 브라우저를 찾을 수 없습니다.");
+      }
+
+      const browser = await puppeteer.launch({
+        executablePath: browserPath,
+        headless: "new",
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+
+      try {
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+        await page.setExtraHTTPHeaders({
+          'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
+        });
+        await page.evaluateOnNewDocument(() => {
+          Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+        });
+        // 모바일 해상도(가로 750px)로 설정 시 모바일 블로그 뷰 캡처에 가장 알맞음
+        await page.setViewport({ width: 750, height: 900 });
+
+        await page.goto(postUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+        await autoScroll(page);
+        await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
+
+        const jpgFilename = `${absoluteDate}-${blogId}-${safeTitle}.jpg`;
+        const jpgPath = path.join(saveFolder, jpgFilename);
+
+        let screenshotBuffer = await page.screenshot({
+          type: 'jpeg',
+          quality: 85,
+          fullPage: true
+        });
+
+        // 3번 또는 4번 모드이며 OCR 키워드가 입력되었을 때 동그라미 처리
+        if (mode === "3" || mode === "4") {
+          const cleanOcr = Array.isArray(ocrKeywords)
+            ? ocrKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0)
+            : [];
+          if (cleanOcr.length > 0) {
+            const circledBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer, cleanOcr);
+            if (circledBuffer) {
+              screenshotBuffer = circledBuffer;
+            }
+          }
+        }
+
+        fs.writeFileSync(jpgPath, screenshotBuffer);
+        screenshotSaved = true;
+        savedFiles.push(jpgFilename);
+      } finally {
+        await browser.close();
+      }
+    }
+
+    res.json({
+      success: true,
+      absoluteDate,
+      textSaved,
+      screenshotSaved,
+      savedFiles
+    });
+
+  } catch (err) {
+    console.error(`게시글 ${logNo} 처리 중 에러:`, err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Proxy helper function
 async function handleProxy(req, res, targetUrl) {
   try {

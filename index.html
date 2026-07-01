@@ -135,6 +135,7 @@
       { id: "homepage-seo", name: "홈페이지 코드세팅", protected: true },
       { id: "backlink-check", name: "백링크검사", protected: true },
       { id: "keyword-screenshot", name: "키워드검색스샷", protected: true },
+      { id: "blog-post-screenshot", name: "블로그게시글스샷", protected: true },
       { id: "about", name: "소개", protected: false }
     ];
 
@@ -215,6 +216,11 @@
       if (!menus.some(m => m.id === "keyword-screenshot")) {
         const idx = menus.findIndex(m => m.id === "backlink-check");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "keyword-screenshot", name: "키워드검색스샷", protected: true });
+        changed = true;
+      }
+      if (!menus.some(m => m.id === "blog-post-screenshot")) {
+        const idx = menus.findIndex(m => m.id === "keyword-screenshot");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "blog-post-screenshot", name: "블로그게시글스샷", protected: true });
         changed = true;
       }
 
@@ -704,6 +710,7 @@
         setupHomepageSeo();
         setupBacklinkCheck();
         setupKeywordScreenshot();
+        setupBlogPostScreenshot();
       }, 100);
     }
 
@@ -721,6 +728,7 @@
       if (id === "homepage-seo") return getHomepageSeoHTML();
       if (id === "backlink-check") return getBacklinkCheckHTML();
       if (id === "keyword-screenshot") return getKeywordScreenshotHTML();
+      if (id === "blog-post-screenshot") return getBlogPostScreenshotHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
           <h2 class="text-3xl font-bold mb-4 text-gray-800 dark-mode:text-gray-100">소개</h2>
@@ -5545,6 +5553,114 @@
       });
     }
 
+    function getBlogPostScreenshotHTML() {
+      return `
+        <div class="max-w-4xl mx-auto space-y-6">
+          <!-- Title Card -->
+          <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white shadow-md">
+            <h2 class="text-2xl font-bold flex items-center gap-2">✍️ 블로그게시글스샷</h2>
+            <p class="text-xs text-orange-100 mt-1 font-medium font-bold">블로그 ID를 입력하여 전체 포스트를 크롤링하고 텍스트 및 스크린샷을 자동 수집합니다. (로컬 서버 필수)</p>
+          </div>
+
+          <!-- Configuration Card -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
+            <h3 class="text-sm font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">⚙️ 수집 환경 및 설정</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-1.5">🔑 네이버 블로그 ID</label>
+                <input type="text" id="bps-blog-id" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="블로그 아이디 입력 (예: dudu8882)">
+              </div>
+              
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-1.5">💾 자동 저장 폴더 경로</label>
+                <input type="text" id="bps-save-folder" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="예: D:\\blog-post-screenshot" value="D:\\\\blog-post-screenshot">
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-1">⚡ 작업방식 선택</label>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label class="flex items-center gap-2.5 p-3 border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-50/50 dark-mode:bg-gray-850/50 cursor-pointer hover:bg-gray-105/50 dark-mode:hover:bg-gray-750/50 transition-colors">
+                  <input type="radio" name="bps-mode" value="1" checked class="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500">
+                  <div class="text-xs">
+                    <span class="font-bold text-gray-800 dark-mode:text-gray-150">1. 전체 게시글 텍스트 저장</span>
+                    <p class="text-[10px] text-gray-500 dark-mode:text-gray-400 mt-0.5 font-medium">제목, 날짜, 내용을 YYYY.MM.DD.txt 파일로 초고속 추출 및 저장 (수초~수분 소요)</p>
+                  </div>
+                </label>
+                <label class="flex items-center gap-2.5 p-3 border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-50/50 dark-mode:bg-gray-850/50 cursor-pointer hover:bg-gray-105/50 dark-mode:hover:bg-gray-750/50 transition-colors">
+                  <input type="radio" name="bps-mode" value="2" class="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500">
+                  <div class="text-xs">
+                    <span class="font-bold text-gray-800 dark-mode:text-gray-150">2. 게시글 전체스크롤 스크린샷</span>
+                    <p class="text-[10px] text-gray-500 dark-mode:text-gray-400 mt-0.5 font-medium">글 화면을 모바일 웹 뷰 크기로 끝까지 렌더링 후 JPG 이미지로 캡처 저장</p>
+                  </div>
+                </label>
+                <label class="flex items-center gap-2.5 p-3 border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-50/50 dark-mode:bg-gray-850/50 cursor-pointer hover:bg-gray-105/50 dark-mode:hover:bg-gray-750/50 transition-colors">
+                  <input type="radio" name="bps-mode" value="3" class="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500">
+                  <div class="text-xs">
+                    <span class="font-bold text-gray-800 dark-mode:text-gray-150">3. 전체스크롤 스샷 + OCR 매칭 표시</span>
+                    <p class="text-[10px] text-gray-500 dark-mode:text-gray-400 mt-0.5 font-medium">캡처 완료 시 이미지 내 지정 단어가 있으면 빨간 동그라미를 그려 저장</p>
+                  </div>
+                </label>
+                <label class="flex items-center gap-2.5 p-3 border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-50/50 dark-mode:bg-gray-850/50 cursor-pointer hover:bg-gray-105/50 dark-mode:hover:bg-gray-750/50 transition-colors">
+                  <input type="radio" name="bps-mode" value="4" class="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500">
+                  <div class="text-xs">
+                    <span class="font-bold text-gray-800 dark-mode:text-gray-150">4. 1번 + 3번 기능 모두 실행</span>
+                    <p class="text-[10px] text-gray-500 dark-mode:text-gray-400 mt-0.5 font-medium">본문 텍스트 메모장(.txt)과 빨간 동그라미 처리된 이미지(.jpg)를 둘 다 저장</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div id="bps-ocr-container" class="hidden">
+              <label class="block text-xs font-bold text-orange-600 dark-mode:text-orange-400 mb-1.5">🎯 OCR 체크 단어 목록 (쉼표 구분)</label>
+              <input type="text" id="bps-ocr-keywords" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="예: 인디컴퍼니, inde.co.kr" value="인디컴퍼니, inde.co.kr">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+              <button id="bps-start-btn" class="flex-grow px-4 py-3 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] transition-transform text-white text-xs font-bold rounded-xl shadow-sm">
+                🚀 수집 시작
+              </button>
+              <button id="bps-pause-btn" disabled class="px-4 py-3 bg-gray-300 dark-mode:bg-gray-750 text-gray-500 dark-mode:text-gray-400 text-xs font-bold rounded-xl cursor-not-allowed">
+                ⏸ 일시정지
+              </button>
+              <button id="bps-stop-btn" disabled class="px-4 py-3 bg-gray-300 dark-mode:bg-gray-750 text-gray-500 dark-mode:text-gray-400 text-xs font-bold rounded-xl cursor-not-allowed">
+                ⏹ 작업중단
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress Card -->
+          <div id="bps-progress-card" class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4 hidden">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-bold text-gray-800 dark-mode:text-gray-100">📊 실시간 수집 현황</h3>
+              <span id="bps-progress-percentage" class="text-xs font-extrabold text-orange-500">0%</span>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-150 dark-mode:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+              <div id="bps-progress-bar" class="bg-orange-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-xs font-bold text-gray-600 dark-mode:text-gray-400">
+              <div>발견된 게시글: <span id="bps-total-count" class="text-gray-800 dark-mode:text-gray-200">0</span>개</div>
+              <div>처리됨: <span id="bps-processed-count" class="text-gray-800 dark-mode:text-gray-200">0</span>개</div>
+              <div>성공: <span id="bps-success-count" class="text-green-600 dark-mode:text-green-400 font-extrabold">0</span>개</div>
+              <div>실패: <span id="bps-error-count" class="text-red-500 font-extrabold">0</span>개</div>
+            </div>
+
+            <!-- Log Console -->
+            <div class="space-y-2">
+              <div class="text-xs font-bold text-gray-700 dark-mode:text-gray-300">📜 실행 로그</div>
+              <div id="bps-log-console" class="w-full h-48 px-4 py-3 bg-gray-900 text-gray-200 font-mono text-[11px] rounded-xl overflow-y-auto space-y-1.5 scrollbar-thin">
+                <div class="text-gray-500 font-semibold">// 작업 시작 버튼을 누르면 로그가 표시됩니다.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function getKeywordScreenshotHTML() {
       return `
         <div class="max-w-4xl mx-auto space-y-6">
@@ -6041,6 +6157,308 @@
         } finally {
           startBtn.disabled = false;
           startBtn.textContent = "📸 즉시 캡처 시작";
+        }
+      });
+    }
+
+    function setupBlogPostScreenshot() {
+      const blogInput = document.getElementById("bps-blog-id");
+      const folderInput = document.getElementById("bps-save-folder");
+      const ocrInput = document.getElementById("bps-ocr-keywords");
+      const startBtn = document.getElementById("bps-start-btn");
+      const pauseBtn = document.getElementById("bps-pause-btn");
+      const stopBtn = document.getElementById("bps-stop-btn");
+      const progressCard = document.getElementById("bps-progress-card");
+      const progressBar = document.getElementById("bps-progress-bar");
+      const percentageText = document.getElementById("bps-progress-percentage");
+      const totalText = document.getElementById("bps-total-count");
+      const processedText = document.getElementById("bps-processed-count");
+      const successText = document.getElementById("bps-success-count");
+      const errorText = document.getElementById("bps-error-count");
+      const consoleLog = document.getElementById("bps-log-console");
+      const modeRadios = document.getElementsByName("bps-mode");
+      const ocrContainer = document.getElementById("bps-ocr-container");
+
+      if (!startBtn) return;
+
+      // Restore values from localStorage
+      if (blogInput) blogInput.value = localStorage.getItem("bps_blog_id") || "";
+      if (folderInput) folderInput.value = localStorage.getItem("bps_save_folder") || "D:\\\\blog-post-screenshot";
+      if (ocrInput) ocrInput.value = localStorage.getItem("bps_ocr_keywords") || "인디컴퍼니, inde.co.kr";
+      
+      const savedMode = localStorage.getItem("bps_mode") || "1";
+      modeRadios.forEach(radio => {
+        if (radio.value === savedMode) {
+          radio.checked = true;
+        }
+      });
+
+      // Show/Hide OCR Keywords container based on mode selection
+      function toggleOcrVisibility() {
+        const selectedMode = Array.from(modeRadios).find(r => r.checked)?.value || "1";
+        if (selectedMode === "3" || selectedMode === "4") {
+          ocrContainer.classList.remove("hidden");
+        } else {
+          ocrContainer.classList.add("hidden");
+        }
+      }
+      
+      modeRadios.forEach(radio => {
+        radio.addEventListener("change", (e) => {
+          localStorage.setItem("bps_mode", e.target.value);
+          toggleOcrVisibility();
+        });
+      });
+      toggleOcrVisibility();
+
+      // Input event listeners to save preferences
+      if (blogInput) {
+        blogInput.addEventListener("input", () => localStorage.setItem("bps_blog_id", blogInput.value.trim()));
+      }
+      if (folderInput) {
+        folderInput.addEventListener("input", () => localStorage.setItem("bps_save_folder", folderInput.value.trim()));
+      }
+      if (ocrInput) {
+        ocrInput.addEventListener("input", () => localStorage.setItem("bps_ocr_keywords", ocrInput.value.trim()));
+      }
+
+      let appState = "IDLE"; // "IDLE", "RUNNING", "PAUSED"
+      let postsQueue = [];
+      let totalCount = 0;
+      let processedCount = 0;
+      let successCount = 0;
+      let errorCount = 0;
+      let timerId = null;
+
+      let blogId = "";
+      let saveFolder = "";
+      let mode = "1";
+      let ocrKeywords = [];
+
+      function logConsole(message, color = "") {
+        if (!consoleLog) return;
+        const div = document.createElement("div");
+        div.className = "leading-relaxed break-all";
+        if (color === "green") {
+          div.className += " text-green-400 font-bold";
+        } else if (color === "red") {
+          div.className += " text-red-400 font-bold";
+        } else if (color === "blue") {
+          div.className += " text-blue-400 font-bold";
+        }
+        
+        // Add timestamp
+        const now = new Date();
+        const timeStr = `[\${String(now.getHours()).padStart(2, '0')}:\${String(now.getMinutes()).padStart(2, '0')}:\${String(now.getSeconds()).padStart(2, '0')}] `;
+        div.textContent = timeStr + message;
+        
+        consoleLog.appendChild(div);
+        consoleLog.scrollTop = consoleLog.scrollHeight;
+      }
+
+      function updateProgress() {
+        if (totalCount === 0) return;
+        const percent = Math.round((processedCount / totalCount) * 100);
+        if (progressBar) progressBar.style.width = `\${percent}%`;
+        if (percentageText) percentageText.textContent = `\${percent}%`;
+        if (processedText) processedText.textContent = processedCount;
+        if (successText) successText.textContent = successCount;
+        if (errorText) errorText.textContent = errorCount;
+      }
+
+      function resetButtons() {
+        startBtn.disabled = false;
+        startBtn.textContent = "🚀 수집 시작";
+        startBtn.className = "flex-grow px-4 py-3 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] transition-transform text-white text-xs font-bold rounded-xl shadow-sm";
+        
+        pauseBtn.disabled = true;
+        pauseBtn.textContent = "⏸ 일시정지";
+        pauseBtn.className = "px-4 py-3 bg-gray-300 dark-mode:bg-gray-750 text-gray-500 dark-mode:text-gray-400 text-xs font-bold rounded-xl cursor-not-allowed";
+        
+        stopBtn.disabled = true;
+        stopBtn.className = "px-4 py-3 bg-gray-300 dark-mode:bg-gray-750 text-gray-500 dark-mode:text-gray-400 text-xs font-bold rounded-xl cursor-not-allowed";
+      }
+
+      async function runLoop() {
+        if (appState !== "RUNNING") return;
+        if (processedCount >= postsQueue.length) {
+          logConsole(`[완료] 블로그 전체 글 수집 작업이 성공적으로 완료되었습니다!`);
+          logConsole(`[최종 결과] 성공: \${successCount}개, 실패: \${errorCount}개`);
+          resetButtons();
+          appState = "IDLE";
+          return;
+        }
+
+        const post = postsQueue[processedCount];
+        logConsole(`[\${processedCount + 1}/\${totalCount}] "\${post.title}" 처리 중...`);
+
+        try {
+          const res = await fetch("http://127.0.0.1:3888/api/blog-posts/process-one", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              blogId,
+              logNo: post.logNo,
+              title: post.title,
+              mode,
+              saveFolder,
+              ocrKeywords
+            })
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || "서버 통신 실패");
+          }
+
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error);
+
+          successCount++;
+          logConsole(`  ✓ 성공: \${data.savedFiles.join(', ')} 저장 완료 (\${data.absoluteDate})`, "green");
+        } catch (e) {
+          errorCount++;
+          logConsole(`  ✗ 실패: "\${post.title}" 처리 오류: \${e.message}`, "red");
+        }
+
+        processedCount++;
+        updateProgress();
+
+        // 1번(텍스트) 모드인 경우 300ms ~ 500ms의 짧은 대기
+        // 스크린샷이 들어간 모드(2, 3, 4)인 경우 2.5초 ~ 4.0초 사이의 랜덤 대기
+        let delay = (mode === "1") ? (300 + Math.random() * 200) : (2500 + Math.random() * 1500);
+        
+        if (processedCount < postsQueue.length && appState === "RUNNING") {
+          logConsole(`  .. 다음 작업 대기 중 (\${Math.round(delay)}ms)`);
+          timerId = setTimeout(runLoop, delay);
+        } else if (processedCount >= postsQueue.length) {
+          runLoop();
+        }
+      }
+
+      startBtn.addEventListener("click", async () => {
+        // Resume if paused
+        if (appState === "PAUSED") {
+          appState = "RUNNING";
+          logConsole(`[정보] 작업을 재개합니다.`, "blue");
+          startBtn.disabled = true;
+          startBtn.textContent = "수집 진행 중...";
+          startBtn.className = "flex-grow px-4 py-3 bg-gray-300 dark-mode:bg-gray-750 text-gray-500 dark-mode:text-gray-400 text-xs font-bold rounded-xl cursor-not-allowed";
+          
+          pauseBtn.disabled = false;
+          pauseBtn.textContent = "⏸ 일시정지";
+          pauseBtn.className = "px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold rounded-xl shadow-sm active:scale-[0.98] transition-transform";
+          
+          stopBtn.disabled = false;
+          stopBtn.className = "px-4 py-3 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl shadow-sm active:scale-[0.98] transition-transform";
+          
+          runLoop();
+          return;
+        }
+
+        // Start new run
+        blogId = blogInput.value.trim();
+        saveFolder = folderInput.value.trim();
+        mode = Array.from(modeRadios).find(r => r.checked)?.value || "1";
+        const rawOcr = ocrInput.value.trim();
+        ocrKeywords = rawOcr.split(/,/).map(k => k.trim()).filter(k => k.length > 0);
+
+        if (!blogId) {
+          alert("네이버 블로그 ID를 입력해주세요.");
+          blogInput.focus();
+          return;
+        }
+        if (!saveFolder) {
+          alert("자동 저장 폴더 경로를 입력해주세요.");
+          folderInput.focus();
+          return;
+        }
+
+        // Reset variables
+        postsQueue = [];
+        totalCount = 0;
+        processedCount = 0;
+        successCount = 0;
+        errorCount = 0;
+        if (timerId) clearTimeout(timerId);
+
+        // UI Setup
+        progressCard.classList.remove("hidden");
+        if (progressBar) progressBar.style.width = "0%";
+        if (percentageText) percentageText.textContent = "0%";
+        if (totalText) totalText.textContent = "0";
+        if (processedText) processedText.textContent = "0";
+        if (successText) successText.textContent = "0";
+        if (errorText) errorText.textContent = "0";
+        
+        if (consoleLog) consoleLog.innerHTML = "";
+        logConsole(`[시작] 블로그 ID: "${blogId}", 저장경로: "${saveFolder}", 작업모드: ${mode}번`);
+        
+        startBtn.disabled = true;
+        startBtn.textContent = "목록 추출 중...";
+        startBtn.className = "flex-grow px-4 py-3 bg-gray-300 dark-mode:bg-gray-750 text-gray-500 dark-mode:text-gray-400 text-xs font-bold rounded-xl cursor-not-allowed";
+        
+        pauseBtn.disabled = true;
+        stopBtn.disabled = false;
+        stopBtn.className = "px-4 py-3 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl shadow-sm active:scale-[0.98] transition-transform";
+
+        try {
+          logConsole(`[네트워크] 네이버 블로그 전체 공개 게시글 목록을 수집하는 중...`);
+          const res = await fetch(`http://127.0.0.1:3888/api/blog-posts/list?blogId=${encodeURIComponent(blogId)}`);
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || "글 목록 조회에 실패했습니다.");
+          }
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error);
+
+          postsQueue = data.posts || [];
+          totalCount = postsQueue.length;
+          
+          if (totalText) totalText.textContent = totalCount;
+          logConsole(`[조회 완료] 총 ${totalCount}개의 공개 게시글을 발견했습니다. 작업을 시작합니다.`, "blue");
+
+          if (totalCount === 0) {
+            logConsole(`[경고] 수집할 게시글이 존재하지 않습니다.`);
+            resetButtons();
+            return;
+          }
+
+          appState = "RUNNING";
+          startBtn.textContent = "수집 진행 중...";
+          
+          pauseBtn.disabled = false;
+          pauseBtn.className = "px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold rounded-xl shadow-sm active:scale-[0.98] transition-transform";
+          
+          runLoop();
+        } catch (e) {
+          logConsole(`[에러] 목록 수집 에러: ${e.message}`, "red");
+          alert(`블로그 글 목록 수집 중 실패: ${e.message}`);
+          resetButtons();
+        }
+      });
+
+      pauseBtn.addEventListener("click", () => {
+        if (appState === "RUNNING") {
+          appState = "PAUSED";
+          if (timerId) clearTimeout(timerId);
+          logConsole(`[일시정지] 사용자가 작업을 일시정지했습니다. 언제든 [수집 시작]을 눌러 이어갈 수 있습니다.`, "blue");
+          
+          startBtn.disabled = false;
+          startBtn.textContent = "🚀 수집 재개";
+          startBtn.className = "flex-grow px-4 py-3 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] transition-transform text-white text-xs font-bold rounded-xl shadow-sm";
+          
+          pauseBtn.disabled = true;
+          pauseBtn.className = "px-4 py-3 bg-gray-300 dark-mode:bg-gray-750 text-gray-500 dark-mode:text-gray-400 text-xs font-bold rounded-xl cursor-not-allowed";
+        }
+      });
+
+      stopBtn.addEventListener("click", () => {
+        if (confirm("정말로 전체 수집 작업을 중단하시겠습니까? 현재까지 저장된 파일은 그대로 유지됩니다.")) {
+          appState = "IDLE";
+          if (timerId) clearTimeout(timerId);
+          logConsole(`[작업중단] 사용자에 의해 전체 수집 작업이 강제 중단되었습니다.`, "red");
+          resetButtons();
         }
       });
     }
