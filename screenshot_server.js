@@ -566,9 +566,9 @@ app.post('/api/screenshot', async (req, res) => {
   }
 
   const dateStr = getKstDateString();
-  const finalDir = 'D:\\rank';
+  const finalDir = 'D:\\search-rank';
 
-  // Try creating D:\rank directory
+  // Try creating D:\search-rank directory
   try {
     if (!fs.existsSync(finalDir)) {
       fs.mkdirSync(finalDir, { recursive: true });
@@ -577,7 +577,7 @@ app.post('/api/screenshot', async (req, res) => {
     console.error(`지정된 경로(${finalDir}) 폴더 생성 실패:`, e);
     return res.status(500).json({ 
       success: false, 
-      error: `D:\\rank 저장 폴더를 생성할 수 없습니다. 권한이 있는지 확인하세요. (오류: ${e.message})` 
+      error: `D:\\search-rank 저장 폴더를 생성할 수 없습니다. 권한이 있는지 확인하세요. (오류: ${e.message})` 
     });
   }
 
@@ -619,7 +619,7 @@ setInterval(async () => {
     saveConfig();
 
     console.log(`[예약 자동 실행] 예정된 시각(${globalConfig.scheduleTime})이 되어 수집을 자동 시작합니다.`);
-    const finalDir = 'D:\\rank';
+    const finalDir = 'D:\\search-rank';
     try {
       if (!fs.existsSync(finalDir)) {
         fs.mkdirSync(finalDir, { recursive: true });
@@ -654,7 +654,7 @@ app.listen(PORT, () => {
   console.log(` [네이버/구글 키워드 검색 풀스크린 캡처 통합 서버 시작되었습니다]`);
   console.log(` 접속용 웹페이지 주소: http://127.0.0.1:${PORT}`);
   console.log(` API Endpoint : http://127.0.0.1:${PORT}/api/screenshot`);
-  console.log(` 저장 기본 경로: D:\\rank [파일명: 키워드 YYYY.MM.DD.jpg 저장]`);
+  console.log(` 저장 기본 경로: D:\\search-rank [파일명: 키워드 YYYY.MM.DD.jpg 저장]`);
   console.log(` 실행 종료는 터미널에서 Ctrl+C를 눌러주세요.`);
   console.log(`================================================================`);
 });
