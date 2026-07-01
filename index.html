@@ -5606,37 +5606,20 @@
           <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
             <h3 class="text-sm font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">⏰ 매일 지정 시각 자동 수집 설정 (예약 기능)</h3>
             <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">
-              로컬 서버(CMD)를 켜둔 상태라면 브라우저를 닫아놓아도 지정된 시각에 매일 1회 자동으로 키워드 수집을 백그라운드에서 진행합니다. (D:\\search-rank에 저장)
+              로컬 서버(CMD)를 켜둔 상태라면 브라우저를 닫아놓아도 지정된 시각에 매일 1회 자동으로 키워드 수집을 백그라운드에서 진행합니다. (폴더 경로 개별 설정 가능)
             </p>
             
-            <div class="space-y-3">
-              <div class="flex items-center gap-3">
-                <label class="flex items-center gap-2 text-xs font-bold text-gray-700 dark-mode:text-gray-300 cursor-pointer">
-                  <input type="checkbox" id="schedule-enabled" class="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500">
-                  <span>매일 자동 수집 실행 사용</span>
-                </label>
-                <div class="flex items-center gap-1.5 ml-auto">
-                  <span class="text-xs font-bold text-gray-700 dark-mode:text-gray-300">수집 시각:</span>
-                  <input type="time" id="schedule-time" class="px-2 py-1 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-1 focus:ring-orange-500" value="09:00">
-                </div>
-              </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-bold text-green-600 dark-mode:text-green-400 mb-1.5">📋 예약할 네이버(Naver) 키워드 목록 (줄바꿈/쉼표 구분)</label>
-                  <textarea id="schedule-keywords-naver" rows="4" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예시:\\n부산인테리어\\n부산학원인테리어"></textarea>
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-blue-600 dark-mode:text-blue-400 mb-1.5">📋 예약할 구글(Google) 키워드 목록 (줄바꿈/쉼표 구분)</label>
-                  <textarea id="schedule-keywords-google" rows="4" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예시:\\n부산인테리어 디자인\\n부산학원인테리어 견적"></textarea>
-                </div>
-              </div>
+            <div id="schedule-tasks-container" class="space-y-4 divide-y divide-gray-150 dark-mode:divide-gray-750">
+              <!-- Dynamic schedule task cards go here -->
+            </div>
 
-              <div class="flex justify-end">
-                <button id="schedule-save-btn" class="px-4 py-2 bg-gray-800 dark-mode:bg-gray-700 hover:bg-gray-750 dark-mode:hover:bg-gray-600 text-white rounded-xl text-xs font-bold shadow-sm active:scale-[0.98] transition-transform">
-                  💾 예약 설정 저장
-                </button>
-              </div>
+            <div class="flex justify-between items-center pt-2">
+              <button id="add-schedule-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm active:scale-[0.98] transition-all flex items-center gap-1.5">
+                <span>➕ 자동 수집 예약 추가</span>
+              </button>
+              <button id="schedule-save-btn" class="px-5 py-2.5 bg-gray-800 dark-mode:bg-gray-700 hover:bg-gray-750 dark-mode:hover:bg-gray-600 text-white rounded-xl text-xs font-bold shadow-sm active:scale-[0.98] transition-transform">
+                💾 모든 예약 설정 저장
+              </button>
             </div>
           </div>
 
@@ -5676,11 +5659,8 @@
       const folderPath = document.getElementById("screenshot-folder-path");
       const warningBanner = document.getElementById("https-warning-banner");
 
-      const scheduleEnabledInput = document.getElementById("schedule-enabled");
-      const scheduleTimeInput = document.getElementById("schedule-time");
-      const scheduleNaverArea = document.getElementById("schedule-keywords-naver");
-      const scheduleGoogleArea = document.getElementById("schedule-keywords-google");
       const scheduleSaveBtn = document.getElementById("schedule-save-btn");
+      const addScheduleBtn = document.getElementById("add-schedule-btn");
 
       if (!startBtn) return;
 
@@ -5693,21 +5673,119 @@
       let serverOnline = false;
       let hasLoadedConfig = false;
 
+      function addScheduleTaskUI(data) {
+        const container = document.getElementById("schedule-tasks-container");
+        if (!container) return;
+
+        const id = data.id || Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        const enabled = !!data.enabled;
+        const time = data.time || "09:00";
+        const naverKeywords = Array.isArray(data.naverKeywords) ? data.naverKeywords : [];
+        const googleKeywords = Array.isArray(data.googleKeywords) ? data.googleKeywords : [];
+        const ocrKeywords = Array.isArray(data.ocrKeywords) ? data.ocrKeywords : [];
+        const saveFolder = data.saveFolder || "D:\\\\search-rank";
+
+        const taskHTML = `
+          <div class="schedule-task-item p-4 border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-50/30 dark-mode:bg-gray-850/30 space-y-3 relative pt-8" data-id="\${id}">
+            <button class="remove-task-btn absolute top-3 right-3 text-red-500 hover:text-red-700 transition-colors focus:outline-none" title="삭제">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+            <div class="flex flex-wrap items-center gap-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-gray-700 dark-mode:text-gray-300 cursor-pointer">
+                <input type="checkbox" class="task-enabled w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500" \${enabled ? 'checked' : ''}>
+                <span>이 예약 자동 수집 활성화</span>
+              </label>
+              <div class="flex items-center gap-1.5 ml-auto">
+                <span class="text-xs font-bold text-gray-700 dark-mode:text-gray-300">수집 시각:</span>
+                <input type="time" class="task-time px-2 py-1 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-1 focus:ring-orange-500" value="\${time}">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-[11px] font-bold text-gray-600 dark-mode:text-gray-400 mb-1">💾 저장할 폴더 경로</label>
+              <input type="text" class="task-save-folder w-full px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500" value="\${saveFolder}" placeholder="예: D:\\\\search-rank">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-green-600 dark-mode:text-green-400 mb-1">📋 네이버 키워드 (줄바꿈/쉼표 구분)</label>
+                <textarea class="task-keywords-naver w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 font-mono" rows="3" placeholder="예:\\n부산인테리어\\n부산학원인테리어">\${naverKeywords.join('\\n')}</textarea>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-blue-600 dark-mode:text-blue-400 mb-1">📋 구글 키워드 (줄바꿈/쉼표 구분)</label>
+                <textarea class="task-keywords-google w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 font-mono" rows="3" placeholder="예:\\n부산인테리어 디자인\\n부산학원인테리어 견적">\${googleKeywords.join('\\n')}</textarea>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-orange-600 dark-mode:text-orange-400 mb-1">🎯 OCR 체크 단어 (선택사항, 쉼표 구분)</label>
+              <input type="text" class="task-ocr-keywords w-full px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500" value="\${ocrKeywords.join(', ')}" placeholder="예시: 인디컴퍼니, inde.co.kr">
+            </div>
+          </div>
+        `;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "py-4 first:pt-0 last:pb-0";
+        wrapper.innerHTML = taskHTML;
+        const itemNode = wrapper.firstElementChild;
+
+        // Handle delete button click
+        const removeBtn = itemNode.querySelector(".remove-task-btn");
+        removeBtn.addEventListener("click", () => {
+          if (confirm("이 자동 수집 예약 설정을 삭제하시겠습니까?")) {
+            wrapper.remove();
+          }
+        });
+
+        container.appendChild(wrapper);
+      }
+
       async function loadScheduleConfig() {
         try {
           const res = await fetch("http://127.0.0.1:3888/api/config");
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.config) {
-              if (scheduleEnabledInput) scheduleEnabledInput.checked = !!data.config.scheduleEnabled;
-              if (scheduleTimeInput) scheduleTimeInput.value = data.config.scheduleTime || "09:00";
-              if (scheduleNaverArea) scheduleNaverArea.value = (data.config.naverKeywords || []).join("\\n");
-              if (scheduleGoogleArea) scheduleGoogleArea.value = (data.config.googleKeywords || []).join("\\n");
+              const container = document.getElementById("schedule-tasks-container");
+              if (container) {
+                container.innerHTML = "";
+                const schedules = data.config.schedules || [];
+                if (schedules.length === 0) {
+                  addScheduleTaskUI({
+                    id: Date.now().toString(),
+                    enabled: false,
+                    time: "09:00",
+                    naverKeywords: [],
+                    googleKeywords: [],
+                    ocrKeywords: [],
+                    saveFolder: "D:\\\\search-rank"
+                  });
+                } else {
+                  schedules.forEach(schedule => {
+                    addScheduleTaskUI(schedule);
+                  });
+                }
+              }
             }
           }
         } catch (e) {
           console.error("예약 설정 로드 실패:", e);
         }
+      }
+
+      // Add schedule task button click handler
+      if (addScheduleBtn) {
+        addScheduleBtn.addEventListener("click", () => {
+          addScheduleTaskUI({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            enabled: true,
+            time: "09:00",
+            naverKeywords: [],
+            googleKeywords: [],
+            ocrKeywords: [],
+            saveFolder: "D:\\\\search-rank"
+          });
+        });
       }
 
       async function checkServerStatus() {
@@ -5755,24 +5833,44 @@
             return;
           }
 
-          const enabled = scheduleEnabledInput.checked;
-          const time = scheduleTimeInput.value;
-          const rawNaver = scheduleNaverArea.value.trim();
-          const rawGoogle = scheduleGoogleArea.value.trim();
+          const taskItems = document.querySelectorAll(".schedule-task-item");
+          const schedules = [];
 
-          const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
-          const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+          for (const item of taskItems) {
+            const id = item.dataset.id;
+            const enabled = item.querySelector(".task-enabled").checked;
+            const time = item.querySelector(".task-time").value;
+            const saveFolder = item.querySelector(".task-save-folder").value.trim();
+            const rawNaver = item.querySelector(".task-keywords-naver").value.trim();
+            const rawGoogle = item.querySelector(".task-keywords-google").value.trim();
+            const rawOcr = item.querySelector(".task-ocr-keywords").value.trim();
+
+            if (!saveFolder) {
+              alert("저장할 폴더 경로를 입력해 주세요.");
+              item.querySelector(".task-save-folder").focus();
+              return;
+            }
+
+            const naverKeywords = rawNaver.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+            const googleKeywords = rawGoogle.split(/[\n,]/).map(k => k.trim()).filter(k => k.length > 0);
+            const ocrKeywords = rawOcr.split(/,/).map(k => k.trim()).filter(k => k.length > 0);
+
+            schedules.push({
+              id,
+              enabled,
+              time,
+              saveFolder,
+              naverKeywords,
+              googleKeywords,
+              ocrKeywords
+            });
+          }
 
           try {
             const res = await fetch("http://127.0.0.1:3888/api/config", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                scheduleEnabled: enabled,
-                scheduleTime: time,
-                naverKeywords,
-                googleKeywords
-              })
+              body: JSON.stringify({ schedules })
             });
 
             if (!res.ok) {
@@ -5780,7 +5878,7 @@
               throw new Error(err.error || "예약 설정 저장에 실패했습니다.");
             }
 
-            alert("⏰ 매일 지정 시각 자동 수집 예약 설정이 성공적으로 저장되었습니다!");
+            alert("⏰ 모든 자동 수집 예약 설정이 성공적으로 저장되었습니다!");
           } catch (e) {
             alert(`예약 설정 저장 중 에러: \${e.message}`);
           }

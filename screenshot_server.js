@@ -51,11 +51,7 @@ app.get('/', (req, res) => {
 // --- Scheduling configuration load/save ---
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 let globalConfig = {
-  scheduleEnabled: false,
-  scheduleTime: '09:00',
-  naverKeywords: [],
-  googleKeywords: [],
-  lastRunDate: ''
+  schedules: []
 };
 
 function loadConfig() {
@@ -64,29 +60,57 @@ function loadConfig() {
       const data = fs.readFileSync(CONFIG_FILE, 'utf8');
       const loaded = JSON.parse(data);
       
-      // Backward compatibility mapping for old 'keywords' array
-      if (loaded.keywords && Array.isArray(loaded.keywords) && loaded.naverKeywords === undefined) {
-        loaded.naverKeywords = loaded.keywords;
-      }
-
       globalConfig = { ...globalConfig, ...loaded };
-
-      // Bulletproof split in case string elements contain newlines/commas
-      if (Array.isArray(globalConfig.naverKeywords)) {
-        globalConfig.naverKeywords = globalConfig.naverKeywords
-          .flatMap(k => k.split(/[\n,]/))
-          .map(k => k.trim())
-          .filter(k => k.length > 0);
-      }
-      if (Array.isArray(globalConfig.googleKeywords)) {
-        globalConfig.googleKeywords = globalConfig.googleKeywords
-          .flatMap(k => k.split(/[\n,]/))
-          .map(k => k.trim())
-          .filter(k => k.length > 0);
-      }
-
-      console.log(`[설정 로드] 자동 예약 실행 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}`);
     }
+    
+    // Migrate legacy config format if schedules array is missing
+    if (!globalConfig.schedules || !Array.isArray(globalConfig.schedules)) {
+      globalConfig.schedules = [];
+      if (globalConfig.scheduleTime) {
+        globalConfig.schedules.push({
+          id: 'legacy-default',
+          enabled: !!globalConfig.scheduleEnabled,
+          time: globalConfig.scheduleTime,
+          naverKeywords: Array.isArray(globalConfig.naverKeywords) ? globalConfig.naverKeywords : [],
+          googleKeywords: Array.isArray(globalConfig.googleKeywords) ? globalConfig.googleKeywords : [],
+          ocrKeywords: [],
+          saveFolder: 'D:\\search-rank',
+          lastRunDate: globalConfig.lastRunDate || ''
+        });
+      }
+    }
+
+    // Bulletproof split and clean for each schedule
+    if (Array.isArray(globalConfig.schedules)) {
+      globalConfig.schedules.forEach(schedule => {
+        if (Array.isArray(schedule.naverKeywords)) {
+          schedule.naverKeywords = schedule.naverKeywords
+            .flatMap(k => k.split(/[\n,]/))
+            .map(k => k.trim())
+            .filter(k => k.length > 0);
+        } else {
+          schedule.naverKeywords = [];
+        }
+        if (Array.isArray(schedule.googleKeywords)) {
+          schedule.googleKeywords = schedule.googleKeywords
+            .flatMap(k => k.split(/[\n,]/))
+            .map(k => k.trim())
+            .filter(k => k.length > 0);
+        } else {
+          schedule.googleKeywords = [];
+        }
+        if (Array.isArray(schedule.ocrKeywords)) {
+          schedule.ocrKeywords = schedule.ocrKeywords
+            .flatMap(k => k.split(/[\n,]/))
+            .map(k => k.trim())
+            .filter(k => k.length > 0);
+        } else {
+          schedule.ocrKeywords = [];
+        }
+      });
+    }
+
+    console.log(`[설정 로드] 총 ${globalConfig.schedules.length}개의 예약 설정 로드 완료`);
   } catch (e) {
     console.error("config.json 로드 실패:", e);
   }
@@ -109,26 +133,28 @@ app.get('/api/config', (req, res) => {
 
 // Save config endpoint
 app.post('/api/config', (req, res) => {
-  const { scheduleEnabled, scheduleTime, naverKeywords, googleKeywords } = req.body;
+  const { schedules } = req.body;
 
-  if (scheduleTime && !/^\d{2}:\d{2}$/.test(scheduleTime)) {
-    return res.status(400).json({ success: false, error: '시간 형식은 HH:MM 이어야 합니다.' });
-  }
+  if (Array.isArray(schedules)) {
+    for (const schedule of schedules) {
+      if (schedule.time && !/^\d{2}:\d{2}$/.test(schedule.time)) {
+        return res.status(400).json({ success: false, error: '시간 형식은 HH:MM 이어야 합니다.' });
+      }
 
-  if (globalConfig.scheduleTime !== scheduleTime || globalConfig.scheduleEnabled !== !!scheduleEnabled) {
-    globalConfig.lastRunDate = ''; // Reset run date to allow same-day testing when time or status changes
-  }
-  globalConfig.scheduleEnabled = !!scheduleEnabled;
-  if (scheduleTime) globalConfig.scheduleTime = scheduleTime;
-  if (Array.isArray(naverKeywords)) {
-    globalConfig.naverKeywords = naverKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0);
-  }
-  if (Array.isArray(googleKeywords)) {
-    globalConfig.googleKeywords = googleKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0);
+      // Preserve lastRunDate from existing config if matching ID
+      const existing = globalConfig.schedules?.find(s => s.id === schedule.id);
+      schedule.lastRunDate = existing ? existing.lastRunDate : '';
+
+      // Reset run date to allow same-day testing when time or status changes
+      if (existing && (existing.time !== schedule.time || existing.enabled !== schedule.enabled)) {
+        schedule.lastRunDate = '';
+      }
+    }
+    globalConfig.schedules = schedules;
   }
 
   saveConfig();
-  console.log(`[설정 변경] 예약 상태: ${globalConfig.scheduleEnabled ? '활성화 (' + globalConfig.scheduleTime + ')' : '비활성화'}, 네이버: ${globalConfig.naverKeywords.length}개, 구글: ${globalConfig.googleKeywords.length}개`);
+  console.log(`[설정 변경] 총 ${globalConfig.schedules.length}개의 예약 설정이 저장되었습니다.`);
   res.json({ success: true, config: globalConfig });
 });
 
@@ -601,7 +627,7 @@ app.post('/api/screenshot', async (req, res) => {
 
 // Background automation scheduler loop (checks every 30 seconds)
 setInterval(async () => {
-  if (!globalConfig.scheduleEnabled) return;
+  if (!Array.isArray(globalConfig.schedules) || globalConfig.schedules.length === 0) return;
 
   const now = new Date();
   const utc = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
@@ -613,32 +639,39 @@ setInterval(async () => {
 
   const dateStr = `${kst.getFullYear()}.${String(kst.getMonth() + 1).padStart(2, '0')}.${String(kst.getDate()).padStart(2, '0')}`;
 
-  // If time matches and not run today yet
-  if (currentTimeStr === globalConfig.scheduleTime && globalConfig.lastRunDate !== dateStr) {
-    globalConfig.lastRunDate = dateStr;
-    saveConfig();
+  for (const schedule of globalConfig.schedules) {
+    if (!schedule.enabled) continue;
 
-    console.log(`[예약 자동 실행] 예정된 시각(${globalConfig.scheduleTime})이 되어 수집을 자동 시작합니다.`);
-    const finalDir = 'D:\\search-rank';
-    try {
-      if (!fs.existsSync(finalDir)) {
-        fs.mkdirSync(finalDir, { recursive: true });
-      }
+    if (currentTimeStr === schedule.time && schedule.lastRunDate !== dateStr) {
+      schedule.lastRunDate = dateStr;
+      saveConfig();
 
-      const tasks = [];
-      if (Array.isArray(globalConfig.naverKeywords)) {
-        globalConfig.naverKeywords.forEach(k => tasks.push({ keyword: k, platform: 'naver' }));
-      }
-      if (Array.isArray(globalConfig.googleKeywords)) {
-        globalConfig.googleKeywords.forEach(k => tasks.push({ keyword: k, platform: 'google' }));
-      }
+      console.log(`[예약 자동 실행] 예정된 시각(${schedule.time})이 되어 수집을 자동 시작합니다.`);
+      const finalDir = schedule.saveFolder || 'D:\\search-rank';
+      try {
+        if (!fs.existsSync(finalDir)) {
+          fs.mkdirSync(finalDir, { recursive: true });
+        }
 
-      if (tasks.length > 0) {
-        await executeScreenshotList(tasks, finalDir, dateStr);
-        console.log(`[예약 자동 실행] 하루 1회 정기 키워드 수집을 성공적으로 완료하였습니다.`);
+        const tasks = [];
+        if (Array.isArray(schedule.naverKeywords)) {
+          schedule.naverKeywords.forEach(k => tasks.push({ keyword: k, platform: 'naver' }));
+        }
+        if (Array.isArray(schedule.googleKeywords)) {
+          schedule.googleKeywords.forEach(k => tasks.push({ keyword: k, platform: 'google' }));
+        }
+
+        if (tasks.length > 0) {
+          const ocrList = Array.isArray(schedule.ocrKeywords) && schedule.ocrKeywords.length > 0
+            ? schedule.ocrKeywords
+            : undefined;
+
+          await executeScreenshotList(tasks, finalDir, dateStr, ocrList);
+          console.log(`[예약 자동 실행] 예정 시각(${schedule.time})의 정기 키워드 수집을 성공적으로 완료하였습니다. (저장경로: ${finalDir})`);
+        }
+      } catch (err) {
+        console.error(`[예약 자동 실행 실패 - 시각: ${schedule.time}]:`, err);
       }
-    } catch (err) {
-      console.error("[예약 자동 실행 실패]:", err);
     }
   }
 }, 30000);
