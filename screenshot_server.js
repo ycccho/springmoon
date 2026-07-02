@@ -323,7 +323,7 @@ app.post('/api/blog-posts/process-one', async (req, res) => {
           .join('\n');
       }
 
-      const fileContent = `게시글 제목: ${title}\n게시글 작성 날짜: ${absoluteDate}\n\n게시글 내용:\n${text}`;
+      const fileContent = `게시글 제목: ${title}\n게시글 URL: https://blog.naver.com/${blogId}/${logNo}\n게시글 작성 날짜: ${absoluteDate}\n\n게시글 내용:\n${text}`;
       const txtFilename = `${absoluteDate}-${blogId}-${safeTitle}.txt`;
       const txtPath = path.join(saveFolder, txtFilename);
       fs.writeFileSync(txtPath, fileContent, 'utf8');
