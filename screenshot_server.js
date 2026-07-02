@@ -353,19 +353,18 @@ app.post('/api/blog-posts/process-one', async (req, res) => {
         await page.evaluateOnNewDocument(() => {
           Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
         });
-        // 모바일 해상도(가로 750px)로 설정 시 모바일 블로그 뷰 캡처에 가장 알맞음
-        await page.setViewport({ width: 750, height: 900 });
+        // 모바일 해상도(가로 750px, 고화질 2배율)로 설정 시 모바일 블로그 뷰 캡처에 가장 알맞음
+        await page.setViewport({ width: 750, height: 900, deviceScaleFactor: 2 });
 
         await page.goto(postUrl, { waitUntil: 'networkidle2', timeout: 60000 });
         await autoScroll(page);
         await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
 
-        const jpgFilename = `${absoluteDate}-${blogId}-${safeTitle}.jpg`;
-        const jpgPath = path.join(saveFolder, jpgFilename);
+        const pngFilename = `${absoluteDate}-${blogId}-${safeTitle}.png`;
+        const pngPath = path.join(saveFolder, pngFilename);
 
         let screenshotBuffer = await page.screenshot({
-          type: 'jpeg',
-          quality: 85,
+          type: 'png',
           fullPage: true
         });
 
@@ -375,16 +374,16 @@ app.post('/api/blog-posts/process-one', async (req, res) => {
             ? ocrKeywords.flatMap(k => k.split(/[\n,]/)).map(k => k.trim()).filter(k => k.length > 0)
             : [];
           if (cleanOcr.length > 0) {
-            const circledBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer, cleanOcr);
+            const circledBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer, cleanOcr, 'png');
             if (circledBuffer) {
               screenshotBuffer = circledBuffer;
             }
           }
         }
 
-        fs.writeFileSync(jpgPath, screenshotBuffer);
+        fs.writeFileSync(pngPath, screenshotBuffer);
         screenshotSaved = true;
-        savedFiles.push(jpgFilename);
+        savedFiles.push(pngFilename);
       } finally {
         await browser.close();
       }
@@ -513,7 +512,7 @@ async function autoScroll(page) {
 }
 
 // OCR 검출 및 매칭되는 단어에 빨간색 동그라미 그리기 함수
-async function detectAndDrawRedCircles(browser, buffer, ocrKeywords) {
+async function detectAndDrawRedCircles(browser, buffer, ocrKeywords, imageType = 'jpeg') {
   try {
     const base64Image = buffer.toString('base64');
     const apiKey = "AIzaSyA8IWoPG8vHeVQISBiI9i4-csuluwsV_no";
@@ -693,11 +692,16 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords) {
       deviceScaleFactor: 1
     });
 
-    const circledBuffer = await page.screenshot({
-      type: 'jpeg',
-      quality: 85,
+    const screenshotOptions = {
       fullPage: true
-    });
+    };
+    if (imageType === 'png') {
+      screenshotOptions.type = 'png';
+    } else {
+      screenshotOptions.type = 'jpeg';
+      screenshotOptions.quality = 85;
+    }
+    const circledBuffer = await page.screenshot(screenshotOptions);
 
     await page.close();
     console.log("[OCR 검출] 빨간 동그라미 그리기 및 이미지 재저장 완료.");
