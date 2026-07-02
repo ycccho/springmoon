@@ -158,8 +158,6 @@ app.post('/api/config', (req, res) => {
   res.json({ success: true, config: globalConfig });
 });
 
-});
-
 // 블로그 전체 게시글 목록 가져오기 API
 app.get('/api/blog-posts/list', async (req, res) => {
   const blogId = req.query.blogId;
