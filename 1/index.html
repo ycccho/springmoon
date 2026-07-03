@@ -35,7 +35,7 @@
 
     <!-- Top Fixed Header (Mobile Specific) -->
     <div class="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-150 px-4 py-3 flex justify-between items-center">
-      <h1 class="text-sm font-black text-gray-950 tracking-tight">📝 현장 일일보고서</h1>
+      <h1 class="text-sm font-black text-gray-950 tracking-tight" id="dr-main-title">📝 현장 일일보고서</h1>
       
       <!-- Screen Toggle Tab Button -->
       <button id="dr-toggle-tab-btn" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-sm transition-colors border border-green-200 bg-green-50 hover:bg-green-100 text-green-700">
@@ -43,9 +43,24 @@
       </button>
     </div>
 
+    <!-- Main Navigation Tab Bar -->
+    <div class="bg-gray-100 border-b border-gray-200 px-3 py-2 flex gap-3 shadow-inner">
+      <button id="main-tab-report" class="flex-1 py-2.5 text-center text-[11px] font-black rounded-lg shadow-sm border border-orange-200 bg-white text-orange-700 transition-all focus:outline-none">
+        📝 일일보고서 작성
+      </button>
+      <button id="main-tab-photo" class="flex-1 py-2.5 text-center text-[11px] font-bold rounded-lg border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 transition-all focus:outline-none">
+        📸 사진 텍스트넣기
+      </button>
+    </div>
+
     <div class="p-2 mt-1">
-      <!-- Write/Form Container -->
+      <!-- Write/Form Container (Tab 1) -->
       <div id="dr-form-container" class="space-y-4">
+        <!-- Form Cards are dynamically generated here -->
+      </div>
+
+      <!-- Photo Text Container (Tab 2) -->
+      <div id="pt-form-container" class="space-y-4 hidden">
         <!-- Form Cards are dynamically generated here -->
       </div>
     </div>
@@ -434,11 +449,17 @@
               </div>
 
               <!-- Friendly Quick Guide Card -->
-              <div class="mt-6 p-4 bg-blue-50 border border-blue-150 rounded-xl text-[11px] text-blue-900 leading-relaxed font-semibold space-y-2 shadow-xs">
+              <div class="mt-6 p-4 bg-blue-50 border border-blue-150 rounded-xl text-[11px] text-blue-900 leading-relaxed font-semibold space-y-3.5 shadow-xs">
                 <h3 class="font-bold text-[12px] text-blue-850 flex items-center gap-1.5 border-b border-blue-150 pb-1">💡 일일보고서 작성 쉬운 설명서</h3>
-                <ul class="list-disc pl-3.5 space-y-1.5">
+                
+                <!-- Visual Graphic Manual -->
+                <div class="rounded-lg overflow-hidden border border-blue-200 shadow-sm bg-white p-1">
+                  <img src="daily_report_guide.png" class="w-full h-auto object-cover rounded" alt="일일보고서 사용법 가이드">
+                </div>
+
+                <ul class="list-disc pl-3.5 space-y-2 text-[10.5px]">
                   <li><strong>공종 및 인원</strong>: 공종명(예: 목수)과 인원 숫자를 적어주세요.</li>
-                  <li><strong>작업 추가/엔터 키</strong>: 작업 내용을 쓰고 <span class="bg-blue-100 text-blue-800 px-1 rounded font-bold">엔터(Enter)</span> 키를 누르면 다음 칸이 자동으로 추가됩니다.</li>
+                  <li><strong>작업 추가/줄바꿈</strong>: 모바일 키보드에서 <span class="bg-blue-100 text-blue-800 px-1 rounded font-bold">[완료/이동/엔터]</span> 버튼을 누르면 다음 작업 칸이 자동으로 추가됩니다.</li>
                   <li><strong>하위 작업 세분화</strong>: 분류를 나누려면 <span class="bg-blue-100 text-blue-800 px-1 rounded font-bold">+하위</span> 버튼을 누르고 진행 단계(완료/진행중/예정)를 터치해 지정하세요.</li>
                   <li><strong>임시 저장 (자동 저장)</strong>: <span class="bg-yellow-250 text-yellow-900 px-1.5 py-0.5 rounded font-extrabold">카톡용 복사하기</span> 버튼을 누르면 복사와 동시에 작성 내역이 폰에 자동 저장됩니다.</li>
                   <li><strong>이어서 작성하기</strong>: 최근 저장된 내용을 불러오려면 우측 상단의 <span class="bg-green-150 text-green-800 px-1.5 py-0.5 rounded font-extrabold">📂 지난 내역 보기</span>를 누르세요.</li>
@@ -538,9 +559,272 @@
       renderActiveForm();
     }
 
+    function setupPhotoText() {
+      const container = document.getElementById("pt-form-container");
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="p-3 rounded-xl shadow-md border border-orange-200 bg-white mb-8">
+          <div class="flex justify-between items-center mb-3 pb-1.5 border-b border-gray-150">
+            <h2 class="font-black text-sm flex items-center gap-1.5 text-orange-700">
+              📸 사진 하단에 텍스트 넣기
+            </h2>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Site name & Date -->
+            <div class="flex flex-col gap-3 bg-gray-55 p-3 rounded-lg border border-gray-150 shadow-xs">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-500 mb-1">날짜 (기본 오늘)</label>
+                <input type="text" id="pt-input-date" class="w-full border-b border-gray-200 pb-1.5 text-sm focus:outline-none focus:border-orange-500 bg-transparent text-gray-800 transition-colors">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-500 mb-1">현장명</label>
+                <input type="text" id="pt-input-sitename" placeholder="현장명 입력 (예: 미포 뉴미)" class="w-full border-b border-gray-200 pb-1.5 text-sm font-bold focus:outline-none focus:border-orange-500 bg-transparent text-gray-800 transition-colors">
+              </div>
+            </div>
+
+            <!-- Upload Box -->
+            <div class="border-2 border-dashed border-gray-300 hover:border-orange-400 rounded-xl p-6 text-center transition-colors cursor-pointer relative" id="pt-upload-dropzone">
+              <input type="file" id="pt-file-input" multiple accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+              <div class="flex flex-col items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="text-xs font-bold text-gray-655">이곳을 터치하여 사진을 선택하세요</p>
+                <p class="text-[9px] text-gray-400 mt-1">한 장 또는 여러 장 동시에 업로드 가능</p>
+              </div>
+            </div>
+
+            <!-- Processed Previews -->
+            <div id="pt-preview-section" class="hidden space-y-3 pt-3 border-t border-gray-200">
+              <div class="flex justify-between items-center">
+                <h3 class="text-xs font-bold text-gray-700">🖼 변환된 사진 목록</h3>
+                <button id="pt-btn-download-all" class="text-[10px] bg-orange-600 active:bg-orange-700 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-sm active:scale-[0.98] transition-transform">모두 다운로드</button>
+              </div>
+              <div id="pt-preview-list" class="space-y-3">
+                <!-- Items render here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo Guide Card -->
+        <div class="mt-2 p-4 bg-orange-50/50 border border-orange-150 rounded-xl text-[11px] text-orange-955 leading-relaxed font-semibold space-y-2 shadow-xs">
+          <h3 class="font-bold text-[12px] text-orange-850 flex items-center gap-1.5 border-b border-orange-150 pb-1">💡 사진 텍스트넣기 간단 설명서</h3>
+          <ul class="list-disc pl-3.5 space-y-1.5 text-[10.5px]">
+            <li><strong>현장명 입력</strong>: 사진 하단에 넣을 현장명을 적어주세요.</li>
+            <li><strong>사진 선택</strong>: 업로드 상자를 터치해 갤러리나 카메라로 사진들을 골라주세요.</li>
+            <li><strong>자동 생성</strong>: 원본 화질을 그대로 유지하며, 사진 하단에 흰색 바를 덧붙여 <span class="bg-orange-100 text-orange-900 px-1 rounded font-bold">[오늘날짜 - 현장명]</span> 문구를 깔끔하게 그려줍니다.</li>
+            <li><strong>개별/전체 다운로드</strong>: 변환이 완료된 사진들을 각각 다운로드하거나 <span class="bg-orange-200 text-orange-900 px-1.5 py-0.5 rounded font-extrabold">모두 다운로드</span> 버튼으로 한 번에 폰에 저장하세요.</li>
+          </ul>
+        </div>
+      `;
+
+      const dateInput = document.getElementById("pt-input-date");
+      const siteInput = document.getElementById("pt-input-sitename");
+      const fileInput = document.getElementById("pt-file-input");
+      const previewSection = document.getElementById("pt-preview-section");
+      const previewList = document.getElementById("pt-preview-list");
+      const downloadAllBtn = document.getElementById("pt-btn-download-all");
+
+      // Set default date to YYYY.MM.DD
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const defaultDateStr = `${yyyy}.${mm}.${dd}`;
+      if (dateInput) dateInput.value = defaultDateStr;
+
+      // Restore values from localStorage
+      if (siteInput) siteInput.value = localStorage.getItem("pt_site_name") || "";
+      if (siteInput) {
+        siteInput.addEventListener("input", () => {
+          localStorage.setItem("pt_site_name", siteInput.value.trim());
+          processAllUploadedFiles();
+        });
+      }
+      if (dateInput) {
+        dateInput.addEventListener("input", () => {
+          processAllUploadedFiles();
+        });
+      }
+
+      let uploadedFiles = [];
+      let processedImages = []; // Array of { dataUrl, filename }
+
+      fileInput.addEventListener("change", (e) => {
+        uploadedFiles = Array.from(e.target.files);
+        processAllUploadedFiles();
+      });
+
+      async function processAllUploadedFiles() {
+        if (uploadedFiles.length === 0) {
+          previewSection.classList.add("hidden");
+          previewList.innerHTML = "";
+          return;
+        }
+        
+        const siteName = siteInput.value.trim() || "미지정 현장";
+        const dateStr = dateInput.value.trim() || defaultDateStr;
+        
+        processedImages = [];
+        previewList.innerHTML = "";
+        previewSection.classList.remove("hidden");
+
+        for (let i = 0; i < uploadedFiles.length; i++) {
+          const file = uploadedFiles[i];
+          
+          // Create placeholder list item with spinner
+          const listItem = document.createElement("div");
+          listItem.className = "p-2.5 bg-gray-50 border border-gray-150 rounded-lg flex flex-col gap-2";
+          listItem.innerHTML = `
+            <div class="flex justify-between items-center">
+              <span class="text-[11px] font-bold text-gray-500">${file.name} 처리 중...</span>
+            </div>
+            <div class="h-28 bg-gray-100 rounded flex justify-center items-center">
+              <svg class="animate-spin h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          `;
+          previewList.appendChild(listItem);
+
+          try {
+            const result = await processPhoto(file, siteName, dateStr);
+            const index = i + 1;
+            const newFilename = `${dateStr}-${siteName}-사진_${index}.jpg`;
+            processedImages.push({
+              dataUrl: result.dataUrl,
+              filename: newFilename
+            });
+
+            // Update item view
+            listItem.innerHTML = `
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] font-black text-gray-700 truncate w-3/5">${newFilename}</span>
+                <button class="pt-individual-download text-[10px] bg-orange-100 text-orange-700 px-2 py-1 rounded font-bold hover:bg-orange-200">다운로드</button>
+              </div>
+              <div class="rounded overflow-hidden border border-gray-200 max-h-40 bg-gray-100 flex justify-center">
+                <img src="${result.dataUrl}" class="h-full max-h-40 w-auto object-contain">
+              </div>
+            `;
+
+            // Bind individual download button
+            listItem.querySelector(".pt-individual-download").addEventListener("click", () => {
+              downloadDataURI(result.dataUrl, newFilename);
+            });
+
+          } catch (err) {
+            console.error(err);
+            listItem.innerHTML = `
+              <div class="text-[11px] font-bold text-red-500">❌ 변환 실패: ${file.name}</div>
+            `;
+          }
+        }
+      }
+
+      function downloadDataURI(dataUrl, filename) {
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      downloadAllBtn.addEventListener("click", () => {
+        if (processedImages.length === 0) return;
+        processedImages.forEach(img => {
+          downloadDataURI(img.dataUrl, img.filename);
+        });
+      });
+
+      function processPhoto(file, siteName, dateStr) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              
+              const originalWidth = img.width;
+              const originalHeight = img.height;
+              
+              // Bottom bar height is 8% of original height, minimum 50px
+              const paddingHeight = Math.max(50, Math.round(originalHeight * 0.08)); 
+              
+              canvas.width = originalWidth;
+              canvas.height = originalHeight + paddingHeight;
+              
+              // Draw image
+              ctx.drawImage(img, 0, 0);
+              
+              // Draw white bar
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, originalHeight, originalWidth, paddingHeight);
+              
+              // Draw text
+              ctx.fillStyle = '#111827';
+              const fontSize = Math.max(14, Math.round(paddingHeight * 0.35));
+              ctx.font = `bold ${fontSize}px sans-serif`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              
+              const textContent = `${dateStr} - ${siteName}`;
+              ctx.fillText(textContent, originalWidth / 2, originalHeight + (paddingHeight / 2));
+              
+              resolve({
+                dataUrl: canvas.toDataURL('image/jpeg', 0.92)
+              });
+            };
+            img.onerror = reject;
+            img.src = event.target.result;
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
     // Initialize once DOM is ready
     window.addEventListener("DOMContentLoaded", () => {
       setupDailyReport();
+      setupPhotoText();
+
+      // Main Navigation Tab toggle
+      const tabReport = document.getElementById("main-tab-report");
+      const tabPhoto = document.getElementById("main-tab-photo");
+      const drContainer = document.getElementById("dr-form-container");
+      const ptContainer = document.getElementById("pt-form-container");
+      const toggleBtn = document.getElementById("dr-toggle-tab-btn");
+      const mainTitle = document.getElementById("dr-main-title");
+
+      tabReport.addEventListener("click", () => {
+        // Toggle tabs classes
+        tabReport.className = "flex-1 py-2.5 text-center text-[11px] font-black rounded-lg shadow-sm border border-orange-200 bg-white text-orange-700 transition-all focus:outline-none";
+        tabPhoto.className = "flex-1 py-2.5 text-center text-[11px] font-bold rounded-lg border border-gray-200 bg-gray-55 text-gray-500 hover:bg-gray-100 transition-all focus:outline-none";
+        
+        // Show/Hide containers
+        drContainer.classList.remove("hidden");
+        ptContainer.classList.add("hidden");
+        toggleBtn.classList.remove("hidden");
+        mainTitle.textContent = "📝 현장 일일보고서";
+      });
+
+      tabPhoto.addEventListener("click", () => {
+        // Toggle tabs classes
+        tabPhoto.className = "flex-1 py-2.5 text-center text-[11px] font-black rounded-lg shadow-sm border border-orange-200 bg-white text-orange-700 transition-all focus:outline-none";
+        tabReport.className = "flex-1 py-2.5 text-center text-[11px] font-bold rounded-lg border border-gray-200 bg-gray-55 text-gray-500 hover:bg-gray-100 transition-all focus:outline-none";
+        
+        // Show/Hide containers
+        drContainer.classList.add("hidden");
+        ptContainer.classList.remove("hidden");
+        toggleBtn.classList.add("hidden");
+        mainTitle.textContent = "📸 사진 텍스트넣기";
+      });
 
       // Real-time clock update (KST, 24-hour format)
       function updateClock() {
