@@ -594,7 +594,28 @@
             <div id="pt-preview-section" class="hidden space-y-3 pt-3 border-t border-gray-200">
               <div class="flex justify-between items-center">
                 <h3 class="text-xs font-bold text-gray-700">🖼 변환된 사진 목록</h3>
-                <button id="pt-btn-download-all" class="text-[10px] bg-orange-600 active:bg-orange-700 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-sm active:scale-[0.98] transition-transfo      const dateInput = document.getElementById("pt-input-date");
+                <button id="pt-btn-download-all" class="text-[10px] bg-orange-600 active:bg-orange-700 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-sm active:scale-[0.98] transition-transform">모두 다운로드</button>
+              </div>
+              <div id="pt-preview-list" class="space-y-3">
+                <!-- Items render here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo Guide Card -->
+        <div class="mt-2 p-4 bg-orange-50/50 border border-orange-150 rounded-xl text-[11px] text-orange-955 leading-relaxed font-semibold space-y-2 shadow-xs">
+          <h3 class="font-bold text-[12px] text-orange-850 flex items-center gap-1.5 border-b border-orange-150 pb-1">💡 사진 텍스트넣기 간단 설명서</h3>
+          <ul class="list-disc pl-3.5 space-y-1.5 text-[10.5px]">
+            <li><strong>현장명 입력</strong>: 사진 하단에 넣을 현장명을 적어주세요.</li>
+            <li><strong>사진 선택</strong>: 업로드 상자를 터치해 갤러리나 카메라로 사진들을 골라주세요.</li>
+            <li><strong>자동 생성</strong>: 원본 화질을 그대로 유지하며, 사진 하단에 흰색 바를 덧붙여 <span class="bg-orange-100 text-orange-900 px-1 rounded font-bold">[오늘날짜 - 현장명]</span> 문구를 깔끔하게 그려줍니다.</li>
+            <li><strong>개별/전체 다운로드</strong>: 변환이 완료된 사진들을 각각 다운로드하거나 <span class="bg-orange-200 text-orange-900 px-1.5 py-0.5 rounded font-extrabold">모두 다운로드</span> 버튼으로 한 번에 폰에 저장하세요.</li>
+          </ul>
+        </div>
+      `;
+
+      const dateInput = document.getElementById("pt-input-date");
       const siteInput = document.getElementById("pt-input-sitename");
       const fileInput = document.getElementById("pt-file-input");
       const previewSection = document.getElementById("pt-preview-section");
