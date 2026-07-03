@@ -136,6 +136,7 @@
       { id: "backlink-check", name: "백링크검사", protected: true },
       { id: "keyword-screenshot", name: "키워드검색스샷", protected: true },
       { id: "blog-post-screenshot", name: "블로그게시글스샷", protected: true },
+      { id: "daily-report", name: "일일보고서 작성", protected: false, hidden: true },
       { id: "about", name: "소개", protected: false }
     ];
 
@@ -221,6 +222,10 @@
       if (!menus.some(m => m.id === "blog-post-screenshot")) {
         const idx = menus.findIndex(m => m.id === "keyword-screenshot");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "blog-post-screenshot", name: "블로그게시글스샷", protected: true });
+        changed = true;
+      }
+      if (!menus.some(m => m.id === "daily-report")) {
+        menus.push({ id: "daily-report", name: "일일보고서 작성", protected: false, hidden: true });
         changed = true;
       }
 
@@ -359,7 +364,7 @@
       container.innerHTML = "";
 
       // 1. Render Standalone/Uncategorized menus first
-      const standaloneMenus = currentMenus.filter(m => !m.categoryId);
+      const standaloneMenus = currentMenus.filter(m => !m.categoryId && !m.hidden);
       standaloneMenus.forEach((menu) => {
         const btn = createMenuButton(menu, currentMenus.indexOf(menu));
         container.appendChild(btn);
@@ -464,7 +469,7 @@
         catDiv.appendChild(catHeader);
 
         // Render menus inside this category
-        const catMenus = currentMenus.filter(m => m.categoryId === cat.id);
+        const catMenus = currentMenus.filter(m => m.categoryId === cat.id && !m.hidden);
         catMenus.forEach((menu) => {
           const btn = createMenuButton(menu, currentMenus.indexOf(menu));
           if (isCollapsed) {
@@ -711,6 +716,7 @@
         setupBacklinkCheck();
         setupKeywordScreenshot();
         setupBlogPostScreenshot();
+        setupDailyReport();
       }, 100);
     }
 
@@ -729,6 +735,7 @@
       if (id === "backlink-check") return getBacklinkCheckHTML();
       if (id === "keyword-screenshot") return getKeywordScreenshotHTML();
       if (id === "blog-post-screenshot") return getBlogPostScreenshotHTML();
+      if (id === "daily-report") return getDailyReportHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
           <h2 class="text-3xl font-bold mb-4 text-gray-800 dark-mode:text-gray-100">소개</h2>
@@ -5661,6 +5668,29 @@
       `;
     }
 
+    function getDailyReportHTML() {
+      return `
+        <div class="max-w-md mx-auto bg-gray-55 dark-mode:bg-gray-900 pb-10 select-none">
+          <!-- Top Fixed Header (Mobile Specific) -->
+          <div class="sticky top-0 z-40 bg-white dark-mode:bg-gray-800 shadow-sm border-b border-gray-150 dark-mode:border-gray-750 px-4 py-3 flex justify-between items-center">
+            <h1 class="text-sm font-black text-gray-950 dark-mode:text-gray-50 tracking-tight">📝 현장 일일보고서</h1>
+            
+            <!-- Screen Toggle Tab Button -->
+            <button id="dr-toggle-tab-btn" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-sm transition-colors border border-green-200 bg-green-50 hover:bg-green-100 text-green-700 dark-mode:bg-green-950/20 dark-mode:text-green-400 dark-mode:border-green-900/50">
+              📂 지난 내역 보기
+            </button>
+          </div>
+
+          <div class="p-2 mt-1">
+            <!-- Write/Form Container -->
+            <div id="dr-form-container" class="space-y-4">
+              <!-- Form Cards are dynamically generated here -->
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function getKeywordScreenshotHTML() {
       return `
         <div class="max-w-4xl mx-auto space-y-6">
@@ -6461,6 +6491,479 @@
           resetButtons();
         }
       });
+    }
+
+    function setupDailyReport() {
+      const getTodayString = () => {
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const date = today.getDate();
+        const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+        const day = days[today.getDay()];
+        return `${month}월 ${date}일 ${day}`;
+      };
+
+      const createEmptyData = () => ({
+        reportDate: getTodayString(),
+        siteName: '',
+        teams: [
+          {
+            id: Date.now(),
+            name: '',
+            headcount: '',
+            tasks: [{ id: Date.now() + 1, description: '', status: '', subTasks: [] }]
+          }
+        ]
+      });
+
+      let activeTab = 'new'; // 'new' or 'saved'
+      let defaultData = createEmptyData();
+      let savedData = null;
+
+      try {
+        const local = localStorage.getItem('siteReportSavedData');
+        savedData = local ? JSON.parse(local) : createEmptyData();
+      } catch (e) {
+        savedData = createEmptyData();
+      }
+
+      function saveToLocalStorage() {
+        localStorage.setItem('siteReportSavedData', JSON.stringify(savedData));
+      }
+
+      function updatePreviewText() {
+        const data = (activeTab === 'new') ? defaultData : savedData;
+        let result = `${data.reportDate || ''}\n${data.siteName || ''}\n\n`;
+        
+        data.teams.forEach((team, index) => {
+          if (!team.name && team.tasks.every(task => !task.description)) return;
+          
+          let countStr = (team.headcount || '').toString().trim();
+          if (countStr && !countStr.endsWith('명')) {
+            countStr += '명';
+          }
+          const header = countStr ? `${team.name} ${countStr}` : team.name;
+          result += `${index + 1}. ${header || '미지정 공종'}\n`;
+          
+          team.tasks.forEach(task => {
+            const hasSubTasks = task.subTasks && task.subTasks.length > 0;
+            
+            if (hasSubTasks) {
+              task.subTasks.forEach(subTask => {
+                if (subTask.description) {
+                  const prefix = task.description ? `${task.description} ` : '';
+                  const statusText = subTask.status ? ` (${subTask.status})` : '';
+                  result += `- ${prefix}${subTask.description}${statusText}\n`;
+                }
+              });
+            } else if (task.description) {
+              const statusText = task.status ? ` (${task.status})` : '';
+              result += `- ${task.description}${statusText}\n`;
+            }
+          });
+          result += '\n';
+        });
+        
+        result += '입니다';
+        
+        const previewBox = document.getElementById("dr-preview-box");
+        if (previewBox) {
+          previewBox.textContent = result;
+        }
+      }
+
+      function renderTeams() {
+        const data = (activeTab === 'new') ? defaultData : savedData;
+        const isAutoSave = (activeTab === 'saved');
+        
+        const teamListContainer = document.getElementById("dr-team-list");
+        if (!teamListContainer) return;
+        
+        teamListContainer.innerHTML = "";
+        
+        data.teams.forEach((team, tIndex) => {
+          const teamCard = document.createElement("div");
+          teamCard.className = "bg-white dark-mode:bg-gray-800 p-3 rounded-xl border border-gray-250 dark-mode:border-gray-700 shadow-sm relative space-y-4";
+          
+          // Remove Team button
+          if (data.teams.length > 1) {
+            const removeBtn = document.createElement("button");
+            removeBtn.className = "absolute top-2 right-3 text-gray-400 hover:text-red-500 text-xs font-bold";
+            removeBtn.textContent = "삭제";
+            removeBtn.addEventListener("click", () => {
+              data.teams = data.teams.filter(t => t.id !== team.id);
+              if (isAutoSave) saveToLocalStorage();
+              renderTeams();
+              updatePreviewText();
+            });
+            teamCard.appendChild(removeBtn);
+          }
+          
+          // Team title and headcount
+          const headerDiv = document.createElement("div");
+          headerDiv.className = "flex items-end gap-3 mb-2 mt-1";
+          headerDiv.innerHTML = `
+            <div class="w-3/5">
+              <label class="block text-[10px] font-bold text-gray-550 mb-1">공종 (예: 목수)</label>
+              <input type="text" value="${team.name || ''}" class="dr-team-name-input w-full border-b border-gray-200 dark-mode:border-gray-750 pb-1.5 text-sm font-bold focus:outline-none focus:border-blue-500 bg-transparent text-gray-800 dark-mode:text-gray-150">
+            </div>
+            <div class="w-2/5">
+              <label class="block text-[10px] font-bold text-gray-550 mb-1">인원 (명)</label>
+              <input type="number" value="${team.headcount || ''}" class="dr-team-headcount-input w-full border-b border-gray-200 dark-mode:border-gray-750 pb-1.5 text-sm font-bold focus:outline-none focus:border-blue-500 bg-transparent text-gray-800 dark-mode:text-gray-150" placeholder="숫자만">
+            </div>
+          `;
+          
+          const nameInput = headerDiv.querySelector(".dr-team-name-input");
+          const headcountInput = headerDiv.querySelector(".dr-team-headcount-input");
+          
+          nameInput.addEventListener("input", (e) => {
+            team.name = e.target.value;
+            if (isAutoSave) saveToLocalStorage();
+            updatePreviewText();
+          });
+          headcountInput.addEventListener("input", (e) => {
+            team.headcount = e.target.value;
+            if (isAutoSave) saveToLocalStorage();
+            updatePreviewText();
+          });
+          
+          teamCard.appendChild(headerDiv);
+          
+          // Tasks Container
+          const tasksContainer = document.createElement("div");
+          tasksContainer.className = "space-y-3.5";
+          
+          team.tasks.forEach((task, taskIndex) => {
+            const taskDiv = document.createElement("div");
+            taskDiv.className = "bg-gray-50 dark-mode:bg-gray-905 p-2.5 rounded-lg flex flex-col gap-2 border border-gray-150 dark-mode:border-gray-850";
+            
+            const hasSubTasks = task.subTasks && task.subTasks.length > 0;
+            
+            const rowDiv = document.createElement("div");
+            rowDiv.className = "flex gap-2 items-center";
+            rowDiv.innerHTML = `
+              <span class="text-gray-400 font-bold">-</span>
+              <input type="text" value="${task.description || ''}" class="dr-task-description-input flex-1 bg-transparent border-b border-gray-250 dark-mode:border-gray-750 p-0.5 text-xs font-semibold focus:outline-none focus:border-blue-500 text-gray-800 dark-mode:text-gray-150" placeholder="${hasSubTasks ? '상위 분류 (예: 트레이닝센터)' : '작업 내용 (엔터 시 추가)'}">
+              <button class="dr-btn-add-subtask text-[10px] text-blue-700 bg-blue-100 dark-mode:bg-blue-950 dark-mode:text-blue-400 active:bg-blue-200 px-2 py-1.5 rounded-md shadow-sm whitespace-nowrap font-bold">+하위</button>
+              <button class="dr-btn-remove-task text-gray-450 hover:text-red-500 p-1">✕</button>
+            `;
+            
+            const taskDescInput = rowDiv.querySelector(".dr-task-description-input");
+            const addSubBtn = rowDiv.querySelector(".dr-btn-add-subtask");
+            const removeTaskBtn = rowDiv.querySelector(".dr-btn-remove-task");
+            
+            taskDescInput.addEventListener("input", (e) => {
+              task.description = e.target.value;
+              if (isAutoSave) saveToLocalStorage();
+              updatePreviewText();
+            });
+            
+            taskDescInput.addEventListener("keydown", (e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const isLastTask = (taskIndex === team.tasks.length - 1 && !hasSubTasks);
+                if (isLastTask) {
+                  team.tasks.push({ id: Date.now(), description: '', status: '', subTasks: [] });
+                  if (isAutoSave) saveToLocalStorage();
+                  renderTeams();
+                  setTimeout(() => {
+                    const inputs = teamCard.querySelectorAll(".dr-task-description-input");
+                    if (inputs.length > 0) {
+                      inputs[inputs.length - 1].focus();
+                    }
+                  }, 50);
+                }
+              }
+            });
+            
+            addSubBtn.addEventListener("click", () => {
+              if (!task.subTasks) task.subTasks = [];
+              task.subTasks.push({ id: Date.now(), description: '', status: '' });
+              if (isAutoSave) saveToLocalStorage();
+              renderTeams();
+              updatePreviewText();
+            });
+            
+            removeTaskBtn.addEventListener("click", () => {
+              team.tasks = team.tasks.filter(tk => tk.id !== task.id);
+              if (team.tasks.length === 0) {
+                team.tasks = [{ id: Date.now(), description: '', status: '', subTasks: [] }];
+              }
+              if (isAutoSave) saveToLocalStorage();
+              renderTeams();
+              updatePreviewText();
+            });
+            
+            taskDiv.appendChild(rowDiv);
+            
+            if (hasSubTasks) {
+              const subtasksContainer = document.createElement("div");
+              subtasksContainer.className = "ml-1 pl-2.5 border-l-2 border-blue-200 dark-mode:border-blue-800 space-y-3 mt-1.5";
+              
+              task.subTasks.forEach((subTask, subIndex) => {
+                const subTaskDiv = document.createElement("div");
+                subTaskDiv.className = "flex flex-col gap-2";
+                
+                const subRow = document.createElement("div");
+                subRow.className = "flex gap-2 items-center";
+                subRow.innerHTML = `
+                  <span class="text-blue-400 text-xs">↳</span>
+                  <input type="text" value="${subTask.description || ''}" class="dr-subtask-description-input flex-1 bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded p-1 text-xs focus:outline-none focus:border-blue-500 text-gray-800 dark-mode:text-gray-150" placeholder="세부 내용">
+                  <button class="dr-btn-remove-subtask text-gray-455 hover:text-red-500 p-1">✕</button>
+                `;
+                
+                const subDescInput = subRow.querySelector(".dr-subtask-description-input");
+                const removeSubBtn = subRow.querySelector(".dr-btn-remove-subtask");
+                
+                subDescInput.addEventListener("input", (e) => {
+                  subTask.description = e.target.value;
+                  if (isAutoSave) saveToLocalStorage();
+                  updatePreviewText();
+                });
+                
+                subDescInput.addEventListener("keydown", (e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const isLastSubTask = (subIndex === task.subTasks.length - 1);
+                    if (isLastSubTask) {
+                      task.subTasks.push({ id: Date.now(), description: '', status: '' });
+                      if (isAutoSave) saveToLocalStorage();
+                      renderTeams();
+                      setTimeout(() => {
+                        const inputs = subtasksContainer.querySelectorAll(".dr-subtask-description-input");
+                        if (inputs.length > 0) {
+                          inputs[inputs.length - 1].focus();
+                        }
+                      }, 50);
+                    }
+                  }
+                });
+                
+                removeSubBtn.addEventListener("click", () => {
+                  task.subTasks = task.subTasks.filter(st => st.id !== subTask.id);
+                  if (isAutoSave) saveToLocalStorage();
+                  renderTeams();
+                  updatePreviewText();
+                });
+                
+                subTaskDiv.appendChild(subRow);
+                
+                // Subtask Status Buttons
+                const subStatusDiv = document.createElement("div");
+                subStatusDiv.className = "flex gap-1.5 pl-4";
+                
+                const statuses = [
+                  { key: '완', label: '완료', colorClass: 'bg-blue-500 text-white' },
+                  { key: '작업중', label: '진행중', colorClass: 'bg-orange-500 text-white' },
+                  { key: '작업예정', label: '예정', colorClass: 'bg-gray-600 text-white' }
+                ];
+                
+                statuses.forEach(st => {
+                  const btn = document.createElement("button");
+                  btn.className = `flex-1 py-1.5 text-[11px] font-bold rounded-md transition-colors ${subTask.status === st.key ? st.colorClass + ' shadow-inner font-extrabold' : 'bg-white dark-mode:bg-gray-800 border border-gray-300 dark-mode:border-gray-700 text-gray-500 dark-mode:text-gray-400'}`;
+                  btn.textContent = st.label;
+                  btn.addEventListener("click", () => {
+                    subTask.status = (subTask.status === st.key) ? '' : st.key;
+                    if (isAutoSave) saveToLocalStorage();
+                    renderTeams();
+                    updatePreviewText();
+                  });
+                  subStatusDiv.appendChild(btn);
+                });
+                
+                subTaskDiv.appendChild(subStatusDiv);
+                subtasksContainer.appendChild(subTaskDiv);
+              });
+              
+              taskDiv.appendChild(subtasksContainer);
+            } else {
+              // Task Status Buttons (no subtasks)
+              const taskStatusDiv = document.createElement("div");
+              taskStatusDiv.className = "flex gap-1.5 pl-3 mt-1";
+              
+              const statuses = [
+                { key: '완', label: '완료', colorClass: 'bg-blue-500 text-white' },
+                { key: '작업중', label: '진행중', colorClass: 'bg-orange-500 text-white' },
+                { key: '작업예정', label: '예정', colorClass: 'bg-gray-600 text-white' }
+              ];
+              
+              statuses.forEach(st => {
+                const btn = document.createElement("button");
+                btn.className = `flex-1 py-2 text-[11px] font-bold rounded-md transition-colors ${task.status === st.key ? st.colorClass + ' shadow-inner font-extrabold' : 'bg-white dark-mode:bg-gray-800 border border-gray-300 dark-mode:border-gray-700 text-gray-500 dark-mode:text-gray-400'}`;
+                btn.textContent = st.label;
+                btn.addEventListener("click", () => {
+                  task.status = (task.status === st.key) ? '' : st.key;
+                  if (isAutoSave) saveToLocalStorage();
+                  renderTeams();
+                  updatePreviewText();
+                });
+                taskStatusDiv.appendChild(btn);
+              });
+              
+              taskDiv.appendChild(taskStatusDiv);
+            }
+            
+            tasksContainer.appendChild(taskDiv);
+          });
+          
+          teamCard.appendChild(tasksContainer);
+          
+          // Add Task to Team button
+          const addTaskBtn = document.createElement("button");
+          addTaskBtn.className = "w-full py-2.5 text-[11px] text-blue-755 dark-mode:text-blue-400 font-bold bg-blue-50 dark-mode:bg-blue-950/20 active:bg-blue-100 rounded-lg border border-blue-200 dark-mode:border-blue-900/50 transition-colors";
+          addTaskBtn.textContent = "+ 이 공종에 작업 추가";
+          addTaskBtn.addEventListener("click", () => {
+            team.tasks.push({ id: Date.now(), description: '', status: '', subTasks: [] });
+            if (isAutoSave) saveToLocalStorage();
+            renderTeams();
+            updatePreviewText();
+          });
+          teamCard.appendChild(addTaskBtn);
+          
+          teamListContainer.appendChild(teamCard);
+        });
+      }
+
+      function renderActiveForm() {
+        const data = (activeTab === 'new') ? defaultData : savedData;
+        const isAutoSave = (activeTab === 'saved');
+        
+        const formContainer = document.getElementById("dr-form-container");
+        if (!formContainer) return;
+
+        formContainer.innerHTML = `
+          <div class="p-3 rounded-xl shadow-md border mb-8 ${isAutoSave ? 'border-green-500 bg-green-50/10' : 'border-blue-400 bg-white dark-mode:bg-gray-800'}">
+            <div class="flex justify-between items-center mb-3 pb-1.5 border-b border-gray-150 dark-mode:border-gray-750">
+              <h2 class="font-black text-sm flex items-center gap-1.5 ${isAutoSave ? 'text-green-700 dark-mode:text-green-400' : 'text-blue-700 dark-mode:text-blue-400'}">
+                ${isAutoSave ? '💾 지난 내역 (이어서 작성)' : '📝 새 보고서 작성'}
+              </h2>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Date & Site Name -->
+              <div class="flex flex-col gap-3 bg-white dark-mode:bg-gray-900/80 p-3 rounded-lg border border-gray-150 dark-mode:border-gray-750 shadow-xs">
+                <div>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="text-[10px] font-bold text-gray-500">날짜</label>
+                    ${isAutoSave ? `
+                      <button id="dr-btn-refresh-date" class="text-[9px] bg-green-100 text-green-800 dark-mode:bg-green-950 dark-mode:text-green-400 px-2 py-0.5 rounded font-bold active:bg-green-200">
+                        오늘 날짜로 갱신
+                      </button>
+                    ` : ''}
+                  </div>
+                  <input type="text" id="dr-input-date" value="${data.reportDate || ''}" class="w-full border-b border-gray-200 dark-mode:border-gray-700 pb-1 text-sm focus:outline-none focus:border-blue-500 bg-transparent text-gray-800 dark-mode:text-gray-150 transition-colors">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 mb-1">현장명</label>
+                  <input type="text" id="dr-input-sitename" value="${data.siteName || ''}" placeholder="현장명 입력 (예: 미포 뉴미)" class="w-full border-b border-gray-200 dark-mode:border-gray-700 pb-1 text-sm font-bold focus:outline-none focus:border-blue-500 bg-transparent text-gray-800 dark-mode:text-gray-150 transition-colors">
+                </div>
+              </div>
+
+              <!-- Teams List Container -->
+              <div id="dr-team-list" class="space-y-3.5"></div>
+
+              <button id="dr-btn-add-team" class="w-full py-3 bg-gray-800 active:bg-gray-900 text-white text-xs font-bold rounded-xl shadow-md transition-colors">+ 새로운 공종(팀) 추가</button>
+
+              <!-- Preview & Copy -->
+              <div class="pt-5 border-t border-gray-200 dark-mode:border-gray-750 mt-3">
+                <label class="block text-xs font-bold text-gray-700 dark-mode:text-gray-300 mb-2">카카오톡 미리보기</label>
+                <pre id="dr-preview-box" class="bg-gray-55 dark-mode:bg-gray-900/60 p-3.5 rounded-xl text-xs text-gray-800 dark-mode:text-gray-200 whitespace-pre-wrap max-h-48 overflow-y-auto mb-3 border border-gray-200 dark-mode:border-gray-750 shadow-inner font-sans"></pre>
+                <button id="dr-btn-copy-kakaotalk" class="w-full py-3.5 bg-[#FEE500] hover:bg-[#FADA00] text-[#191919] text-sm font-black rounded-xl shadow-sm active:scale-[0.98] transition-all flex justify-center items-center gap-1.5">
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 2C6.48 2 2 5.58 2 10c0 2.84 1.85 5.33 4.6 6.8-.2.7-.72 2.56-.75 2.7-.1.35.15.45.36.32.17-.1 2.37-1.5 3.32-2.16 1.13.25 2.33.39 3.57.39 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
+                  카톡용 복사하기
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const dateInput = document.getElementById("dr-input-date");
+        const siteInput = document.getElementById("dr-input-sitename");
+        
+        dateInput.addEventListener("input", (e) => {
+          data.reportDate = e.target.value;
+          if (isAutoSave) saveToLocalStorage();
+          updatePreviewText();
+        });
+        siteInput.addEventListener("input", (e) => {
+          data.siteName = e.target.value;
+          if (isAutoSave) saveToLocalStorage();
+          updatePreviewText();
+        });
+
+        if (isAutoSave) {
+          const refreshDateBtn = document.getElementById("dr-btn-refresh-date");
+          if (refreshDateBtn) {
+            refreshDateBtn.addEventListener("click", () => {
+              const todayStr = getTodayString();
+              data.reportDate = todayStr;
+              dateInput.value = todayStr;
+              saveToLocalStorage();
+              updatePreviewText();
+            });
+          }
+        }
+
+        document.getElementById("dr-btn-add-team").addEventListener("click", () => {
+          data.teams.push({
+            id: Date.now(),
+            name: '',
+            headcount: '',
+            tasks: [{ id: Date.now() + 1, description: '', status: '', subTasks: [] }]
+          });
+          if (isAutoSave) saveToLocalStorage();
+          renderTeams();
+          updatePreviewText();
+        });
+
+        renderTeams();
+        updatePreviewText();
+
+        document.getElementById("dr-btn-copy-kakaotalk").addEventListener("click", () => {
+          const previewBox = document.getElementById("dr-preview-box");
+          const previewText = previewBox.textContent;
+          
+          const textArea = document.createElement("textarea");
+          textArea.value = previewText;
+          document.body.appendChild(textArea);
+          textArea.select();
+          try {
+            document.execCommand('copy');
+            alert(`보고서가 복사되었습니다! 카카오톡에 붙여넣기 하세요.`);
+            if (!isAutoSave) {
+              savedData = JSON.parse(JSON.stringify(defaultData));
+              saveToLocalStorage();
+              
+              activeTab = 'saved';
+              const toggleBtn = document.getElementById("dr-toggle-tab-btn");
+              toggleBtn.textContent = "📝 새 양식 작성";
+              toggleBtn.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-sm transition-colors border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 dark-mode:bg-blue-950/20 dark-mode:text-blue-400 dark-mode:border-blue-900/50";
+              renderActiveForm();
+            }
+          } catch (err) {
+            alert('복사에 실패했습니다.');
+          }
+          document.body.removeChild(textArea);
+        });
+      }
+
+      const toggleBtn = document.getElementById("dr-toggle-tab-btn");
+      if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+          if (activeTab === 'new') {
+            activeTab = 'saved';
+            toggleBtn.textContent = "📝 새 양식 작성";
+            toggleBtn.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-sm transition-colors border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 dark-mode:bg-blue-950/20 dark-mode:text-blue-400 dark-mode:border-blue-900/50";
+          } else {
+            activeTab = 'new';
+            toggleBtn.textContent = "📂 지난 내역 보기";
+            toggleBtn.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-sm transition-colors border border-green-200 bg-green-50 hover:bg-green-100 text-green-700 dark-mode:bg-green-950/20 dark-mode:text-green-400 dark-mode:border-green-900/50";
+          }
+          renderActiveForm();
+        });
+      }
+
+      renderActiveForm();
     }
 
     window.addEventListener("load", initApp);
