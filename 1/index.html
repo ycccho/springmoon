@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>일일보고서 이동</title>
+  <meta http-equiv="refresh" content="0; url=/?menu=daily-report">
+  <style>
+    body {
+      background-color: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #374151;
+    }
+    .loader {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <p style="font-weight: bold; font-size: 14px;">일일보고서 페이지로 이동 중...</p>
+  </div>
+  <script>
+    window.location.replace("/?menu=daily-report");
+  </script>
+</body>
+</html>
