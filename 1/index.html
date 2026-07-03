@@ -28,6 +28,16 @@
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 antialiased">
   <div class="max-w-md mx-auto bg-gray-55 min-h-screen pb-10 select-none shadow-lg relative">
+    <!-- Main Navigation Tab Bar (Very Top) -->
+    <div class="bg-gray-100 border-b border-gray-200 px-3 py-2 flex gap-3 shadow-inner">
+      <button id="main-tab-report" class="flex-1 py-2 text-center text-[11px] font-black rounded-lg shadow-sm border border-orange-200 bg-white text-orange-700 transition-all focus:outline-none">
+        📝 일일보고서 작성
+      </button>
+      <button id="main-tab-photo" class="flex-1 py-2 text-center text-[11px] font-bold rounded-lg border border-gray-200 bg-gray-55 text-gray-500 hover:bg-gray-100 transition-all focus:outline-none">
+        📸 사진 텍스트넣기
+      </button>
+    </div>
+
     <!-- Clock Header Bar -->
     <div id="dr-current-time-bar" class="bg-gray-150 border-b border-gray-200 text-center py-1.5 text-[10px] font-bold text-gray-500 tracking-tight">
       로드 중...
@@ -40,16 +50,6 @@
       <!-- Screen Toggle Tab Button -->
       <button id="dr-toggle-tab-btn" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-sm transition-colors border border-green-200 bg-green-50 hover:bg-green-100 text-green-700">
         📂 지난 내역 보기
-      </button>
-    </div>
-
-    <!-- Main Navigation Tab Bar -->
-    <div class="bg-gray-100 border-b border-gray-200 px-3 py-2 flex gap-3 shadow-inner">
-      <button id="main-tab-report" class="flex-1 py-2.5 text-center text-[11px] font-black rounded-lg shadow-sm border border-orange-200 bg-white text-orange-700 transition-all focus:outline-none">
-        📝 일일보고서 작성
-      </button>
-      <button id="main-tab-photo" class="flex-1 py-2.5 text-center text-[11px] font-bold rounded-lg border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 transition-all focus:outline-none">
-        📸 사진 텍스트넣기
       </button>
     </div>
 
@@ -449,14 +449,8 @@
               </div>
 
               <!-- Friendly Quick Guide Card -->
-              <div class="mt-6 p-4 bg-blue-50 border border-blue-150 rounded-xl text-[11px] text-blue-900 leading-relaxed font-semibold space-y-3.5 shadow-xs">
+              <div class="mt-6 p-4 bg-blue-50 border border-blue-150 rounded-xl text-[11px] text-blue-900 leading-relaxed font-semibold space-y-2.5 shadow-xs">
                 <h3 class="font-bold text-[12px] text-blue-850 flex items-center gap-1.5 border-b border-blue-150 pb-1">💡 일일보고서 작성 쉬운 설명서</h3>
-                
-                <!-- Visual Graphic Manual -->
-                <div class="rounded-lg overflow-hidden border border-blue-200 shadow-sm bg-white p-1">
-                  <img src="daily_report_guide.png" class="w-full h-auto object-cover rounded" alt="일일보고서 사용법 가이드">
-                </div>
-
                 <ul class="list-disc pl-3.5 space-y-2 text-[10.5px]">
                   <li><strong>공종 및 인원</strong>: 공종명(예: 목수)과 인원 숫자를 적어주세요.</li>
                   <li><strong>작업 추가/줄바꿈</strong>: 모바일 키보드에서 <span class="bg-blue-100 text-blue-800 px-1 rounded font-bold">[완료/이동/엔터]</span> 버튼을 누르면 다음 작업 칸이 자동으로 추가됩니다.</li>
@@ -600,28 +594,7 @@
             <div id="pt-preview-section" class="hidden space-y-3 pt-3 border-t border-gray-200">
               <div class="flex justify-between items-center">
                 <h3 class="text-xs font-bold text-gray-700">🖼 변환된 사진 목록</h3>
-                <button id="pt-btn-download-all" class="text-[10px] bg-orange-600 active:bg-orange-700 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-sm active:scale-[0.98] transition-transform">모두 다운로드</button>
-              </div>
-              <div id="pt-preview-list" class="space-y-3">
-                <!-- Items render here -->
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Photo Guide Card -->
-        <div class="mt-2 p-4 bg-orange-50/50 border border-orange-150 rounded-xl text-[11px] text-orange-955 leading-relaxed font-semibold space-y-2 shadow-xs">
-          <h3 class="font-bold text-[12px] text-orange-850 flex items-center gap-1.5 border-b border-orange-150 pb-1">💡 사진 텍스트넣기 간단 설명서</h3>
-          <ul class="list-disc pl-3.5 space-y-1.5 text-[10.5px]">
-            <li><strong>현장명 입력</strong>: 사진 하단에 넣을 현장명을 적어주세요.</li>
-            <li><strong>사진 선택</strong>: 업로드 상자를 터치해 갤러리나 카메라로 사진들을 골라주세요.</li>
-            <li><strong>자동 생성</strong>: 원본 화질을 그대로 유지하며, 사진 하단에 흰색 바를 덧붙여 <span class="bg-orange-100 text-orange-900 px-1 rounded font-bold">[오늘날짜 - 현장명]</span> 문구를 깔끔하게 그려줍니다.</li>
-            <li><strong>개별/전체 다운로드</strong>: 변환이 완료된 사진들을 각각 다운로드하거나 <span class="bg-orange-200 text-orange-900 px-1.5 py-0.5 rounded font-extrabold">모두 다운로드</span> 버튼으로 한 번에 폰에 저장하세요.</li>
-          </ul>
-        </div>
-      `;
-
-      const dateInput = document.getElementById("pt-input-date");
+                <button id="pt-btn-download-all" class="text-[10px] bg-orange-600 active:bg-orange-700 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-sm active:scale-[0.98] transition-transfo      const dateInput = document.getElementById("pt-input-date");
       const siteInput = document.getElementById("pt-input-sitename");
       const fileInput = document.getElementById("pt-file-input");
       const previewSection = document.getElementById("pt-preview-section");
@@ -638,91 +611,155 @@
 
       // Restore values from localStorage
       if (siteInput) siteInput.value = localStorage.getItem("pt_site_name") || "";
+      
       if (siteInput) {
         siteInput.addEventListener("input", () => {
           localStorage.setItem("pt_site_name", siteInput.value.trim());
-          processAllUploadedFiles();
+          updateProcessedFilenames();
         });
       }
       if (dateInput) {
         dateInput.addEventListener("input", () => {
-          processAllUploadedFiles();
+          updateProcessedFilenames();
         });
       }
 
-      let uploadedFiles = [];
-      let processedImages = []; // Array of { dataUrl, filename }
+      let uploadedFiles = []; // Array of { id, file, dataUrl, filename, status }
 
-      fileInput.addEventListener("change", (e) => {
-        uploadedFiles = Array.from(e.target.files);
-        processAllUploadedFiles();
+      fileInput.addEventListener("change", async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        
+        for (const file of files) {
+          uploadedFiles.push({
+            id: Math.random().toString(36).substr(2, 9) + Date.now(),
+            file: file,
+            dataUrl: null,
+            filename: '',
+            status: 'processing'
+          });
+        }
+        
+        // Reset file input value so same files can be re-selected if removed
+        fileInput.value = "";
+        
+        renderUploadedList();
+        await processPendingFiles();
       });
 
-      async function processAllUploadedFiles() {
+      async function processPendingFiles() {
+        const siteName = siteInput.value.trim() || "미지정 현장";
+        const dateStr = dateInput.value.trim() || defaultDateStr;
+
+        for (let i = 0; i < uploadedFiles.length; i++) {
+          const item = uploadedFiles[i];
+          if (item.status === 'processing' || !item.dataUrl) {
+            try {
+              const result = await processPhoto(item.file, siteName, dateStr);
+              item.dataUrl = result.dataUrl;
+              item.status = 'done';
+            } catch (err) {
+              console.error(err);
+              item.status = 'error';
+            }
+          }
+        }
+        
+        // Update all filenames based on their current indices in the array
+        uploadedFiles.forEach((item, idx) => {
+          if (item.status === 'done') {
+            item.filename = `${dateStr}-${siteName}-사진_${idx + 1}.jpg`;
+          }
+        });
+        
+        renderUploadedList();
+      }
+
+      function renderUploadedList() {
         if (uploadedFiles.length === 0) {
           previewSection.classList.add("hidden");
           previewList.innerHTML = "";
           return;
         }
-        
+
+        previewSection.classList.remove("hidden");
+        previewList.innerHTML = "";
+
+        uploadedFiles.forEach((item) => {
+          const listItem = document.createElement("div");
+          listItem.className = "p-2.5 bg-gray-50 border border-gray-150 rounded-lg flex flex-col gap-2 relative";
+
+          if (item.status === 'processing') {
+            listItem.innerHTML = `
+              <div class="flex justify-between items-center">
+                <span class="text-[11px] font-bold text-gray-500">${item.file.name} 처리 중...</span>
+                <button class="pt-btn-remove text-[10px] text-red-500 font-bold px-2 py-1">제거</button>
+              </div>
+              <div class="h-28 bg-gray-100 rounded flex justify-center items-center">
+                <svg class="animate-spin h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            `;
+          } else if (item.status === 'error') {
+            listItem.innerHTML = `
+              <div class="flex justify-between items-center">
+                <span class="text-[11px] font-bold text-red-500">❌ 변환 실패: ${item.file.name}</span>
+                <button class="pt-btn-remove text-[10px] text-red-500 font-bold px-2 py-1">제거</button>
+              </div>
+            `;
+          } else {
+            // Done state
+            listItem.innerHTML = `
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] font-black text-gray-700 truncate w-1/2">${item.filename}</span>
+                <div class="flex gap-2">
+                  <button class="pt-btn-download text-[10px] bg-orange-100 text-orange-700 px-2 py-1 rounded font-bold hover:bg-orange-200">다운로드</button>
+                  <button class="pt-btn-remove text-[10px] bg-red-50 text-red-700 px-2 py-1 rounded font-bold hover:bg-red-100">제거</button>
+                </div>
+              </div>
+              <div class="rounded overflow-hidden border border-gray-200 max-h-40 bg-gray-100 flex justify-center">
+                <img src="${item.dataUrl}" class="h-full max-h-40 w-auto object-contain">
+              </div>
+            `;
+
+            // Bind download button
+            listItem.querySelector(".pt-btn-download").addEventListener("click", () => {
+              downloadDataURI(item.dataUrl, item.filename);
+            });
+          }
+
+          // Bind remove button
+          listItem.querySelector(".pt-btn-remove").addEventListener("click", () => {
+            uploadedFiles = uploadedFiles.filter(x => x.id !== item.id);
+            // Re-render and re-process filenames
+            const siteName = siteInput.value.trim() || "미지정 현장";
+            const dateStr = dateInput.value.trim() || defaultDateStr;
+            uploadedFiles.forEach((x, idx) => {
+              if (x.status === 'done') {
+                x.filename = `${dateStr}-${siteName}-사진_${idx + 1}.jpg`;
+              }
+            });
+            renderUploadedList();
+          });
+
+          previewList.appendChild(listItem);
+        });
+      }
+
+      function updateProcessedFilenames() {
         const siteName = siteInput.value.trim() || "미지정 현장";
         const dateStr = dateInput.value.trim() || defaultDateStr;
         
-        processedImages = [];
-        previewList.innerHTML = "";
-        previewSection.classList.remove("hidden");
-
-        for (let i = 0; i < uploadedFiles.length; i++) {
-          const file = uploadedFiles[i];
-          
-          // Create placeholder list item with spinner
-          const listItem = document.createElement("div");
-          listItem.className = "p-2.5 bg-gray-50 border border-gray-150 rounded-lg flex flex-col gap-2";
-          listItem.innerHTML = `
-            <div class="flex justify-between items-center">
-              <span class="text-[11px] font-bold text-gray-500">${file.name} 처리 중...</span>
-            </div>
-            <div class="h-28 bg-gray-100 rounded flex justify-center items-center">
-              <svg class="animate-spin h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </div>
-          `;
-          previewList.appendChild(listItem);
-
-          try {
-            const result = await processPhoto(file, siteName, dateStr);
-            const index = i + 1;
-            const newFilename = `${dateStr}-${siteName}-사진_${index}.jpg`;
-            processedImages.push({
-              dataUrl: result.dataUrl,
-              filename: newFilename
-            });
-
-            // Update item view
-            listItem.innerHTML = `
-              <div class="flex justify-between items-center mb-1">
-                <span class="text-[10px] font-black text-gray-700 truncate w-3/5">${newFilename}</span>
-                <button class="pt-individual-download text-[10px] bg-orange-100 text-orange-700 px-2 py-1 rounded font-bold hover:bg-orange-200">다운로드</button>
-              </div>
-              <div class="rounded overflow-hidden border border-gray-200 max-h-40 bg-gray-100 flex justify-center">
-                <img src="${result.dataUrl}" class="h-full max-h-40 w-auto object-contain">
-              </div>
-            `;
-
-            // Bind individual download button
-            listItem.querySelector(".pt-individual-download").addEventListener("click", () => {
-              downloadDataURI(result.dataUrl, newFilename);
-            });
-
-          } catch (err) {
-            console.error(err);
-            listItem.innerHTML = `
-              <div class="text-[11px] font-bold text-red-500">❌ 변환 실패: ${file.name}</div>
-            `;
-          }
-        }
+        // Re-process all images because text overlays have changed!
+        uploadedFiles.forEach(item => {
+          item.status = 'processing';
+          item.dataUrl = null;
+        });
+        
+        renderUploadedList();
+        processPendingFiles();
       }
 
       function downloadDataURI(dataUrl, filename) {
@@ -735,9 +772,10 @@
       }
 
       downloadAllBtn.addEventListener("click", () => {
-        if (processedImages.length === 0) return;
-        processedImages.forEach(img => {
-          downloadDataURI(img.dataUrl, img.filename);
+        const doneItems = uploadedFiles.filter(x => x.status === 'done');
+        if (doneItems.length === 0) return;
+        doneItems.forEach(item => {
+          downloadDataURI(item.dataUrl, item.filename);
         });
       });
 
