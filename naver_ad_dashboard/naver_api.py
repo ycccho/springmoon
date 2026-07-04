@@ -73,9 +73,15 @@ class NaverAdAPI:
         Returns the report job details.
         """
         path = "/stat-reports"
+        clean_date = date_str.replace("-", "").replace(".", "")
+        
+        mapped_report_tp = "AD"
+        if report_type in ["USER_RETURN", "EXPKEYWORD"]:
+            mapped_report_tp = "EXPKEYWORD"
+            
         payload = {
-            "statDt": date_str,
-            "type": report_type
+            "statDt": clean_date,
+            "reportTp": mapped_report_tp
         }
         res = self._request("POST", path, json_data=payload)
         return res
@@ -110,7 +116,7 @@ class NaverAdAPI:
         download and return the mapped rows.
         """
         job = self.request_stat_report(date_str, report_type)
-        job_id = job.get("id")
+        job_id = job.get("reportJobId") or job.get("id")
         if not job_id:
             raise Exception("Failed to create report job ID.")
             

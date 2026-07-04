@@ -20,7 +20,7 @@ db.init_db()
 # Pre-populated Credentials (supplied safely by user)
 DEFAULT_API_KEY = "01000000003e8862c48a1f7ac679c6588c585e0dd35f9c064485960e8f6ff92b22c77c5e6b"
 DEFAULT_SECRET_KEY = "AQAAAAA+iGLEih96xnnGWIxYXg3TOQOrVq+wj1qrlppE2vLU7A=="
-DEFAULT_CUSTOMER_ID = "225690"
+DEFAULT_CUSTOMER_ID = "1610516"
 
 # Sidebar Authentication and Sync Panel
 st.sidebar.header("🔑 네이버 광고 API 설정")
