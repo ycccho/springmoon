@@ -57,6 +57,20 @@ if st.sidebar.button("🚀 네이버 광고 데이터 가져오기"):
         # Trigger Sync Engine
         api = NaverAdAPI(api_key, secret_key, customer_id)
         
+        # Automatically clear sync log if reports table is empty, to force fresh resync
+        conn = db.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT count(*) as cnt FROM reports")
+            count_row = cursor.fetchone()
+            if count_row and count_row["cnt"] == 0:
+                cursor.execute("DELETE FROM sync_log")
+                conn.commit()
+        except Exception:
+            pass
+        finally:
+            conn.close()
+            
         # Calculate date range list (formatted as YYYY-MM-DD)
         delta = sync_end_date - sync_start_date
         raw_date_list = [(sync_start_date + datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(delta.days + 1)]

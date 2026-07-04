@@ -11,9 +11,45 @@ BASE_URL = "https://api.searchad.naver.com"
 
 class NaverAdAPI:
     def __init__(self, api_key, secret_key, customer_id):
-        self.api_key = api_key
-        self.secret_key = secret_key
-        self.customer_id = customer_id
+        self.api_key = api_key.strip()
+        self.secret_key = secret_key.strip()
+        self.customer_id = str(customer_id).strip()
+        self.campaign_cache = {}
+        self.adgroup_cache = {}
+        self.keyword_cache = {}
+
+    def get_campaign_name(self, camp_id):
+        if not camp_id or camp_id == "-":
+            return ""
+        if camp_id not in self.campaign_cache:
+            try:
+                res = self._request("GET", f"/ncc/campaigns/{camp_id}")
+                self.campaign_cache[camp_id] = res.get("name", "")
+            except Exception:
+                self.campaign_cache[camp_id] = camp_id
+        return self.campaign_cache[camp_id]
+
+    def get_adgroup_name(self, group_id):
+        if not group_id or group_id == "-":
+            return ""
+        if group_id not in self.adgroup_cache:
+            try:
+                res = self._request("GET", f"/ncc/adgroups/{group_id}")
+                self.adgroup_cache[group_id] = res.get("name", "")
+            except Exception:
+                self.adgroup_cache[group_id] = group_id
+        return self.adgroup_cache[group_id]
+
+    def get_keyword_text(self, kw_id):
+        if not kw_id or kw_id == "-":
+            return ""
+        if kw_id not in self.keyword_cache:
+            try:
+                res = self._request("GET", f"/ncc/keywords/{kw_id}")
+                self.keyword_cache[kw_id] = res.get("keyword", "")
+            except Exception:
+                self.keyword_cache[kw_id] = kw_id
+        return self.keyword_cache[kw_id]
 
     def _get_headers(self, method, path):
         """Generates HMAC-SHA256 signature headers for Naver API request authentication."""
@@ -105,10 +141,11 @@ class NaverAdAPI:
         tsv_text = content.decode('utf-8-sig', errors='ignore')
         
         # Parse TSV rows
-        reader = csv.DictReader(io.StringIO(tsv_text), delimiter='\t')
+        reader = csv.reader(io.StringIO(tsv_text), delimiter='\t')
         rows = []
         for row in reader:
-            rows.append(row)
+            if row:
+                rows.append(row)
         return rows
 
     def fetch_report_data(self, date_str, ad_type, report_type):
@@ -142,26 +179,36 @@ class NaverAdAPI:
         mapped_rows = []
         
         for row in raw_rows:
-            # Handle case sensitivity in Naver headers
-            c_id = row.get("CampaignId") or row.get("campaignId") or ""
-            c_name = row.get("CampaignName") or row.get("campaignName") or ""
-            g_id = row.get("AdgroupId") or row.get("adgroupId") or ""
-            g_name = row.get("AdgroupName") or row.get("adgroupName") or ""
-            kw = row.get("Keyword") or row.get("keyword") or ""
-            
-            # Detailed clicked query vs general keyword stats
-            sq = row.get("SearchQuery") or row.get("searchQuery") or row.get("UserReturn") or row.get("userReturn") or ""
-            
-            # Map numeric values
-            try:
-                imp = int(row.get("Impressions") or row.get("impressions") or 0)
-                clicks = int(row.get("Clicks") or row.get("clicks") or 0)
-                cost = int(row.get("Cost") or row.get("cost") or 0)
-                cpc = float(row.get("AvgCpc") or row.get("avgCpc") or 0.0)
-            except ValueError:
+            if len(row) < 11:
                 continue
                 
-            # Filter rows with 0 impressions or clicks to save space
+            try:
+                c_id = row[2]
+                g_id = row[3]
+                c_name = self.get_campaign_name(c_id)
+                g_name = self.get_adgroup_name(g_id)
+                
+                if report_type in ["USER_RETURN", "EXPKEYWORD"]:
+                    # Search query report (EXPKEYWORD)
+                    kw = ""
+                    sq = row[4]
+                    imp = int(row[5])
+                    clicks = int(row[8])
+                    cost = int(row[9])
+                else:
+                    # General performance report (AD)
+                    kw_id = row[4]
+                    kw = self.get_keyword_text(kw_id)
+                    sq = ""
+                    imp = int(row[7])
+                    clicks = int(row[9])
+                    cost = int(row[10])
+                    
+                cpc = float(cost / clicks) if clicks > 0 else 0.0
+            except (IndexError, ValueError):
+                continue
+                
+            # Filter rows with 0 impressions and clicks to save space
             if imp == 0 and clicks == 0:
                 continue
                 
