@@ -7,7 +7,7 @@ import gzip
 import csv
 import io
 
-BASE_URL = "https://api.naver.com"
+BASE_URL = "https://api.searchad.naver.com"
 
 class NaverAdAPI:
     def __init__(self, api_key, secret_key, customer_id):
