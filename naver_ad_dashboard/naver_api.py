@@ -224,7 +224,7 @@ class NaverAdAPI:
         Enforces a 0.8 second sleep between requests to avoid API bans.
         """
         results = {}
-        path = "/keywordtool"
+        path = "/keywordstool"
         
         def clean_val(val):
             if not val:

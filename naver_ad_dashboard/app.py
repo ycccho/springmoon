@@ -157,14 +157,14 @@ if st.sidebar.button("🚀 네이버 광고 데이터 가져오기"):
             status_text.text("✅ 수집 및 DB 저장 완료!")
             st.sidebar.success(f"신규 수집: {synced_count}건, 캐시 로드: {skipped_count}건")
             
-            # Look up search volumes for new keywords with 0 volume
+            # Look up search volumes for active new keywords (clicks > 0) with 0 volume
             if new_keywords:
                 status_text.text("🔍 신규 키워드 월간 검색량 매칭 중...")
                 conn = db.get_connection()
-                # Fetch only keywords with 0 search volume
+                # Fetch only keywords with 0 search volume and clicks > 0 to optimize speed
                 placeholders = ",".join(["?"] * len(new_keywords))
                 cursor = conn.cursor()
-                cursor.execute(f"SELECT keyword FROM reports WHERE keyword IN ({placeholders}) AND search_volume = 0", list(new_keywords))
+                cursor.execute(f"SELECT DISTINCT keyword FROM reports WHERE keyword IN ({placeholders}) AND clicks > 0 AND search_volume = 0", list(new_keywords))
                 unindexed_kws = [row["keyword"] for row in cursor.fetchall()]
                 conn.close()
                 
@@ -282,7 +282,7 @@ else:
                 f"<h3 style='margin:5px 0 0 0; font-size:18px; font-weight:black; color:#0f172a;'>{val_a_str}</h3>"
                 f"<p style='margin:0; font-size:11px; font-weight:bold; color:{color};'>{change_str} (vs 기간 B)</p>"
                 f"</div>",
-                unsafe_allowed_html=True
+                unsafe_allow_html=True
             )
             
         render_metric(m1, "노출수 (Impressions)", imp_a, imp_b, "{:,.0f}")
