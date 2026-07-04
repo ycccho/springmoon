@@ -245,25 +245,53 @@
 
     // Fetch API implementation
     async function loadPortfolios() {
+      let loadedFromServer = false;
+      let serverData = [];
+
       try {
         const res = await fetch("/api/portfolio");
         if (res.ok) {
-          portfolios = await res.json();
+          serverData = await res.json();
+          loadedFromServer = true;
           isServerStorage = true;
           const badge = document.getElementById("storage-mode");
           badge.textContent = "서버 저장소";
           badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 dark-mode:bg-green-950/50 dark-mode:text-green-400";
         } else {
+          // If response status is 500, check if it's missing KV binding
+          const errRes = await res.json().catch(() => ({}));
+          if (errRes.error && errRes.error.includes("POWER_CONTENT_KV")) {
+            console.error("KV Binding missing on Cloudflare:", errRes.error);
+          }
           throw new Error("Server API missing or KV not bound");
         }
       } catch (err) {
-        console.warn("Server storage failed, loading from localStorage:", err);
+        console.warn("Server storage failed, falling back to localStorage:", err);
         isServerStorage = false;
-        portfolios = JSON.parse(localStorage.getItem("portfolio_data") || "[]");
         const badge = document.getElementById("storage-mode");
         badge.textContent = "로컬 브라우저 저장소";
         badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-750 dark-mode:bg-yellow-950/50 dark-mode:text-yellow-400";
       }
+
+      const localData = JSON.parse(localStorage.getItem("portfolio_data") || "[]");
+
+      if (loadedFromServer) {
+        // Server connection succeeded.
+        // If server data is empty but local browser data is present, offer recovery!
+        if (serverData.length === 0 && localData.length > 0) {
+          if (confirm("서버에 저장된 포트폴리오가 비어있지만, 현재 브라우저(로컬)에 작성해 두셨던 임시 데이터가 감지되었습니다. 로컬 데이터를 가져와 불러오시겠습니까?\n\n(가져온 후 [저장]을 완료하면 서버에 최종 저장됩니다.)")) {
+            portfolios = localData;
+          } else {
+            portfolios = serverData;
+          }
+        } else {
+          portfolios = serverData;
+        }
+      } else {
+        // Server connection failed, load from local storage
+        portfolios = localData;
+      }
+
       renderPortfolios();
     }
 
@@ -271,23 +299,47 @@
       // Serialize DOM values into portfolios array first
       serializePortfoliosFromDOM();
 
-      if (isServerStorage) {
-        try {
-          const res = await fetch("/api/portfolio", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(portfolios)
-          });
-          if (!res.ok) throw new Error("서버 저장에 실패했습니다.");
-          alert("서버에 성공적으로 저장되었습니다!");
-        } catch (err) {
-          alert(`❌ 저장 오류: ${err.message}. 로컬 저장소에 우선 저장합니다.`);
-          localStorage.setItem("portfolio_data", JSON.stringify(portfolios));
+      // ALWAYS try to upload to the server first
+      let uploadSuccess = false;
+      let kvMissingError = false;
+
+      try {
+        const res = await fetch("/api/portfolio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(portfolios)
+        });
+
+        if (res.ok) {
+          uploadSuccess = true;
+          isServerStorage = true;
+          const badge = document.getElementById("storage-mode");
+          badge.textContent = "서버 저장소";
+          badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 dark-mode:bg-green-950/50 dark-mode:text-green-400";
+        } else {
+          const errRes = await res.json().catch(() => ({}));
+          if (errRes.error && errRes.error.includes("POWER_CONTENT_KV")) {
+            kvMissingError = true;
+          }
+          throw new Error("서버 응답 오류");
         }
-      } else {
-        localStorage.setItem("portfolio_data", JSON.stringify(portfolios));
-        alert("로컬 브라우저 저장소에 저장되었습니다!");
+      } catch (err) {
+        console.error("Failed to upload portfolio to server:", err);
       }
+
+      // Always save to localStorage as a redundant backup!
+      localStorage.setItem("portfolio_data", JSON.stringify(portfolios));
+
+      if (uploadSuccess) {
+        alert("🎉 서버 및 브라우저에 안전하게 이중 저장 완료되었습니다!");
+      } else {
+        if (kvMissingError) {
+          alert("⚠️ [안내] Cloudflare KV(POWER_CONTENT_KV) 바인딩이 되어있지 않아 서버에 저장할 수 없습니다.\n\n현재 컴퓨터 브라우저에는 저장되었지만, 다른 컴퓨터에서도 보려면 Cloudflare Pages 관리자 설정에서 KV 네임스페이스 바인딩을 완료해 주세요.");
+        } else {
+          alert("⚠️ [안내] 네트워크 통신 오류 또는 서버 바인딩 문제로 서버 저장을 완료할 수 없습니다.\n\n작성하신 내역은 현재 브라우저에 우선 임시 저장되었습니다.");
+        }
+      }
+
       isEditMode = false;
       document.getElementById("btn-edit-mode").textContent = "⚙️ 수정하기";
       document.getElementById("btn-edit-mode").className = "px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-1.5 shadow-sm";
