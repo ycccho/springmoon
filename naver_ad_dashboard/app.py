@@ -59,85 +59,108 @@ if st.sidebar.button("🚀 네이버 광고 데이터 가져오기"):
         
         # Calculate date range list (formatted as YYYY-MM-DD)
         delta = sync_end_date - sync_start_date
-        date_list = [(sync_start_date + datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(delta.days + 1)]
+        raw_date_list = [(sync_start_date + datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(delta.days + 1)]
         
-        st.sidebar.info(f"총 {len(date_list)}일간의 데이터 매칭 및 수집을 시작합니다...")
+        # Filter out unavailable dates (today, and yesterday if before 8 AM KST)
+        now = datetime.datetime.now()
+        today_str = today.strftime("%Y-%m-%d")
+        yesterday_str = (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         
-        progress_bar = st.sidebar.progress(0.0)
-        status_text = st.sidebar.empty()
-        
-        # Mapping UI names to Ad Types and Report types
-        ad_mappings = {
-            "파워링크": {"ad_type": "POWERLINK", "reports": ["KEYWORD", "USER_RETURN"]},
-            "플레이스광고": {"ad_type": "PLACE", "reports": ["PLACE_AD"]},
-            "파워컨텐츠": {"ad_type": "POWERCONTENT", "reports": ["CONTENTS_AD"]}
-        }
-        
-        # Track synced days to display summary
-        synced_count = 0
-        skipped_count = 0
-        new_keywords = set()
-        
-        for idx, date_str in enumerate(date_list):
-            status_text.text(f"진행 중: {date_str}...")
-            
-            for ui_name in sync_targets:
-                config = ad_mappings[ui_name]
-                ad_type = config["ad_type"]
+        date_list = []
+        excluded_dates = []
+        for d_str in raw_date_list:
+            if d_str == today_str:
+                excluded_dates.append(d_str)
+            elif d_str == yesterday_str and now.hour < 8:
+                excluded_dates.append(d_str)
+            elif d_str > today_str:
+                excluded_dates.append(d_str)
+            else:
+                date_list.append(d_str)
                 
-                for report_type in config["reports"]:
-                    # Fetch already synced dates to skip duplicates
-                    synced_dates = db.get_synced_dates(ad_type, report_type)
+        if excluded_dates:
+            st.sidebar.warning(f"네이버 통계 집계 기준 미달일({', '.join(excluded_dates)})은 자동 제외하고 수집합니다.")
+            
+        if not date_list:
+            st.sidebar.error("수집 가능한 날짜가 없습니다. 시작일을 더 이전 날짜로 선택해 주세요.")
+        else:
+            st.sidebar.info(f"총 {len(date_list)}일간의 데이터 매칭 및 수집을 시작합니다...")
+            
+            progress_bar = st.sidebar.progress(0.0)
+            status_text = st.sidebar.empty()
+        
+            # Mapping UI names to Ad Types and Report types
+            ad_mappings = {
+                "파워링크": {"ad_type": "POWERLINK", "reports": ["KEYWORD", "USER_RETURN"]},
+                "플레이스광고": {"ad_type": "PLACE", "reports": ["PLACE_AD"]},
+                "파워컨텐츠": {"ad_type": "POWERCONTENT", "reports": ["CONTENTS_AD"]}
+            }
+            
+            # Track synced days to display summary
+            synced_count = 0
+            skipped_count = 0
+            new_keywords = set()
+            
+            for idx, date_str in enumerate(date_list):
+                status_text.text(f"진행 중: {date_str}...")
+                
+                for ui_name in sync_targets:
+                    config = ad_mappings[ui_name]
+                    ad_type = config["ad_type"]
                     
-                    if date_str in synced_dates:
-                        skipped_count += 1
-                        continue
+                    for report_type in config["reports"]:
+                        # Fetch already synced dates to skip duplicates
+                        synced_dates = db.get_synced_dates(ad_type, report_type)
                         
-                    try:
-                        # Fetch from Naver Ad API
-                        rows = api.fetch_report_data(date_str, ad_type, report_type)
-                        
-                        # Save rows to SQLite DB
-                        db.save_report_data(rows)
-                        
-                        # Keep track of keywords that might need search volume lookup
-                        for r in rows:
-                            if r[6]: # keyword field
-                                new_keywords.add(r[6])
-                                
-                        # Log sync status
-                        db.log_sync(date_str, ad_type, report_type)
-                        synced_count += 1
-                        
-                        # Rate limit delay (0.5s between days/reports)
-                        time_delay = 0.5
-                    except Exception as ex:
-                        st.sidebar.warning(f"{date_str} [{ui_name} - {report_type}] 오류: {ex}")
-                        
-            # Update Progress Bar
-            progress_bar.progress((idx + 1) / len(date_list))
-            
-        status_text.text("✅ 수집 및 DB 저장 완료!")
-        st.sidebar.success(f"신규 수집: {synced_count}건, 캐시 로드: {skipped_count}건")
-        
-        # Look up search volumes for new keywords with 0 volume
-        if new_keywords:
-            status_text.text("🔍 신규 키워드 월간 검색량 매칭 중...")
-            conn = db.get_connection()
-            # Fetch only keywords with 0 search volume
-            placeholders = ",".join(["?"] * len(new_keywords))
-            cursor = conn.cursor()
-            cursor.execute(f"SELECT keyword FROM reports WHERE keyword IN ({placeholders}) AND search_volume = 0", list(new_keywords))
-            unindexed_kws = [row["keyword"] for row in cursor.fetchall()]
-            conn.close()
-            
-            if unindexed_kws:
-                status_text.text(f"검색량 정보 수집 중 ({len(unindexed_kws)}개)...")
-                volumes = api.get_monthly_search_volumes(unindexed_kws)
-                db.update_search_volumes(volumes)
-                st.sidebar.success(f"검색량 매칭 완료: {len(volumes)}개 키워드")
+                        if date_str in synced_dates:
+                            skipped_count += 1
+                            continue
+                            
+                        try:
+                            # Fetch from Naver Ad API
+                            rows = api.fetch_report_data(date_str, ad_type, report_type)
+                            
+                            # Save rows to SQLite DB
+                            db.save_report_data(rows)
+                            
+                            # Keep track of keywords that might need search volume lookup
+                            for r in rows:
+                                if r[6]: # keyword field
+                                    new_keywords.add(r[6])
+                                    
+                            # Log sync status
+                            db.log_sync(date_str, ad_type, report_type)
+                            synced_count += 1
+                            
+                            # Rate limit delay (0.5s between days/reports)
+                            time_delay = 0.5
+                        except Exception as ex:
+                            st.sidebar.warning(f"{date_str} [{ui_name} - {report_type}] 오류: {ex}")
+                            
+                # Update Progress Bar
+                progress_bar.progress((idx + 1) / len(date_list))
                 
-        status_text.empty()
+            status_text.text("✅ 수집 및 DB 저장 완료!")
+            st.sidebar.success(f"신규 수집: {synced_count}건, 캐시 로드: {skipped_count}건")
+            
+            # Look up search volumes for new keywords with 0 volume
+            if new_keywords:
+                status_text.text("🔍 신규 키워드 월간 검색량 매칭 중...")
+                conn = db.get_connection()
+                # Fetch only keywords with 0 search volume
+                placeholders = ",".join(["?"] * len(new_keywords))
+                cursor = conn.cursor()
+                cursor.execute(f"SELECT keyword FROM reports WHERE keyword IN ({placeholders}) AND search_volume = 0", list(new_keywords))
+                unindexed_kws = [row["keyword"] for row in cursor.fetchall()]
+                conn.close()
+                
+                if unindexed_kws:
+                    status_text.text(f"검색량 정보 수집 중 ({len(unindexed_kws)}개)...")
+                    volumes = api.get_monthly_search_volumes(unindexed_kws)
+                    db.update_search_volumes(volumes)
+                    st.sidebar.success(f"검색량 매칭 완료: {len(volumes)}개 키워드")
+                    
+            status_text.empty()
 
 # Main Dashboard View
 st.title("📊 네이버 검색광고 성과분석 대시보드")
