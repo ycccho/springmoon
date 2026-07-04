@@ -136,6 +136,7 @@
       { id: "backlink-check", name: "백링크검사", protected: true },
       { id: "keyword-screenshot", name: "키워드검색스샷", protected: true },
       { id: "blog-post-screenshot", name: "블로그게시글스샷", protected: true },
+      { id: "ad-dashboard", name: "파워링크 분석", protected: true },
       { id: "daily-report", name: "일일보고서 작성", protected: false, hidden: true },
       { id: "about", name: "소개", protected: false }
     ];
@@ -206,26 +207,27 @@
       }
       if (!menus.some(m => m.id === "homepage-seo")) {
         const idx = menus.findIndex(m => m.id === "cad-conversion");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "homepage-seo", name: "홈페이지 코드세팅", protected: true });
+        menus.push({ id: "homepage-seo", name: "홈페이지 코드세팅", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "backlink-check")) {
-        const idx = menus.findIndex(m => m.id === "homepage-seo");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "backlink-check", name: "백링크검사", protected: true });
+        menus.push({ id: "backlink-check", name: "백링크검사", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "keyword-screenshot")) {
-        const idx = menus.findIndex(m => m.id === "backlink-check");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "keyword-screenshot", name: "키워드검색스샷", protected: true });
+        menus.push({ id: "keyword-screenshot", name: "키워드검색스샷", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "blog-post-screenshot")) {
-        const idx = menus.findIndex(m => m.id === "keyword-screenshot");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "blog-post-screenshot", name: "블로그게시글스샷", protected: true });
+        menus.push({ id: "blog-post-screenshot", name: "블로그게시글스샷", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "daily-report")) {
         menus.push({ id: "daily-report", name: "일일보고서 작성", protected: false, hidden: true });
+        changed = true;
+      }
+      if (!menus.some(m => m.id === "ad-dashboard")) {
+        menus.push({ id: "ad-dashboard", name: "파워링크 분석", protected: true });
         changed = true;
       }
 
@@ -246,6 +248,17 @@
           changed = true;
         }
       });
+
+      // Sort alphabetically (localeCompare "ko") - keep 'about' at the very bottom
+      const beforeSort = JSON.stringify(menus);
+      menus.sort((a, b) => {
+        if (a.id === "about") return 1;
+        if (b.id === "about") return -1;
+        return a.name.localeCompare(b.name, "ko");
+      });
+      if (JSON.stringify(menus) !== beforeSort) {
+        changed = true;
+      }
 
       if (changed) {
         localStorage.setItem("menuOrder", JSON.stringify(menus));
@@ -717,6 +730,7 @@
         setupKeywordScreenshot();
         setupBlogPostScreenshot();
         setupDailyReport();
+        setupAdDashboard();
       }, 100);
     }
 
@@ -736,6 +750,7 @@
       if (id === "keyword-screenshot") return getKeywordScreenshotHTML();
       if (id === "blog-post-screenshot") return getBlogPostScreenshotHTML();
       if (id === "daily-report") return getDailyReportHTML();
+      if (id === "ad-dashboard") return getAdDashboardHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
           <h2 class="text-3xl font-bold mb-4 text-gray-800 dark-mode:text-gray-100">소개</h2>
@@ -6964,6 +6979,48 @@
       }
 
       renderActiveForm();
+    }
+
+    function getAdDashboardHTML() {
+      return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-10 border border-gray-150 dark-mode:border-gray-700">
+        <h1 class="text-3xl font-black text-gray-900 dark-mode:text-white mb-2 tracking-tight flex items-center gap-2">
+          📊 네이버 검색광고 성과분석 대시보드
+        </h1>
+        <p class="text-gray-500 dark-mode:text-gray-400 mb-8 font-medium">네이버 검색광고(파워링크, 스마트플레이스, 파워컨텐츠) 데이터를 분석하는 지능형 대시보드입니다.</p>
+        
+        <div class="bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900/50 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <h3 class="font-black text-sm text-orange-900 dark-mode:text-orange-400 flex items-center gap-1.5">🚀 대시보드 실행 및 접속</h3>
+            <p class="text-xs text-orange-700 dark-mode:text-orange-300 leading-relaxed font-semibold">
+              대용량 통계 보고서 수집 및 로컬 SQLite DB 안전 저장을 위해 로컬 Python 프로세스로 동작합니다.
+            </p>
+          </div>
+          <a href="http://localhost:8501" target="_blank" class="w-full md:w-auto inline-flex items-center justify-center px-5 py-3 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white font-black text-xs rounded-xl shadow-md transition-all gap-1.5 whitespace-nowrap">
+            🖥️ 대시보드 브라우저 열기 (8501 포트)
+          </a>
+        </div>
+
+        <div class="border-t border-gray-150 dark-mode:border-gray-750 pt-8 space-y-6">
+          <h3 class="text-lg font-black text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">💻 최초 로컬 구동 가이드</h3>
+          <div class="p-5 bg-gray-50 dark-mode:bg-gray-900 rounded-2xl border border-gray-100 dark-mode:border-gray-850 space-y-4">
+            <div>
+              <p class="text-xs text-gray-700 dark-mode:text-gray-300 font-bold mb-2">1. 터미널(CMD/파워쉘)을 열어 필수 라이브러리를 설치합니다.</p>
+              <pre class="bg-gray-950 text-orange-400 text-xs p-3.5 rounded-xl overflow-x-auto font-mono border border-gray-850 shadow-inner">pip install streamlit pandas plotly requests openpyxl</pre>
+            </div>
+            <div>
+              <p class="text-xs text-gray-700 dark-mode:text-gray-300 font-bold mb-2">2. 본 프로젝트 경로로 이동하여 아래 명령으로 가동시킵니다.</p>
+              <pre class="bg-gray-950 text-orange-400 text-xs p-3.5 rounded-xl overflow-x-auto font-mono border border-gray-850 shadow-inner">streamlit run naver_ad_dashboard/app.py</pre>
+            </div>
+            <p class="text-[11px] text-gray-500 dark-mode:text-gray-400 leading-normal font-semibold">
+              * 구동 후 브라우저 탭에 자동 표시되며, API 키를 입력해 안전하게 일별 누락된 광고 성과 자료를 다운로드하고 기간별(A vs B) 성과 분석 보고서를 사용할 수 있습니다.
+            </p>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function setupAdDashboard() {
+      // Static instructional page, no dynamic scripts needed
     }
 
     window.addEventListener("load", initApp);
