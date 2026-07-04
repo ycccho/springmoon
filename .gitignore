@@ -10,3 +10,5 @@ dist/
 .env
 scratch/
 scratch_*
+__pycache__/
+*.db
