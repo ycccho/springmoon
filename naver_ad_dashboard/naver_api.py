@@ -192,17 +192,17 @@ class NaverAdAPI:
                     # Search query report (EXPKEYWORD)
                     kw = ""
                     sq = row[4]
-                    imp = int(row[5])
-                    clicks = int(row[8])
+                    clicks = int(row[7])
+                    imp = int(row[8])
                     cost = int(row[9])
                 else:
                     # General performance report (AD)
                     kw_id = row[4]
                     kw = self.get_keyword_text(kw_id)
                     sq = ""
-                    imp = int(row[7])
-                    clicks = int(row[9])
-                    cost = int(row[10])
+                    imp = int(row[9])
+                    clicks = int(row[10])
+                    cost = int(row[11])
                     
                 cpc = float(cost / clicks) if clicks > 0 else 0.0
             except (IndexError, ValueError):
