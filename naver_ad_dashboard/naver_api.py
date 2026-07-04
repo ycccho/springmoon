@@ -93,7 +93,8 @@ class NaverAdAPI:
 
     def download_report(self, download_url):
         """Downloads and parses the TSV report file."""
-        response = requests.get(download_url, timeout=60)
+        headers = self._get_headers("GET", "/report-download")
+        response = requests.get(download_url, headers=headers, timeout=60)
         response.raise_for_status()
         content = response.content
         
