@@ -7110,7 +7110,7 @@
         if (!kwId || kwId === "-") return "";
         if (keywordCache[kwId]) return keywordCache[kwId];
         try {
-          const res = await fetch(`/functions/api/proxy?path=/ncc/keywords/${kwId}&customerId=${customerId}`);
+          const res = await fetch(`/api/proxy?path=/ncc/keywords/${kwId}&customerId=${customerId}`);
           if (res.ok) {
             const kwData = await res.json();
             keywordCache[kwId] = kwData.keyword || kwId;
@@ -7125,7 +7125,7 @@
       
       async function fetchReportForDate(dateStr, reportTp, customerId) {
         // 1. POST request to create report job
-        const res = await fetch(`/functions/api/proxy?path=/stat-reports&customerId=${customerId}`, {
+        const res = await fetch(`/api/proxy?path=/stat-reports&customerId=${customerId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -7148,7 +7148,7 @@
         let downloadUrl = "";
         for (let attempt = 0; attempt < 25; attempt++) {
           await new Promise(resolve => setTimeout(resolve, 2000));
-          const statusRes = await fetch(`/functions/api/proxy?path=/stat-reports/${jobId}&customerId=${customerId}`);
+          const statusRes = await fetch(`/api/proxy?path=/stat-reports/${jobId}&customerId=${customerId}`);
           if (!statusRes.ok) continue;
           
           const statusJob = await statusRes.json();
@@ -7167,7 +7167,7 @@
         }
         
         // 3. Download TSV report
-        const dlRes = await fetch(`/functions/api/proxy?path=/report-download&downloadUrl=${encodeURIComponent(downloadUrl)}&customerId=${customerId}`);
+        const dlRes = await fetch(`/api/proxy?path=/report-download&downloadUrl=${encodeURIComponent(downloadUrl)}&customerId=${customerId}`);
         if (!dlRes.ok) {
           throw new Error("리포트 다운로드 요청 실패.");
         }
@@ -7259,7 +7259,7 @@
           addLog("1. 캠페인 및 광고그룹 메타데이터 연동 조회 중...");
           statusTxt.innerText = "캠페인 및 광고그룹 데이터 연동 중...";
           
-          const campRes = await fetch(`/functions/api/proxy?path=/ncc/campaigns&customerId=${customerId}`);
+          const campRes = await fetch(`/api/proxy?path=/ncc/campaigns&customerId=${customerId}`);
           if (!campRes.ok) throw new Error("캠페인 목록 조회 실패.");
           const campaigns = await campRes.json();
           
@@ -7269,7 +7269,7 @@
           }
           addLog(`캠페인 ${campaigns.length}개 연동 완료.`);
           
-          const groupRes = await fetch(`/functions/api/proxy?path=/ncc/adgroups&customerId=${customerId}`);
+          const groupRes = await fetch(`/api/proxy?path=/ncc/adgroups&customerId=${customerId}`);
           if (!groupRes.ok) throw new Error("광고그룹 목록 조회 실패.");
           const adgroups = await groupRes.json();
           
