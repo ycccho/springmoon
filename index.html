@@ -7510,9 +7510,9 @@
               const sq = r[4];
               const device = r[6] === "P" ? "PC" : "모바일";
               
-              const clicks = parseInt(r[7]) || 0;
+              const clicks = parseInt(r[9]) || 0;
               const imp = parseInt(r[8]) || 0;
-              const cost = parseInt(r[9]) || 0;
+              const cost = parseInt(r[10]) || 0;
               
               if (clicks === 0) continue;
               
