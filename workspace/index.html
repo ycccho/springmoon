@@ -17,51 +17,87 @@
         extend: {
           colors: {
             brand: {
-              50: '#fff7ed',
-              100: '#ffedd5',
-              200: '#fed7aa',
-              300: '#fdba74',
-              400: '#fb923c',
-              500: '#f97316',
-              600: '#ea580c',
-              700: '#c2410c',
-              800: '#9a3412',
-              950: '#431407',
+              50: '#faf8f5',
+              100: '#f5f0e6',
+              200: '#eadecb',
+              300: '#d7c4a7',
+              400: '#c1a57c',
+              500: '#b08b5c',
+              600: '#9b7348',
+              700: '#815e3b',
+              800: '#694c32',
+              950: '#1e1e10',
             }
           }
         }
-      },
-      plugins: [
-        function({ addVariant }) {
-          addVariant('dark-mode', '.dark-mode &');
-        }
-      ]
+      }
     }
   </script>
   <style>
     body {
       font-family: 'Noto Sans KR', 'Outfit', sans-serif;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      background-color: #f7f4ed;
+      color: #1e1e10;
     }
-    body.dark-mode {
-      background-color: #111827;
-      color: #f9fafb;
+    /* WYSIWYG Rich Editor & Content View styles */
+    #rich-editor-content img, #modal-view-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+      margin: 20px auto;
+      display: block;
+      border: 1px solid #e5e2d9;
     }
-    .editable-cell {
-      outline: none;
+    #rich-editor-content p, #modal-view-content p {
+      margin-bottom: 12px;
+      line-height: 1.7;
     }
-    .editable-cell:focus {
-      background-color: rgba(59, 130, 246, 0.1);
-      box-shadow: inset 0 0 0 1px #3b82f6;
-      border-radius: 4px;
+    #rich-editor-content ul, #modal-view-content ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      margin-bottom: 16px;
+    }
+    #rich-editor-content ol, #modal-view-content ol {
+      list-style-type: decimal;
+      padding-left: 20px;
+      margin-bottom: 16px;
+    }
+    #rich-editor-content h1, #modal-view-content h1,
+    #rich-editor-content h2, #modal-view-content h2,
+    #rich-editor-content h3, #modal-view-content h3 {
+      font-weight: 700;
+      color: #1e1e10;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    #rich-editor-content h2, #modal-view-content h2 {
+      font-size: 1.4em;
+      border-bottom: 2px solid #e5e2d9;
+      padding-bottom: 6px;
+    }
+    #rich-editor-content h3, #modal-view-content h3 {
+      font-size: 1.2em;
+    }
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;  
+      overflow: hidden;
+    }
+    .line-clamp-1 {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;  
+      overflow: hidden;
     }
   </style>
 </head>
-<body class="text-gray-800 bg-slate-50 min-h-screen">
+<body class="min-h-screen text-[#1e1e10]">
   <!-- MOBILE HEADER -->
-  <header class="md:hidden flex items-center justify-between p-4 bg-orange-600 text-white shadow-md z-30 sticky top-0">
-    <div class="text-xl font-bold" id="mobile-brand-name">cho</div>
-    <button id="mobile-menu-toggle" class="p-2 rounded hover:bg-orange-700 focus:outline-none">
+  <header class="md:hidden flex items-center justify-between p-4 bg-[#1e1e10] text-white shadow-md z-30 sticky top-0">
+    <div class="text-xl font-bold font-mono tracking-wider" id="mobile-brand-name">springmoon</div>
+    <button id="mobile-menu-toggle" class="p-2 rounded hover:bg-gray-800 focus:outline-none">
       <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
@@ -73,98 +109,204 @@
 
   <div class="min-h-screen grid grid-cols-1 md:grid-cols-[240px_1fr]">
     <!-- LEFT SIDEBAR -->
-    <aside id="sidebar" style="background-color: #dd5828;" class="fixed inset-y-0 left-0 w-[240px] z-40 transform -translate-x-full md:relative md:translate-x-0 md:transform-none text-white p-4 md:p-6 overflow-y-auto flex flex-col max-h-screen transition-transform duration-300 ease-in-out">
-      <div class="text-2xl font-bold mb-8 cursor-pointer" id="brand-name">cho</div>
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-[240px] z-40 transform -translate-x-full md:relative md:translate-x-0 md:transform-none bg-[#1e1e10] text-gray-300 p-4 md:p-6 overflow-y-auto flex flex-col max-h-screen transition-transform duration-300 ease-in-out border-r border-gray-800">
+      <div class="text-2xl font-black mb-8 cursor-pointer text-white font-mono tracking-wider" id="brand-name">springmoon</div>
       
       <!-- Date/Time & IP widgets above buttons -->
-      <div class="space-y-3 mb-6 border-b border-white border-opacity-15 pb-4">
+      <div class="space-y-3 mb-6 border-b border-gray-800 pb-4">
         <!-- KST Date & Time Widget -->
-        <div class="bg-white bg-opacity-10 rounded-xl p-3 space-y-1">
-          <div class="text-[10px] text-orange-200 uppercase tracking-wider font-bold">KST (한국 표준시)</div>
-          <div id="sidebar-date" class="text-xs font-semibold text-white">로딩 중...</div>
-          <div id="sidebar-time" class="text-lg font-bold text-white font-mono leading-none">로딩 중...</div>
+        <div class="bg-gray-900 rounded-xl p-3 space-y-1">
+          <div class="text-[9px] text-gray-500 uppercase tracking-wider font-bold">KST (한국 표준시)</div>
+          <div id="sidebar-date" class="text-[11px] font-semibold text-gray-400">로딩 중...</div>
+          <div id="sidebar-time" class="text-base font-bold text-white font-mono leading-none">로딩 중...</div>
         </div>
         <!-- IP Address Widget -->
-        <div class="bg-white bg-opacity-10 rounded-xl p-3 flex items-center justify-between">
-          <div class="text-[10px] text-orange-200 uppercase tracking-wider font-bold">🖥️ 접속 IP</div>
-          <div id="visitor-ip" class="text-xs font-mono font-bold text-white bg-orange-700 bg-opacity-40 px-2 py-0.5 rounded">조회 중...</div>
+        <div class="bg-gray-900 rounded-xl p-3 flex items-center justify-between">
+          <div class="text-[9px] text-gray-500 uppercase tracking-wider font-bold">🖥️ 접속 IP</div>
+          <div id="visitor-ip" class="text-[10px] font-mono font-bold text-gray-300 bg-gray-800 px-2 py-0.5 rounded">조회 중...</div>
         </div>
       </div>
 
       <!-- SIDEBAR MENUS -->
       <nav class="space-y-2 flex-1">
-        <a href="#" class="block w-full px-4 py-3 rounded-xl text-sm font-bold bg-white text-orange-700 transition-all flex items-center gap-2">
+        <a href="#" class="block w-full px-4 py-3 rounded-xl text-sm font-bold bg-white text-[#1e1e10] transition-all flex items-center gap-2">
           💼 워크스페이스
         </a>
-        <a href="/?menu=webp" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white hover:bg-opacity-10 transition-all flex items-center gap-2">
+        <a href="/?menu=webp" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all flex items-center gap-2">
           🖼️ webP변환
         </a>
-        <a href="/?menu=keyword" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white hover:bg-opacity-10 transition-all flex items-center gap-2">
+        <a href="/?menu=keyword" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all flex items-center gap-2">
           🔀 키워드조합기
         </a>
-        <a href="/?menu=keyword-search-count" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white hover:bg-opacity-10 transition-all flex items-center gap-2">
+        <a href="/?menu=keyword-search-count" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all flex items-center gap-2">
           📊 키워드조회수
         </a>
-        <a href="/?menu=negative-words" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white hover:bg-opacity-10 transition-all flex items-center gap-2">
+        <a href="/?menu=negative-words" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all flex items-center gap-2">
           🚫 부정단어찾기
         </a>
-        <a href="/?menu=html-analysis" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white hover:bg-opacity-10 transition-all flex items-center gap-2">
+        <a href="/?menu=html-analysis" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all flex items-center gap-2">
           📝 html분석
         </a>
-        <a href="/?menu=url-extraction" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white hover:bg-opacity-10 transition-all flex items-center gap-2">
+        <a href="/?menu=url-extraction" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all flex items-center gap-2">
           🔗 도메인 url추출
         </a>
-        <a href="/?menu=powercontent" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white hover:bg-opacity-10 transition-all flex items-center gap-2">
-          🔍 파컨 키워드
+        <a href="/?menu=powercontent" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all flex items-center gap-2">
+          🔍 6.검색광고 통계수집
         </a>
-        <a href="/?menu=about" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white hover:bg-opacity-10 transition-all flex items-center gap-2">
+        <a href="/?menu=about" class="block w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all flex items-center gap-2">
           ℹ️ 소개
         </a>
       </nav>
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main id="main-content" class="p-4 md:p-8 overflow-y-auto relative bg-slate-50 dark-mode:bg-gray-900 min-h-screen">
-      <!-- TOP CONTROLS -->
-      <div class="flex items-center justify-between mb-8">
-        <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-bold text-gray-800 dark-mode:text-white flex items-center gap-2">
-            💼 마케팅 워크스페이스
-          </h1>
-          <div class="flex flex-col">
-            <span id="storage-mode" class="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-750 dark-mode:bg-yellow-950/50 dark-mode:text-yellow-400 w-fit">
+    <main id="main-content" class="p-4 md:p-8 overflow-y-auto min-h-screen bg-[#f7f4ed]">
+      <div class="max-w-6xl mx-auto space-y-6">
+        <!-- TOP STATUS BAR -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span id="storage-mode" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#eadecb] text-[#694c32]">
               로컬 브라우저 저장소
             </span>
-            <span id="storage-warning" class="text-[9px] text-red-500 font-bold mt-1 hidden">
+            <span id="storage-warning" class="text-[9px] text-red-500 font-bold hidden">
               ⚠️ 캐시 삭제 시 소실 위험! Cloudflare KV 바인딩을 완료해 주세요.
             </span>
           </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-edit-mode" class="px-4 py-2 rounded-lg text-sm font-semibold bg-[#1e1e10] hover:bg-black text-white transition-colors flex items-center gap-1.5 shadow-sm">
+              ⚙️ 수정하기
+            </button>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button id="btn-edit-mode" class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-1.5 shadow-sm">
-            ⚙️ 수정하기
-          </button>
-          <button id="theme-toggle-btn" class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 hover:bg-gray-300 text-gray-800 dark-mode:bg-gray-700 dark-mode:text-white dark-mode:hover:bg-gray-600 transition-colors">
-            🌙 다크모드
-          </button>
-        </div>
-      </div>
 
-      <!-- PORTFOLIO LIST CONTAINER -->
-      <div id="portfolio-container" class="space-y-8 max-w-6xl mx-auto">
-        <!-- Rendered dynamically -->
+        <!-- HERO HEADER (Claude Prompt Library Style) -->
+        <div class="space-y-3 py-4">
+          <div class="text-amber-800 font-bold uppercase tracking-wider text-xs">springmoon WorkSpace</div>
+          <h1 class="text-4xl md:text-5xl font-black text-[#1e1e10] leading-tight tracking-tight">
+            <span id="portfolio-count" class="text-amber-600">0</span> Portfolio Cases
+          </h1>
+          <p class="text-gray-650 font-medium text-sm md:text-base leading-relaxed max-w-3xl">
+            스프링문이 직접 집행하고 검증한 마케팅 성과 및 포트폴리오 리스트입니다.
+          </p>
+          
+          <!-- Small Button labeled "1" as requested -->
+          <div class="flex items-center gap-2 pt-2">
+            <button class="px-3 py-1 bg-white hover:bg-gray-50 border border-[#e5e2d9] rounded-lg text-xs font-bold text-gray-700 shadow-sm transition-colors">
+              1
+            </button>
+          </div>
+        </div>
+
+        <!-- SEARCH & CATEGORY SELECTOR -->
+        <div class="space-y-4 bg-white/40 p-4 md:p-6 rounded-2xl border border-[#e5e2d9]">
+          <!-- Search Input -->
+          <div class="relative">
+            <span class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </span>
+            <input type="text" id="portfolio-search" class="w-full pl-12 pr-4 py-3 border border-[#e5e2d9] rounded-xl bg-white text-[#1e1e10] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold shadow-sm transition-all" placeholder="포트폴리오 검색 (업체명, ROAS, 마케팅 매체, 내용...)">
+          </div>
+
+          <!-- Category Pills Tabs Container -->
+          <div id="category-tabs" class="flex flex-wrap gap-2 pt-1">
+            <!-- Dynamic Category Pills -->
+          </div>
+        </div>
+
+        <!-- PORTFOLIO GRID -->
+        <div id="portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 pb-20">
+          <!-- Dynamically loaded cards -->
+        </div>
       </div>
     </main>
   </div>
 
   <!-- PASSWORD MODAL -->
-  <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-2xl max-w-sm w-full mx-4 relative">
-      <button id="password-close" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
-      <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100">관리자 확인</h2>
-      <p class="text-gray-600 dark-mode:text-gray-400 mb-6 text-sm">포트폴리오 수정을 위해 비밀번호를 입력해 주세요.</p>
-      <input type="password" id="password-input" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-lg mb-4 bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="비밀번호">
-      <button id="password-submit" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all">확인</button>
+  <div id="password-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4 relative border border-[#e5e2d9]">
+      <button id="password-close" class="absolute top-4 right-4 text-gray-400 hover:text-gray-650 font-bold text-xl">&times;</button>
+      <h2 class="text-2xl font-black mb-2 text-[#1e1e10]">관리자 확인</h2>
+      <p class="text-gray-500 mb-6 text-xs font-semibold">포트폴리오 추가 및 수정을 위해 비밀번호를 입력해 주세요.</p>
+      <input type="password" id="password-input" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg mb-4 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-semibold" placeholder="비밀번호">
+      <button id="password-submit" class="w-full py-2.5 bg-[#1e1e10] hover:bg-black text-white rounded-lg font-bold transition-all text-sm">확인</button>
+    </div>
+  </div>
+
+  <!-- DETAIL VIEW / WYSIWYG EDITOR MODAL -->
+  <div id="detail-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-[#e5e2d9]">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-[#e5e2d9] bg-gray-50 flex items-center justify-between">
+        <h2 id="modal-title" class="text-lg font-black text-[#1e1e10]">상세 성과 내용</h2>
+        <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 font-bold text-2xl focus:outline-none">&times;</button>
+      </div>
+      
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto flex-1 space-y-4 bg-[#faf9f6]">
+        <!-- Core Info Row (Visible in View Mode only) -->
+        <div id="modal-core-row" class="grid grid-cols-2 gap-4 pb-4 border-b border-[#e5e2d9]">
+          <div class="bg-[#fffbeb] rounded-xl p-3 border border-[#fef3c7] text-center">
+            <span class="text-[9px] font-bold text-amber-700 block uppercase tracking-wider">ROAS 성과</span>
+            <span id="modal-roas" class="text-sm font-black text-amber-600"></span>
+          </div>
+          <div class="bg-[#f0fdf4] rounded-xl p-3 border border-[#dcfce7] text-center">
+            <span class="text-[9px] font-bold text-green-700 block uppercase tracking-wider">마케팅 매체</span>
+            <span id="modal-channels" class="text-sm font-black text-green-600"></span>
+          </div>
+        </div>
+
+        <!-- Render Content / Editor -->
+        <div id="modal-view-content" class="text-[#1e1e10] leading-relaxed text-sm">
+          <!-- detailHtml content -->
+        </div>
+
+        <!-- WYSIWYG Editor Container -->
+        <div id="modal-edit-content" class="hidden space-y-3">
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">게시판 형식 상세 내용 작성 (글자 굵기, 색상, 이미지 꾸미기)</label>
+          <!-- Toolbars -->
+          <div class="flex flex-wrap items-center gap-1.5 p-2 bg-gray-50 border border-b-0 border-gray-300 rounded-t-xl">
+            <button type="button" onclick="formatDoc('bold')" class="px-2.5 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs font-bold text-gray-700 shadow-sm" title="굵게">B</button>
+            <button type="button" onclick="formatDoc('italic')" class="px-2.5 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs italic font-bold text-gray-700 shadow-sm" title="기울임">I</button>
+            <button type="button" onclick="formatDoc('underline')" class="px-2.5 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs underline font-bold text-gray-700 shadow-sm" title="밑줄">U</button>
+            <button type="button" onclick="formatDoc('removeFormat')" class="px-2 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs font-semibold text-gray-500 shadow-sm" title="서식 제거">Clear</button>
+            
+            <div class="h-6 w-px bg-gray-300 mx-1"></div>
+            
+            <select onchange="formatDoc('fontSize', this.value); this.selectedIndex=0;" class="px-2 py-1 border border-gray-200 rounded bg-white text-xs font-semibold text-gray-700 shadow-sm focus:outline-none">
+              <option value="">글자 크기</option>
+              <option value="2">작게 (10pt)</option>
+              <option value="3">보통 (12pt)</option>
+              <option value="4">중간 (14pt)</option>
+              <option value="5">크게 (18pt)</option>
+              <option value="6">매우 크게 (24pt)</option>
+            </select>
+            
+            <div class="h-6 w-px bg-gray-300 mx-1"></div>
+            
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-bold text-gray-400">색상:</span>
+              <input type="color" onchange="formatDoc('foreColor', this.value)" class="w-6 h-6 p-0 border border-gray-200 rounded cursor-pointer" title="글자색">
+            </div>
+            
+            <div class="h-6 w-px bg-gray-300 mx-1"></div>
+            
+            <button type="button" onclick="document.getElementById('editor-img-file').click()" class="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1">
+              🖼️ 통계 이미지 추가
+            </button>
+            <input type="file" id="editor-img-file" accept="image/*" class="hidden" onchange="handleEditorImageFile(this)" />
+          </div>
+          <!-- Rich Content Area -->
+          <div id="rich-editor-content" contenteditable="true" class="p-4 border border-gray-300 rounded-b-xl min-h-[300px] max-h-[450px] bg-white focus:outline-none overflow-y-auto text-sm text-[#1e1e10]"></div>
+        </div>
+      </div>
+      
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-[#e5e2d9] bg-gray-50 flex items-center justify-end gap-2">
+        <button id="modal-btn-cancel" onclick="closeDetailModal()" class="px-4 py-2 border border-[#e5e2d9] hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-700 shadow-sm transition-colors">닫기</button>
+        <button id="modal-btn-save" onclick="saveEditorContent()" class="hidden px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors">임시 저장</button>
+      </div>
     </div>
   </div>
 
@@ -175,29 +317,7 @@
     let portfolios = [];
     let isServerStorage = false;
 
-    // Load dark mode
-    function initTheme() {
-      isDarkMode = localStorage.getItem("darkMode") === "true";
-      applyTheme();
-    }
-
-    function applyTheme() {
-      if (isDarkMode) {
-        document.body.classList.add("dark-mode");
-        document.getElementById("theme-toggle-btn").textContent = "☀️ 라이트모드";
-      } else {
-        document.body.classList.remove("dark-mode");
-        document.getElementById("theme-toggle-btn").textContent = "🌙 다크모드";
-      }
-      localStorage.setItem("darkMode", isDarkMode);
-    }
-
-    document.getElementById("theme-toggle-btn").addEventListener("click", () => {
-      isDarkMode = !isDarkMode;
-      applyTheme();
-    });
-
-    // Date/Time Clock
+    // Time Clock Widget
     function updateClock() {
       const now = new Date();
       const kstTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * 9));
@@ -241,14 +361,40 @@
       backdrop.addEventListener("click", toggleMobileMenu);
     }
 
-    // Load brand name
+    // Load custom brand name
     const brandNameEl = document.getElementById("brand-name");
     const mobileBrandNameEl = document.getElementById("mobile-brand-name");
-    const savedBrand = localStorage.getItem("brandName") || "cho";
+    const savedBrand = localStorage.getItem("brandName") || "springmoon";
     if (brandNameEl) brandNameEl.textContent = savedBrand;
     if (mobileBrandNameEl) mobileBrandNameEl.textContent = savedBrand;
 
-    // Fetch API implementation
+    // Dynamic Category tabs listing
+    function renderCategoryTabs() {
+      const tabsContainer = document.getElementById("category-tabs");
+      if (!tabsContainer) return;
+
+      const counts = { "전체": portfolios.length };
+      portfolios.forEach(p => {
+        const cat = p.businessType || "기타";
+        counts[cat] = (counts[cat] || 0) + 1;
+      });
+
+      let html = `<button class="px-4 py-2 bg-[#1e1e10] text-white text-xs font-bold rounded-full shadow-sm">전체 ${counts["전체"]}</button>`;
+      
+      const uniqueCats = Array.from(new Set(portfolios.map(p => p.businessType || "기타"))).filter(c => c !== "");
+      
+      uniqueCats.forEach(cat => {
+        html += `
+          <button class="px-4 py-2 bg-white text-gray-650 border border-[#e5e2d9] hover:bg-[#fffdf9] text-xs font-bold rounded-full shadow-sm transition-all">
+            ${cat} ${counts[cat] || 0}
+          </button>
+        `;
+      });
+      
+      tabsContainer.innerHTML = html;
+    }
+
+    // Load Portfolios from Cloudflare API or fallback to LocalStorage
     async function loadPortfolios() {
       let loadedFromServer = false;
       let serverData = [];
@@ -261,14 +407,9 @@
           isServerStorage = true;
           const badge = document.getElementById("storage-mode");
           badge.textContent = "서버 저장소";
-          badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 dark-mode:bg-green-950/50 dark-mode:text-green-400";
+          badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700";
           document.getElementById("storage-warning").classList.add("hidden");
         } else {
-          // If response status is 500, check if it's missing KV binding
-          const errRes = await res.json().catch(() => ({}));
-          if (errRes.error && errRes.error.includes("POWER_CONTENT_KV")) {
-            console.error("KV Binding missing on Cloudflare:", errRes.error);
-          }
           throw new Error("Server API missing or KV not bound");
         }
       } catch (err) {
@@ -276,17 +417,15 @@
         isServerStorage = false;
         const badge = document.getElementById("storage-mode");
         badge.textContent = "로컬 브라우저 저장소";
-        badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-750 dark-mode:bg-yellow-950/50 dark-mode:text-yellow-400";
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800";
         document.getElementById("storage-warning").classList.remove("hidden");
       }
 
       const localData = JSON.parse(localStorage.getItem("portfolio_data") || "[]");
 
       if (loadedFromServer) {
-        // Server connection succeeded.
-        // If server data is empty but local browser data is present, offer recovery!
         if (serverData.length === 0 && localData.length > 0) {
-          if (confirm("서버에 저장된 포트폴리오가 비어있지만, 현재 브라우저(로컬)에 작성해 두셨던 임시 데이터가 감지되었습니다. 로컬 데이터를 가져와 불러오시겠습니까?\n\n(가져온 후 [저장]을 완료하면 서버에 최종 저장됩니다.)")) {
+          if (confirm("서버에 저장된 데이터가 없으나 로컬 임시 데이터가 감지되었습니다. 이를 불러오시겠습니까?")) {
             portfolios = localData;
           } else {
             portfolios = serverData;
@@ -295,18 +434,42 @@
           portfolios = serverData;
         }
       } else {
-        // Server connection failed, load from local storage
         portfolios = localData;
+      }
+
+      // If empty, supply default template
+      if (portfolios.length === 0) {
+        portfolios = [
+          {
+            id: "sample-1",
+            logo: "",
+            clientName: "부산 서면 상가 인테리어 전문 A사",
+            businessType: "인테리어",
+            roas: "1200% 달성",
+            channels: "네이버 블로그, 파워링크",
+            description: "전문 브랜드 블로그 운영 및 타겟형 파워링크 최적화를 진행하여 상업 공사 계약 수주 문의를 급증시켰습니다.",
+            detailHtml: `
+              <h2>📈 인테리어 브랜드 마케팅 성과 상세</h2>
+              <p>기존 블로그는 완성 사진만 단순 나열되어 공사 의뢰로 연결되지 않았습니다. 스프링문은 다음과 같은 전략을 수립하였습니다.</p>
+              <h3>🛠️ 핵심 마케팅 진행 내역</h3>
+              <ul>
+                <li>시공 비포/애프터 과정을 풍부한 설명과 도면을 곁들여 전문성 있게 스토리텔링</li>
+                <li>세부 전환 키워드(예: 서면 상가 인테리어) 중심의 파워링크 매칭 광고 운영</li>
+                <li>지역 노출 기반 네이버 플레이스 리뷰 신뢰도 구축</li>
+              </ul>
+              <p>광고 집행 후 고단가 인테리어 견적 문의가 월 12건 이상 유입되는 고효율 성과를 기록하였습니다.</p>
+            `
+          }
+        ];
       }
 
       renderPortfolios();
     }
 
+    // Save Portfolios to server & local backup
     async function savePortfolios() {
-      // Serialize DOM values into portfolios array first
       serializePortfoliosFromDOM();
 
-      // ALWAYS try to upload to the server first
       let uploadSuccess = false;
       let kvMissingError = false;
 
@@ -322,20 +485,20 @@
           isServerStorage = true;
           const badge = document.getElementById("storage-mode");
           badge.textContent = "서버 저장소";
-          badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 dark-mode:bg-green-950/50 dark-mode:text-green-450";
+          badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700";
           document.getElementById("storage-warning").classList.add("hidden");
         } else {
           const errRes = await res.json().catch(() => ({}));
           if (errRes.error && errRes.error.includes("POWER_CONTENT_KV")) {
             kvMissingError = true;
           }
-          throw new Error("서버 응답 오류");
+          throw new Error("서버 업로드 실패");
         }
       } catch (err) {
         console.error("Failed to upload portfolio to server:", err);
       }
 
-      // Always save to localStorage as a redundant backup!
+      // Local storage backup
       localStorage.setItem("portfolio_data", JSON.stringify(portfolios));
 
       if (uploadSuccess) {
@@ -343,29 +506,27 @@
       } else {
         document.getElementById("storage-warning").classList.remove("hidden");
         if (kvMissingError) {
-          alert("⚠️ [안내] Cloudflare KV(POWER_CONTENT_KV) 바인딩이 되어있지 않아 서버에 저장할 수 없습니다.\n\n현재 컴퓨터 브라우저에는 저장되었지만, 다른 컴퓨터에서도 보려면 Cloudflare Pages 관리자 설정에서 KV 네임스페이스 바인딩을 완료해 주세요.");
+          alert("⚠️ [안내] Cloudflare KV 바인딩이 되어있지 않아 임시로 현재 컴퓨터 브라우저에만 저장되었습니다.");
         } else {
-          alert("⚠️ [안내] 네트워크 통신 오류 또는 서버 바인딩 문제로 서버 저장을 완료할 수 없습니다.\n\n작성하신 내역은 현재 브라우저에 우선 임시 저장되었습니다.");
+          alert("⚠️ [안내] 네트워크 오류로 서버에 업로드하지 못했습니다. 현재 브라우저에 우선 백업되었습니다.");
         }
       }
 
       isEditMode = false;
       document.getElementById("btn-edit-mode").textContent = "⚙️ 수정하기";
-      document.getElementById("btn-edit-mode").className = "px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-1.5 shadow-sm";
+      document.getElementById("btn-edit-mode").className = "px-4 py-2 rounded-lg text-sm font-semibold bg-[#1e1e10] hover:bg-black text-white transition-colors flex items-center gap-1.5 shadow-sm";
       renderPortfolios();
     }
 
-    // Toggle edit mode / authentication
+    // Admin password mode authentication
     const editBtn = document.getElementById("btn-edit-mode");
     const pwdModal = document.getElementById("password-modal");
     const pwdInput = document.getElementById("password-input");
 
     editBtn.addEventListener("click", () => {
       if (isEditMode) {
-        // Save
         savePortfolios();
       } else {
-        // Prompt password modal
         pwdInput.value = "";
         pwdModal.classList.remove("hidden");
         pwdInput.focus();
@@ -395,25 +556,18 @@
       }
     }
 
-    // Add portfolio card
+    // Portfolio Card add & delete operations
     function addPortfolioCard() {
       const newCard = {
         id: "card-" + Date.now(),
         logo: "",
         clientName: "",
         businessType: "",
-        salesTable: [
-          { period: "마케팅 진행 전", value: "", note: "" },
-          { period: "마케팅 진행 후", value: "", note: "" }
-        ],
-        marketingTable: [
-          { year: "1년 차", cost: "", roas: "" }
-        ],
+        roas: "",
+        channels: "",
         description: "",
-        optionType: "none", // 'none' or 'interior'
-        optionLogos: []
+        detailHtml: ""
       };
-      // Serialize DOM first so we don't lose current typing values
       serializePortfoliosFromDOM();
       portfolios.unshift(newCard);
       renderPortfolios();
@@ -427,7 +581,7 @@
       }
     }
 
-    // DOM Serialization
+    // Gathers editable values from card forms
     function serializePortfoliosFromDOM() {
       const cards = document.querySelectorAll(".portfolio-card");
       const updatedList = [];
@@ -436,99 +590,164 @@
         const id = card.dataset.id;
         const logo = card.querySelector(".logo-preview")?.getAttribute("src") || "";
         const clientName = card.querySelector(".client-name-input")?.value || card.querySelector(".client-name-text")?.textContent || "";
-        const businessType = card.querySelector(".business-type-input")?.value || card.querySelector(".business-type-text")?.textContent || "";
-        const description = card.querySelector(".description-input")?.value || card.querySelector(".description-text")?.textContent || "";
-        const optionType = card.querySelector(".option-type-select")?.value || card.dataset.optionType || "none";
-
-        // Sales Table
-        const salesRows = card.querySelectorAll(".sales-row");
-        const salesTable = [];
-        salesRows.forEach(row => {
-          const period = row.querySelector(".sales-period")?.value || row.querySelector(".sales-period")?.textContent || "";
-          const value = row.querySelector(".sales-value")?.value || row.querySelector(".sales-value")?.textContent || "";
-          const note = row.querySelector(".sales-note")?.value || row.querySelector(".sales-note")?.textContent || "";
-          salesTable.push({ period, value, note });
-        });
-
-        // Marketing Table
-        const mktRows = card.querySelectorAll(".mkt-row");
-        const marketingTable = [];
-        mktRows.forEach(row => {
-          const year = row.querySelector(".mkt-year")?.value || row.querySelector(".mkt-year")?.textContent || "";
-          const cost = row.querySelector(".mkt-cost")?.value || row.querySelector(".mkt-cost")?.textContent || "";
-          const roas = row.querySelector(".mkt-roas")?.value || row.querySelector(".mkt-roas")?.textContent || "";
-          marketingTable.push({ year, cost, roas });
-        });
-
-        // Option Logos
-        const optionGridItems = card.querySelectorAll(".option-grid-item");
-        const optionLogos = [];
-        optionGridItems.forEach(item => {
-          const optLogoSrc = item.querySelector(".option-logo-preview")?.getAttribute("src") || "";
-          const optPrice = item.querySelector(".option-price-input")?.value || item.querySelector(".option-price-text")?.textContent || "";
-          optionLogos.push({ logo: optLogoSrc, price: optPrice });
-        });
+        const businessType = card.querySelector(".business-type-input")?.value || card.dataset.businessType || "";
+        const roas = card.querySelector(".roas-input")?.value || "";
+        const channels = card.querySelector(".channels-input")?.value || "";
+        const description = card.querySelector(".description-input")?.value || "";
+        const detailHtml = card.querySelector(".detail-html-hidden")?.value || "";
 
         updatedList.push({
-          id, logo, clientName, businessType, salesTable, marketingTable, description, optionType, optionLogos
+          id, logo, clientName, businessType, roas, channels, description, detailHtml
         });
       });
 
       portfolios = updatedList;
     }
 
-    // Dynamic Row Manipulation
-    function addSalesRow(btn, cardId) {
-      const tbody = btn.closest(".sales-table-container").querySelector("tbody");
-      const tr = document.createElement("tr");
-      tr.className = "sales-row border-b border-gray-200 dark-mode:border-gray-700 bg-white dark-mode:bg-gray-800";
-      tr.innerHTML = `
-        <td class="p-3"><input type="text" class="sales-period w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" placeholder="예: 마케팅 진행 전"></td>
-        <td class="p-3"><input type="text" class="sales-value w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" placeholder="예: 월 2,000만 원"></td>
-        <td class="p-3 flex items-center gap-2">
-          <input type="text" class="sales-note w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" placeholder="비고">
-          <button onclick="this.closest('tr').remove();" class="text-red-500 hover:text-red-700 font-bold p-1 text-xs">➖</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    }
-
-    function addMktRow(btn, cardId) {
-      const tbody = btn.closest(".mkt-table-container").querySelector("tbody");
-      const tr = document.createElement("tr");
-      tr.className = "mkt-row border-b border-gray-200 dark-mode:border-gray-700 bg-white dark-mode:bg-gray-800";
-      tr.innerHTML = `
-        <td class="p-3"><input type="text" class="mkt-year w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" placeholder="예: 2년 차"></td>
-        <td class="p-3"><input type="text" class="mkt-cost w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" placeholder="예: 월 300만 원"></td>
-        <td class="p-3 flex items-center gap-2">
-          <input type="text" class="mkt-roas w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" placeholder="예: 800%">
-          <button onclick="this.closest('tr').remove();" class="text-red-500 hover:text-red-700 font-bold p-1 text-xs">➖</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    }
-
-    function addOptionItem(btn, cardId) {
-      const grid = btn.closest(".option-logos-container").querySelector(".option-logos-grid");
-      const itemIndex = grid.children.length;
-      const card = btn.closest(".portfolio-card");
-      const cardIdRaw = card.dataset.id;
+    // Renders visual prompt library cards or edit forms
+    function renderPortfolios() {
+      const grid = document.getElementById("portfolio-grid");
+      if (!grid) return;
+      grid.innerHTML = "";
       
-      const div = document.createElement("div");
-      div.className = "option-grid-item flex flex-col items-center p-3 bg-white dark-mode:bg-gray-750 border border-gray-200 dark-mode:border-gray-600 rounded-xl relative shadow-sm";
-      div.innerHTML = `
-        <button onclick="this.closest('.option-grid-item').remove();" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xs p-1">❌</button>
-        <div onclick="document.getElementById('opt-file-${cardIdRaw}-${itemIndex}').click();" class="w-16 h-16 border-2 border-dashed border-gray-300 dark-mode:border-gray-600 rounded-lg flex items-center justify-center cursor-pointer overflow-hidden bg-gray-50 dark-mode:bg-gray-800 hover:bg-gray-100 transition-colors">
-          <img id="opt-preview-${cardIdRaw}-${itemIndex}" class="option-logo-preview max-w-full max-h-full object-contain hidden" />
-          <span id="opt-plus-${cardIdRaw}-${itemIndex}" class="text-gray-400 font-bold text-lg">➕</span>
-        </div>
-        <input type="file" id="opt-file-${cardIdRaw}-${itemIndex}" accept="image/*" class="hidden" onchange="handleImageFile(this, 'opt-preview-${cardIdRaw}-${itemIndex}', 'opt-plus-${cardIdRaw}-${itemIndex}')" />
-        <input type="text" class="option-price-input mt-2 w-full text-center px-1 py-0.5 text-[11px] border rounded text-gray-800 dark-mode:bg-gray-750 dark-mode:border-gray-600 dark-mode:text-gray-100" placeholder="공사금액 (예: 8,000만 원)">
-      `;
-      grid.appendChild(div);
+      const countEl = document.getElementById("portfolio-count");
+      if (countEl) countEl.textContent = portfolios.length;
+      
+      renderCategoryTabs();
+      
+      if (isEditMode) {
+        const addCardBar = document.createElement("div");
+        addCardBar.className = "flex justify-center mb-4 col-span-full";
+        addCardBar.innerHTML = `
+          <button onclick="addPortfolioCard()" class="px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm shadow-md transition-all flex items-center gap-1.5">
+            ➕ 새 포트폴리오 카드 추가
+          </button>
+        `;
+        grid.appendChild(addCardBar);
+      }
+      
+      if (portfolios.length === 0) {
+        const emptyDiv = document.createElement("div");
+        emptyDiv.className = "col-span-full text-center py-20 bg-white border border-[#e5e2d9] rounded-2xl shadow-sm";
+        emptyDiv.innerHTML = `
+          <span class="text-gray-400 font-bold block mb-4 text-4xl">📁</span>
+          <p class="text-gray-500 font-bold">등록된 포트폴리오가 없습니다.</p>
+          ${!isEditMode ? '<p class="text-xs text-gray-400 mt-2">수정하기를 눌러 포트폴리오를 작성해 보세요.</p>' : ''}
+        `;
+        grid.appendChild(emptyDiv);
+        return;
+      }
+      
+      portfolios.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.dataset.id = item.id;
+        card.dataset.businessType = item.businessType || "";
+        
+        if (isEditMode) {
+          card.className = "portfolio-card bg-white border border-[#e5e2d9] rounded-2xl p-6 space-y-4 relative shadow-sm transition-all";
+          card.innerHTML = `
+            <!-- Delete & Drag Handle -->
+            <div class="absolute top-4 right-4 flex items-center gap-2 z-10">
+              <div class="drag-handle cursor-move px-2 py-1.5 border border-[#e5e2d9] rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-500 font-bold text-[10px] flex items-center gap-1 select-none">
+                ⠿ 이동
+              </div>
+              <button onclick="deletePortfolioCard('${item.id}')" class="text-red-500 hover:text-red-700 font-bold text-[10px] p-1.5 border border-red-200 rounded-lg hover:bg-red-55 transition-colors">
+                ❌ 삭제
+              </button>
+            </div>
+
+            <!-- Client & Logo Upload Row -->
+            <div class="flex items-center gap-3 pr-20 pt-2">
+              <div onclick="document.getElementById('file-${item.id}').click();" class="w-14 h-14 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden bg-gray-50 hover:bg-gray-100 transition-colors relative flex-shrink-0">
+                <img id="preview-${item.id}" src="${item.logo || ''}" class="logo-preview max-w-full max-h-full object-contain ${item.logo ? '' : 'hidden'}" />
+                <span id="plus-${item.id}" class="text-gray-400 font-bold text-lg ${item.logo ? 'hidden' : ''}">➕</span>
+              </div>
+              <input type="file" id="file-${item.id}" accept="image/*" class="hidden" onchange="handleImageFile(this, 'preview-${item.id}', 'plus-${item.id}')" />
+              <div class="flex-1 space-y-1.5">
+                <input type="text" class="client-name-input w-full px-2.5 py-1 border border-gray-200 rounded-lg text-xs font-bold text-[#1e1e10]" placeholder="업체명 (예: 서면 A치과)" value="${item.clientName || ''}">
+                <input type="text" class="business-type-input w-full px-2.5 py-1 border border-gray-200 rounded-lg text-[10px] text-gray-500 font-semibold" placeholder="분류/업종 (예: 인테리어)" value="${item.businessType || ''}">
+              </div>
+            </div>
+
+            <!-- ROAS & Channels Grid -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[9px] font-bold text-gray-500 mb-1">ROAS 수치</label>
+                <input type="text" class="roas-input w-full px-2.5 py-1 border rounded-lg text-xs font-bold text-amber-600 bg-[#fffbeb] border-[#fef3c7]" placeholder="예: 800%" value="${item.roas || ''}">
+              </div>
+              <div>
+                <label class="block text-[9px] font-bold text-gray-500 mb-1">진행 마케팅 매체</label>
+                <input type="text" class="channels-input w-full px-2.5 py-1 border rounded-lg text-xs font-bold text-green-600 bg-[#f0fdf4] border-[#dcfce7]" placeholder="예: 블로그, 파워링크" value="${item.channels || ''}">
+              </div>
+            </div>
+
+            <!-- Excerpt / Simple Info -->
+            <div>
+              <label class="block text-[9px] font-bold text-gray-500 mb-1">핵심 요약 정보</label>
+              <textarea class="description-input w-full px-3 py-2 border border-gray-250 rounded-lg text-xs text-gray-700 resize-none font-medium leading-relaxed" rows="2" placeholder="간단한 핵심 성과를 적어주세요.">${item.description || ''}</textarea>
+            </div>
+
+            <!-- Hidden detailed HTML field -->
+            <textarea class="detail-html-hidden hidden">${item.detailHtml || ''}</textarea>
+
+            <!-- Edit Detail Content Trigger Button -->
+            <div class="pt-2">
+              <button onclick="openDetailEditor('${item.id}')" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5">
+                📝 상세 성과 꾸미기 (게시글 본문)
+              </button>
+            </div>
+          `;
+        } else {
+          card.className = "portfolio-card bg-white border border-[#e5e2d9] hover:border-amber-500 hover:shadow-md rounded-2xl p-6 transition-all cursor-pointer flex flex-col justify-between shadow-sm";
+          card.setAttribute("onclick", `openDetailModal('${item.id}')`);
+          card.innerHTML = `
+            <div class="space-y-4">
+              <!-- Header: Logo & Name -->
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl overflow-hidden bg-gray-50 border border-gray-150 flex items-center justify-center p-1 flex-shrink-0">
+                  ${item.logo ? `<img src="${item.logo}" class="max-w-full max-h-full object-contain" />` : `<span class="text-[10px] text-gray-400 font-bold">로고</span>`}
+                </div>
+                <div>
+                  <h3 class="client-name-text font-bold text-[#1e1e10] text-base leading-tight line-clamp-1">${item.clientName || '업체명 미정'}</h3>
+                  <span class="text-xs text-gray-500 font-medium">${item.businessType || '미지정'}</span>
+                </div>
+              </div>
+              
+              <!-- Badges / Stats -->
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                <div class="bg-[#fffbeb] border border-[#fef3c7] rounded-lg p-2.5 text-center">
+                  <div class="text-[9px] text-amber-700 font-bold uppercase tracking-wider">ROAS 성과</div>
+                  <div class="roas-text text-xs font-black text-amber-600 mt-0.5 line-clamp-1">${item.roas || '-'}</div>
+                </div>
+                <div class="bg-[#f0fdf4] border border-[#dcfce7] rounded-lg p-2.5 text-center">
+                  <div class="text-[9px] text-green-700 font-bold uppercase tracking-wider">마케팅 매체</div>
+                  <div class="channels-text text-xs font-black text-green-600 mt-0.5 line-clamp-1">${item.channels || '-'}</div>
+                </div>
+              </div>
+              
+              <!-- Short Excerpt -->
+              <p class="description-text text-xs text-gray-650 font-medium leading-relaxed line-clamp-3">
+                ${item.description || '요약 설명이 없습니다.'}
+              </p>
+
+              <!-- Hidden detailed HTML field (needed for search matching in view mode) -->
+              <textarea class="detail-html-hidden hidden">${item.detailHtml || ''}</textarea>
+            </div>
+            
+            <div class="flex items-center justify-between border-t border-[#e5e2d9] pt-4 mt-4 text-[10px] font-bold text-gray-400">
+              <span>상세 성과 보기 ➔</span>
+              <span class="text-amber-600">#${index + 1}</span>
+            </div>
+          `;
+        }
+        
+        grid.appendChild(card);
+      });
+      
+      initSortable();
     }
 
-    // Handles image upload -> compresses to max 400px JPEG -> base64
+    // Handles logo compression
     function handleImageFile(input, previewId, plusId) {
       const file = input.files[0];
       if (!file) return;
@@ -540,8 +759,8 @@
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
 
-          const MAX_WIDTH = 400;
-          const MAX_HEIGHT = 400;
+          const MAX_WIDTH = 300;
+          const MAX_HEIGHT = 300;
           let width = img.width;
           let height = img.height;
 
@@ -561,7 +780,6 @@
           canvas.height = height;
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Compress to low-size JPEG
           const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
 
           const preview = document.getElementById(previewId);
@@ -579,294 +797,10 @@
       reader.readAsDataURL(file);
     }
 
-    function toggleOptionType(select, cardId) {
-      const card = select.closest(".portfolio-card");
-      card.dataset.optionType = select.value;
-      const optContainer = card.querySelector(".option-logos-container");
-      if (select.value === "interior") {
-        optContainer.classList.remove("hidden");
-      } else {
-        optContainer.classList.add("hidden");
-      }
-    }
-
-    // Render Portfolio Cards
-    function renderPortfolios() {
-      const container = document.getElementById("portfolio-container");
-      container.innerHTML = "";
-
-      if (isEditMode) {
-        // Add card button at the top in Edit Mode
-        const addCardBar = document.createElement("div");
-        addCardBar.className = "flex justify-center mb-6";
-        addCardBar.innerHTML = `
-          <button onclick="addPortfolioCard()" class="px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-md transition-all flex items-center gap-1.5">
-            ➕ 새 포트폴리오 카드 추가
-          </button>
-        `;
-        container.appendChild(addCardBar);
-      }
-
-      if (portfolios.length === 0) {
-        container.innerHTML += `
-          <div class="text-center py-20 bg-white dark-mode:bg-gray-800 border border-gray-250 dark-mode:border-gray-700 rounded-2xl shadow-sm">
-            <span class="text-gray-400 font-bold block mb-4 text-4xl">📁</span>
-            <p class="text-gray-500 dark-mode:text-gray-300 font-bold">등록된 포트폴리오가 없습니다.</p>
-            ${!isEditMode ? '<p class="text-xs text-gray-400 mt-2">수정하기를 눌러 포트폴리오를 작성해 보세요.</p>' : ''}
-          </div>
-        `;
-        return;
-      }
-
-      portfolios.forEach((item) => {
-        const card = document.createElement("div");
-        card.className = "portfolio-card bg-white dark-mode:bg-gray-800 p-6 md:p-8 rounded-2xl border border-gray-200 dark-mode:border-gray-750 shadow-sm relative transition-all w-full";
-        card.dataset.id = item.id;
-        card.dataset.optionType = item.optionType || "none";
-
-        // Header controls (Delete Card & Drag Handle) in Edit Mode
-        let editControlsHTML = "";
-        if (isEditMode) {
-          editControlsHTML = `
-            <div class="absolute top-4 right-4 flex items-center gap-2 z-10">
-              <div class="drag-handle cursor-move px-2.5 py-1.5 border border-gray-200 dark-mode:border-gray-700 rounded-lg bg-gray-50 hover:bg-gray-100 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-650 text-gray-500 dark-mode:text-gray-400 font-bold text-xs select-none flex items-center gap-1">
-                ⠿ 이동
-              </div>
-              <button onclick="deletePortfolioCard('${item.id}')" class="text-red-500 hover:text-red-700 font-bold text-xs p-1.5 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
-                ❌ 삭제
-              </button>
-            </div>
-          `;
-        }
-
-        // 1. Header (Logo & Name/Type)
-        let headerHTML = "";
-        if (isEditMode) {
-          headerHTML = `
-            <div class="flex flex-col sm:flex-row sm:items-center gap-4 border-b border-gray-150 dark-mode:border-gray-700 pb-6 mb-6 pr-24">
-              <!-- Logo Upload -->
-              <div onclick="document.getElementById('file-${item.id}').click();" class="w-20 h-20 border-2 border-dashed border-gray-300 dark-mode:border-gray-600 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden bg-gray-50 dark-mode:bg-gray-750 hover:bg-gray-100 transition-colors relative">
-                <img id="preview-${item.id}" src="${item.logo || ''}" class="logo-preview max-w-full max-h-full object-contain ${item.logo ? '' : 'hidden'}" />
-                <span id="plus-${item.id}" class="text-gray-400 font-bold text-xl ${item.logo ? 'hidden' : ''}">➕</span>
-              </div>
-              <input type="file" id="file-${item.id}" accept="image/*" class="hidden" onchange="handleImageFile(this, 'preview-${item.id}', 'plus-${item.id}')" />
-
-              <div class="space-y-2 flex-1">
-                <div>
-                  <label class="block text-[10px] font-bold text-gray-500 dark-mode:text-gray-450 uppercase mb-1">업체명 (Client Name)</label>
-                  <input type="text" class="client-name-input w-full px-3 py-1.5 border rounded-lg dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100 font-semibold" placeholder="예: 인테리어 전문 A사" value="${item.clientName || ''}">
-                </div>
-                <div>
-                  <label class="block text-[10px] font-bold text-gray-500 dark-mode:text-gray-450 uppercase mb-1">업종 (Industry Type)</label>
-                  <input type="text" class="business-type-input w-full px-3 py-1.5 border rounded-lg dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" placeholder="예: 인테리어" value="${item.businessType || ''}">
-                </div>
-              </div>
-            </div>
-          `;
-        } else {
-          headerHTML = `
-            <div class="flex items-center gap-4 border-b border-gray-150 dark-mode:border-gray-700 pb-6 mb-6">
-              <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-50 dark-mode:bg-gray-700 flex items-center justify-center border border-gray-100 dark-mode:border-gray-650">
-                ${item.logo ? `<img src="${item.logo}" class="logo-preview max-w-full max-h-full object-contain" />` : `<span class="text-xs text-gray-400 font-bold">로고</span>`}
-              </div>
-              <div>
-                <h3 class="client-name-text text-xl font-bold text-gray-900 dark-mode:text-white">${item.clientName || '업체명 미정'}</h3>
-                <span class="business-type-text text-sm text-gray-500 dark-mode:text-gray-400 font-medium">${item.businessType || '업종 미정'}</span>
-              </div>
-            </div>
-          `;
-        }
-
-        // 2. Tables Grid (Sales and Marketing Cost & ROAS)
-        let tablesHTML = "";
-        const salesRowsHTML = item.salesTable.map((row) => {
-          if (isEditMode) {
-            return `
-              <tr class="sales-row border-b border-gray-100 dark-mode:border-gray-750 bg-white dark-mode:bg-gray-800">
-                <td class="p-3"><input type="text" class="sales-period w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" value="${row.period || ''}"></td>
-                <td class="p-3"><input type="text" class="sales-value w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" value="${row.value || ''}"></td>
-                <td class="p-3 flex items-center gap-2">
-                  <input type="text" class="sales-note w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" value="${row.note || ''}">
-                  <button onclick="this.closest('tr').remove();" class="text-red-500 hover:text-red-700 font-bold p-1 text-xs">➖</button>
-                </td>
-              </tr>
-            `;
-          } else {
-            return `
-              <tr class="sales-row border-b border-gray-100 dark-mode:border-gray-750">
-                <td class="sales-period p-3 text-sm font-semibold text-gray-700 dark-mode:text-gray-300">${row.period || ''}</td>
-                <td class="sales-value p-3 text-sm text-gray-900 dark-mode:text-white font-bold text-center">${row.value || ''}</td>
-                <td class="sales-note p-3 text-sm text-gray-500 dark-mode:text-gray-400">${row.note || ''}</td>
-              </tr>
-            `;
-          }
-        }).join("");
-
-        const mktRowsHTML = item.marketingTable.map((row) => {
-          if (isEditMode) {
-            return `
-              <tr class="mkt-row border-b border-gray-100 dark-mode:border-gray-750 bg-white dark-mode:bg-gray-800">
-                <td class="p-3"><input type="text" class="mkt-year w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" value="${row.year || ''}"></td>
-                <td class="p-3"><input type="text" class="mkt-cost w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" value="${row.cost || ''}"></td>
-                <td class="p-3 flex items-center gap-2">
-                  <input type="text" class="mkt-roas w-full px-2 py-1 text-sm border rounded dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100" value="${row.roas || ''}">
-                  <button onclick="this.closest('tr').remove();" class="text-red-500 hover:text-red-700 font-bold p-1 text-xs">➖</button>
-                </td>
-              </tr>
-            `;
-          } else {
-            return `
-              <tr class="mkt-row border-b border-gray-100 dark-mode:border-gray-750">
-                <td class="mkt-year p-3 text-sm font-semibold text-gray-700 dark-mode:text-gray-300">${row.year || ''}</td>
-                <td class="mkt-cost p-3 text-sm text-gray-900 dark-mode:text-white text-center">${row.cost || ''}</td>
-                <td class="mkt-roas p-3 text-sm text-blue-600 dark-mode:text-blue-400 font-bold text-center">${row.roas || ''}</td>
-              </tr>
-            `;
-          }
-        }).join("");
-
-        tablesHTML = `
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Sales Increase Table -->
-            <div class="sales-table-container border border-gray-150 dark-mode:border-gray-700 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
-              <div>
-                <div class="bg-gray-50 dark-mode:bg-gray-750 px-4 py-2 border-b border-gray-150 dark-mode:border-gray-700 flex justify-between items-center">
-                  <h4 class="text-xs font-bold text-orange-700 dark-mode:text-orange-400 uppercase tracking-wide">📈 매출 상승 지표</h4>
-                  ${isEditMode ? `<button onclick="addSalesRow(this, '${item.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs">➕ 추가</button>` : ''}
-                </div>
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-[10px] font-bold text-gray-400 dark-mode:text-gray-450 uppercase tracking-wider border-b border-gray-150 dark-mode:border-gray-700">
-                      <th class="p-3 w-1/3">구분</th>
-                      <th class="p-3 w-1/3 text-center">매출액</th>
-                      <th class="p-3 w-1/3">상승률 / 비고</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${salesRowsHTML}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Marketing Spend & ROAS Table -->
-            <div class="mkt-table-container border border-gray-150 dark-mode:border-gray-700 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
-              <div>
-                <div class="bg-gray-50 dark-mode:bg-gray-750 px-4 py-2 border-b border-gray-150 dark-mode:border-gray-700 flex justify-between items-center">
-                  <h4 class="text-xs font-bold text-blue-700 dark-mode:text-blue-400 uppercase tracking-wide">💸 마케팅 비용 및 ROAS 성과</h4>
-                  ${isEditMode ? `<button onclick="addMktRow(this, '${item.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs">➕ 추가</button>` : ''}
-                </div>
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-[10px] font-bold text-gray-400 dark-mode:text-gray-450 uppercase tracking-wider border-b border-gray-150 dark-mode:border-gray-700">
-                      <th class="p-3 w-1/3">연차</th>
-                      <th class="p-3 w-1/3 text-center">마케팅 비용</th>
-                      <th class="p-3 w-1/3 text-center">ROAS 성과</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${mktRowsHTML}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        `;
-
-        // 3. Description (Characteristics / Process)
-        let descHTML = "";
-        if (isEditMode) {
-          descHTML = `
-            <div class="mb-6">
-              <label class="block text-xs font-bold text-gray-500 dark-mode:text-gray-450 uppercase mb-2">💡 업종 특징 및 전략 실행 과정</label>
-              <textarea class="description-input w-full px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-750 text-gray-800 dark-mode:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="예: 인테리어 업종 특성상 30-50대 실수요층을 공략하기 위해 고품질 시공 포트폴리오 기반의 블로그 마케팅과 지역 기반 네이버 파워링크 검색 광고를 동시에 세팅하였습니다.">${item.description || ''}</textarea>
-            </div>
-          `;
-        } else {
-          descHTML = `
-            <div class="mb-6 bg-slate-50 dark-mode:bg-gray-900/40 p-5 rounded-xl border border-gray-100 dark-mode:border-gray-750">
-              <h4 class="text-xs font-bold text-gray-400 dark-mode:text-gray-450 uppercase tracking-wider mb-2">💡 업종 특징 및 전략 실행 과정</h4>
-              <p class="description-text text-sm text-gray-700 dark-mode:text-gray-300 leading-relaxed whitespace-pre-line">${item.description || '작성된 내용이 없습니다.'}</p>
-            </div>
-          `;
-        }
-
-        // 4. Client Option logos Grid (e.g. Interior items done)
-        let optionControlHTML = "";
-        if (isEditMode) {
-          optionControlHTML = `
-            <div class="flex items-center justify-between border-t border-gray-150 dark-mode:border-gray-700 pt-4 mb-4">
-              <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-gray-500 dark-mode:text-gray-450 uppercase">업종별 하단 추가 옵션:</label>
-                <select onchange="toggleOptionType(this, '${item.id}')" class="option-type-select px-3 py-1.5 text-xs border rounded-lg dark-mode:bg-gray-750 dark-mode:border-gray-600 text-gray-800 dark-mode:text-gray-100 focus:outline-none">
-                  <option value="none" ${item.optionType === 'none' ? 'selected' : ''}>없음</option>
-                  <option value="interior" ${item.optionType === 'interior' ? 'selected' : ''}>인테리어 (서브 브랜드 로고 + 공사비)</option>
-                </select>
-              </div>
-              <button onclick="addOptionItem(this, '${item.id}')" class="btn-add-option-item text-blue-600 hover:text-blue-800 font-bold text-xs ${item.optionType === 'interior' ? '' : 'hidden'}">➕ 업체 추가</button>
-            </div>
-          `;
-        }
-
-        let optionLogosHTML = "";
-        const isHidden = (item.optionType || "none") !== "interior" ? "hidden" : "";
-        
-        let gridItemsHTML = "";
-        if (item.optionLogos && item.optionLogos.length > 0) {
-          gridItemsHTML = item.optionLogos.map((opt, idx) => {
-            if (isEditMode) {
-              return `
-                <div class="option-grid-item flex flex-col items-center p-3 bg-white dark-mode:bg-gray-750 border border-gray-200 dark-mode:border-gray-600 rounded-xl relative shadow-sm">
-                  <button onclick="this.closest('.option-grid-item').remove();" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xs p-1">❌</button>
-                  <div onclick="document.getElementById('opt-file-${item.id}-${idx}').click();" class="w-16 h-16 border-2 border-dashed border-gray-300 dark-mode:border-gray-600 rounded-lg flex items-center justify-center cursor-pointer overflow-hidden bg-gray-50 dark-mode:bg-gray-800 hover:bg-gray-100 transition-colors">
-                    <img id="opt-preview-${item.id}-${idx}" src="${opt.logo || ''}" class="option-logo-preview max-w-full max-h-full object-contain ${opt.logo ? '' : 'hidden'}" />
-                    <span id="opt-plus-${item.id}-${idx}" class="text-gray-400 font-bold text-lg ${opt.logo ? 'hidden' : ''}">➕</span>
-                  </div>
-                  <input type="file" id="opt-file-${item.id}-${idx}" accept="image/*" class="hidden" onchange="handleImageFile(this, 'opt-preview-${item.id}-${idx}', 'opt-plus-${item.id}-${idx}')" />
-                  <input type="text" class="option-price-input mt-2 w-full text-center px-1 py-0.5 text-[11px] border rounded text-gray-800 dark-mode:bg-gray-750 dark-mode:border-gray-600 dark-mode:text-gray-100" placeholder="공사금액 (예: 8,000만 원)" value="${opt.price || ''}">
-                </div>
-              `;
-            } else {
-              return `
-                <div class="flex flex-col items-center p-3 bg-slate-50/50 dark-mode:bg-gray-800/50 border border-gray-100 dark-mode:border-gray-700/60 rounded-xl shadow-sm">
-                  <div class="w-16 h-16 rounded-lg overflow-hidden bg-white dark-mode:bg-gray-700 flex items-center justify-center border border-gray-100 dark-mode:border-gray-650 p-1">
-                    ${opt.logo ? `<img src="${opt.logo}" class="option-logo-preview max-w-full max-h-full object-contain" />` : `<span class="text-[10px] text-gray-400 font-bold">로고</span>`}
-                  </div>
-                  <span class="option-price-text mt-2 text-xs font-bold text-gray-600 dark-mode:text-gray-300 text-center">${opt.price || '금액 미기재'}</span>
-                </div>
-              `;
-            }
-          }).join("");
-        }
-
-        optionLogosHTML = `
-          <div class="option-logos-container ${isHidden}">
-            <h4 class="text-xs font-bold text-gray-400 dark-mode:text-gray-450 uppercase tracking-wider mb-3">🛠️ 진행 시공사 사례 및 대략적인 견적액</h4>
-            <div class="option-logos-grid grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-              ${gridItemsHTML}
-            </div>
-          </div>
-        `;
-
-        card.innerHTML = `
-          ${editControlsHTML}
-          ${headerHTML}
-          ${tablesHTML}
-          ${descHTML}
-          ${isEditMode ? optionControlHTML : ''}
-          ${optionLogosHTML}
-        `;
-
-        container.appendChild(card);
-      });
-
-      // Initialize or update SortableJS for drag-and-drop
-      initSortable();
-    }
-
+    // Drag-and-drop sortable instance
     let sortableInstance = null;
     function initSortable() {
-      const container = document.getElementById("portfolio-container");
+      const container = document.getElementById("portfolio-grid");
       if (container && !sortableInstance) {
         sortableInstance = new Sortable(container, {
           animation: 150,
@@ -882,9 +816,182 @@
       }
     }
 
-    // App Initialization
+    // Search query matching (matches across all texts including hidden detail post body)
+    document.getElementById("portfolio-search").addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const cards = document.querySelectorAll(".portfolio-card");
+      cards.forEach(card => {
+        if (isEditMode) {
+          card.classList.remove("hidden");
+          return;
+        }
+        const titleText = card.querySelector(".client-name-text")?.textContent.toLowerCase() || "";
+        const descText = card.querySelector(".description-text")?.textContent.toLowerCase() || "";
+        const roasText = card.querySelector(".roas-text")?.textContent.toLowerCase() || "";
+        const channelsText = card.querySelector(".channels-text")?.textContent.toLowerCase() || "";
+        const detailText = card.querySelector(".detail-html-hidden")?.value.toLowerCase() || "";
+        
+        if (titleText.includes(q) || descText.includes(q) || roasText.includes(q) || channelsText.includes(q) || detailText.includes(q)) {
+          card.classList.remove("hidden");
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+    });
+
+    // Detailed View / Editor modals implementation
+    let activeEditorCardId = null;
+
+    function openDetailModal(id) {
+      if (isEditMode) return;
+      
+      const item = portfolios.find(p => p.id === id);
+      if (!item) return;
+      
+      activeEditorCardId = id;
+      
+      document.getElementById("modal-title").textContent = `${item.clientName || '업체명 미정'} - 상세 성과 리포트`;
+      
+      // Load Stats
+      document.getElementById("modal-core-row").classList.remove("hidden");
+      document.getElementById("modal-roas").textContent = item.roas || "-";
+      document.getElementById("modal-channels").textContent = item.channels || "-";
+      
+      // Load Content
+      const viewContent = document.getElementById("modal-view-content");
+      viewContent.classList.remove("hidden");
+      viewContent.innerHTML = item.detailHtml || `
+        <div class="text-center py-20 text-gray-400 font-bold">
+          <p>등록된 상세 성과가 없습니다.</p>
+        </div>
+      `;
+      
+      // UI Settings
+      document.getElementById("modal-edit-content").classList.add("hidden");
+      document.getElementById("modal-btn-save").classList.add("hidden");
+      document.getElementById("modal-btn-cancel").textContent = "닫기";
+      
+      document.getElementById("detail-modal").classList.remove("hidden");
+    }
+
+    function openDetailEditor(id) {
+      const item = portfolios.find(p => p.id === id);
+      if (!item) return;
+      
+      activeEditorCardId = id;
+      
+      document.getElementById("modal-title").textContent = `${item.clientName || '업체명 미정'} - 상세 글 작성`;
+      
+      document.getElementById("modal-core-row").classList.add("hidden");
+      document.getElementById("modal-view-content").classList.add("hidden");
+      
+      document.getElementById("modal-edit-content").classList.remove("hidden");
+      document.getElementById("modal-btn-save").classList.remove("hidden");
+      document.getElementById("modal-btn-cancel").textContent = "취소";
+      
+      document.getElementById("rich-editor-content").innerHTML = item.detailHtml || "";
+      
+      document.getElementById("detail-modal").classList.remove("hidden");
+    }
+
+    function saveEditorContent() {
+      if (!activeEditorCardId) return;
+      
+      const richContent = document.getElementById("rich-editor-content").innerHTML;
+      
+      const cardDom = document.querySelector(`.portfolio-card[data-id="${activeEditorCardId}"]`);
+      if (cardDom) {
+        cardDom.querySelector(".detail-html-hidden").value = richContent;
+      }
+      
+      const item = portfolios.find(p => p.id === activeEditorCardId);
+      if (item) {
+        item.detailHtml = richContent;
+      }
+      
+      closeDetailModal();
+      alert("상세 글 내용이 임시 저장되었습니다.\n(전체 서버 업로드를 완료하려면 화면 상단의 [저장 완료] 버튼을 꼭 눌러주세요!)");
+    }
+
+    function closeDetailModal() {
+      document.getElementById("detail-modal").classList.add("hidden");
+      activeEditorCardId = null;
+    }
+
+    // Rich Text WYSIWYG commands
+    function formatDoc(cmd, value = null) {
+      document.execCommand(cmd, false, value);
+      document.getElementById("rich-editor-content").focus();
+    }
+
+    // Inserts image into editor at selection point (converts local image file to base64 canvas)
+    function handleEditorImageFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          const MAX_WIDTH = 800; // body stats image width
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          const imgHtml = `<img src="${compressedDataUrl}" alt="통계 이미지" class="my-4 max-w-full rounded-xl shadow-sm block border border-gray-150" />`;
+          
+          document.getElementById("rich-editor-content").focus();
+          insertHtmlAtCursor(imgHtml);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      input.value = "";
+    }
+
+    // Standard helper to insert DOM elements at selection cursor
+    function insertHtmlAtCursor(html) {
+      let sel, range;
+      if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+          range = sel.getRangeAt(0);
+          range.deleteContents();
+          
+          const el = document.createElement("div");
+          el.innerHTML = html;
+          const frag = document.createDocumentFragment();
+          let node, lastNode;
+          while ((node = el.firstChild)) {
+            lastNode = frag.appendChild(node);
+          }
+          range.insertNode(frag);
+          
+          if (lastNode) {
+            range = range.cloneRange();
+            range.setStartAfter(lastNode);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      }
+    }
+
+    // App Startup
     window.addEventListener("load", () => {
-      initTheme();
       updateClock();
       setInterval(updateClock, 1000);
       loadVisitorIP();
