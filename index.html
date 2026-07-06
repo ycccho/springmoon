@@ -136,7 +136,7 @@
       { id: "backlink-check", name: "9.백링크검사", protected: true },
       { id: "keyword-screenshot", name: "9.키워드검색스샷", protected: true },
       { id: "blog-post-screenshot", name: "9.블로그게시글스샷", protected: true },
-      { id: "ad-dashboard", name: "9.파워링크 분석", protected: true },
+      { id: "ad-dashboard", name: "6.검색광고 통계수집", protected: true },
       { id: "daily-report", name: "9.일일보고서 작성", protected: false, hidden: true },
       { id: "about", name: "소개", protected: false }
     ];
@@ -247,7 +247,7 @@
         "backlink-check": "9.백링크검사",
         "keyword-screenshot": "9.키워드검색스샷",
         "blog-post-screenshot": "9.블로그게시글스샷",
-        "ad-dashboard": "9.파워링크 분석",
+        "ad-dashboard": "6.검색광고 통계수집",
         "daily-report": "9.일일보고서 작성",
         "about": "소개"
       };
@@ -7418,76 +7418,72 @@
           
           addLog("키워드 명칭 매핑 성공.");
           
-          // Build Sheet 1: Daily Summary
-          const summaryGroup = {};
-          for (const r of filteredAdRows) {
-            const key = `${r.date}_${r.product}_${r.device}`;
-            if (!summaryGroup[key]) {
-              summaryGroup[key] = {
-                "날짜": r.date,
-                "광고 상품": r.product,
-                "기기": r.device,
-                "노출수": 0,
-                "클릭수": 0,
-                "총 비용": 0
-              };
+          // Helper to add summary rows (PC Total, Mobile Total, Grand Total) at the bottom
+          function addSummaryRows(dataList, labelKey) {
+            if (!dataList || dataList.length === 0) return;
+            
+            let pcImp = 0, pcClicks = 0, pcCost = 0;
+            let mobImp = 0, mobClicks = 0, mobCost = 0;
+            
+            for (const r of dataList) {
+              if (r["기기"] === "PC") {
+                pcImp += r["노출수"] || 0;
+                pcClicks += r["클릭수"] || 0;
+                pcCost += r["총 비용 (원)"] || 0;
+              } else if (r["기기"] === "모바일") {
+                mobImp += r["노출수"] || 0;
+                mobClicks += r["클릭수"] || 0;
+                mobCost += r["총 비용 (원)"] || 0;
+              }
             }
-            summaryGroup[key]["노출수"] += r.imp;
-            summaryGroup[key]["클릭수"] += r.clicks;
-            summaryGroup[key]["총 비용"] += r.cost;
-          }
-          
-          const sheet1Data = Object.values(summaryGroup).map(row => {
-            const ctr = row["노출수"] > 0 ? (row["클릭수"] / row["노출수"] * 100) : 0;
-            const cpc = row["클릭수"] > 0 ? (row["총 비용"] / row["클릭수"]) : 0;
-            return {
-              "날짜": row["날짜"],
-              "광고 상품": row["광고 상품"],
-              "기기": row["기기"],
-              "노출수": row["노출수"],
-              "클릭수": row["클릭수"],
-              "클릭률 (CTR %)": parseFloat(ctr.toFixed(2)),
-              "총 비용 (원)": row["총 비용"],
-              "평균 CPC (원)": Math.round(cpc)
+            
+            const totalImp = pcImp + mobImp;
+            const totalClicks = pcClicks + mobClicks;
+            const totalCost = pcCost + mobCost;
+            
+            const pcCtr = pcImp > 0 ? (pcClicks / pcImp * 100) : 0;
+            const pcCpc = pcClicks > 0 ? (pcCost / pcClicks) : 0;
+            
+            const mobCtr = mobImp > 0 ? (mobClicks / mobImp * 100) : 0;
+            const mobCpc = mobClicks > 0 ? (mobCost / mobClicks) : 0;
+            
+            const totalCtr = totalImp > 0 ? (totalClicks / totalImp * 100) : 0;
+            const totalCpc = totalClicks > 0 ? (totalCost / totalClicks) : 0;
+            
+            const template = dataList[0] || {};
+            const createEmptyRow = (label, device, imp, clk, ctr, cost, cpc) => {
+              const row = {};
+              Object.keys(template).forEach(k => {
+                row[k] = "";
+              });
+              row[labelKey] = label;
+              row["기기"] = device;
+              row["노출수"] = imp;
+              row["클릭수"] = clk;
+              row["클릭률 (CTR %)"] = parseFloat(ctr.toFixed(2));
+              row["총 비용 (원)"] = cost;
+              row["평균 CPC (원)"] = Math.round(cpc);
+              return row;
             };
-          });
-          // Group/Classify: sort by Product, Date desc, Device
-          sheet1Data.sort((a, b) => a["광고 상품"].localeCompare(b["광고 상품"]) || b["날짜"].localeCompare(a["날짜"]) || a["기기"].localeCompare(b["기기"]));
+            
+            dataList.push(createEmptyRow("PC 합계", "PC", pcImp, pcClicks, pcCtr, pcCost, pcCpc));
+            dataList.push(createEmptyRow("모바일 합계", "모바일", mobImp, mobClicks, mobCtr, mobCost, mobCpc));
+            dataList.push(createEmptyRow("전체 총합계", "전체", totalImp, totalClicks, totalCtr, totalCost, totalCpc));
+          }
+
+          // Build Sheet 1: 파워링크 성과
+          const sheet1Data = [];
           
-          // Build Sheet 2: Power Content Performance (Only Power Content, clicks > 0)
-          const sheet2Data = filteredAdRows
-            .filter(r => r.product === "파워컨텐츠" && r.clicks > 0)
-            .map(r => {
-              const ctr = r.imp > 0 ? (r.clicks / r.imp * 100) : 0;
-              const cpc = r.clicks > 0 ? (r.cost / r.clicks) : 0;
-              return {
-                "캠페인": r.campaign,
-                "광고그룹": r.adgroup,
-                "키워드/소재": r.keyword || r.creative || "소재없음",
-                "기기": r.device,
-                "노출수": r.imp,
-                "클릭수": r.clicks,
-                "클릭률 (CTR %)": parseFloat(ctr.toFixed(2)),
-                "총 비용 (원)": r.cost,
-                "평균 CPC (원)": Math.round(cpc)
-              };
-            });
-          sheet2Data.sort((a, b) => b["총 비용 (원)"] - a["총 비용 (원)"]);
-          
-          // Build Sheet 3: Merged Keywords & User Search Queries Detail (clicks > 0)
-          const sheet3Data = [];
-          
-          // 3.1. Add keyword rows
+          // 1.1. Add keyword detail rows
           for (const r of filteredAdRows) {
-            if (r.keyword && r.clicks > 0) {
+            if (r.product === "파워링크" && r.clicks > 0) {
               const ctr = r.imp > 0 ? (r.clicks / r.imp * 100) : 0;
               const cpc = r.clicks > 0 ? (r.cost / r.clicks) : 0;
-              sheet3Data.push({
+              sheet1Data.push({
                 "날짜": r.date,
-                "광고 상품": r.product,
                 "캠페인": r.campaign,
                 "광고그룹": r.adgroup,
-                "등록 키워드": r.keyword,
+                "등록 키워드": r.keyword || "-",
                 "실제 검색어": "등록키워드 직접노출",
                 "기기": r.device,
                 "노출수": r.imp,
@@ -7499,7 +7495,7 @@
             }
           }
           
-          // 3.2. Add search query rows (if checked)
+          // 1.2. Add search query detail rows (if checked)
           if (includeQuery) {
             for (const r of expReportRows) {
               if (r.length < 10) continue;
@@ -7525,14 +7521,14 @@
               else if (c_type === "PLACE") productName = "플레이스광고";
               else if (c_type === "POWER_CONTENTS") productName = "파워컨텐츠";
               
-              if (!allowedProducts.includes(productName)) continue;
+              if (productName !== "파워링크") continue;
+              if (!allowedProducts.includes("파워링크")) continue;
               
               const ctr = imp > 0 ? (clicks / imp * 100) : 0;
               const cpc = clicks > 0 ? (cost / clicks) : 0;
               
-              sheet3Data.push({
+              sheet1Data.push({
                 "날짜": dateFormatted,
-                "광고 상품": productName,
                 "캠페인": c_name,
                 "광고그룹": adgroupMap[g_id] || g_id,
                 "등록 키워드": "-",
@@ -7547,15 +7543,53 @@
             }
           }
           
-          // Sort sheet3Data by 광고 상품 (파워링크 -> 플레이스광고 -> 파워컨텐츠), 날짜 desc, 클릭수 desc
-          const productOrder = { "파워링크": 1, "플레이스광고": 2, "파워컨텐츠": 3, "기타광고": 4 };
-          sheet3Data.sort((a, b) => {
-            const orderA = productOrder[a["광고 상품"]] || 99;
-            const orderB = productOrder[b["광고 상품"]] || 99;
-            if (orderA !== orderB) return orderA - orderB;
-            if (a["날짜"] !== b["날짜"]) return b["날짜"].localeCompare(a["날짜"]);
-            return b["클릭수"] - a["클릭수"];
-          });
+          sheet1Data.sort((a, b) => b["날짜"].localeCompare(a["날짜"]) || b["클릭수"] - a["클릭수"]);
+          addSummaryRows(sheet1Data, "실제 검색어");
+          
+          // Build Sheet 2: 파워컨텐츠 성과 (Only Power Content, clicks > 0)
+          const sheet2Data = filteredAdRows
+            .filter(r => r.product === "파워컨텐츠" && r.clicks > 0)
+            .map(r => {
+              const ctr = r.imp > 0 ? (r.clicks / r.imp * 100) : 0;
+              const cpc = r.clicks > 0 ? (r.cost / r.clicks) : 0;
+              return {
+                "날짜": r.date,
+                "캠페인": r.campaign,
+                "광고그룹": r.adgroup,
+                "키워드/소재": r.keyword || r.creative || "소재없음",
+                "기기": r.device,
+                "노출수": r.imp,
+                "클릭수": r.clicks,
+                "클릭률 (CTR %)": parseFloat(ctr.toFixed(2)),
+                "총 비용 (원)": r.cost,
+                "평균 CPC (원)": Math.round(cpc)
+              };
+            });
+          sheet2Data.sort((a, b) => b["날짜"].localeCompare(a["날짜"]) || b["클릭수"] - a["클릭수"]);
+          addSummaryRows(sheet2Data, "키워드/소재");
+          
+          // Build Sheet 3: 플레이스 성과 (Only Place, clicks > 0)
+          const sheet3Data = filteredAdRows
+            .filter(r => r.product === "플레이스광고" && r.clicks > 0)
+            .map(r => {
+              const ctr = r.imp > 0 ? (r.clicks / r.imp * 100) : 0;
+              const cpc = r.clicks > 0 ? (r.cost / r.clicks) : 0;
+              return {
+                "날짜": r.date,
+                "캠페인": r.campaign,
+                "광고그룹": r.adgroup,
+                "등록 키워드": "-",
+                "실제 검색어": "-",
+                "기기": r.device,
+                "노출수": r.imp,
+                "클릭수": r.clicks,
+                "클릭률 (CTR %)": parseFloat(ctr.toFixed(2)),
+                "총 비용 (원)": r.cost,
+                "평균 CPC (원)": Math.round(cpc)
+              };
+            });
+          sheet3Data.sort((a, b) => b["날짜"].localeCompare(a["날짜"]) || b["클릭수"] - a["클릭수"]);
+          addSummaryRows(sheet3Data, "실제 검색어");
           
           // Create Excel Workbook
           addLog("4. 엑셀 워크북 빌드 및 변환 작업 중...");
@@ -7564,13 +7598,13 @@
           const wb = XLSX.utils.book_new();
           
           const ws1 = XLSX.utils.json_to_sheet(sheet1Data);
-          XLSX.utils.book_append_sheet(wb, ws1, "일별 요약");
+          XLSX.utils.book_append_sheet(wb, ws1, "파워링크");
           
           const ws2 = XLSX.utils.json_to_sheet(sheet2Data);
-          XLSX.utils.book_append_sheet(wb, ws2, "파워컨텐츠 성과");
+          XLSX.utils.book_append_sheet(wb, ws2, "파워컨텐츠");
           
           const ws3 = XLSX.utils.json_to_sheet(sheet3Data);
-          XLSX.utils.book_append_sheet(wb, ws3, "상세 키워드 및 검색어 분석");
+          XLSX.utils.book_append_sheet(wb, ws3, "플레이스");
           
           const fileStart = startDateVal.replace(/-/g, "");
           const fileEnd = endDateVal.replace(/-/g, "");
