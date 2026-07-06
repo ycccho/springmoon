@@ -7474,29 +7474,8 @@
           // Build Sheet 1: 파워링크 성과
           const sheet1Data = [];
           
-          // 1.1. Add keyword detail rows
-          for (const r of filteredAdRows) {
-            if (r.product === "파워링크" && r.clicks > 0) {
-              const ctr = r.imp > 0 ? (r.clicks / r.imp * 100) : 0;
-              const cpc = r.clicks > 0 ? (r.cost / r.clicks) : 0;
-              sheet1Data.push({
-                "날짜": r.date,
-                "캠페인": r.campaign,
-                "광고그룹": r.adgroup,
-                "등록 키워드": r.keyword || "-",
-                "실제 검색어": "등록키워드 직접노출",
-                "기기": r.device,
-                "노출수": r.imp,
-                "클릭수": r.clicks,
-                "클릭률 (CTR %)": parseFloat(ctr.toFixed(2)),
-                "총 비용 (원)": r.cost,
-                "평균 CPC (원)": Math.round(cpc)
-              });
-            }
-          }
-          
-          // 1.2. Add search query detail rows (if checked)
-          if (includeQuery) {
+          if (includeQuery && expReportRows.length > 0) {
+            // Use search query report as primary source to show actual keywords and avoid duplication
             for (const r of expReportRows) {
               if (r.length < 10) continue;
               const dateVal = r[0];
@@ -7531,8 +7510,7 @@
                 "날짜": dateFormatted,
                 "캠페인": c_name,
                 "광고그룹": adgroupMap[g_id] || g_id,
-                "등록 키워드": "-",
-                "실제 검색어": sq,
+                "키워드": sq,
                 "기기": device,
                 "노출수": imp,
                 "클릭수": clicks,
@@ -7541,10 +7519,30 @@
                 "평균 CPC (원)": Math.round(cpc)
               });
             }
+          } else {
+            // Fallback to AD report keywords if search queries are not requested
+            for (const r of filteredAdRows) {
+              if (r.product === "파워링크" && r.clicks > 0) {
+                const ctr = r.imp > 0 ? (r.clicks / r.imp * 100) : 0;
+                const cpc = r.clicks > 0 ? (r.cost / r.clicks) : 0;
+                sheet1Data.push({
+                  "날짜": r.date,
+                  "캠페인": r.campaign,
+                  "광고그룹": r.adgroup,
+                  "키워드": r.keyword || "-",
+                  "기기": r.device,
+                  "노출수": r.imp,
+                  "클릭수": r.clicks,
+                  "클릭률 (CTR %)": parseFloat(ctr.toFixed(2)),
+                  "총 비용 (원)": r.cost,
+                  "평균 CPC (원)": Math.round(cpc)
+                });
+              }
+            }
           }
           
           sheet1Data.sort((a, b) => b["날짜"].localeCompare(a["날짜"]) || b["클릭수"] - a["클릭수"]);
-          addSummaryRows(sheet1Data, "실제 검색어");
+          addSummaryRows(sheet1Data, "키워드");
           
           // Build Sheet 2: 파워컨텐츠 성과 (Only Power Content, clicks > 0)
           const sheet2Data = filteredAdRows
@@ -7578,8 +7576,7 @@
                 "날짜": r.date,
                 "캠페인": r.campaign,
                 "광고그룹": r.adgroup,
-                "등록 키워드": "-",
-                "실제 검색어": "-",
+                "키워드": "-",
                 "기기": r.device,
                 "노출수": r.imp,
                 "클릭수": r.clicks,
@@ -7589,7 +7586,7 @@
               };
             });
           sheet3Data.sort((a, b) => b["날짜"].localeCompare(a["날짜"]) || b["클릭수"] - a["클릭수"]);
-          addSummaryRows(sheet3Data, "실제 검색어");
+          addSummaryRows(sheet3Data, "키워드");
           
           // Create Excel Workbook
           addLog("4. 엑셀 워크북 빌드 및 변환 작업 중...");
