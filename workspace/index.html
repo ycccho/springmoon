@@ -1087,6 +1087,22 @@
       setInterval(updateClock, 1000);
       loadVisitorIP();
       loadPortfolios();
+
+      // Protect sidebar links except Workspace
+      document.querySelectorAll("nav a").forEach(link => {
+        const href = link.getAttribute("href");
+        if (href && href !== "#") {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const pwd = prompt("관리자만 접근할 수 있는 기능입니다.\n비밀번호를 입력해 주세요.");
+            if (pwd === PASSWORD) {
+              window.location.href = href;
+            } else if (pwd !== null) {
+              alert("비밀번호가 올바르지 않습니다.");
+            }
+          });
+        }
+      });
     });
   </script>
 </body>
