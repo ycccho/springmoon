@@ -41,9 +41,9 @@ export async function onRequestPost(context) {
   try {
     const data = await context.request.json();
     
-    // Simple validation: should be an array of portfolio items
-    if (!Array.isArray(data)) {
-      return new Response(JSON.stringify({ error: "Invalid payload: must be an array of portfolio items" }), {
+    // Allow either array (old format) or object (new format containing header info)
+    if (!Array.isArray(data) && (typeof data !== "object" || data === null)) {
+      return new Response(JSON.stringify({ error: "Invalid payload: must be an array or an object" }), {
         status: 400,
         headers: { "Content-Type": "application/json" }
       });
