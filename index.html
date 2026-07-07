@@ -140,7 +140,7 @@
       { id: "keyword-screenshot", name: "9.키워드검색스샷", protected: true },
       { id: "blog-post-screenshot", name: "9.블로그게시글스샷", protected: true },
       { id: "ad-dashboard", name: "6.검색광고 통계수집", protected: true },
-      { id: "competitor-blog", name: "9: 경쟁 블로그 탐색", protected: true },
+      { id: "competitor-blog", name: "7.경쟁 블로그 탐색", protected: true },
       { id: "daily-report", name: "9.일일보고서 작성", protected: false, hidden: true },
       { id: "about", name: "소개", protected: false }
     ];
@@ -7906,7 +7906,7 @@
         <div class="max-w-4xl mx-auto space-y-6">
           <!-- Top settings: global designated words -->
           <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
-            <h2 class="text-xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🔍 9: 경쟁 블로그 탐색</h2>
+            <h2 class="text-xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🔍 7.경쟁 블로그 탐색</h2>
             <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">
               모니터링할 네이버 블로그들을 등록하면, 프로필 통계 정보 및 이번 달 발행 글 목록을 불러옵니다.<br>
               정기 수집(오후 1시, 오후 6시)을 통해 백그라운드에서도 항상 실시간 상태가 자동으로 체크됩니다.
@@ -7921,6 +7921,10 @@
                     💾 단어 저장
                   </button>
                 </div>
+                <!-- Dynamic designated words tags container -->
+                <div id="competitor-words-tags" class="flex flex-wrap gap-2 pt-2.5">
+                  <!-- Active designated word badges will render here -->
+                </div>
               </div>
             </div>
           </div>
@@ -7932,6 +7936,19 @@
               <input type="text" id="competitor-url-input" class="flex-1 px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="네이버 블로그 주소(URL) 또는 블로그 아이디 입력">
               <button id="competitor-add-btn" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all whitespace-nowrap">
                 블로그 등록
+              </button>
+            </div>
+          </div>
+
+          <!-- Control Actions Row -->
+          <div class="flex items-center justify-between bg-white dark-mode:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark-mode:border-gray-700">
+            <span class="text-xs font-black text-gray-500">포스팅 목록 펼침 제어</span>
+            <div class="flex gap-2">
+              <button id="competitor-expand-all-btn" class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-250 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                📂 전체펼침
+              </button>
+              <button id="competitor-collapse-all-btn" class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-250 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                📁 전체접기
               </button>
             </div>
           </div>
@@ -7964,6 +7981,21 @@
       wordsSaveBtn.addEventListener("click", saveDesignatedWords);
       addBtn.addEventListener("click", addCompetitorBlog);
 
+      // Expand/Collapse All buttons
+      const expandAllBtn = document.getElementById("competitor-expand-all-btn");
+      const collapseAllBtn = document.getElementById("competitor-collapse-all-btn");
+
+      if (expandAllBtn) {
+        expandAllBtn.addEventListener("click", () => {
+          container.querySelectorAll("details").forEach(details => details.open = true);
+        });
+      }
+      if (collapseAllBtn) {
+        collapseAllBtn.addEventListener("click", () => {
+          container.querySelectorAll("details").forEach(details => details.open = false);
+        });
+      }
+
       async function loadConfig() {
         container.innerHTML = '<div class="py-10 text-center text-xs text-gray-500 font-semibold">데이터 동기화 중...</div>';
         try {
@@ -7989,7 +8021,37 @@
         }
         
         wordsInput.value = (competitorConfig.designatedWords || []).join(", ");
+        renderDesignatedWordsTags();
         renderBlogs();
+      }
+
+      function renderDesignatedWordsTags() {
+        const tagsContainer = document.getElementById("competitor-words-tags");
+        if (!tagsContainer) return;
+        tagsContainer.innerHTML = "";
+        
+        const words = competitorConfig.designatedWords || [];
+        if (words.length === 0) {
+          tagsContainer.innerHTML = `<span class="text-xs text-gray-400 italic">등록된 탐색 지정 단어가 없습니다.</span>`;
+          return;
+        }
+        
+        words.forEach(word => {
+          const tag = document.createElement("span");
+          tag.className = "inline-flex items-center gap-1 px-2.5 py-1 bg-orange-50 text-orange-600 dark-mode:bg-orange-950/20 dark-mode:text-orange-400 rounded-lg text-xs font-bold border border-orange-100 dark-mode:border-orange-900/50 transition-all select-none";
+          tag.innerHTML = `
+            <span># ${word}</span>
+            <button class="hover:text-red-500 font-bold focus:outline-none ml-0.5" title="삭제">&times;</button>
+          `;
+          tag.querySelector("button").addEventListener("click", async () => {
+            competitorConfig.designatedWords = competitorConfig.designatedWords.filter(w => w !== word);
+            wordsInput.value = competitorConfig.designatedWords.join(", ");
+            await saveConfigToServer();
+            renderDesignatedWordsTags();
+            renderBlogs();
+          });
+          tagsContainer.appendChild(tag);
+        });
       }
 
       async function saveConfigToServer() {
@@ -8009,6 +8071,7 @@
         const words = wordsInput.value.split(",").map(w => w.trim()).filter(w => w.length > 0);
         competitorConfig.designatedWords = words;
         await saveConfigToServer();
+        renderDesignatedWordsTags();
         alert("🎯 글로벌 탐색 지정 단어가 저장되었습니다!");
         renderBlogs();
       }

@@ -1020,35 +1020,47 @@ async function getNaverBlogStats(blogId) {
         'Referer': `https://m.blog.naver.com/${encodeURIComponent(blogId)}`
       }
     });
+    
     let infoJson = {};
     if (infoRes.ok) {
       const txt = await infoRes.text();
-      const cleanTxt = txt.replace(/^\)\]\}'\s*\n/, '');
+      // Strip the prefix including the comma if present (e.g. ")]}',")
+      const cleanTxt = txt.replace(/^\)\]\}',?\s*\n/, '');
       infoJson = JSON.parse(cleanTxt);
     }
 
-    const visitorUrl = `https://blog.naver.com/NVisitorgp4Ajax.naver?blogId=${encodeURIComponent(blogId)}`;
-    const visitorRes = await fetch(visitorUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    const result = infoJson.result || {};
+    const blogName = result.blogName || '네이버 블로그';
+    const buddyCount = result.subscriberCount || 0;
+    const todayVisitors = result.dayVisitorCount || 0;
+    const totalVisitors = result.totalVisitorCount || todayVisitors;
+
+    // Fetch total post count from the first page of PostTitleListAsync
+    let totalPostCount = 0;
+    try {
+      const listUrl = `https://blog.naver.com/PostTitleListAsync.naver?blogId=${encodeURIComponent(blogId)}&viewdate=&parentCategoryNo=&categoryNo=&itemcount=20&authorid=&userSelectMenu=&parentCategoryCode=&currentPage=1`;
+      const listRes = await fetch(listUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': `https://blog.naver.com/${encodeURIComponent(blogId)}`
+        }
+      });
+      if (listRes.ok) {
+        const listText = await listRes.text();
+        const listCleaned = listText.replace(/\\'/g, "'");
+        const listJson = JSON.parse(listCleaned);
+        totalPostCount = listJson.totalCount || 0;
       }
-    });
-    let todayVisitors = '0';
-    if (visitorRes.ok) {
-      const xml = await visitorRes.text();
-      const visitorCnts = [...xml.matchAll(/<visitorcnt\s+id="(\d+)"\s+cnt="(\d+)"\s*\/>/gi)];
-      if (visitorCnts.length > 0) {
-        const latest = visitorCnts[visitorCnts.length - 1];
-        todayVisitors = latest[2];
-      }
+    } catch (err) {
+      console.warn(`[포스팅 개수 조회 에러] ${blogId}:`, err.message);
     }
 
     return {
-      blogName: infoJson.result?.blogName || infoJson.blogName || '네이버 블로그',
-      buddyCount: infoJson.result?.buddyCount || infoJson.buddyCount || 0,
-      totalPostCount: infoJson.result?.totalPostCount || infoJson.totalPostCount || 0,
+      blogName,
+      buddyCount,
+      totalPostCount,
       todayVisitors,
-      totalVisitors: infoJson.result?.totalVisitorCount || infoJson.totalVisitorCount || todayVisitors
+      totalVisitors
     };
   } catch (e) {
     console.error(`블로그 정보 조회 실패 (${blogId}):`, e);
