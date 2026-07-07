@@ -117,6 +117,9 @@
   </div>
 
   <script>
+    // Dynamic local helper backend resolution (handles private network loopbacks for HTTPS)
+    const localHostDomain = 'localhost:3888';
+
     // ============================================
     // 시스템 설정
     // ============================================
@@ -5740,10 +5743,10 @@
           <!-- HTTPS Mixed Content Warning Banner -->
           <div id="https-warning-banner" class="hidden bg-red-50 dark-mode:bg-red-950/20 border border-red-200 dark-mode:border-red-900/50 p-4 rounded-xl space-y-2 text-xs text-red-800 dark-mode:text-red-400 leading-relaxed font-semibold">
             <h4 class="font-bold flex items-center gap-1">⚠️ 브라우저 보안 정책(Mixed Content) 경고</h4>
-            <p>현재 사이트가 <strong>HTTPS(보안 접속)</strong> 상태입니다. 브라우저 보안 규정상 HTTPS 웹페이지에서 로컬 HTTP API(http://127.0.0.1:3888)를 직접 호출하면 차단(Failed to fetch)이 발생합니다.</p>
+            <p>현재 사이트가 <strong>HTTPS(보안 접속)</strong> 상태입니다. 브라우저 보안 규정상 HTTPS 웹페이지에서 로컬 HTTP API(http://localhost:3888)를 직접 호출하면 차단(Failed to fetch)이 발생합니다.</p>
             <p class="font-bold">💡 해결 방법 (택 1):</p>
             <ol class="list-decimal list-inside space-y-1 pl-1">
-              <li>로컬 개발 주소인 <a href="http://127.0.0.1:8788?menu=keyword-screenshot" class="underline text-orange-600 dark-mode:text-orange-400 font-extrabold">http://127.0.0.1:8788 (클릭하여 이동)</a> 로 접속하여 실행해 주세요. (가장 확실하고 간편한 권장 방식)</li>
+              <li>로컬 개발 주소인 <a href="http://localhost:8788?menu=keyword-screenshot" class="underline text-orange-600 dark-mode:text-orange-400 font-extrabold">http://localhost:8788 (클릭하여 이동)</a> 로 접속하여 실행해 주세요. (가장 확실하고 간편한 권장 방식)</li>
               <li>또는 크롬 주소창 왼쪽의 <strong>[설정 아이콘]</strong>(조절기 모양 또는 자물쇠) 클릭 -> <strong>[사이트 설정]</strong> 클릭 -> <strong>[안전하지 않은 콘텐츠 (Insecure content)]</strong> 항목을 <strong>[허용 (Allow)]</strong>으로 변경한 후 이 페이지를 새로고침(F5) 해주세요.</li>
             </ol>
           </div>
@@ -5976,7 +5979,7 @@
 
       async function loadScheduleConfig() {
         try {
-          const res = await fetch("http://127.0.0.1:3888/api/config");
+          const res = await fetch(`http://${localHostDomain}/api/config`);
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.config) {
@@ -6024,7 +6027,7 @@
 
       async function checkServerStatus() {
         try {
-          await fetch("http://127.0.0.1:3888/api/screenshot", { method: "OPTIONS" });
+          await fetch(`http://${localHostDomain}/api/screenshot`, { method: "OPTIONS" });
           serverOnline = true;
           statusText.innerHTML = `
             <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
@@ -6101,7 +6104,7 @@
           }
 
           try {
-            const res = await fetch("http://127.0.0.1:3888/api/config", {
+            const res = await fetch(`http://${localHostDomain}/api/config`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ schedules })
@@ -6181,7 +6184,7 @@
         try {
           summary.textContent = `진행 중 (0 / \${tasks.length})`;
           
-          const res = await fetch("http://127.0.0.1:3888/api/screenshot", {
+          const res = await fetch(`http://${localHostDomain}/api/screenshot`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -6282,7 +6285,7 @@
           imagesContainer.innerHTML = '';
           
           try {
-            const res = await fetch(`http://127.0.0.1:3888/api/local-screenshots?folderPath=${encodeURIComponent(folderPath)}`);
+            const res = await fetch(`http://${localHostDomain}/api/local-screenshots?folderPath=${encodeURIComponent(folderPath)}`);
             if (!res.ok) throw new Error("서버 응답 오류");
             const data = await res.json();
             if (data.success) {
@@ -6293,7 +6296,7 @@
             }
           } catch (err) {
             console.error("Local screenshots fetch failed:", err);
-            keywordsContainer.innerHTML = '<span class="text-xs text-red-500 font-semibold">로컬 백서버(http://127.0.0.1:3888)가 실행 중인지 확인해 주세요.</span>';
+            keywordsContainer.innerHTML = `<span class="text-xs text-red-500 font-semibold">로컬 백서버(http://${localHostDomain})가 실행 중인지 확인해 주세요.</span>`;
           }
         }
         
@@ -6352,7 +6355,7 @@
           files.forEach((file, index) => {
             const card = document.createElement("div");
             card.className = "bg-gray-50 dark-mode:bg-gray-750 p-3 rounded-xl border border-gray-200 dark-mode:border-gray-700 space-y-2 flex flex-col justify-between";
-            const imgUrl = `http://127.0.0.1:3888/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
+            const imgUrl = `http://${localHostDomain}/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
             card.innerHTML = `
               <div class="relative group cursor-pointer overflow-hidden rounded-lg border border-gray-150 dark-mode:border-gray-700 bg-white" onclick="openLightbox(${index})">
                 <img src="${imgUrl}" alt="${file.fileName}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
@@ -6459,7 +6462,7 @@
           if (!file) return;
           
           const folderPath = dirInput.value.trim() || "D:\\rank";
-          const imgUrl = `http://127.0.0.1:3888/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
+          const imgUrl = `http://${localHostDomain}/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
           
           const titleEl = document.getElementById("lightbox-title");
           const imgEl = document.getElementById("lightbox-img");
@@ -6633,7 +6636,7 @@
         logConsole(`[\${processedCount + 1}/\${totalCount}] "\${post.title}" 처리 중...`);
 
         try {
-          const res = await fetch("http://127.0.0.1:3888/api/blog-posts/process-one", {
+          const res = await fetch(`http://${localHostDomain}/api/blog-posts/process-one`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -6744,7 +6747,7 @@
 
         try {
           logConsole(`[네트워크] 네이버 블로그 전체 공개 게시글 목록을 수집하는 중...`);
-          const res = await fetch(`http://127.0.0.1:3888/api/blog-posts/list?blogId=${encodeURIComponent(blogId)}`);
+          const res = await fetch(`http://${localHostDomain}/api/blog-posts/list?blogId=${encodeURIComponent(blogId)}`);
           if (!res.ok) {
             const err = await res.json().catch(() => ({}));
             throw new Error(err.error || "글 목록 조회에 실패했습니다.");
@@ -8042,7 +8045,7 @@
         }
         
         try {
-          const res = await fetch("http://127.0.0.1:3888/api/competitor-blog/scrape-all", {
+          const res = await fetch(`http://${localHostDomain}/api/competitor-blog/scrape-all`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -8065,7 +8068,7 @@
           }
         } catch (e) {
           console.error(`수집 요청 실패 (${blogId}):`, e);
-          alert("경쟁 블로그 수집을 위해서는 로컬 캡처 서버(http://127.0.0.1:3888)가 가동 중이어야 합니다.");
+          alert(`경쟁 블로그 수집을 위해서는 로컬 캡처 서버(http://${localHostDomain})가 가동 중이어야 합니다.`);
         } finally {
           renderBlogs();
         }

@@ -30,7 +30,6 @@ const cors = require('cors');
 const puppeteer = require('puppeteer-core');
 
 const app = express();
-app.use(cors());
 
 // Bypass Chrome Private Network Access (PNA) restrictions when accessed from public HTTPS sites
 // MUST be registered BEFORE cors() so it attaches to preflight OPTIONS requests!
