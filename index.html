@@ -7996,6 +7996,27 @@
         });
       }
 
+      async function getNaverBlogStatsFromCloud(blogId) {
+        try {
+          const res = await fetch(`/api/naver-blog?action=info&blogId=${encodeURIComponent(blogId)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.info) {
+              return {
+                blogName: data.info.blogName || '네이버 블로그',
+                buddyCount: data.info.subscribers || 0,
+                totalPostCount: data.info.totalPosts || 0,
+                todayVisitors: data.info.todayVisitors || 0,
+                totalVisitors: data.info.totalVisitors || 0
+              };
+            }
+          }
+        } catch (e) {
+          console.error("Cloud stats fetch failed:", e);
+        }
+        return null;
+      }
+
       async function loadConfig() {
         container.innerHTML = '<div class="py-10 text-center text-xs text-gray-500 font-semibold">데이터 동기화 중...</div>';
         try {
@@ -8023,6 +8044,30 @@
         wordsInput.value = (competitorConfig.designatedWords || []).join(", ");
         renderDesignatedWordsTags();
         renderBlogs();
+
+        // Auto-heal failed/missing stats via Cloud API
+        for (const blog of competitorConfig.blogs) {
+          const blogId = blog.blogId;
+          const scrape = competitorConfig.scrapedData.find(s => s.blogId === blogId);
+          if (!scrape || !scrape.stats || scrape.stats.blogName === '조회 실패' || scrape.stats.buddyCount === 0) {
+            getNaverBlogStatsFromCloud(blogId).then(async (cloud) => {
+              if (cloud) {
+                if (scrape) {
+                  scrape.stats = cloud;
+                } else {
+                  competitorConfig.scrapedData.push({
+                    blogId,
+                    stats: cloud,
+                    posts: [],
+                    lastScraped: new Date().toISOString()
+                  });
+                }
+                await saveConfigToServer();
+                renderBlogs();
+              }
+            });
+          }
+        }
       }
 
       function renderDesignatedWordsTags() {
@@ -8121,6 +8166,15 @@
           const data = await res.json();
           if (data.success && data.scrapedData && data.scrapedData.length > 0) {
             const fresh = data.scrapedData[0];
+            
+            // If local server returned failed stats, fallback to Cloud API
+            if (!fresh.stats || fresh.stats.blogName === '조회 실패' || fresh.stats.buddyCount === 0) {
+              const cloud = await getNaverBlogStatsFromCloud(blogId);
+              if (cloud) {
+                fresh.stats = cloud;
+              }
+            }
+
             const idx = competitorConfig.scrapedData.findIndex(s => s.blogId === blogId);
             if (idx !== -1) {
               competitorConfig.scrapedData[idx] = fresh;
@@ -8131,10 +8185,46 @@
           }
         } catch (e) {
           console.error(`수집 요청 실패 (${blogId}):`, e);
-          alert(`경쟁 블로그 수집을 위해서는 로컬 캡처 서버(http://${localHostDomain})가 가동 중이어야 합니다.`);
+          
+          // Network failure or offline local server - try to fallback to cloud stats entirely!
+          const cloud = await getNaverBlogStatsFromCloud(blogId);
+          if (cloud) {
+            const idx = competitorConfig.scrapedData.findIndex(s => s.blogId === blogId);
+            const fresh = {
+              blogId,
+              stats: cloud,
+              posts: (idx !== -1 ? competitorConfig.scrapedData[idx].posts : []) || [],
+              lastScraped: new Date().toISOString()
+            };
+            if (idx !== -1) {
+              competitorConfig.scrapedData[idx] = fresh;
+            } else {
+              competitorConfig.scrapedData.push(fresh);
+            }
+            await saveConfigToServer();
+          } else {
+            alert(`경쟁 블로그 수집을 위해서는 로컬 캡처 서버(http://${localHostDomain})가 가동 중이어야 합니다.`);
+          }
         } finally {
           renderBlogs();
         }
+      }
+
+      async function saveNewBlogOrder() {
+        const sortedIds = Array.from(container.children)
+          .map(card => card.id.replace("blog-card-", ""))
+          .filter(id => id);
+        
+        const newBlogs = [];
+        sortedIds.forEach(id => {
+          const blog = competitorConfig.blogs.find(b => b.blogId === id);
+          if (blog) {
+            newBlogs.push(blog);
+          }
+        });
+        
+        competitorConfig.blogs = newBlogs;
+        await saveConfigToServer();
       }
 
       async function deleteBlog(blogId) {
@@ -8163,7 +8253,29 @@
           
           const card = document.createElement("div");
           card.id = `blog-card-${blogId}`;
-          card.className = "bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4";
+          card.className = "bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4 cursor-default transition-all duration-200";
+          card.setAttribute("draggable", "true");
+
+          // Drag and drop event listeners
+          card.addEventListener("dragstart", (e) => {
+            e.dataTransfer.setData("text/plain", blogId);
+            card.classList.add("opacity-40", "border-orange-500", "scale-[0.98]");
+          });
+          
+          card.addEventListener("dragend", () => {
+            card.classList.remove("opacity-40", "border-orange-500", "scale-[0.98]");
+            saveNewBlogOrder();
+          });
+          
+          card.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            const draggingCard = container.querySelector(".opacity-40");
+            if (draggingCard && draggingCard !== card) {
+              const rect = card.getBoundingClientRect();
+              const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+              container.insertBefore(draggingCard, next ? card.nextSibling : card);
+            }
+          });
           
           const timeStr = scrape.lastScraped ? new Date(scrape.lastScraped).toLocaleString("ko-KR") : "미수집";
           
@@ -8222,12 +8334,18 @@
 
           card.innerHTML = `
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-150 dark-mode:border-gray-700 pb-4 gap-4">
-              <div>
-                <h4 class="text-base font-black text-gray-900 dark-mode:text-white flex items-center gap-1.5">
-                  📁 ${stats.blogName || '네이버 블로그'}
-                  <span class="text-xs font-mono font-bold text-gray-400 bg-gray-100 dark-mode:bg-gray-700 px-2 py-0.5 rounded">${blogId}</span>
-                </h4>
-                <p class="text-[10px] text-gray-400 font-bold mt-1">마지막 수집 시각: ${timeStr}</p>
+              <div class="flex items-center gap-3">
+                <!-- Drag Handle -->
+                <div class="text-gray-300 hover:text-gray-500 dark-mode:text-gray-600 dark-mode:hover:text-gray-400 select-none text-base cursor-grab active:cursor-grabbing flex items-center" title="드래그하여 순서 변경">
+                  ☰
+                </div>
+                <div>
+                  <h4 class="text-base font-black text-gray-900 dark-mode:text-white flex items-center gap-1.5">
+                    📁 ${stats.blogName || '네이버 블로그'}
+                    <span class="text-xs font-mono font-bold text-gray-400 bg-gray-100 dark-mode:bg-gray-700 px-2 py-0.5 rounded">${blogId}</span>
+                  </h4>
+                  <p class="text-[10px] text-gray-400 font-bold mt-1">마지막 수집 시각: ${timeStr}</p>
+                </div>
               </div>
               <div class="flex items-center gap-2">
                 <button id="refresh-btn-${blogId}" class="px-3 py-1.5 border border-gray-200 hover:bg-gray-50 dark-mode:border-gray-700 dark-mode:hover:bg-gray-750 rounded-xl text-xs font-bold text-gray-700 dark-mode:text-gray-200 shadow-sm transition-colors">
