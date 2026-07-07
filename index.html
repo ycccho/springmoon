@@ -6367,6 +6367,8 @@
           });
         }
 
+        let zoomScale = 1.0;
+
         window.openLightbox = function(index) {
           activeIndex = index;
           let lightbox = document.getElementById("screenshot-lightbox");
@@ -6387,8 +6389,8 @@
                 <button onclick="prevLightbox()" class="absolute left-2 md:left-4 z-10 p-3 bg-black/50 hover:bg-black/80 rounded-full text-white text-lg font-bold shadow transition-all leading-none focus:outline-none">&lt;</button>
                 
                 <!-- Image Box (Scrollable for long full-page screenshots) -->
-                <div class="w-full h-full overflow-y-auto flex justify-center items-start px-8 md:px-16 py-2 select-none" id="lightbox-img-box">
-                  <img id="lightbox-img" src="" class="max-w-full h-auto rounded shadow-2xl border border-gray-850" style="min-width: 320px; max-width: 1000px; display: block;" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
+                <div class="w-full h-full overflow-auto flex justify-center items-start px-8 md:px-16 py-2 select-none" id="lightbox-img-box">
+                  <img id="lightbox-img" src="" class="rounded shadow-2xl border border-gray-850 mx-auto" style="min-width: 320px; max-width: 1000px; width: 100%; display: block;" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
                 </div>
                 
                 <!-- Next Button -->
@@ -6396,8 +6398,10 @@
               </div>
               
               <!-- Footer / Navigation Indicators -->
-              <div class="text-center text-xs text-gray-500 font-bold select-none pt-2" id="lightbox-footer">
-                키보드 방향키(←, →)로 이동 가능 / ESC 키로 닫기
+              <div class="text-center text-xs text-gray-500 font-bold select-none pt-2 flex justify-between items-center px-4" id="lightbox-footer">
+                <span>키보드 방향키(←, →)로 이동 / ESC 키로 닫기</span>
+                <span id="lightbox-zoom-indicator" class="text-orange-500 bg-gray-900 border border-gray-800 px-2.5 py-1 rounded font-mono font-bold">확대/축소: 100%</span>
+                <span>키보드 방향키(↑, ↓)로 확대/축소</span>
               </div>
             `;
             document.body.appendChild(lightbox);
@@ -6427,6 +6431,29 @@
           updateLightboxContent();
         };
 
+        window.zoomInLightbox = function() {
+          const imgEl = document.getElementById("lightbox-img");
+          if (!imgEl) return;
+          zoomScale = Math.min(3.0, zoomScale + 0.1);
+          imgEl.style.maxWidth = (zoomScale * 1000) + "px";
+          updateZoomIndicator();
+        };
+
+        window.zoomOutLightbox = function() {
+          const imgEl = document.getElementById("lightbox-img");
+          if (!imgEl) return;
+          zoomScale = Math.max(0.3, zoomScale - 0.1);
+          imgEl.style.maxWidth = (zoomScale * 1000) + "px";
+          updateZoomIndicator();
+        };
+
+        function updateZoomIndicator() {
+          const indicator = document.getElementById("lightbox-zoom-indicator");
+          if (indicator) {
+            indicator.textContent = `확대/축소: ${Math.round(zoomScale * 100)}%`;
+          }
+        }
+
         function updateLightboxContent() {
           const file = currentFilteredFiles[activeIndex];
           if (!file) return;
@@ -6443,10 +6470,12 @@
           }
           if (imgEl) {
             imgEl.src = imgUrl;
+            imgEl.style.maxWidth = (zoomScale * 1000) + "px";
           }
           if (imgBox) {
             imgBox.scrollTop = 0; // 새 이미지 로드 시 스크롤을 맨 위로 초기화
           }
+          updateZoomIndicator();
         }
 
         function handleLightboxKeydown(e) {
@@ -6457,6 +6486,12 @@
             prevLightbox();
           } else if (e.key === "ArrowRight") {
             nextLightbox();
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            zoomInLightbox();
+          } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            zoomOutLightbox();
           } else if (e.key === "Escape") {
             closeLightbox();
           }
