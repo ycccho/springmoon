@@ -137,6 +137,7 @@
       { id: "keyword-screenshot", name: "9.키워드검색스샷", protected: true },
       { id: "blog-post-screenshot", name: "9.블로그게시글스샷", protected: true },
       { id: "ad-dashboard", name: "6.검색광고 통계수집", protected: true },
+      { id: "competitor-blog", name: "9: 경쟁 블로그 탐색", protected: true },
       { id: "daily-report", name: "9.일일보고서 작성", protected: false, hidden: true },
       { id: "about", name: "소개", protected: false }
     ];
@@ -230,6 +231,10 @@
         menus.push({ id: "ad-dashboard", name: "파워링크 분석", protected: true });
         changed = true;
       }
+      if (!menus.some(m => m.id === "competitor-blog")) {
+        menus.push({ id: "competitor-blog", name: "9: 경쟁 블로그 탐색", protected: true });
+        changed = true;
+      }
 
       // Automatically update names based on new naming scheme for cached lists
       const newNames = {
@@ -248,6 +253,7 @@
         "keyword-screenshot": "9.키워드검색스샷",
         "blog-post-screenshot": "9.블로그게시글스샷",
         "ad-dashboard": "6.검색광고 통계수집",
+        "competitor-blog": "9: 경쟁 블로그 탐색",
         "daily-report": "9.일일보고서 작성",
         "about": "소개"
       };
@@ -751,6 +757,7 @@
         setupBlogPostScreenshot();
         setupDailyReport();
         setupAdDashboard();
+        setupCompetitorBlog();
       }, 100);
     }
 
@@ -771,6 +778,7 @@
       if (id === "blog-post-screenshot") return getBlogPostScreenshotHTML();
       if (id === "daily-report") return getDailyReportHTML();
       if (id === "ad-dashboard") return getAdDashboardHTML();
+      if (id === "competitor-blog") return getCompetitorBlogHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
           <h2 class="text-3xl font-bold mb-4 text-gray-800 dark-mode:text-gray-100">소개</h2>
@@ -5824,6 +5832,31 @@
               </div>
             </div>
           </div>
+
+          <!-- Local Screenshot Directory Viewer Section -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
+            <h3 class="text-sm font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📂 로컬 저장 경로 이미지 뷰어</h3>
+            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">
+              미리 등록된 로컬 저장경로를 입력하면, 해당 경로의 캡처 이미지들을 키워드별로 분류하여 즉각 확인할 수 있습니다.
+            </p>
+            
+            <div class="flex items-center gap-2">
+              <input type="text" id="local-screenshot-dir-input" class="flex-1 px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" placeholder="예: D:\\rank" value="D:\\rank">
+              <button id="local-screenshot-load-btn" class="px-5 py-2 bg-gray-800 hover:bg-gray-900 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                <span>🔄 불러오기</span>
+              </button>
+            </div>
+
+            <!-- Keyword selection buttons -->
+            <div id="local-screenshot-keywords-container" class="flex flex-wrap gap-2 pt-2">
+              <p class="text-xs text-gray-400 italic">저장경로를 입력한 뒤 불러오기를 클릭해 주세요.</p>
+            </div>
+
+            <!-- Screenshots list container -->
+            <div id="local-screenshot-images-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+              <!-- Images with dates -->
+            </div>
+          </div>
         </div>
       `;
     }
@@ -6224,6 +6257,115 @@
           startBtn.textContent = "📸 즉시 캡처 시작";
         }
       });
+
+      // --- 로컬 스크린샷 뷰어 연동 로직 ---
+      function setupLocalScreenshotViewer() {
+        const loadBtn = document.getElementById("local-screenshot-load-btn");
+        const dirInput = document.getElementById("local-screenshot-dir-input");
+        const keywordsContainer = document.getElementById("local-screenshot-keywords-container");
+        const imagesContainer = document.getElementById("local-screenshot-images-container");
+        
+        if (!loadBtn || !dirInput || !keywordsContainer || !imagesContainer) return;
+        
+        let localFiles = [];
+        
+        // 초기 가동 시 기본 D:\rank에서 자동 불러오기 시도
+        loadLocalScreenshots();
+        
+        loadBtn.addEventListener("click", loadLocalScreenshots);
+        
+        async function loadLocalScreenshots() {
+          const folderPath = dirInput.value.trim() || "D:\\rank";
+          keywordsContainer.innerHTML = '<span class="text-xs text-gray-500 font-semibold">불러오는 중...</span>';
+          imagesContainer.innerHTML = '';
+          
+          try {
+            const res = await fetch(`http://127.0.0.1:3888/api/local-screenshots?folderPath=${encodeURIComponent(folderPath)}`);
+            if (!res.ok) throw new Error("서버 응답 오류");
+            const data = await res.json();
+            if (data.success) {
+              localFiles = data.files || [];
+              renderKeywordButtons();
+            } else {
+              keywordsContainer.innerHTML = `<span class="text-xs text-red-500 font-semibold">오류: ${data.error}</span>`;
+            }
+          } catch (err) {
+            console.error("Local screenshots fetch failed:", err);
+            keywordsContainer.innerHTML = '<span class="text-xs text-red-500 font-semibold">로컬 백서버(http://127.0.0.1:3888)가 실행 중인지 확인해 주세요.</span>';
+          }
+        }
+        
+        function renderKeywordButtons() {
+          if (localFiles.length === 0) {
+            keywordsContainer.innerHTML = '<span class="text-xs text-gray-400 font-semibold">지정 경로에 이미지 파일이 없습니다.</span>';
+            return;
+          }
+          
+          const keywords = Array.from(new Set(localFiles.map(f => f.keyword))).filter(k => k.length > 0);
+          keywordsContainer.innerHTML = '';
+          
+          const allBtn = document.createElement("button");
+          allBtn.className = "px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all";
+          allBtn.textContent = `전체 (${localFiles.length})`;
+          allBtn.addEventListener("click", () => {
+            selectButton(allBtn);
+            renderImages(localFiles);
+          });
+          keywordsContainer.appendChild(allBtn);
+          
+          keywords.forEach(kw => {
+            const kwFiles = localFiles.filter(f => f.keyword === kw);
+            const btn = document.createElement("button");
+            btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-200 rounded-lg text-xs font-bold shadow-sm transition-all";
+            btn.textContent = `${kw} (${kwFiles.length})`;
+            btn.addEventListener("click", () => {
+              selectButton(btn);
+              renderImages(kwFiles);
+            });
+            keywordsContainer.appendChild(btn);
+          });
+          
+          renderImages(localFiles);
+        }
+        
+        function selectButton(selectedBtn) {
+          keywordsContainer.querySelectorAll("button").forEach(btn => {
+            if (btn === selectedBtn) {
+              btn.className = "px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all";
+            } else {
+              btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-200 rounded-lg text-xs font-bold shadow-sm transition-all";
+            }
+          });
+        }
+        
+        function renderImages(files) {
+          imagesContainer.innerHTML = '';
+          if (files.length === 0) {
+            imagesContainer.innerHTML = '<div class="col-span-full py-10 text-center text-xs text-gray-400 font-semibold">해당 키워드의 이미지가 없습니다.</div>';
+            return;
+          }
+          
+          const folderPath = dirInput.value.trim() || "D:\\rank";
+          files.forEach(file => {
+            const card = document.createElement("div");
+            card.className = "bg-gray-50 dark-mode:bg-gray-750 p-3 rounded-xl border border-gray-200 dark-mode:border-gray-700 space-y-2 flex flex-col justify-between";
+            const imgUrl = `http://127.0.0.1:3888/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
+            card.innerHTML = `
+              <div class="relative group cursor-pointer overflow-hidden rounded-lg border border-gray-150 dark-mode:border-gray-700 bg-white" onclick="window.open('${imgUrl}')">
+                <img src="${imgUrl}" alt="${file.fileName}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">클릭하여 원본보기</div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] font-bold text-gray-600 dark-mode:text-gray-300">
+                <span class="truncate pr-2" title="${file.keyword}">${file.keyword}</span>
+                <span class="text-orange-500 font-mono whitespace-nowrap">${file.date}</span>
+              </div>
+            `;
+            imagesContainer.appendChild(card);
+          });
+        }
+      }
+
+      setupLocalScreenshotViewer();
     }
 
     function setupBlogPostScreenshot() {
@@ -7618,6 +7760,326 @@
           downloadBtn.classList.remove("opacity-50", "cursor-not-allowed");
         }
       };
+    }
+
+    // ============================================
+    // 9: 경쟁 블로그 탐색 UI 및 기능 구현
+    // ============================================
+    function getCompetitorBlogHTML() {
+      return `
+        <div class="max-w-4xl mx-auto space-y-6">
+          <!-- Top settings: global designated words -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
+            <h2 class="text-xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">🔍 9: 경쟁 블로그 탐색</h2>
+            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">
+              모니터링할 네이버 블로그들을 등록하면, 프로필 통계 정보 및 이번 달 발행 글 목록을 불러옵니다.<br>
+              정기 수집(오후 1시, 오후 6시)을 통해 백그라운드에서도 항상 실시간 상태가 자동으로 체크됩니다.
+            </p>
+            
+            <div class="border-t border-gray-150 dark-mode:border-gray-700 pt-4 space-y-3">
+              <div>
+                <label class="block text-xs font-bold text-orange-600 dark-mode:text-orange-400 mb-1.5">🎯 글로벌 탐색 지정 단어 설정 (콤마 ',' 구분)</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" id="competitor-words-input" class="flex-1 px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="예: 인디컴퍼니, 인테리어, 창업">
+                  <button id="competitor-words-save-btn" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-900 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all whitespace-nowrap">
+                    💾 단어 저장
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blog Addition Card -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
+            <h3 class="text-sm font-bold text-gray-800 dark-mode:text-gray-100">➕ 탐색 블로그 추가</h3>
+            <div class="flex items-center gap-2">
+              <input type="text" id="competitor-url-input" class="flex-1 px-4 py-2.5 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="네이버 블로그 주소(URL) 또는 블로그 아이디 입력">
+              <button id="competitor-add-btn" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all whitespace-nowrap">
+                블로그 등록
+              </button>
+            </div>
+          </div>
+
+          <!-- Scraped Blogs Container -->
+          <div id="competitor-blogs-container" class="space-y-6">
+            <!-- Dynamic blog cards go here -->
+          </div>
+        </div>
+      `;
+    }
+
+    function setupCompetitorBlog() {
+      const wordsInput = document.getElementById("competitor-words-input");
+      const wordsSaveBtn = document.getElementById("competitor-words-save-btn");
+      const urlInput = document.getElementById("competitor-url-input");
+      const addBtn = document.getElementById("competitor-add-btn");
+      const container = document.getElementById("competitor-blogs-container");
+
+      if (!wordsInput || !wordsSaveBtn || !urlInput || !addBtn || !container) return;
+
+      let competitorConfig = {
+        blogs: [],
+        designatedWords: [],
+        scrapedData: []
+      };
+
+      loadConfig();
+
+      wordsSaveBtn.addEventListener("click", saveDesignatedWords);
+      addBtn.addEventListener("click", addCompetitorBlog);
+
+      async function loadConfig() {
+        container.innerHTML = '<div class="py-10 text-center text-xs text-gray-500 font-semibold">데이터 동기화 중...</div>';
+        try {
+          const res = await fetch("/api/competitor-blog");
+          if (res.ok) {
+            const data = await res.json();
+            competitorConfig = {
+              blogs: data.blogs || [],
+              designatedWords: data.designatedWords || [],
+              scrapedData: data.scrapedData || []
+            };
+          } else {
+            throw new Error("KV 로드 실패");
+          }
+        } catch (e) {
+          console.warn("KV 로드 실패, 로컬 백업 로드:", e);
+          const local = localStorage.getItem("competitor_blog_data");
+          if (local) {
+            try {
+              competitorConfig = JSON.parse(local);
+            } catch (err) {}
+          }
+        }
+        
+        wordsInput.value = (competitorConfig.designatedWords || []).join(", ");
+        renderBlogs();
+      }
+
+      async function saveConfigToServer() {
+        localStorage.setItem("competitor_blog_data", JSON.stringify(competitorConfig));
+        try {
+          await fetch("/api/competitor-blog", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(competitorConfig)
+          });
+        } catch (e) {
+          console.error("KV 저장 실패:", e);
+        }
+      }
+
+      async function saveDesignatedWords() {
+        const words = wordsInput.value.split(",").map(w => w.trim()).filter(w => w.length > 0);
+        competitorConfig.designatedWords = words;
+        await saveConfigToServer();
+        alert("🎯 글로벌 탐색 지정 단어가 저장되었습니다!");
+        renderBlogs();
+      }
+
+      function parseNaverBlogId(input) {
+        let val = input.trim();
+        val = val.replace(/\/$/, "");
+        const match = val.match(/blog\.naver\.com\/([a-zA-Z0-9_-]+)/i);
+        if (match) return match[1];
+        return val;
+      }
+
+      async function addCompetitorBlog() {
+        const inputVal = urlInput.value.trim();
+        if (!inputVal) return;
+        const blogId = parseNaverBlogId(inputVal);
+
+        if (competitorConfig.blogs.some(b => b.blogId === blogId)) {
+          alert("이미 등록된 블로그입니다.");
+          return;
+        }
+
+        urlInput.value = "";
+        competitorConfig.blogs.push({ blogId });
+        await saveConfigToServer();
+        
+        await scrapeBlogOnDemand(blogId);
+      }
+
+      async function scrapeBlogOnDemand(blogId) {
+        const cardEl = document.getElementById(`blog-card-${blogId}`);
+        if (cardEl) {
+          cardEl.style.opacity = "0.6";
+        }
+        
+        try {
+          const res = await fetch("http://127.0.0.1:3888/api/competitor-blog/scrape-all", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              blogs: [{ blogId }],
+              designatedWords: competitorConfig.designatedWords
+            })
+          });
+
+          if (!res.ok) throw new Error("로컬 백서버 응답 실패");
+          const data = await res.json();
+          if (data.success && data.scrapedData && data.scrapedData.length > 0) {
+            const fresh = data.scrapedData[0];
+            const idx = competitorConfig.scrapedData.findIndex(s => s.blogId === blogId);
+            if (idx !== -1) {
+              competitorConfig.scrapedData[idx] = fresh;
+            } else {
+              competitorConfig.scrapedData.push(fresh);
+            }
+            await saveConfigToServer();
+          }
+        } catch (e) {
+          console.error(`수집 요청 실패 (${blogId}):`, e);
+          alert("경쟁 블로그 수집을 위해서는 로컬 캡처 서버(http://127.0.0.1:3888)가 가동 중이어야 합니다.");
+        } finally {
+          renderBlogs();
+        }
+      }
+
+      async function deleteBlog(blogId) {
+        if (!confirm("정말 이 블로그를 삭제하시겠습니까?")) return;
+        competitorConfig.blogs = competitorConfig.blogs.filter(b => b.blogId !== blogId);
+        competitorConfig.scrapedData = competitorConfig.scrapedData.filter(s => s.blogId !== blogId);
+        await saveConfigToServer();
+        renderBlogs();
+      }
+
+      function renderBlogs() {
+        container.innerHTML = "";
+        if (competitorConfig.blogs.length === 0) {
+          container.innerHTML = '<div class="py-20 text-center text-xs text-gray-400 font-bold bg-white dark-mode:bg-gray-800 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">등록된 경쟁 블로그가 없습니다.</div>';
+          return;
+        }
+
+        competitorConfig.blogs.forEach(blog => {
+          const blogId = blog.blogId;
+          const scrape = competitorConfig.scrapedData.find(s => s.blogId === blogId) || {
+            stats: { blogName: '로딩 대기 중', buddyCount: '-', totalPostCount: '-', todayVisitors: '-', totalVisitors: '-' },
+            posts: []
+          };
+          const stats = scrape.stats || {};
+          const posts = scrape.posts || [];
+          
+          const card = document.createElement("div");
+          card.id = `blog-card-${blogId}`;
+          card.className = "bg-white dark-mode:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4";
+          
+          const timeStr = scrape.lastScraped ? new Date(scrape.lastScraped).toLocaleString("ko-KR") : "미수집";
+          
+          let postsHtml = "";
+          if (posts.length === 0) {
+            postsHtml = '<div class="text-center py-6 text-xs text-gray-400 font-semibold">이번 달에 등록된 게시글이 없습니다.</div>';
+          } else {
+            postsHtml = `
+              <div class="overflow-x-auto pt-2">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="border-b border-gray-150 dark-mode:border-gray-700 text-gray-500 font-bold">
+                      <th class="py-2.5 px-3 w-12 text-center">번호</th>
+                      <th class="py-2.5 px-3">게시글 제목</th>
+                      <th class="py-2.5 px-3 w-28 text-center">발행 날짜</th>
+                      <th class="py-2.5 px-3 w-24 text-center">원문 링크</th>
+                      <th class="py-2.5 px-3 w-24 text-center">지정단어</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100 dark-mode:divide-gray-750">
+            `;
+            
+            posts.forEach((post, index) => {
+              const num = posts.length - index;
+              const hasMatches = Array.isArray(post.matchedWords) && post.matchedWords.length > 0;
+              const btnClass = hasMatches 
+                ? "bg-red-500 hover:bg-red-650 text-white font-extrabold cursor-help scale-[1.02]" 
+                : "bg-green-600 hover:bg-green-700 text-white font-bold";
+              const tooltip = hasMatches 
+                ? `지정단어 포함됨: ${post.matchedWords.join(", ")}` 
+                : "지정단어 포함되지 않음";
+                
+              postsHtml += `
+                <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30">
+                  <td class="py-3 px-3 text-center font-mono font-bold text-gray-450">${num}</td>
+                  <td class="py-3 px-3 font-semibold text-gray-800 dark-mode:text-gray-100">${post.title}</td>
+                  <td class="py-3 px-3 text-center text-gray-500 font-medium font-mono">${post.addDate}</td>
+                  <td class="py-3 px-3 text-center">
+                    <a href="${post.link}" target="_blank" class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-250 rounded-lg font-bold text-[11px] transition-all inline-block">바로가기</a>
+                  </td>
+                  <td class="py-3 px-3 text-center">
+                    <button onclick="window.open('${post.link}')" class="px-2.5 py-1 rounded-lg text-[11px] shadow-sm transition-all inline-block ${btnClass}" title="${tooltip}">
+                      ${hasMatches ? '포함됨' : '확인'}
+                    </button>
+                  </td>
+                </tr>
+              `;
+            });
+            
+            postsHtml += `
+                  </tbody>
+                </table>
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-150 dark-mode:border-gray-700 pb-4 gap-4">
+              <div>
+                <h4 class="text-base font-black text-gray-900 dark-mode:text-white flex items-center gap-1.5">
+                  📁 ${stats.blogName || '네이버 블로그'}
+                  <span class="text-xs font-mono font-bold text-gray-400 bg-gray-100 dark-mode:bg-gray-700 px-2 py-0.5 rounded">${blogId}</span>
+                </h4>
+                <p class="text-[10px] text-gray-400 font-bold mt-1">마지막 수집 시각: ${timeStr}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="refresh-btn-${blogId}" class="px-3 py-1.5 border border-gray-200 hover:bg-gray-50 dark-mode:border-gray-700 dark-mode:hover:bg-gray-750 rounded-xl text-xs font-bold text-gray-700 dark-mode:text-gray-200 shadow-sm transition-colors">
+                  🔄 수집 재요청
+                </button>
+                <button id="delete-btn-${blogId}" class="px-3 py-1.5 border border-red-200 hover:bg-red-50 dark-mode:border-red-950/20 rounded-xl text-xs font-bold text-red-500 transition-colors">
+                  ❌ 삭제
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 pt-1">
+              <div class="bg-gray-50 dark-mode:bg-gray-750 border border-gray-150 dark-mode:border-gray-700 rounded-xl p-3 text-center">
+                <span class="text-[9px] text-gray-505 font-bold block uppercase tracking-wider">총 등록 글 수</span>
+                <span class="text-sm font-black text-gray-800 dark-mode:text-white font-mono">${stats.totalPostCount}</span>
+              </div>
+              <div class="bg-gray-50 dark-mode:bg-gray-750 border border-gray-150 dark-mode:border-gray-700 rounded-xl p-3 text-center">
+                <span class="text-[9px] text-gray-550 font-bold block uppercase tracking-wider">이웃 수</span>
+                <span class="text-sm font-black text-gray-800 dark-mode:text-white font-mono">${stats.buddyCount}</span>
+              </div>
+              <div class="bg-amber-50/50 dark-mode:bg-amber-950/10 border border-amber-100/50 dark-mode:border-amber-900/30 rounded-xl p-3 text-center">
+                <span class="text-[9px] text-amber-700 block uppercase tracking-wider">오늘 방문자</span>
+                <span class="text-sm font-black text-amber-600 font-mono">${stats.todayVisitors}</span>
+              </div>
+              <div class="bg-indigo-50/50 dark-mode:bg-indigo-950/10 border border-indigo-100/50 dark-mode:border-indigo-900/30 rounded-xl p-3 text-center col-span-2 md:col-span-1">
+                <span class="text-[9px] text-indigo-700 block uppercase tracking-wider">누적 방문자</span>
+                <span class="text-sm font-black text-indigo-600 font-mono">${stats.totalVisitors}</span>
+              </div>
+              <div class="bg-green-50/50 dark-mode:bg-green-950/10 border border-green-100/50 dark-mode:border-green-900/30 rounded-xl p-3 text-center col-span-2 md:col-span-1">
+                <span class="text-[9px] text-green-700 block uppercase tracking-wider">이번달 새 글</span>
+                <span class="text-sm font-black text-green-600 font-mono">${posts.length} 개</span>
+              </div>
+            </div>
+
+            <details class="bg-gray-50/40 dark-mode:bg-gray-900/20 border border-gray-150 dark-mode:border-gray-700 rounded-xl p-4 transition-all">
+              <summary class="text-xs font-bold text-gray-700 dark-mode:text-gray-300 cursor-pointer select-none focus:outline-none flex items-center justify-between">
+                <span>이번 달 게시글 목록 (펼쳐보기)</span>
+                <span class="px-2 py-0.5 bg-gray-200 dark-mode:bg-gray-700 rounded-md text-[9px] font-extrabold text-gray-600 dark-mode:text-gray-300 font-mono">${posts.length}</span>
+              </summary>
+              <div class="mt-4 border-t border-gray-150 dark-mode:border-gray-700 pt-3">
+                ${postsHtml}
+              </div>
+            </details>
+          `;
+
+          container.appendChild(card);
+
+          document.getElementById(`refresh-btn-${blogId}`).addEventListener("click", () => scrapeBlogOnDemand(blogId));
+          document.getElementById(`delete-btn-${blogId}`).addEventListener("click", () => deleteBlog(blogId));
+        });
+      }
     }
 
     window.addEventListener("load", initApp);

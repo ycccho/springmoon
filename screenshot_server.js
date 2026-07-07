@@ -926,8 +926,336 @@ setInterval(async () => {
   }
 }, 30000);
 
+// --- 경쟁 블로그 탐색 기능 상세 수집 API ---
+// 1. 블로그 프로필 통계 조회
+async function getNaverBlogStats(blogId) {
+  try {
+    const infoUrl = `https://m.blog.naver.com/rego/BlogInfo.naver?blogId=${encodeURIComponent(blogId)}`;
+    const infoRes = await fetch(infoUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
+        'Referer': `https://m.blog.naver.com/${encodeURIComponent(blogId)}`
+      }
+    });
+    let infoJson = {};
+    if (infoRes.ok) {
+      const txt = await infoRes.text();
+      const cleanTxt = txt.replace(/^\)\]\}'\s*\n/, '');
+      infoJson = JSON.parse(cleanTxt);
+    }
+
+    const visitorUrl = `https://blog.naver.com/NVisitorgp4Ajax.naver?blogId=${encodeURIComponent(blogId)}`;
+    const visitorRes = await fetch(visitorUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    let todayVisitors = '0';
+    if (visitorRes.ok) {
+      const xml = await visitorRes.text();
+      const visitorCnts = [...xml.matchAll(/<visitorcnt\s+id="(\d+)"\s+cnt="(\d+)"\s*\/>/gi)];
+      if (visitorCnts.length > 0) {
+        const latest = visitorCnts[visitorCnts.length - 1];
+        todayVisitors = latest[2];
+      }
+    }
+
+    return {
+      blogName: infoJson.result?.blogName || infoJson.blogName || '네이버 블로그',
+      buddyCount: infoJson.result?.buddyCount || infoJson.buddyCount || 0,
+      totalPostCount: infoJson.result?.totalPostCount || infoJson.totalPostCount || 0,
+      todayVisitors,
+      totalVisitors: infoJson.result?.totalVisitorCount || infoJson.totalVisitorCount || todayVisitors
+    };
+  } catch (e) {
+    console.error(`블로그 정보 조회 실패 (${blogId}):`, e);
+    return {
+      blogName: '조회 실패',
+      buddyCount: 0,
+      totalPostCount: 0,
+      todayVisitors: 0,
+      totalVisitors: 0
+    };
+  }
+}
+
+// 2. 이번 달 게시글 리스트 조회 및 지정단어 판별
+async function getNaverBlogThisMonthPosts(blogId, designatedWords) {
+  const posts = [];
+  let page = 1;
+  let keepGoing = true;
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  try {
+    while (keepGoing && page <= 5) {
+      const listUrl = `https://blog.naver.com/PostTitleListAsync.naver?blogId=${encodeURIComponent(blogId)}&viewdate=&parentCategoryNo=&categoryNo=&itemcount=20&authorid=&userSelectMenu=&parentCategoryCode=&currentPage=${page}`;
+      const response = await fetch(listUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': `https://blog.naver.com/${encodeURIComponent(blogId)}`
+        }
+      });
+      if (!response.ok) break;
+      const text = await response.text();
+      const cleaned = text.replace(/\\'/g, "'");
+      const listData = JSON.parse(cleaned);
+
+      if (listData.resultCode !== 'S' || !listData.postList || listData.postList.length === 0) {
+        break;
+      }
+
+      for (const post of listData.postList) {
+        const addDate = post.addDate || '';
+        let isThisMonth = false;
+        
+        if (addDate.includes('전') || addDate.includes('어제') || addDate.includes('오늘') || addDate.includes('방금')) {
+          isThisMonth = true;
+        } else {
+          const cleanDate = addDate.replace(/\s+/g, '');
+          const parts = cleanDate.split('.');
+          if (parts.length >= 2) {
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            isThisMonth = (year === currentYear && month === currentMonth);
+          }
+        }
+
+        if (!isThisMonth) {
+          keepGoing = false;
+          break;
+        }
+
+        let matchedWords = [];
+        try {
+          const postUrl = `https://m.blog.naver.com/PostView.naver?blogId=${encodeURIComponent(blogId)}&logNo=${post.logNo}`;
+          const postRes = await fetch(postUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
+              'Referer': 'https://m.blog.naver.com/'
+            }
+          });
+          if (postRes.ok) {
+            const bodyHtml = await postRes.text();
+            let mainContent = '';
+            const parts = bodyHtml.split(/class="se-main-container"/i);
+            if (parts.length > 1) {
+              mainContent = parts[1].split(/class="post_footer"|id="post_share"/i)[0];
+            } else {
+              mainContent = bodyHtml;
+            }
+            const cleanText = mainContent.replace(/<[^>]*>/g, ' ').toLowerCase();
+            
+            if (Array.isArray(designatedWords)) {
+              matchedWords = designatedWords.filter(word => {
+                const cleanWord = word.trim().toLowerCase();
+                return cleanWord.length > 0 && cleanText.includes(cleanWord);
+              });
+            }
+          }
+        } catch (postErr) {
+          console.error(`본문 내용 추출 실패 (logNo: ${post.logNo}):`, postErr);
+        }
+
+        let decodedTitle = '';
+        try {
+          decodedTitle = decodeURIComponent((post.title || '').replace(/\+/g, '%20'));
+        } catch (e) {
+          decodedTitle = post.title || '';
+        }
+
+        posts.push({
+          logNo: post.logNo,
+          title: decodedTitle,
+          link: `https://m.blog.naver.com/PostView.naver?blogId=${encodeURIComponent(blogId)}&logNo=${post.logNo}`,
+          addDate: addDate,
+          matchedWords: matchedWords
+        });
+      }
+
+      page++;
+      await new Promise(resolve => setTimeout(resolve, 150));
+    }
+  } catch (err) {
+    console.error(`이번달 글 목록 추출 중 오류 (${blogId}):`, err);
+  }
+
+  return posts;
+}
+
+// 3. 수집 API 엔드포인트
+app.post('/api/competitor-blog/scrape-all', async (req, res) => {
+  const { blogs, designatedWords } = req.body;
+  if (!Array.isArray(blogs)) {
+    return res.status(400).json({ success: false, error: 'blogs 배열이 필요합니다.' });
+  }
+
+  console.log(`[경쟁 블로그 탐색] 총 ${blogs.length}개 블로그 수집 시작...`);
+  try {
+    const scrapedData = [];
+    for (const blog of blogs) {
+      const blogId = blog.blogId;
+      const stats = await getNaverBlogStats(blogId);
+      const posts = await getNaverBlogThisMonthPosts(blogId, designatedWords);
+      scrapedData.push({
+        blogId,
+        stats,
+        posts,
+        lastScraped: new Date().toISOString()
+      });
+    }
+    res.json({ success: true, scrapedData });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// --- 지정 경로 로컬 스크린샷 뷰어 API ---
+// 1. 지정 폴더 이미지 목록 조회
+app.get('/api/local-screenshots', (req, res) => {
+  const folderPath = req.query.folderPath || 'D:\\rank';
+  try {
+    if (!fs.existsSync(folderPath)) {
+      return res.json({ success: true, files: [] });
+    }
+    const files = fs.readdirSync(folderPath);
+    const result = [];
+    for (const file of files) {
+      const ext = path.extname(file).toLowerCase();
+      if (ext === '.png' || ext === '.jpg' || ext === '.jpeg') {
+        const filePath = path.join(folderPath, file);
+        const stats = fs.statSync(filePath);
+        const baseName = path.basename(file, ext);
+        const parts = baseName.split(' ');
+        
+        let dateStr = '';
+        let keyword = '';
+        if (parts.length >= 2) {
+          const lastPart = parts[parts.length - 1];
+          if (/^\d{4}\.\d{2}\.\d{2}$/.test(lastPart)) {
+            dateStr = lastPart;
+            keyword = parts.slice(0, parts.length - 1).join(' ');
+          } else {
+            keyword = baseName;
+            const d = new Date(stats.mtime);
+            dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+          }
+        } else {
+          keyword = baseName;
+          const d = new Date(stats.mtime);
+          dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        result.push({
+          fileName: file,
+          keyword: keyword.trim(),
+          date: dateStr,
+          mtime: stats.mtimeMs
+        });
+      }
+    }
+    result.sort((a, b) => b.mtime - a.mtime);
+    res.json({ success: true, files: result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 2. 단일 로컬 이미지 로드
+app.get('/api/local-screenshots/view', (req, res) => {
+  const folderPath = req.query.folderPath || 'D:\\rank';
+  const fileName = req.query.fileName;
+  if (!fileName) {
+    return res.status(400).send('fileName 파라미터가 누락되었습니다.');
+  }
+  const filePath = path.join(folderPath, fileName);
+  try {
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).send('파일을 찾을 수 없습니다.');
+    }
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// --- 경쟁 블로그 정기 자동 스케줄러 (오후 1시, 오후 6시 수집) ---
+setInterval(async () => {
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+  const kst = new Date(utc + (9 * 60 * 60 * 1000));
+
+  const hour = String(kst.getHours()).padStart(2, '0');
+  const minute = String(kst.getMinutes()).padStart(2, '0');
+  const currentTimeStr = `${hour}:${minute}`;
+
+  // 지정 시각 13:00, 18:00에 수집
+  if (currentTimeStr === '13:00' || currentTimeStr === '18:00') {
+    // 30초 주기로 체크하므로 동일 분 내 중복 실행 방지용 플래그
+    if (global.lastCompetitorScrapedTime === currentTimeStr) return;
+    global.lastCompetitorScrapedTime = currentTimeStr;
+
+    console.log(`[정기 경쟁 블로그 수집 시작] 자동 시각: ${currentTimeStr}`);
+    try {
+      // Cloudflare Pages KV API 호출하여 현재 등록된 블로그와 지정단어 목록 가져오기
+      const cfGetRes = await fetch('https://springmoons.pages.dev/api/competitor-blog');
+      if (!cfGetRes.ok) throw new Error("Cloudflare KV 데이터를 가져올 수 없습니다.");
+      const cfData = await cfGetRes.json();
+
+      const blogs = cfData.blogs || [];
+      const designatedWords = cfData.designatedWords || [];
+
+      if (blogs.length === 0) {
+        console.log("[정기 경쟁 블로그 수집] 등록된 블로그가 없어 패스합니다.");
+        return;
+      }
+
+      // 스크래핑 진행
+      const scrapedData = [];
+      for (const blog of blogs) {
+        const stats = await getNaverBlogStats(blog.blogId);
+        const posts = await getNaverBlogThisMonthPosts(blog.blogId, designatedWords);
+        scrapedData.push({
+          blogId: blog.blogId,
+          stats,
+          posts,
+          lastScraped: new Date().toISOString()
+        });
+      }
+
+      // Cloudflare Pages KV API로 결과 업데이트 전송
+      const cfPostRes = await fetch('https://springmoons.pages.dev/api/competitor-blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          blogs,
+          designatedWords,
+          scrapedData
+        })
+      });
+
+      if (cfPostRes.ok) {
+        console.log(`[정기 경쟁 블로그 수집 완료] 자동 시각 ${currentTimeStr} 데이터 수집 및 KV 저장에 성공했습니다.`);
+      } else {
+        console.error(`[정기 경쟁 블로그 수집 실패] KV 저장 응답 실패: ${cfPostRes.status}`);
+      }
+    } catch (err) {
+      console.error("[정기 경쟁 블로그 수집 중 에러 발생]:", err);
+    }
+  }
+}, 30000);
+
 // OPTIONS preflight endpoint for client checks
 app.options('/api/screenshot', cors(), (req, res) => {
+  res.sendStatus(200);
+});
+app.options('/api/competitor-blog/scrape-all', cors(), (req, res) => {
+  res.sendStatus(200);
+});
+app.options('/api/local-screenshots', cors(), (req, res) => {
   res.sendStatus(200);
 });
 
