@@ -265,7 +265,7 @@
         <!-- Core Info Row (Visible in View Mode only) -->
         <div id="modal-core-row" class="grid grid-cols-2 gap-4 pb-4 border-b border-[#e5e2d9]">
           <div class="bg-[#fffbeb] rounded-xl p-3 border border-[#fef3c7] text-center">
-            <span class="text-[9px] font-bold text-amber-700 block uppercase tracking-wider">ROAS 성과</span>
+            <span id="modal-roas-label" class="text-[9px] font-bold text-amber-700 block uppercase tracking-wider">ROAS 성과</span>
             <span id="modal-roas" class="text-sm font-black text-amber-600"></span>
           </div>
           <div class="bg-[#f0fdf4] rounded-xl p-3 border border-[#dcfce7] text-center">
@@ -603,6 +603,7 @@
         logo: "",
         clientName: "",
         businessType: "",
+        roasLabel: "ROAS 성과",
         roas: "",
         channels: "",
         description: "",
@@ -640,13 +641,14 @@
         const logo = card.querySelector(".logo-preview")?.getAttribute("src") || "";
         const clientName = card.querySelector(".client-name-input")?.value || card.querySelector(".client-name-text")?.textContent || "";
         const businessType = card.querySelector(".business-type-input")?.value || card.dataset.businessType || "";
+        const roasLabel = card.querySelector(".roas-label-input")?.value || card.querySelector(".roas-label-hidden")?.value || "ROAS 성과";
         const roas = card.querySelector(".roas-input")?.value || "";
         const channels = card.querySelector(".channels-input")?.value || "";
         const description = card.querySelector(".description-input")?.value || "";
         const detailHtml = card.querySelector(".detail-html-hidden")?.value || "";
 
         updatedList.push({
-          id, logo, clientName, businessType, roas, channels, description, detailHtml
+          id, logo, clientName, businessType, roasLabel, roas, channels, description, detailHtml
         });
       });
 
@@ -769,12 +771,15 @@
             <!-- ROAS & Channels Grid -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-[9px] font-bold text-gray-500 mb-1">ROAS 수치</label>
-                <input type="text" class="roas-input w-full px-2.5 py-1 border rounded-lg text-xs font-bold text-amber-600 bg-[#fffbeb] border-[#fef3c7]" placeholder="예: 800%" value="${item.roas || ''}">
+                <div class="flex items-center justify-between mb-1">
+                  <input type="text" class="roas-label-input w-2/3 bg-transparent text-[9px] font-bold text-gray-500 border-b border-dashed border-gray-300 focus:border-amber-500 focus:outline-none" placeholder="라벨 (예: ROAS 성과)" value="${item.roasLabel || 'ROAS 성과'}">
+                  <span class="text-[9px] text-gray-400 font-bold">수치</span>
+                </div>
+                <input type="text" class="roas-input w-full px-2.5 py-1 border border-gray-200 rounded-lg text-xs font-bold text-amber-600 bg-[#fffbeb] border-[#fef3c7] focus:outline-none" placeholder="예: 800%" value="${item.roas || ''}">
               </div>
               <div>
                 <label class="block text-[9px] font-bold text-gray-500 mb-1">진행 마케팅 매체</label>
-                <input type="text" class="channels-input w-full px-2.5 py-1 border rounded-lg text-xs font-bold text-green-600 bg-[#f0fdf4] border-[#dcfce7]" placeholder="예: 블로그, 파워링크" value="${item.channels || ''}">
+                <input type="text" class="channels-input w-full px-2.5 py-1 border border-gray-200 rounded-lg text-xs font-bold text-green-600 bg-[#f0fdf4] border-[#dcfce7]" placeholder="예: 블로그, 파워링크" value="${item.channels || ''}">
               </div>
             </div>
 
@@ -813,8 +818,9 @@
               <!-- Badges / Stats -->
               <div class="grid grid-cols-2 gap-2 pt-1">
                 <div class="bg-[#fffbeb] border border-[#fef3c7] rounded-lg p-2.5 text-center">
-                  <div class="text-[9px] text-amber-700 font-bold uppercase tracking-wider">ROAS 성과</div>
+                  <div class="roas-label-text text-[9px] text-amber-700 font-bold uppercase tracking-wider">${item.roasLabel || 'ROAS 성과'}</div>
                   <div class="roas-text text-xs font-black text-amber-600 mt-0.5 line-clamp-1">${item.roas || '-'}</div>
+                  <input type="hidden" class="roas-label-hidden" value="${item.roasLabel || 'ROAS 성과'}">
                 </div>
                 <div class="bg-[#f0fdf4] border border-[#dcfce7] rounded-lg p-2.5 text-center">
                   <div class="text-[9px] text-green-700 font-bold uppercase tracking-wider">마케팅 매체</div>
@@ -951,6 +957,7 @@
       
       // Load Stats
       document.getElementById("modal-core-row").classList.remove("hidden");
+      document.getElementById("modal-roas-label").textContent = item.roasLabel || "ROAS 성과";
       document.getElementById("modal-roas").textContent = item.roas || "-";
       document.getElementById("modal-channels").textContent = item.channels || "-";
       
