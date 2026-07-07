@@ -6268,6 +6268,8 @@
         if (!loadBtn || !dirInput || !keywordsContainer || !imagesContainer) return;
         
         let localFiles = [];
+        let activeIndex = -1;
+        let currentFilteredFiles = [];
         
         // 초기 가동 시 기본 D:\rank에서 자동 불러오기 시도
         loadLocalScreenshots();
@@ -6340,20 +6342,21 @@
         
         function renderImages(files) {
           imagesContainer.innerHTML = '';
+          currentFilteredFiles = files;
           if (files.length === 0) {
             imagesContainer.innerHTML = '<div class="col-span-full py-10 text-center text-xs text-gray-400 font-semibold">해당 키워드의 이미지가 없습니다.</div>';
             return;
           }
           
           const folderPath = dirInput.value.trim() || "D:\\rank";
-          files.forEach(file => {
+          files.forEach((file, index) => {
             const card = document.createElement("div");
             card.className = "bg-gray-50 dark-mode:bg-gray-750 p-3 rounded-xl border border-gray-200 dark-mode:border-gray-700 space-y-2 flex flex-col justify-between";
             const imgUrl = `http://127.0.0.1:3888/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
             card.innerHTML = `
-              <div class="relative group cursor-pointer overflow-hidden rounded-lg border border-gray-150 dark-mode:border-gray-700 bg-white" onclick="window.open('${imgUrl}')">
+              <div class="relative group cursor-pointer overflow-hidden rounded-lg border border-gray-150 dark-mode:border-gray-700 bg-white" onclick="openLightbox(${index})">
                 <img src="${imgUrl}" alt="${file.fileName}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
-                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">클릭하여 원본보기</div>
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">클릭하여 연속보기 (슬라이드)</div>
               </div>
               <div class="flex items-center justify-between text-[11px] font-bold text-gray-600 dark-mode:text-gray-300">
                 <span class="truncate pr-2" title="${file.keyword}">${file.keyword}</span>
@@ -6362,6 +6365,101 @@
             `;
             imagesContainer.appendChild(card);
           });
+        }
+
+        window.openLightbox = function(index) {
+          activeIndex = index;
+          let lightbox = document.getElementById("screenshot-lightbox");
+          if (!lightbox) {
+            lightbox = document.createElement("div");
+            lightbox.id = "screenshot-lightbox";
+            lightbox.className = "fixed inset-0 bg-black/95 backdrop-blur-md flex flex-col z-[100] transition-opacity duration-300 justify-between p-4 md:p-6";
+            lightbox.innerHTML = `
+              <!-- Header -->
+              <div class="flex items-center justify-between text-white pb-3 border-b border-gray-800">
+                <h4 id="lightbox-title" class="text-xs md:text-sm font-extrabold truncate"></h4>
+                <button onclick="closeLightbox()" class="text-gray-400 hover:text-white text-3xl font-bold leading-none p-1 focus:outline-none">&times;</button>
+              </div>
+              
+              <!-- Content Row -->
+              <div class="flex-1 flex items-center justify-between relative overflow-hidden my-4">
+                <!-- Prev Button -->
+                <button onclick="prevLightbox()" class="absolute left-2 md:left-4 z-10 p-3 bg-black/50 hover:bg-black/80 rounded-full text-white text-lg font-bold shadow transition-all leading-none focus:outline-none">&lt;</button>
+                
+                <!-- Image Box (Scrollable for long full-page screenshots) -->
+                <div class="w-full h-full overflow-y-auto flex justify-center items-start px-8 md:px-16 py-2 select-none" id="lightbox-img-box">
+                  <img id="lightbox-img" src="" class="max-w-full h-auto rounded shadow-2xl border border-gray-850" style="min-width: 320px; max-width: 1000px; display: block;" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
+                </div>
+                
+                <!-- Next Button -->
+                <button onclick="nextLightbox()" class="absolute right-2 md:right-4 z-10 p-3 bg-black/50 hover:bg-black/80 rounded-full text-white text-lg font-bold shadow transition-all leading-none focus:outline-none">&gt;</button>
+              </div>
+              
+              <!-- Footer / Navigation Indicators -->
+              <div class="text-center text-xs text-gray-500 font-bold select-none pt-2" id="lightbox-footer">
+                키보드 방향키(←, →)로 이동 가능 / ESC 키로 닫기
+              </div>
+            `;
+            document.body.appendChild(lightbox);
+            document.addEventListener("keydown", handleLightboxKeydown);
+          }
+          
+          lightbox.classList.remove("hidden");
+          updateLightboxContent();
+        };
+
+        window.closeLightbox = function() {
+          const lightbox = document.getElementById("screenshot-lightbox");
+          if (lightbox) {
+            lightbox.classList.add("hidden");
+          }
+        };
+
+        window.prevLightbox = function() {
+          if (currentFilteredFiles.length === 0) return;
+          activeIndex = (activeIndex - 1 + currentFilteredFiles.length) % currentFilteredFiles.length;
+          updateLightboxContent();
+        };
+
+        window.nextLightbox = function() {
+          if (currentFilteredFiles.length === 0) return;
+          activeIndex = (activeIndex + 1) % currentFilteredFiles.length;
+          updateLightboxContent();
+        };
+
+        function updateLightboxContent() {
+          const file = currentFilteredFiles[activeIndex];
+          if (!file) return;
+          
+          const folderPath = dirInput.value.trim() || "D:\\rank";
+          const imgUrl = `http://127.0.0.1:3888/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
+          
+          const titleEl = document.getElementById("lightbox-title");
+          const imgEl = document.getElementById("lightbox-img");
+          const imgBox = document.getElementById("lightbox-img-box");
+          
+          if (titleEl) {
+            titleEl.textContent = `📂 [${file.keyword}] - ${file.date} (${activeIndex + 1} / ${currentFilteredFiles.length})`;
+          }
+          if (imgEl) {
+            imgEl.src = imgUrl;
+          }
+          if (imgBox) {
+            imgBox.scrollTop = 0; // 새 이미지 로드 시 스크롤을 맨 위로 초기화
+          }
+        }
+
+        function handleLightboxKeydown(e) {
+          const lightbox = document.getElementById("screenshot-lightbox");
+          if (!lightbox || lightbox.classList.contains("hidden")) return;
+          
+          if (e.key === "ArrowLeft") {
+            prevLightbox();
+          } else if (e.key === "ArrowRight") {
+            nextLightbox();
+          } else if (e.key === "Escape") {
+            closeLightbox();
+          }
         }
       }
 

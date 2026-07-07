@@ -713,6 +713,93 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords, imageType =
   }
 }
 
+// PC 스크린샷 좌우 공백 마진 잘라내기 함수
+async function cropScreenshotMargins(browser, buffer, platform) {
+  try {
+    const base64Image = buffer.toString('base64');
+    const page = await browser.newPage();
+    
+    // 네이버 PC 검색 결과: 약 80px 시작, 콘텐츠 폭 1050px
+    // 구글 PC 검색 결과: 약 140px 시작, 콘텐츠 폭 800px
+    let xStart = 80;
+    let cropWidth = 1050;
+    
+    if (platform === 'google') {
+      xStart = 140;
+      cropWidth = 800;
+    }
+    
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { margin: 0; padding: 0; overflow: hidden; background: white; }
+          canvas { display: block; }
+        </style>
+      </head>
+      <body>
+        <canvas id="canvas"></canvas>
+        <script>
+          window.cropImage = function(base64Data, x, width) {
+            return new Promise((resolve, reject) => {
+              const img = new Image();
+              img.src = 'data:image/jpeg;base64,' + base64Data;
+              img.onload = function() {
+                const canvas = document.getElementById('canvas');
+                
+                // 만약 1350px가 아닌 모바일 해상도(750px 등)인 경우 자르지 않고 그대로 리턴
+                if (img.naturalWidth !== 1350) {
+                  canvas.width = img.naturalWidth;
+                  canvas.height = img.naturalHeight;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0);
+                  resolve({ width: img.naturalWidth, height: img.naturalHeight });
+                  return;
+                }
+                
+                canvas.width = width;
+                canvas.height = img.naturalHeight;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, x, 0, width, img.naturalHeight, 0, 0, width, img.naturalHeight);
+                resolve({ width: width, height: img.naturalHeight });
+              };
+              img.onerror = function(err) {
+                reject(err);
+              };
+            });
+          };
+        </script>
+      </body>
+      </html>
+    `;
+    
+    await page.setContent(htmlContent);
+    const dimensions = await page.evaluate(async (imgBase64, x, w) => {
+      return await window.cropImage(imgBase64, x, w);
+    }, base64Image, xStart, cropWidth);
+    
+    await page.setViewport({
+      width: dimensions.width,
+      height: dimensions.height,
+      deviceScaleFactor: 1
+    });
+    
+    const croppedBuffer = await page.screenshot({
+      type: 'jpeg',
+      quality: 85,
+      fullPage: true
+    });
+    
+    await page.close();
+    return croppedBuffer;
+  } catch (err) {
+    console.error("[스크린샷 마진 크롭 실패]:", err);
+    return buffer;
+  }
+}
+
 // Shared capture method
 async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
   // tasks: Array of { keyword: string, platform: 'naver' | 'google' }
@@ -749,15 +836,13 @@ async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
       try {
         console.log(`[작업 진행] [${platform.toUpperCase()}] 검색 및 스크롤: "${cleanKeyword}"`);
         if (platform === 'google') {
-          // Safe human-like navigation starting from the main search page
           await page.goto('https://www.google.com', { waitUntil: 'networkidle2', timeout: 60000 });
           
-          // Google Cookie Consent Bypass if exists
           try {
             const consentBtn = await page.$('button[aria-label="Accept all"], button[aria-label="동의"], #L2AGLb');
             if (consentBtn) {
               await consentBtn.click();
-              await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => null);
+              await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 500 }).catch(() => null);
             }
           } catch (e) {}
 
@@ -765,7 +850,6 @@ async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
           await page.waitForSelector(searchBoxSelector, { timeout: 10000 });
           await page.click(searchBoxSelector);
           
-          // Human-like typing with random character delays
           for (const char of cleanKeyword) {
             await page.type(searchBoxSelector, char);
             await new Promise(resolve => setTimeout(resolve, 60 + Math.random() * 80));
@@ -782,9 +866,6 @@ async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
 
         const safeFilename = cleanKeyword.replace(/[\\/:*?"<>|]/g, '_');
         
-        // File saved as:
-        // Naver: [Keyword] [YYYY.MM.DD].jpg
-        // Google: [Keyword] 구글 [YYYY.MM.DD].jpg
         let filename = '';
         if (platform === 'naver') {
           filename = `${safeFilename} ${dateStr}.jpg`;
@@ -798,6 +879,9 @@ async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
           quality: 85,
           fullPage: true
         });
+
+        // PC 스크린샷 좌우 공백 마진 잘라내기 실행
+        screenshotBuffer = await cropScreenshotMargins(browser, screenshotBuffer, platform);
 
         // Run OCR and draw red circles on it if target words are found
         const circledBuffer = await detectAndDrawRedCircles(browser, screenshotBuffer, ocrKeywords);
