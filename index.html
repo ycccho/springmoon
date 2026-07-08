@@ -6298,6 +6298,7 @@
         let localFiles = [];
         let activeIndex = -1;
         let currentFilteredFiles = [];
+        let isCloudMode = false;
         
         // 초기 가동 시 기본 D:\rank에서 자동 불러오기 시도
         loadLocalScreenshots();
@@ -6308,6 +6309,7 @@
           const folderPath = dirInput.value.trim() || "D:\\rank";
           keywordsContainer.innerHTML = '<span class="text-xs text-gray-500 font-semibold">불러오는 중...</span>';
           imagesContainer.innerHTML = '';
+          isCloudMode = false;
           
           try {
             const res = await fetch(getLocalServerUrl(`/api/local-screenshots?folderPath=${encodeURIComponent(folderPath)}`));
@@ -6320,7 +6322,21 @@
               keywordsContainer.innerHTML = `<span class="text-xs text-red-500 font-semibold">오류: ${data.error}</span>`;
             }
           } catch (err) {
-            console.error("Local screenshots fetch failed:", err);
+            console.warn("Local server offline, trying cloud fallback...", err);
+            try {
+              const res = await fetch(`/api/sync-screenshots?action=list&folderPath=${encodeURIComponent(folderPath)}`);
+              if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                  localFiles = data.files || [];
+                  isCloudMode = true;
+                  renderKeywordButtons();
+                  return;
+                }
+              }
+            } catch (cloudErr) {
+              console.error("Cloud fallback failed too:", cloudErr);
+            }
             keywordsContainer.innerHTML = `<span class="text-xs text-red-500 font-semibold">로컬 백서버(${getLocalServerUrl('/')})가 실행 중인지 확인해 주세요.</span>`;
           }
         }
@@ -6380,7 +6396,9 @@
           files.forEach((file, index) => {
             const card = document.createElement("div");
             card.className = "bg-gray-50 dark-mode:bg-gray-750 p-3 rounded-xl border border-gray-200 dark-mode:border-gray-700 space-y-2 flex flex-col justify-between";
-            const imgUrl = getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`);
+            const imgUrl = isCloudMode
+              ? `/api/sync-screenshots?action=view-file&folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`
+              : getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`);
             card.innerHTML = `
               <div class="relative group cursor-pointer overflow-hidden rounded-lg border border-gray-150 dark-mode:border-gray-700 bg-white" onclick="openLightbox(${index})">
                 <img src="${imgUrl}" alt="${file.fileName}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
@@ -6487,7 +6505,9 @@
           if (!file) return;
           
           const folderPath = dirInput.value.trim() || "D:\\rank";
-          const imgUrl = getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`);
+          const imgUrl = isCloudMode
+            ? `/api/sync-screenshots?action=view-file&folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`
+            : getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`);
           
           const titleEl = document.getElementById("lightbox-title");
           const imgEl = document.getElementById("lightbox-img");

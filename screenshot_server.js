@@ -1252,11 +1252,47 @@ app.get('/api/local-screenshots', (req, res) => {
       }
     }
     result.sort((a, b) => b.mtime - a.mtime);
+
+    // Trigger Cloudflare KV sync in the background
+    syncLocalScreenshotsToCloud(folderPath, result).catch(() => {});
+
     res.json({ success: true, files: result });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// Background Cloudflare KV sync function
+async function syncLocalScreenshotsToCloud(folderPath, files) {
+  try {
+    const listRes = await fetch('https://springmoons.pages.dev/api/sync-screenshots?action=sync-list', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folderPath, files })
+    });
+    if (!listRes.ok) return;
+
+    const data = await listRes.json();
+    const missing = data.missingFiles || [];
+    for (const fileName of missing) {
+      const filePath = path.join(folderPath, fileName);
+      if (fs.existsSync(filePath)) {
+        const buffer = fs.readFileSync(filePath);
+        const base64Data = buffer.toString('base64');
+        const ext = path.extname(fileName).toLowerCase();
+        const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
+
+        await fetch('https://springmoons.pages.dev/api/sync-screenshots?action=upload-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folderPath, fileName, mimeType, base64Data })
+        });
+      }
+    }
+  } catch (err) {
+    console.warn(`[클라우드 동기화 실패] ${err.message}`);
+  }
+}
 
 // 2. 단일 로컬 이미지 로드
 app.get('/api/local-screenshots/view', (req, res) => {
