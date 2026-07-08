@@ -74,6 +74,11 @@
           <div class="text-[10px] text-orange-200 uppercase tracking-wider font-bold">🖥️ 접속 IP</div>
           <div id="visitor-ip" class="text-xs font-mono font-bold text-white bg-orange-700 bg-opacity-40 px-2 py-0.5 rounded">조회 중...</div>
         </div>
+        <!-- Local Server Address Widget -->
+        <div class="bg-white bg-opacity-10 rounded-xl p-3 space-y-1.5">
+          <div class="text-[10px] text-orange-200 uppercase tracking-wider font-bold">⚙️ 로컬 백서버 주소</div>
+          <input type="text" id="sidebar-local-server-input" class="w-full px-2 py-1 text-xs rounded bg-orange-800 bg-opacity-40 border border-white border-opacity-10 text-white placeholder-orange-200 focus:outline-none focus:ring-1 focus:ring-white font-mono" placeholder="localhost:3888">
+        </div>
       </div>
 
       <nav id="menu-container" class="space-y-4 flex-1"></nav>
@@ -117,8 +122,16 @@
   </div>
 
   <script>
-    // Dynamic local helper backend resolution (handles private network loopbacks for HTTPS)
-    const localHostDomain = 'localhost:3888';
+    // Dynamic local helper backend URL resolver (supports ngrok / custom ports / local network IPs)
+    function getLocalServerUrl(path) {
+      let addr = localStorage.getItem("localServerAddress") || 'localhost:3888';
+      addr = addr.trim().replace(/\/$/, "");
+      let url = addr;
+      if (!/^https?:\/\//i.test(addr)) {
+        url = 'http://' + addr;
+      }
+      return url + (path.startsWith('/') ? path : '/' + path);
+    }
 
     // ============================================
     // 시스템 설정
@@ -4124,6 +4137,18 @@
       currentMenus = loadMenuOrder();
       currentCategories = loadCategories();
 
+      const serverInput = document.getElementById("sidebar-local-server-input");
+      if (serverInput) {
+        serverInput.value = localStorage.getItem("localServerAddress") || "localhost:3888";
+        serverInput.addEventListener("change", () => {
+          const val = serverInput.value.trim() || "localhost:3888";
+          localStorage.setItem("localServerAddress", val);
+          if (typeof checkServerStatus === "function") {
+            checkServerStatus();
+          }
+        });
+      }
+
       // Sync brand name and add save listeners
       const brandNameElem = document.getElementById("brand-name");
       const mobileBrandNameElem = document.getElementById("mobile-brand-name");
@@ -5979,7 +6004,7 @@
 
       async function loadScheduleConfig() {
         try {
-          const res = await fetch(`http://${localHostDomain}/api/config`);
+          const res = await fetch(getLocalServerUrl('/api/config'));
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.config) {
@@ -6027,7 +6052,7 @@
 
       async function checkServerStatus() {
         try {
-          await fetch(`http://${localHostDomain}/api/screenshot`, { method: "OPTIONS" });
+          await fetch(getLocalServerUrl('/api/screenshot'), { method: "OPTIONS" });
           serverOnline = true;
           statusText.innerHTML = `
             <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
@@ -6104,7 +6129,7 @@
           }
 
           try {
-            const res = await fetch(`http://${localHostDomain}/api/config`, {
+            const res = await fetch(getLocalServerUrl('/api/config'), {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ schedules })
@@ -6184,7 +6209,7 @@
         try {
           summary.textContent = `진행 중 (0 / \${tasks.length})`;
           
-          const res = await fetch(`http://${localHostDomain}/api/screenshot`, {
+          const res = await fetch(getLocalServerUrl('/api/screenshot'), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -6285,7 +6310,7 @@
           imagesContainer.innerHTML = '';
           
           try {
-            const res = await fetch(`http://${localHostDomain}/api/local-screenshots?folderPath=${encodeURIComponent(folderPath)}`);
+            const res = await fetch(getLocalServerUrl(`/api/local-screenshots?folderPath=${encodeURIComponent(folderPath)}`));
             if (!res.ok) throw new Error("서버 응답 오류");
             const data = await res.json();
             if (data.success) {
@@ -6296,7 +6321,7 @@
             }
           } catch (err) {
             console.error("Local screenshots fetch failed:", err);
-            keywordsContainer.innerHTML = `<span class="text-xs text-red-500 font-semibold">로컬 백서버(http://${localHostDomain})가 실행 중인지 확인해 주세요.</span>`;
+            keywordsContainer.innerHTML = `<span class="text-xs text-red-500 font-semibold">로컬 백서버(${getLocalServerUrl('/')})가 실행 중인지 확인해 주세요.</span>`;
           }
         }
         
@@ -6355,7 +6380,7 @@
           files.forEach((file, index) => {
             const card = document.createElement("div");
             card.className = "bg-gray-50 dark-mode:bg-gray-750 p-3 rounded-xl border border-gray-200 dark-mode:border-gray-700 space-y-2 flex flex-col justify-between";
-            const imgUrl = `http://${localHostDomain}/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
+            const imgUrl = getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`);
             card.innerHTML = `
               <div class="relative group cursor-pointer overflow-hidden rounded-lg border border-gray-150 dark-mode:border-gray-700 bg-white" onclick="openLightbox(${index})">
                 <img src="${imgUrl}" alt="${file.fileName}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
@@ -6462,7 +6487,7 @@
           if (!file) return;
           
           const folderPath = dirInput.value.trim() || "D:\\rank";
-          const imgUrl = `http://${localHostDomain}/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`;
+          const imgUrl = getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`);
           
           const titleEl = document.getElementById("lightbox-title");
           const imgEl = document.getElementById("lightbox-img");
@@ -6636,7 +6661,7 @@
         logConsole(`[\${processedCount + 1}/\${totalCount}] "\${post.title}" 처리 중...`);
 
         try {
-          const res = await fetch(`http://${localHostDomain}/api/blog-posts/process-one`, {
+          const res = await fetch(getLocalServerUrl('/api/blog-posts/process-one'), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -6747,7 +6772,7 @@
 
         try {
           logConsole(`[네트워크] 네이버 블로그 전체 공개 게시글 목록을 수집하는 중...`);
-          const res = await fetch(`http://${localHostDomain}/api/blog-posts/list?blogId=${encodeURIComponent(blogId)}`);
+          const res = await fetch(getLocalServerUrl(`/api/blog-posts/list?blogId=${encodeURIComponent(blogId)}`));
           if (!res.ok) {
             const err = await res.json().catch(() => ({}));
             throw new Error(err.error || "글 목록 조회에 실패했습니다.");
@@ -8153,7 +8178,7 @@
         }
         
         try {
-          const res = await fetch(`http://${localHostDomain}/api/competitor-blog/scrape-all`, {
+          const res = await fetch(getLocalServerUrl('/api/competitor-blog/scrape-all'), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -8203,7 +8228,7 @@
             }
             await saveConfigToServer();
           } else {
-            alert(`경쟁 블로그 수집을 위해서는 로컬 캡처 서버(http://${localHostDomain})가 가동 중이어야 합니다.`);
+            alert(`경쟁 블로그 수집을 위해서는 로컬 캡처 서버(${getLocalServerUrl('/')})가 가동 중이어야 합니다.`);
           }
         } finally {
           renderBlogs();
