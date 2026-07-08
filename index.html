@@ -6318,6 +6318,9 @@
             if (data.success) {
               localFiles = data.files || [];
               renderKeywordButtons();
+              
+              // Trigger client-side background cloud sync
+              syncLocalScreenshotsFromClient(folderPath, localFiles);
             } else {
               keywordsContainer.innerHTML = `<span class="text-xs text-red-500 font-semibold">오류: ${data.error}</span>`;
             }
@@ -6338,6 +6341,59 @@
               console.error("Cloud fallback failed too:", cloudErr);
             }
             keywordsContainer.innerHTML = `<span class="text-xs text-red-500 font-semibold">로컬 백서버(${getLocalServerUrl('/')})가 실행 중인지 확인해 주세요.</span>`;
+          }
+        }
+
+        async function syncLocalScreenshotsFromClient(folderPath, files) {
+          try {
+            const res = await fetch('/api/sync-screenshots?action=sync-list', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ folderPath, files })
+            });
+            if (!res.ok) return;
+
+            const data = await res.json();
+            const missing = data.missingFiles || [];
+            if (missing.length === 0) return;
+
+            console.log(`[클라우드 동기화] ${missing.length}개 이미지 업로드 중...`);
+
+            for (const fileName of missing) {
+              try {
+                const imgUrl = getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(fileName)}`);
+                const imgRes = await fetch(imgUrl);
+                if (!imgRes.ok) continue;
+
+                const blob = await imgRes.blob();
+
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                await new Promise((resolve, reject) => {
+                  reader.onloadend = async () => {
+                    try {
+                      const base64Data = reader.result.split(',')[1];
+                      const mimeType = blob.type || 'image/png';
+
+                      await fetch('/api/sync-screenshots?action=upload-file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ folderPath, fileName, mimeType, base64Data })
+                      });
+                      resolve();
+                    } catch (e) {
+                      reject(e);
+                    }
+                  };
+                  reader.onerror = reject;
+                });
+              } catch (err) {
+                console.warn(`[클라우드 업로드 실패] ${fileName}:`, err);
+              }
+            }
+            console.log('[클라우드 동기화 완료]');
+          } catch (e) {
+            console.error("클라우드 동기화 실패:", e);
           }
         }
         
