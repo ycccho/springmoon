@@ -6031,11 +6031,17 @@
         renderSchedules([]);
       }
 
+      let allSchedules = [];
+
       function renderSchedules(schedules) {
+        allSchedules = schedules || [];
         const container = document.getElementById("schedule-tasks-container");
         if (!container) return;
         container.innerHTML = "";
-        if (schedules.length === 0) {
+
+        const visibleSchedules = allSchedules.filter(s => s.saveFolder !== "D:\\clinic");
+
+        if (visibleSchedules.length === 0) {
           addScheduleTaskUI({
             id: Date.now().toString(),
             enabled: false,
@@ -6046,7 +6052,7 @@
             saveFolder: "D:\\\\search-rank"
           });
         } else {
-          schedules.forEach(schedule => {
+          visibleSchedules.forEach(schedule => {
             addScheduleTaskUI(schedule);
           });
         }
@@ -6145,6 +6151,10 @@
               ocrKeywords
             });
           }
+
+          // Preserve hidden clinic schedules during save
+          const hiddenSchedules = allSchedules.filter(s => s.saveFolder === "D:\\clinic");
+          schedules.push(...hiddenSchedules);
 
           try {
             const res = await fetch(getLocalServerUrl('/api/config'), {
