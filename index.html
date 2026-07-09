@@ -6327,6 +6327,7 @@
         let activeIndex = -1;
         let currentFilteredFiles = [];
         let isCloudMode = false;
+        let selectedKeyword = "부산사무실인테리어";
         
         // 초기 가동 시 기본 D:\rank에서 자동 불러오기 시도
         loadLocalScreenshots();
@@ -6425,6 +6426,49 @@
           }
         }
         
+        function getKeywordCategoryMapping() {
+          let mapping = {};
+          const stored = localStorage.getItem("local_viewer_keyword_categories");
+          if (stored) {
+            try {
+              mapping = JSON.parse(stored);
+            } catch (e) {}
+          }
+          return mapping;
+        }
+
+        function saveKeywordCategoryMapping(mapping) {
+          localStorage.setItem("local_viewer_keyword_categories", JSON.stringify(mapping));
+        }
+
+        function getKeywordCategory(keyword) {
+          const mapping = getKeywordCategoryMapping();
+          if (mapping[keyword]) {
+            return mapping[keyword];
+          }
+          
+          const k = keyword.toLowerCase();
+          let cat = "기타";
+          if (k.includes("병원") || k.includes("치과") || k.includes("내과") || 
+              k.includes("외과") || k.includes("성형외과") || k.includes("피부과") || 
+              k.includes("산부인과") || k.includes("정형외과") || k.includes("안과") || 
+              k.includes("의원") || k.includes("클리닉") || k.includes("하지정맥") || 
+              k.includes("피지낭종") || k.includes("탈장") || k.includes("복강경") || 
+              k.includes("맹장염") || k.includes("지방종") || k.includes("낭종")) {
+            cat = "병원";
+          } else if (k.includes("사무실") || k.includes("사옥") || k.includes("오피스") || 
+                     k.includes("bifc") || k.includes("bifc2") || k.includes("지식산업센터") || k.includes("아이비플래닛")) {
+            cat = "사무실";
+          } else if (k.includes("학원") || k.includes("수학") || k.includes("영어") || 
+                     k.includes("국어") || k.includes("음악") || k.includes("교육") || k.includes("미술")) {
+            cat = "학원";
+          }
+          
+          mapping[keyword] = cat;
+          saveKeywordCategoryMapping(mapping);
+          return cat;
+        }
+
         function renderKeywordButtons() {
           if (localFiles.length === 0) {
             keywordsContainer.innerHTML = '<span class="text-xs text-gray-400 font-semibold">지정 경로에 이미지 파일이 없습니다.</span>';
@@ -6432,40 +6476,112 @@
           }
           
           const keywords = Array.from(new Set(localFiles.map(f => f.keyword))).filter(k => k.length > 0);
-          keywordsContainer.innerHTML = '';
           
-          const allBtn = document.createElement("button");
-          allBtn.className = "px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all";
-          allBtn.textContent = `전체 (${localFiles.length})`;
-          allBtn.addEventListener("click", () => {
-            selectButton(allBtn);
-            renderImages(localFiles);
-          });
-          keywordsContainer.appendChild(allBtn);
-          
+          keywordsContainer.innerHTML = `
+            <div class="space-y-3.5 w-full">
+              <!-- Category: 병원 -->
+              <div class="category-zone p-3 bg-red-50/50 dark-mode:bg-red-950/10 rounded-xl border border-red-100/40 dark-mode:border-red-900/20 space-y-2 transition-all" data-category="병원">
+                <div class="text-[10px] font-black text-red-650 dark-mode:text-red-400 flex items-center gap-1 select-none">
+                  <span>🏥 병원 관련 키워드 (치과, 내과, 성형외과 등)</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 min-h-[32px] p-1 rounded-lg bg-white/20 dark-mode:bg-black/10" id="keywords-zone-병원"></div>
+              </div>
+              <!-- Category: 사무실 -->
+              <div class="category-zone p-3 bg-blue-50/50 dark-mode:bg-blue-950/10 rounded-xl border border-blue-100/40 dark-mode:border-blue-900/20 space-y-2 transition-all" data-category="사무실">
+                <div class="text-[10px] font-black text-blue-650 dark-mode:text-blue-400 flex items-center gap-1 select-none">
+                  <span>🖥️ 사무실 관련 키워드 (오피스, 사옥, 지산 등)</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 min-h-[32px] p-1 rounded-lg bg-white/20 dark-mode:bg-black/10" id="keywords-zone-사무실"></div>
+              </div>
+              <!-- Category: 학원 -->
+              <div class="category-zone p-3 bg-green-50/50 dark-mode:bg-green-950/10 rounded-xl border border-green-100/40 dark-mode:border-green-900/20 space-y-2 transition-all" data-category="학원">
+                <div class="text-[10px] font-black text-green-650 dark-mode:text-green-400 flex items-center gap-1 select-none">
+                  <span>✏️ 학원 관련 키워드 (어학원, 수학, 국어 등)</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 min-h-[32px] p-1 rounded-lg bg-white/20 dark-mode:bg-black/10" id="keywords-zone-학원"></div>
+              </div>
+              <!-- Category: 기타 -->
+              <div class="category-zone p-3 bg-gray-50 dark-mode:bg-gray-800 rounded-xl border border-gray-150 dark-mode:border-gray-700 space-y-2 transition-all" data-category="기타">
+                <div class="text-[10px] font-black text-gray-600 dark-mode:text-gray-400 flex items-center gap-1 select-none">
+                  <span>☕ 기타 키워드 (상가, 호텔, 카페 등)</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 min-h-[32px] p-1 rounded-lg bg-white/20 dark-mode:bg-black/10" id="keywords-zone-기타"></div>
+              </div>
+            </div>
+          `;
+
+          if (!keywords.includes(selectedKeyword)) {
+            if (keywords.includes("부산사무실인테리어")) {
+              selectedKeyword = "부산사무실인테리어";
+            } else if (keywords.length > 0) {
+              selectedKeyword = keywords[0];
+            }
+          }
+
           keywords.forEach(kw => {
             const kwFiles = localFiles.filter(f => f.keyword === kw);
-            const btn = document.createElement("button");
-            btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-200 rounded-lg text-xs font-bold shadow-sm transition-all";
-            btn.textContent = `${kw} (${kwFiles.length})`;
-            btn.addEventListener("click", () => {
-              selectButton(btn);
-              renderImages(kwFiles);
-            });
-            keywordsContainer.appendChild(btn);
-          });
-          
-          renderImages(localFiles);
-        }
-        
-        function selectButton(selectedBtn) {
-          keywordsContainer.querySelectorAll("button").forEach(btn => {
-            if (btn === selectedBtn) {
-              btn.className = "px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all";
-            } else {
-              btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-200 rounded-lg text-xs font-bold shadow-sm transition-all";
+            const cat = getKeywordCategory(kw);
+            const zone = document.getElementById(`keywords-zone-${cat}`);
+            
+            if (zone) {
+              const btn = document.createElement("button");
+              btn.draggable = true;
+              btn.dataset.keyword = kw;
+              btn.textContent = `${kw} (${kwFiles.length})`;
+              
+              if (selectedKeyword === kw) {
+                btn.className = "px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all cursor-grab active:cursor-grabbing select-none scale-[1.03] ring-2 ring-orange-400/50";
+              } else {
+                btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-750 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-250 rounded-lg text-xs font-bold shadow-sm transition-all cursor-grab active:cursor-grabbing select-none";
+              }
+
+              btn.addEventListener("click", () => {
+                selectedKeyword = kw;
+                renderKeywordButtons();
+              });
+
+              btn.addEventListener("dragstart", (e) => {
+                e.dataTransfer.setData("text/plain", kw);
+                btn.classList.add("opacity-40");
+              });
+
+              btn.addEventListener("dragend", () => {
+                btn.classList.remove("opacity-40");
+              });
+
+              zone.appendChild(btn);
             }
           });
+
+          // Bind Drag and Drop events to category zone panels
+          const zones = keywordsContainer.querySelectorAll(".category-zone");
+          zones.forEach(zone => {
+            zone.addEventListener("dragover", (e) => {
+              e.preventDefault();
+              zone.classList.add("border-orange-500", "ring-2", "ring-orange-400/50", "scale-[1.01]");
+            });
+
+            zone.addEventListener("dragleave", () => {
+              zone.classList.remove("border-orange-500", "ring-2", "ring-orange-400/50", "scale-[1.01]");
+            });
+
+            zone.addEventListener("drop", (e) => {
+              e.preventDefault();
+              zone.classList.remove("border-orange-500", "ring-2", "ring-orange-400/50", "scale-[1.01]");
+              const kw = e.dataTransfer.getData("text/plain");
+              const targetCategory = zone.dataset.category;
+
+              if (kw && targetCategory) {
+                const mapping = getKeywordCategoryMapping();
+                mapping[kw] = targetCategory;
+                saveKeywordCategoryMapping(mapping);
+                renderKeywordButtons();
+              }
+            });
+          });
+
+          const filtered = localFiles.filter(f => f.keyword === selectedKeyword);
+          renderImages(filtered);
         }
         
         function renderImages(files) {
