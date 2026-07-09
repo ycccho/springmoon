@@ -6008,30 +6008,47 @@
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.config) {
-              const container = document.getElementById("schedule-tasks-container");
-              if (container) {
-                container.innerHTML = "";
-                const schedules = data.config.schedules || [];
-                if (schedules.length === 0) {
-                  addScheduleTaskUI({
-                    id: Date.now().toString(),
-                    enabled: false,
-                    time: "09:00",
-                    naverKeywords: [],
-                    googleKeywords: [],
-                    ocrKeywords: [],
-                    saveFolder: "D:\\\\search-rank"
-                  });
-                } else {
-                  schedules.forEach(schedule => {
-                    addScheduleTaskUI(schedule);
-                  });
-                }
-              }
+              localStorage.setItem("cachedScheduleConfig", JSON.stringify(data.config));
+              renderSchedules(data.config.schedules || []);
+              return;
             }
           }
         } catch (e) {
           console.error("예약 설정 로드 실패:", e);
+        }
+
+        // Fallback to local cache
+        const cached = localStorage.getItem("cachedScheduleConfig");
+        if (cached) {
+          try {
+            const config = JSON.parse(cached);
+            renderSchedules(config.schedules || []);
+            return;
+          } catch (err) {}
+        }
+
+        // Default empty schedule task if no cache
+        renderSchedules([]);
+      }
+
+      function renderSchedules(schedules) {
+        const container = document.getElementById("schedule-tasks-container");
+        if (!container) return;
+        container.innerHTML = "";
+        if (schedules.length === 0) {
+          addScheduleTaskUI({
+            id: Date.now().toString(),
+            enabled: false,
+            time: "09:00",
+            naverKeywords: [],
+            googleKeywords: [],
+            ocrKeywords: [],
+            saveFolder: "D:\\\\search-rank"
+          });
+        } else {
+          schedules.forEach(schedule => {
+            addScheduleTaskUI(schedule);
+          });
         }
       }
 
@@ -6075,6 +6092,7 @@
         }
       }
 
+      loadScheduleConfig();
       checkServerStatus();
       const statusInterval = setInterval(checkServerStatus, 5000);
 
