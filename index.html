@@ -5873,6 +5873,9 @@
               <button id="local-screenshot-load-btn" class="px-5 py-2 bg-gray-800 hover:bg-gray-900 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1">
                 <span>🔄 불러오기</span>
               </button>
+              <button id="local-screenshot-save-order-btn" class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                <span>💾 분류/순서 저장</span>
+              </button>
             </div>
 
             <!-- Keyword selection buttons -->
@@ -6317,6 +6320,7 @@
       // --- 로컬 스크린샷 뷰어 연동 로직 ---
       function setupLocalScreenshotViewer() {
         const loadBtn = document.getElementById("local-screenshot-load-btn");
+        const saveOrderBtn = document.getElementById("local-screenshot-save-order-btn");
         const dirInput = document.getElementById("local-screenshot-dir-input");
         const keywordsContainer = document.getElementById("local-screenshot-keywords-container");
         const imagesContainer = document.getElementById("local-screenshot-images-container");
@@ -6333,6 +6337,33 @@
         loadLocalScreenshots();
         
         loadBtn.addEventListener("click", loadLocalScreenshots);
+
+        if (saveOrderBtn) {
+          saveOrderBtn.addEventListener("click", () => {
+            const config = {
+              "병원": [],
+              "사무실": [],
+              "학원": [],
+              "기타": []
+            };
+            
+            for (const cat in config) {
+              const zone = document.getElementById(`keywords-zone-${cat}`);
+              if (zone) {
+                const buttons = zone.querySelectorAll("button");
+                buttons.forEach(btn => {
+                  const kw = btn.dataset.keyword;
+                  if (kw) {
+                    config[cat].push(kw);
+                  }
+                });
+              }
+            }
+            
+            saveKeywordOrderConfig(config);
+            alert("💾 키워드 분류와 배치 순서가 성공적으로 저장되었습니다!");
+          });
+        }
         
         async function loadLocalScreenshots() {
           const folderPath = dirInput.value.trim() || "D:\\rank";
@@ -6426,47 +6457,79 @@
           }
         }
         
-        function getKeywordCategoryMapping() {
-          let mapping = {};
-          const stored = localStorage.getItem("local_viewer_keyword_categories");
+        function getKeywordOrderConfig() {
+          const stored = localStorage.getItem("local_viewer_keyword_order");
           if (stored) {
             try {
-              mapping = JSON.parse(stored);
+              return JSON.parse(stored);
             } catch (e) {}
           }
-          return mapping;
+          return null;
         }
 
-        function saveKeywordCategoryMapping(mapping) {
-          localStorage.setItem("local_viewer_keyword_categories", JSON.stringify(mapping));
+        function saveKeywordOrderConfig(config) {
+          localStorage.setItem("local_viewer_keyword_order", JSON.stringify(config));
         }
 
-        function getKeywordCategory(keyword) {
-          const mapping = getKeywordCategoryMapping();
-          if (mapping[keyword]) {
-            return mapping[keyword];
-          }
-          
+        function getAutoKeywordCategory(keyword) {
           const k = keyword.toLowerCase();
-          let cat = "기타";
           if (k.includes("병원") || k.includes("치과") || k.includes("내과") || 
               k.includes("외과") || k.includes("성형외과") || k.includes("피부과") || 
               k.includes("산부인과") || k.includes("정형외과") || k.includes("안과") || 
               k.includes("의원") || k.includes("클리닉") || k.includes("하지정맥") || 
               k.includes("피지낭종") || k.includes("탈장") || k.includes("복강경") || 
               k.includes("맹장염") || k.includes("지방종") || k.includes("낭종")) {
-            cat = "병원";
+            return "병원";
           } else if (k.includes("사무실") || k.includes("사옥") || k.includes("오피스") || 
                      k.includes("bifc") || k.includes("bifc2") || k.includes("지식산업센터") || k.includes("아이비플래닛")) {
-            cat = "사무실";
+            return "사무실";
           } else if (k.includes("학원") || k.includes("수학") || k.includes("영어") || 
                      k.includes("국어") || k.includes("음악") || k.includes("교육") || k.includes("미술")) {
-            cat = "학원";
+            return "학원";
           }
-          
-          mapping[keyword] = cat;
-          saveKeywordCategoryMapping(mapping);
-          return cat;
+          return "기타";
+        }
+
+        function loadAndCleanKeywordsConfig(allKeywords) {
+          let config = getKeywordOrderConfig();
+          if (!config) {
+            config = {
+              "병원": [],
+              "사무실": [],
+              "학원": [],
+              "기타": []
+            };
+          }
+
+          // Backwards compatibility with previous categorizations
+          const oldMapping = localStorage.getItem("local_viewer_keyword_categories");
+          if (oldMapping && (!config.병원.length && !config.사무실.length && !config.학원.length && !config.기타.length)) {
+            try {
+              const mapping = JSON.parse(oldMapping);
+              for (const kw in mapping) {
+                const cat = mapping[kw];
+                if (config[cat]) {
+                  config[cat].push(kw);
+                }
+              }
+            } catch (e) {}
+          }
+
+          // Exclude deleted keywords
+          for (const cat in config) {
+            config[cat] = config[cat].filter(kw => allKeywords.includes(kw));
+          }
+
+          // Include newly added keywords
+          allKeywords.forEach(kw => {
+            const exists = Object.values(config).some(list => list.includes(kw));
+            if (!exists) {
+              const cat = getAutoKeywordCategory(kw);
+              config[cat].push(kw);
+            }
+          });
+
+          return config;
         }
 
         function renderKeywordButtons() {
@@ -6481,21 +6544,21 @@
             <div class="space-y-3.5 w-full">
               <!-- Category: 병원 -->
               <div class="category-zone p-3 bg-red-50/50 dark-mode:bg-red-950/10 rounded-xl border border-red-100/40 dark-mode:border-red-900/20 space-y-2 transition-all" data-category="병원">
-                <div class="text-[10px] font-black text-red-650 dark-mode:text-red-400 flex items-center gap-1 select-none">
+                <div class="text-[10px] font-black text-red-655 dark-mode:text-red-400 flex items-center gap-1 select-none">
                   <span>🏥 병원 관련 키워드 (치과, 내과, 성형외과 등)</span>
                 </div>
                 <div class="flex flex-wrap gap-1.5 min-h-[32px] p-1 rounded-lg bg-white/20 dark-mode:bg-black/10" id="keywords-zone-병원"></div>
               </div>
               <!-- Category: 사무실 -->
               <div class="category-zone p-3 bg-blue-50/50 dark-mode:bg-blue-950/10 rounded-xl border border-blue-100/40 dark-mode:border-blue-900/20 space-y-2 transition-all" data-category="사무실">
-                <div class="text-[10px] font-black text-blue-650 dark-mode:text-blue-400 flex items-center gap-1 select-none">
+                <div class="text-[10px] font-black text-blue-655 dark-mode:text-blue-400 flex items-center gap-1 select-none">
                   <span>🖥️ 사무실 관련 키워드 (오피스, 사옥, 지산 등)</span>
                 </div>
                 <div class="flex flex-wrap gap-1.5 min-h-[32px] p-1 rounded-lg bg-white/20 dark-mode:bg-black/10" id="keywords-zone-사무실"></div>
               </div>
               <!-- Category: 학원 -->
               <div class="category-zone p-3 bg-green-50/50 dark-mode:bg-green-950/10 rounded-xl border border-green-100/40 dark-mode:border-green-900/20 space-y-2 transition-all" data-category="학원">
-                <div class="text-[10px] font-black text-green-650 dark-mode:text-green-400 flex items-center gap-1 select-none">
+                <div class="text-[10px] font-black text-green-655 dark-mode:text-green-400 flex items-center gap-1 select-none">
                   <span>✏️ 학원 관련 키워드 (어학원, 수학, 국어 등)</span>
                 </div>
                 <div class="flex flex-wrap gap-1.5 min-h-[32px] p-1 rounded-lg bg-white/20 dark-mode:bg-black/10" id="keywords-zone-학원"></div>
@@ -6518,40 +6581,52 @@
             }
           }
 
-          keywords.forEach(kw => {
-            const kwFiles = localFiles.filter(f => f.keyword === kw);
-            const cat = getKeywordCategory(kw);
+          const config = loadAndCleanKeywordsConfig(keywords);
+
+          for (const cat in config) {
             const zone = document.getElementById(`keywords-zone-${cat}`);
-            
             if (zone) {
-              const btn = document.createElement("button");
-              btn.draggable = true;
-              btn.dataset.keyword = kw;
-              btn.textContent = `${kw} (${kwFiles.length})`;
-              
-              if (selectedKeyword === kw) {
-                btn.className = "px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all cursor-grab active:cursor-grabbing select-none scale-[1.03] ring-2 ring-orange-400/50";
-              } else {
-                btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-750 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-250 rounded-lg text-xs font-bold shadow-sm transition-all cursor-grab active:cursor-grabbing select-none";
-              }
+              config[cat].forEach(kw => {
+                const kwFiles = localFiles.filter(f => f.keyword === kw);
+                const btn = document.createElement("button");
+                btn.draggable = true;
+                btn.dataset.keyword = kw;
+                btn.textContent = `${kw} (${kwFiles.length})`;
 
-              btn.addEventListener("click", () => {
-                selectedKeyword = kw;
-                renderKeywordButtons();
+                if (selectedKeyword === kw) {
+                  btn.className = "px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all cursor-grab active:cursor-grabbing select-none scale-[1.03] ring-2 ring-orange-400/50";
+                } else {
+                  btn.className = "px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-750 dark-mode:bg-gray-750 dark-mode:hover:bg-gray-700 dark-mode:text-gray-250 rounded-lg text-xs font-bold shadow-sm transition-all cursor-grab active:cursor-grabbing select-none";
+                }
+
+                btn.addEventListener("click", () => {
+                  selectedKeyword = kw;
+                  renderKeywordButtons();
+                });
+
+                btn.addEventListener("dragstart", (e) => {
+                  e.dataTransfer.setData("text/plain", kw);
+                  btn.classList.add("opacity-40");
+                });
+
+                btn.addEventListener("dragend", () => {
+                  btn.classList.remove("opacity-40");
+                });
+
+                btn.addEventListener("dragover", (e) => {
+                  e.preventDefault();
+                  const draggingBtn = keywordsContainer.querySelector(".opacity-40");
+                  if (draggingBtn && draggingBtn !== btn) {
+                    const rect = btn.getBoundingClientRect();
+                    const next = (e.clientX - rect.left) / (rect.right - rect.left) > 0.5;
+                    btn.parentNode.insertBefore(draggingBtn, next ? btn.nextSibling : btn);
+                  }
+                });
+
+                zone.appendChild(btn);
               });
-
-              btn.addEventListener("dragstart", (e) => {
-                e.dataTransfer.setData("text/plain", kw);
-                btn.classList.add("opacity-40");
-              });
-
-              btn.addEventListener("dragend", () => {
-                btn.classList.remove("opacity-40");
-              });
-
-              zone.appendChild(btn);
             }
-          });
+          }
 
           // Bind Drag and Drop events to category zone panels
           const zones = keywordsContainer.querySelectorAll(".category-zone");
@@ -6559,6 +6634,14 @@
             zone.addEventListener("dragover", (e) => {
               e.preventDefault();
               zone.classList.add("border-orange-500", "ring-2", "ring-orange-400/50", "scale-[1.01]");
+              
+              const draggingBtn = keywordsContainer.querySelector(".opacity-40");
+              if (draggingBtn) {
+                const innerContainer = zone.querySelector(".flex-wrap");
+                if (e.target === zone || e.target === innerContainer || !e.target.closest("button")) {
+                  innerContainer.appendChild(draggingBtn);
+                }
+              }
             });
 
             zone.addEventListener("dragleave", () => {
@@ -6568,15 +6651,6 @@
             zone.addEventListener("drop", (e) => {
               e.preventDefault();
               zone.classList.remove("border-orange-500", "ring-2", "ring-orange-400/50", "scale-[1.01]");
-              const kw = e.dataTransfer.getData("text/plain");
-              const targetCategory = zone.dataset.category;
-
-              if (kw && targetCategory) {
-                const mapping = getKeywordCategoryMapping();
-                mapping[kw] = targetCategory;
-                saveKeywordCategoryMapping(mapping);
-                renderKeywordButtons();
-              }
             });
           });
 
