@@ -554,8 +554,9 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords, imageType =
       const annotation = textAnnotations[i];
       
       targetWords.forEach(target => {
-        const cleanTarget = target.toLowerCase().replace(/[\s\-_.()]+/g, "");
-        const text = (annotation.description || "").toLowerCase().replace(/[\s\-_.()]+/g, "");
+        // Case-sensitive matching. Do not lowercase. Preserve characters like - and . to distinguish exact matches like bando-
+        const cleanTarget = target.replace(/[\s_()]+/g, "");
+        const text = (annotation.description || "").replace(/[\s_()]+/g, "");
         
         if (!text) return;
 
@@ -584,7 +585,7 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords, imageType =
 
           while (tempIdx < textAnnotations.length) {
             const nextAnnotation = textAnnotations[tempIdx];
-            const nextText = (nextAnnotation.description || "").toLowerCase().replace(/[\s\-_.()]+/g, "");
+            const nextText = (nextAnnotation.description || "").replace(/[\s_()]+/g, "");
             mergedText += nextText;
             matchedTokens.push(nextAnnotation);
 
