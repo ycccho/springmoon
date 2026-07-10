@@ -1380,6 +1380,45 @@ setInterval(async () => {
   }
 }, 30000);
 
+// --- 블로그분석/누락판별 정기 방문자수 기록 스케줄러 (매일 밤 11시 50분 KST 실행) ---
+setInterval(async () => {
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+  const kst = new Date(utc + (9 * 60 * 60 * 1000));
+
+  const hour = String(kst.getHours()).padStart(2, '0');
+  const minute = String(kst.getMinutes()).padStart(2, '0');
+  const currentTimeStr = `${hour}:${minute}`;
+
+  if (currentTimeStr === '23:50') {
+    if (global.lastVisitorScrapedTime === currentTimeStr) return;
+    global.lastVisitorScrapedTime = currentTimeStr;
+
+    console.log(`[정기 방문자수 추이 체크 시작] 자동 실행 시각: ${currentTimeStr}`);
+    const targetBlogs = ['sundooclinic', 'dudu8882'];
+    for (const blogId of targetBlogs) {
+      try {
+        const url = `https://springmoons.pages.dev/api/naver-blog?blogId=${encodeURIComponent(blogId)}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            console.log(`[정기 방문자수 기록 성공] 블로그: ${blogId}, 오늘 방문자수: ${data.info.todayVisitors}`);
+          } else {
+            console.warn(`[정기 방문자수 기록 실패] 블로그: ${blogId} (API 에러: ${data.error})`);
+          }
+        } else {
+          console.warn(`[정기 방문자수 기록 실패] 블로그: ${blogId} (HTTP Status: ${res.status})`);
+        }
+      } catch (e) {
+        console.error(`[정기 방문자수 기록 중 예외 에러] 블로그: ${blogId}:`, e.message);
+      }
+      // Be nice to Naver
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+}, 30000);
+
 // OPTIONS preflight endpoint for client checks
 app.options('/api/screenshot', cors(), (req, res) => {
   res.sendStatus(200);
