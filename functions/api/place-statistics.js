@@ -40,10 +40,10 @@ export async function onRequestPost(context) {
 
   try {
     const body = await context.request.json();
-    const { placeId, dateStr, stats } = body;
+    const { placeId, dateStr, stats, bulkHistory } = body;
 
-    if (!placeId || !dateStr || !stats) {
-      return new Response(JSON.stringify({ error: "placeId, dateStr, and stats are required" }), {
+    if (!placeId || (!dateStr && !bulkHistory)) {
+      return new Response(JSON.stringify({ error: "placeId, along with dateStr or bulkHistory are required" }), {
         status: 400,
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
@@ -59,12 +59,19 @@ export async function onRequestPost(context) {
       } catch (_) {}
     }
 
-    // Merge or update the stats for the specific date
-    placeData.history[dateStr] = stats;
+    if (bulkHistory) {
+      // Bulk merge
+      for (const d in bulkHistory) {
+        placeData.history[d] = bulkHistory[d];
+      }
+    } else {
+      // Single day update
+      placeData.history[dateStr] = stats;
+    }
 
     await kv.put(key, JSON.stringify(placeData));
 
-    return new Response(JSON.stringify({ success: true, message: `Stats for ${dateStr} successfully saved.` }), {
+    return new Response(JSON.stringify({ success: true, message: "Stats successfully saved." }), {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*"
