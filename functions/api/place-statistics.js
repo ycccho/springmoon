@@ -1,12 +1,8 @@
+import { backupStats } from './place_stats_backup.js';
+
 export async function onRequestGet(context) {
   const kv = context.env.POWER_CONTENT_KV;
-  if (!kv) {
-    return new Response(JSON.stringify({ error: "POWER_CONTENT_KV binding not found" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-    });
-  }
-
+  
   const { searchParams } = new URL(context.request.url);
   const placeId = searchParams.get('placeId');
   
@@ -18,9 +14,31 @@ export async function onRequestGet(context) {
   }
 
   const key = `place:stats:v2:${placeId}`;
-  const dataStr = await kv.get(key);
+  let dataStr = null;
+  if (kv) {
+    try {
+      dataStr = await kv.get(key);
+    } catch (_) {}
+  }
   
-  return new Response(dataStr || JSON.stringify({ placeId, history: {} }), {
+  let placeData = { placeId, history: {} };
+  if (dataStr) {
+    try {
+      placeData = JSON.parse(dataStr);
+    } catch (_) {}
+  }
+
+  // Merge with static CDN backup stats if KV is empty or missing days
+  const backup = backupStats[placeId] || {};
+  let merged = false;
+  for (const dateStr in backup) {
+    if (!placeData.history[dateStr] || placeData.history[dateStr].inflows === 0) {
+      placeData.history[dateStr] = backup[dateStr];
+      merged = true;
+    }
+  }
+
+  return new Response(JSON.stringify(placeData), {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
