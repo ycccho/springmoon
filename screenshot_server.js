@@ -1416,6 +1416,7 @@ setInterval(async () => {
       // Be nice to Naver
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
+  }
 }, 30000);
 
 // --- 스마트플레이스 정기 자동 통계 스케줄러 (매일 밤 11시 55분 KST 실행) ---
