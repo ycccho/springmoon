@@ -86,7 +86,7 @@
         "officeinteriors.pages.dev",
         "bando-"
       ],
-      "lastRunDate": "2026.07.10"
+      "lastRunDate": "2026.07.11"
     },
     {
       "id": "${id}",
@@ -167,7 +167,7 @@
         "선두외과내과의원",
         "1stdms.com"
       ],
-      "lastRunDate": "2026.07.10"
+      "lastRunDate": "2026.07.11"
     }
   ],
   "scheduleEnabled": true,
