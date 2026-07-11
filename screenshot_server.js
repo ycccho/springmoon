@@ -1598,63 +1598,72 @@ async function scrapePlaceStatsForDate(placeId, dateStr) {
 // Fallback dynamic HTML DOM Parser to extract values regardless of minor changes
 async function extractStatsFromDOM(page, stats) {
   const domData = await page.evaluate(() => {
-    const findText = (selector, textRegex) => {
-      const elements = document.querySelectorAll(selector);
-      for (const el of elements) {
-        if (textRegex.test(el.textContent)) return el;
-      }
-      return null;
-    };
-
+    const bodyText = document.body.innerText;
+    const lines = bodyText.split('\n').map(l => l.trim()).filter(l => l);
+    
     let inflows = 0;
-    // Look for inflow header blocks
-    const inflowHeader = findText('span, div, h4, th, td', /유입수|조회수|전체 유입수/);
-    if (inflowHeader) {
-      const parent = inflowHeader.parentElement;
-      const numbers = parent.textContent.match(/\b\d+([,]\d+)*\b/g);
-      if (numbers) {
-        inflows = parseInt(numbers[numbers.length - 1].replace(/,/g, ''), 10) || 0;
+    const channels = {};
+    const keywords = {};
+
+    // 1. Parse Inflows
+    const inflowMatch = bodyText.match(/유입\s*수\s*(?:\n|.)*?(?:도움말)?\s*?(\d+)\s*?회/i) || bodyText.match(/유입\s*수\s*(?:\n|.)*?(\d+)\s*?회/i);
+    if (inflowMatch) {
+      inflows = parseInt(inflowMatch[1], 10) || 0;
+    } else {
+      const idx = lines.findIndex(l => l.replace(/\s+/g, '') === '유입수');
+      if (idx !== -1) {
+        for (let j = idx + 1; j < idx + 6; j++) {
+          if (lines[j] && lines[j].includes('회')) {
+            inflows = parseInt(lines[j].replace(/[^0-9]/g, ''), 10) || 0;
+            break;
+          }
+        }
       }
     }
 
-    const keywords = {};
-    const channels = {};
-    
-    // Extract tables (e.g. keywords and channels tables)
-    const tables = document.querySelectorAll('table');
-    tables.forEach(table => {
-      const rows = table.querySelectorAll('tr');
-      rows.forEach(row => {
-        const cells = Array.from(row.querySelectorAll('td, th')).map(c => c.textContent.trim());
-        if (cells.length >= 2) {
-          const name = cells[0];
-          const valMatch = cells[1].match(/\b\d+([,]\d+)*\b/);
-          if (valMatch) {
-            const val = parseInt(valMatch[0].replace(/,/g, ''), 10);
-            const isChannel = /검색|지도|플레이스|블로그|카페|웹문서|지식in|모바일|pc|인터넷/i.test(name);
-            if (isChannel) {
-              channels[name] = val;
-            } else if (name.length > 1 && !/순위|비율|유입|조회|날짜/i.test(name)) {
-              keywords[name] = val;
-            }
+    // 2. Parse Channels
+    const channelIdx = lines.findIndex(l => l.replace(/\s+/g, '') === '유입채널');
+    if (channelIdx !== -1) {
+      let j = channelIdx + 1;
+      if (lines[j] === '도움말') j++;
+      while (j < lines.length) {
+        const line = lines[j];
+        if (/^\d+$/.test(line)) {
+          const name = lines[j+1];
+          const pctStr = lines[j+2];
+          if (name && pctStr && pctStr.includes('%')) {
+            const pct = parseFloat(pctStr.replace('%', ''));
+            const count = Math.max(Math.round((inflows * pct) / 100), 1);
+            channels[name] = count;
+            j += 3;
+            continue;
           }
         }
-      });
-    });
-
-    // Extract list items (e.g. keywords rank list)
-    const listItems = document.querySelectorAll('li');
-    listItems.forEach(li => {
-      const text = li.textContent.trim();
-      const match = text.match(/^(\d+)?[\s.]*([가-힣\w\s\-]{2,20})[\s:]+(\d+)/);
-      if (match) {
-        const name = match[2].trim();
-        const val = parseInt(match[3], 10);
-        if (!/검색|지도|플레이스|블로그|카페/i.test(name)) {
-          keywords[name] = val;
-        }
+        break;
       }
-    });
+    }
+
+    // 3. Parse Keywords
+    const keywordIdx = lines.findIndex(l => l.replace(/\s+/g, '') === '유입키워드');
+    if (keywordIdx !== -1) {
+      let j = keywordIdx + 1;
+      if (lines[j] === '도움말') j++;
+      while (j < lines.length) {
+        const line = lines[j];
+        if (/^\d+$/.test(line)) {
+          const name = lines[j+1];
+          const pctStr = lines[j+2];
+          if (name && pctStr && pctStr.includes('%')) {
+            const pct = parseFloat(pctStr.replace('%', ''));
+            const count = Math.max(Math.round((inflows * pct) / 100), 1);
+            keywords[name] = count;
+            j += 3;
+            continue;
+          }
+        }
+        break;
+      }
+    }
 
     return { inflows, channels, keywords };
   });
