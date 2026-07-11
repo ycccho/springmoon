@@ -1832,14 +1832,20 @@ app.get('/api/google-sa', cors(), async (req, res) => {
   const googleConf = globalConfig.google || {};
   
   if (!googleConf.refreshToken || !googleConf.customerId) {
+    const startDate = req.query.startDate || req.query.start;
+    const endDate = req.query.endDate || req.query.end;
+    let days = 7;
+    if (startDate && endDate) {
+      days = Math.max(1, Math.round((new Date(endDate) - new Date(startDate)) / (24 * 60 * 60 * 1000)) + 1);
+    }
     return res.json({
       success: true,
       isDemo: true,
       searchTerms: [
-        { term: "학원인테리어", type: "EXACT", clicks: 12, impressions: 240, ctr: 5.0, avgCpc: 2500, keyword: "학원인테리어" },
-        { term: "부산 상가인테리어", type: "PHRASE", clicks: 8, impressions: 160, ctr: 5.0, avgCpc: 3100, keyword: "상가인테리어" },
-        { term: "사무실인테리어견적", type: "BROAD", clicks: 5, impressions: 125, ctr: 4.0, avgCpc: 1800, keyword: "사무실인테리어" },
-        { term: "부산 인테리어 디자인", type: "EXACT", clicks: 3, impressions: 90, ctr: 3.33, avgCpc: 2200, keyword: "인디컴퍼니" }
+        { term: "학원인테리어", type: "EXACT", clicks: Math.round(1.7 * days), impressions: Math.round(1.7 * 40 * days), ctr: 5.0, avgCpc: 2500, keyword: "학원인테리어" },
+        { term: "부산 상가인테리어", type: "PHRASE", clicks: Math.round(1.1 * days), impressions: Math.round(1.1 * 40 * days), ctr: 5.0, avgCpc: 3100, keyword: "상가인테리어" },
+        { term: "사무실인테리어견적", type: "BROAD", clicks: Math.round(0.7 * days), impressions: Math.round(0.7 * 40 * days), ctr: 4.0, avgCpc: 1800, keyword: "사무실인테리어" },
+        { term: "부산 인테리어 디자인", type: "EXACT", clicks: Math.round(0.4 * days), impressions: Math.round(0.4 * 40 * days), ctr: 3.33, avgCpc: 2200, keyword: "인디컴퍼니" }
       ],
       registeredKeywords: [
         { text: "학원인테리어", matchType: "EXACT", status: "ENABLED" },
@@ -1954,9 +1960,9 @@ app.get('/api/google-sa', cors(), async (req, res) => {
 app.get('/api/imweb', cors(), async (req, res) => {
   const imwebConf = globalConfig.imweb || {};
   
-  const subscriptionExpiry = imwebConf.subscriptionExpiry || "2026-12-31";
-  const domainExpiry = imwebConf.domainExpiry || "2027-05-15";
-  const sslExpiry = imwebConf.sslExpiry || "2027-04-10";
+  const subscriptionExpiry = imwebConf.subscriptionExpiry || "2028-01-19";
+  const domainExpiry = imwebConf.domainExpiry || "2028-01-19";
+  const sslExpiry = imwebConf.sslExpiry || "2028-01-19";
 
   const today = new Date();
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();

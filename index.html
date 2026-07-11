@@ -144,23 +144,122 @@
       { id: "meta-statistics", name: "4. 메타광고 통계", categoryId: "cat-stats", protected: true },
       { id: "google-sa-statistics", name: "5. 구글SA 통계", categoryId: "cat-stats", protected: true },
       { id: "imweb-statistics", name: "6. 아임웹 통계", categoryId: "cat-stats", protected: true },
-      { id: "omission-check", name: "블로그분석 누락판별", protected: true },
-      { id: "keyword", name: "키워드조합", protected: true },
-      { id: "keyword-search-count", name: "키워드별 조회수", protected: true },
+      { id: "omission-check", name: "1.블로그분석 누락판별", protected: true },
+      { id: "keyword", name: "2.키워드조합", protected: true },
+      { id: "keyword-search-count", name: "3.키워드별 조회수", protected: true },
       { id: "webp", name: "webP변환", categoryId: "cat-homepage", protected: true },
-      { id: "negative-words", name: "부정단어찾기", protected: true },
+      { id: "negative-words", name: "5.부정단어찾기", protected: true },
       { id: "competitor-blog", name: "7.경쟁 블로그 탐색", protected: true },
-      { id: "interior-intro", name: "인테리어", categoryId: "cat-interior", protected: true },
-      { id: "cad-conversion", name: "배치도면 캐드변환", categoryId: "cat-interior", protected: true },
+      { id: "interior-intro", name: "9.인테리어", categoryId: "cat-interior", protected: true },
+      { id: "cad-conversion", name: "9.배치도면 캐드변환", categoryId: "cat-interior", protected: true },
       { id: "about", name: "소개", protected: false },
       { id: "html-analysis", name: "html분석", categoryId: "cat-homepage", protected: true },
       { id: "url-extraction", name: "도메인 url추출", categoryId: "cat-homepage", protected: true },
       { id: "homepage-seo", name: "홈페이지 코드세팅", categoryId: "cat-homepage", protected: true },
       { id: "backlink-check", name: "백링크점검", categoryId: "cat-homepage", protected: true },
-      { id: "keyword-screenshot", name: "키워드 스크린샷", protected: true },
-      { id: "blog-post-screenshot", name: "블로그게시글 샷", protected: true },
-      { id: "daily-report", name: "데일리보고서 작성", protected: false, hidden: true }
+      { id: "keyword-screenshot", name: "9.키워드 스크린샷", protected: true },
+      { id: "blog-post-screenshot", name: "9.블로그게시글 샷", protected: true },
+      { id: "daily-report", name: "9.데일리보고서 작성", protected: false, hidden: true }
     ];
+
+    function getLast7DaysExcludingToday() {
+      const kst = new Date(Date.now() + (9 * 60 * 60 * 1000));
+      const end = new Date(kst.getTime() - (24 * 60 * 60 * 1000));
+      const start = new Date(kst.getTime() - (7 * 24 * 60 * 60 * 1000));
+      return {
+        start: start.toISOString().split('T')[0],
+        end: end.toISOString().split('T')[0]
+      };
+    }
+
+    function drawChartSVG(containerId, dataList, valueKey, strokeColor, fillColor) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (!dataList || dataList.length === 0) {
+        container.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-xs text-gray-400 font-bold bg-gray-50 dark-mode:bg-gray-900 rounded-xl">데이터가 없습니다.</div>`;
+        return;
+      }
+
+      const width = container.clientWidth || 500;
+      const height = 200;
+      const padding = 30;
+
+      const values = dataList.map(d => d[valueKey] || 0);
+      const maxVal = Math.max(...values, 10);
+      const minVal = 0;
+
+      let gridLinesHtml = "";
+      const gridCount = 4;
+      for (let i = 0; i <= gridCount; i++) {
+        const y = padding + (height - padding * 2) * (1 - i / gridCount);
+        const val = Math.round(minVal + (maxVal - minVal) * (i / gridCount));
+        gridLinesHtml += `
+          <line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#E5E7EB" stroke-dasharray="4,4" class="dark-mode:stroke-gray-700" />
+          <text x="${padding - 5}" y="${y + 4}" fill="#9CA3AF" font-size="8" text-anchor="end" font-weight="bold" class="font-mono">${val}</text>
+        `;
+      }
+
+      const points = [];
+      const stepX = (width - padding * 2) / Math.max(dataList.length - 1, 1);
+      dataList.forEach((d, idx) => {
+        const x = padding + idx * stepX;
+        const val = d[valueKey] || 0;
+        const ratio = (val - minVal) / (maxVal - minVal);
+        const y = height - padding - ratio * (height - padding * 2);
+        points.push({ x, y, date: d.date, value: val });
+      });
+
+      let pathD = "";
+      let areaD = "";
+      if (points.length > 0) {
+        pathD = `M ${points[0].x} ${points[0].y}`;
+        areaD = `M ${points[0].x} ${height - padding}`;
+        points.forEach((p, idx) => {
+          if (idx > 0) pathD += ` L ${p.x} ${p.y}`;
+          areaD += ` L ${p.x} ${p.y}`;
+        });
+        areaD += ` L ${points[points.length - 1].x} ${height - padding} Z`;
+      }
+
+      let xLabelsHtml = "";
+      const labelStep = Math.max(Math.ceil(dataList.length / 8), 1);
+      points.forEach((p, idx) => {
+        if (idx % labelStep === 0) {
+          const shortDate = p.date.substring(5);
+          xLabelsHtml += `
+            <text x="${p.x}" y="${height - 10}" fill="#9CA3AF" font-size="8" text-anchor="middle" font-weight="bold" class="font-mono">${shortDate}</text>
+          `;
+        }
+      });
+
+      let circlesHtml = "";
+      points.forEach((p) => {
+        circlesHtml += `
+          <circle cx="${p.x}" cy="${p.y}" r="4" fill="${strokeColor}" stroke="#FFFFFF" stroke-width="2" class="cursor-pointer">
+            <title>${p.date}: ${p.value}</title>
+          </circle>
+          <text x="${p.x}" y="${p.y - 8}" fill="${strokeColor}" font-size="8" text-anchor="middle" font-weight="black" class="font-mono font-black">${p.value}</text>
+        `;
+      });
+
+      container.innerHTML = `
+        <svg width="${width}" height="${height}" class="w-full h-full select-none">
+          <defs>
+            <linearGradient id="area-grad-${containerId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${fillColor}" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="${fillColor}" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+          ${gridLinesHtml}
+          <path d="${areaD}" fill="url(#area-grad-${containerId})" />
+          <path d="${pathD}" fill="none" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          ${xLabelsHtml}
+          ${circlesHtml}
+        </svg>
+      `;
+    }
 
     function getLast7DaysExcludingToday() {
       const kst = new Date(Date.now() + (9 * 60 * 60 * 1000));
@@ -368,21 +467,21 @@
         "google-sa-statistics": "5. 구글SA 통계",
         "imweb-statistics": "6. 아임웹 통계",
         "webp": "webP변환",
-        "keyword": "키워드조합",
-        "keyword-search-count": "키워드별 조회수",
-        "negative-words": "부정단어찾기",
+        "keyword": "2.키워드조합",
+        "keyword-search-count": "3.키워드별 조회수",
+        "negative-words": "5.부정단어찾기",
         "html-analysis": "html분석",
         "url-extraction": "도메인 url추출",
-        "powercontent": "파컨 키워드",
-        "omission-check": "블로그분석 누락판별",
-        "interior-intro": "인테리어",
-        "cad-conversion": "배치도면 캐드변환",
+        "powercontent": "9.파컨 키워드",
+        "omission-check": "1.블로그분석 누락판별",
+        "interior-intro": "9.인테리어",
+        "cad-conversion": "9.배치도면 캐드변환",
         "homepage-seo": "홈페이지 코드세팅",
         "backlink-check": "백링크점검",
-        "keyword-screenshot": "키워드 스크린샷",
-        "blog-post-screenshot": "블로그게시글 샷",
+        "keyword-screenshot": "9.키워드 스크린샷",
+        "blog-post-screenshot": "9.블로그게시글 샷",
         "competitor-blog": "7.경쟁 블로그 탐색",
-        "daily-report": "데일리보고서 작성",
+        "daily-report": "9.데일리보고서 작성",
         "about": "소개"
       };
       
@@ -428,6 +527,14 @@
       // Ensure cat-interior exists and default it to collapsed
       if (!cats.some(c => c.id === "cat-interior")) {
         cats.push({ id: "cat-interior", name: "인테리어", collapsed: true });
+        changed = true;
+      }
+      if (!cats.some(c => c.id === "cat-stats")) {
+        cats.push({ id: "cat-stats", name: "통계확인", collapsed: false });
+        changed = true;
+      }
+      if (!cats.some(c => c.id === "cat-homepage")) {
+        cats.push({ id: "cat-homepage", name: "홈페이지 관련", collapsed: false });
         changed = true;
       }
       if (!cats.some(c => c.id === "cat-stats")) {
@@ -818,6 +925,10 @@
         setupMetaStatistics();
         setupGoogleSAStatistics();
         setupImwebStatistics();
+        setupTotalStatistics();
+        setupMetaStatistics();
+        setupGoogleSAStatistics();
+        setupImwebStatistics();
       }, 100);
     }
 
@@ -840,6 +951,10 @@
       if (id === "ad-dashboard") return getAdDashboardHTML();
       if (id === "competitor-blog") return getCompetitorBlogHTML();
       if (id === "place-statistics") return getPlaceStatisticsHTML();
+      if (id === "total-statistics") return getTotalStatisticsHTML();
+      if (id === "meta-statistics") return getMetaStatisticsHTML();
+      if (id === "google-sa-statistics") return getGoogleSAStatisticsHTML();
+      if (id === "imweb-statistics") return getImwebStatisticsHTML();
       if (id === "total-statistics") return getTotalStatisticsHTML();
       if (id === "meta-statistics") return getMetaStatisticsHTML();
       if (id === "google-sa-statistics") return getGoogleSAStatisticsHTML();
@@ -9191,6 +9306,423 @@
     }
 
 
+    function getTotalStatisticsHTML() {
+      return `
+        <div class="max-w-6xl mx-auto space-y-6">
+          <!-- Date Filter Header -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-black text-gray-855 dark-mode:text-white flex items-center gap-2">📊 통합 마케팅 성과 대시보드</h2>
+              <p class="text-xs text-gray-550 font-medium mt-1">네이버 검색광고, 플레이스, 메타광고, 구글 SA, 아임웹 방문 통계를 종합 수집 및 집계합니다.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
+                <button class="total-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-850 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일</button>
+                <button class="total-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="this-month">이번달</button>
+                <button class="total-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-month">지난달</button>
+                <button class="total-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-3-months">최근3개월</button>
+                <button class="total-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="custom">직접지정</button>
+              </div>
+              <div id="total-custom-date-container" class="flex items-center gap-1.5 hidden">
+                <input type="date" id="total-start-date" class="px-3 py-1.5 bg-white dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold text-gray-755 dark-mode:text-white focus:outline-none focus:ring-1 focus:ring-orange-500" />
+                <span class="text-gray-400 text-xs">~</span>
+                <input type="date" id="total-end-date" class="px-3 py-1.5 bg-white dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold text-gray-755 dark-mode:text-white focus:outline-none focus:ring-1 focus:ring-orange-500" />
+                <button id="total-date-apply-btn" class="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-extrabold transition-all shadow-sm">조회</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top KPI Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-col justify-between">
+              <span class="text-[10px] text-gray-550 font-bold uppercase tracking-wider block">총 광고비 집행액</span>
+              <div class="flex items-baseline gap-1.5 mt-2">
+                <span id="total-spend-val" class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">0</span>
+                <span class="text-xs font-bold text-gray-400">원</span>
+              </div>
+            </div>
+            <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-col justify-between">
+              <span class="text-[10px] text-orange-505 font-bold uppercase tracking-wider block">총 광고 클릭수</span>
+              <div class="flex items-baseline gap-1.5 mt-2">
+                <span id="total-clicks-val" class="text-2xl font-black text-orange-600 font-mono">0</span>
+                <span class="text-xs font-bold text-orange-500">회</span>
+              </div>
+            </div>
+            <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-col justify-between">
+              <span class="text-[10px] text-gray-550 font-bold uppercase tracking-wider block">평균 클릭 단가 (CPC)</span>
+              <div class="flex items-baseline gap-1.5 mt-2">
+                <span id="total-cpc-val" class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">0</span>
+                <span class="text-xs font-bold text-gray-400">원</span>
+              </div>
+            </div>
+            <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-col justify-between">
+              <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider block">총 웹사이트 방문자수</span>
+              <div class="flex items-baseline gap-1.5 mt-2">
+                <span id="total-visitors-val" class="text-2xl font-black text-emerald-600 font-mono">0</span>
+                <span class="text-xs font-bold text-emerald-500">명</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Channel Summary Table -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-gray-150 dark-mode:border-gray-700">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">매체별 성과 상세 요약</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-gray-450 border-b border-gray-150 dark-mode:border-gray-700 font-black">
+                    <th class="py-3.5 px-3">매체 / 채널명</th>
+                    <th class="py-3.5 px-3 text-right">노출수</th>
+                    <th class="py-3.5 px-3 text-right">클릭수 / 방문수</th>
+                    <th class="py-3.5 px-3 text-right">클릭률 (CTR)</th>
+                    <th class="py-3.5 px-3 text-right">광고비</th>
+                    <th class="py-3.5 px-3 text-right">평균클릭단가</th>
+                  </tr>
+                </thead>
+                <tbody id="total-channels-tbody" class="divide-y divide-gray-100 dark-mode:divide-gray-700 font-bold text-gray-855 dark-mode:text-gray-200">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Integration Setup Guide -->
+          <details class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm group">
+            <summary class="p-5 flex items-center justify-between cursor-pointer focus:outline-none select-none">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white flex items-center gap-2">📘 통합 마케팅 성과 대시보드 로컬서버 연동 가이드</h3>
+              <span class="text-xs text-gray-400 font-bold group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-6 border-t border-gray-150 dark-mode:border-gray-700 space-y-4 text-xs font-semibold leading-relaxed text-gray-600 dark-mode:text-gray-305">
+              <div class="space-y-1">
+                <h4 class="text-orange-500 font-bold text-[13px]">1단계: 로컬 백엔드 서버 구동</h4>
+                <p>본 플랫폼의 실시간 광고 API 통신을 위해서 로컬 중계 서버를 실행해야 합니다. 터미널 창에서 <code>node screenshot_server.js</code>를 기동한 뒤 해당 포트(3888)로 통신이 열려있는지 확인합니다.</p>
+              </div>
+              <div class="space-y-1">
+                <h4 class="text-orange-500 font-bold text-[13px]">2단계: config.json 키 매핑 확인</h4>
+                <p>로컬 서버가 구동 중인 경로의 <code>config.json</code> 내에 메타, 구글 Ads, 아임웹 키가 정확하게 입력되어야 통합 성과가 일괄적으로 합산 처리됩니다.</p>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+    }
+
+    function getMetaStatisticsHTML() {
+      return `
+        <div class="max-w-6xl mx-auto space-y-6">
+          <!-- Header and Date Filters -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-black text-gray-855 dark-mode:text-white flex items-center gap-2">📷 메타(Instagram/Facebook) 광고 분석</h2>
+              <p class="text-xs text-gray-555 font-medium mt-1">캠페인 <code>2025-02-10_슬라이드_최적이동</code>의 노출, 클릭 및 소재별 성과를 모니터링합니다.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
+                <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일</button>
+                <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="this-month">이번달</button>
+                <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-month">지난달</button>
+                <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-3-months">최근3개월</button>
+                <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="custom">직접지정</button>
+              </div>
+              <div id="meta-custom-date-container" class="flex items-center gap-1.5 hidden">
+                <input type="date" id="meta-start-date" class="px-3 py-1.5 bg-white dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold text-gray-755 dark-mode:text-white focus:outline-none focus:ring-1 focus:ring-orange-500" />
+                <span class="text-gray-400 text-xs">~</span>
+                <input type="date" id="meta-end-date" class="px-3 py-1.5 bg-white dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold text-gray-755 dark-mode:text-white focus:outline-none focus:ring-1 focus:ring-orange-500" />
+                <button id="meta-date-apply-btn" class="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-extrabold transition-all shadow-sm">조회</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Token Expiry Warnings -->
+          <div class="bg-amber-50 dark-mode:bg-amber-950/20 border border-amber-200 dark-mode:border-amber-900/40 rounded-2xl p-4 flex items-center gap-3">
+            <span class="text-lg">⚠️</span>
+            <div class="text-xs font-bold text-amber-855 dark-mode:text-amber-300 leading-relaxed">
+              <span>페이스북 개발자 토큰 만료 알림 (만료일자: <strong>2026-09-10</strong>)</span>
+              <p class="text-[10px] text-amber-600 dark-mode:text-amber-400/80 font-medium mt-0.5">토큰 만료 30일 전에 연동 계정 이메일을 통해 수동으로 갱신해 주셔야 데이터 차질이 생기지 않습니다.</p>
+            </div>
+          </div>
+
+          <!-- KPI & Clicks Trend Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div id="meta-comparison-cards" class="lg:col-span-1 flex flex-col gap-4">
+            </div>
+            
+            <div class="lg:col-span-2 bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">기간 내 광고 클릭수 추이</h3>
+                <span class="text-[10px] text-gray-400 font-bold font-mono">단위: 클릭수</span>
+              </div>
+              <div id="meta-clicks-chart-container" class="w-full h-60 relative">
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Ads Materials -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-gray-150 dark-mode:border-gray-700">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">ON 상태 활성 광고 소재 분석</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-gray-450 border-b border-gray-150 dark-mode:border-gray-700 font-black">
+                    <th class="py-3.5 px-3 text-center">썸네일</th>
+                    <th class="py-3.5 px-3">광고 소재명</th>
+                    <th class="py-3.5 px-3 text-center">상태</th>
+                    <th class="py-3.5 px-3 text-center">결과 (클릭수)</th>
+                    <th class="py-3.5 px-3 text-right">일일 예산</th>
+                    <th class="py-3.5 px-3 text-right">지출 금액</th>
+                    <th class="py-3.5 px-3 text-right">결과당 비용</th>
+                    <th class="py-3.5 px-3 text-right">노출수</th>
+                  </tr>
+                </thead>
+                <tbody id="meta-ads-tbody" class="divide-y divide-gray-100 dark-mode:divide-gray-700">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Collapsible Meta Ad Library Search Guide -->
+          <details class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm group">
+            <summary class="p-5 flex items-center justify-between cursor-pointer focus:outline-none select-none">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white flex items-center gap-2">📂 메타 광고 API 발급 및 라이브러리 검색 가이드</h3>
+              <span class="text-xs text-gray-400 font-bold group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-6 border-t border-gray-150 dark-mode:border-gray-700 space-y-4 text-xs font-semibold leading-relaxed text-gray-600 dark-mode:text-gray-305">
+              <div class="space-y-1">
+                <h4 class="text-orange-500 font-bold text-[13px]">1단계: API 가져오는 방법 및 절차</h4>
+                <p>1. <a href="https://developers.facebook.com/" target="_blank" class="text-blue-500 underline font-black">페이스북 개발자 센터</a>에 가입한 후 새 앱을 생성합니다.</p>
+                <p>2. Graph API 탐색기에서 <code>ads_read</code> 권한을 선택하고 단기 액세스 토큰을 발급 받습니다.</p>
+                <p>3. 발급받은 액세스 토큰 디버거를 통해 **장기 60일 권한 토큰**으로 연장 변환하여 사용합니다.</p>
+                <p>4. 로컬 서버의 <code>config.json</code> 내 <code>meta</code> 필드에 각 키 정보를 매핑하여 저장합니다.</p>
+              </div>
+              <div class="space-y-1">
+                <h4 class="text-orange-500 font-bold text-[13px]">2단계: 토큰 만료기한 확인 및 연장 디버거 링크</h4>
+                <p>현재 토큰 만료 예정일은 <strong>2026-09-10</strong> 입니다.</p>
+                <p>만료 전에 아래 연장 링크에 방문하여 수동 갱신을 진행해 주셔야 합니다.</p>
+                <p>👉 <a href="https://developers.facebook.com/tools/debug/accesstoken" target="_blank" class="text-orange-500 underline font-black">메타 액세스 토큰 디버거 사이트 이동</a></p>
+              </div>
+              <div class="space-y-2 pt-2 border-t border-gray-150 dark-mode:border-gray-700">
+                <h4 class="text-orange-500 font-bold text-[13px]">💡 메타 광고 라이브러리 모든 광고 검색기능 API 연동 여부</h4>
+                <p><strong>[연동 가능 여부: 가능]</strong></p>
+                <p>메타 광고 라이브러리 API(Ad Library API)를 호출하여 타사/경쟁사의 광고 데이터를 우리 웹 앱 상에서 직접 검색하는 기능은 구현이 가능합니다. 단, 메타의 엄격한 보안 정책상 **비즈니스 인증(Business Verification)** 및 개발자 신원 확인 절차가 완료된 광고주 계정 토큰이어야 작동하며, 일반 토큰으로는 차단될 수 있습니다.</p>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+    }
+
+    function getGoogleSAStatisticsHTML() {
+      return `
+        <div class="max-w-6xl mx-auto space-y-6">
+          <!-- Date Filter Header -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-black text-gray-855 dark-mode:text-white flex items-center gap-2">🔍 구글 검색광고(SA) 실시간 통계</h2>
+              <p class="text-xs text-gray-555 font-medium mt-1">구글 광고 캠페인의 키워드별 클릭 추이, 유입 검색어, 클릭 단가를 실시간 모니터링합니다.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
+                <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일</button>
+                <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="this-month">이번달</button>
+                <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-month">지난달</button>
+                <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-3-months">최근3개월</button>
+                <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="custom">직접지정</button>
+              </div>
+              <div id="google-custom-date-container" class="flex items-center gap-1.5 hidden">
+                <input type="date" id="google-start-date" class="px-3 py-1.5 bg-white dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold text-gray-755 dark-mode:text-white focus:outline-none focus:ring-1 focus:ring-orange-500" />
+                <span class="text-gray-400 text-xs">~</span>
+                <input type="date" id="google-end-date" class="px-3 py-1.5 bg-white dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold text-gray-755 dark-mode:text-white focus:outline-none focus:ring-1 focus:ring-orange-500" />
+                <button id="google-date-apply-btn" class="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-extrabold transition-all shadow-sm">조회</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI & Chart Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div id="google-comparison-cards" class="lg:col-span-1 flex flex-col gap-4">
+            </div>
+            
+            <div class="lg:col-span-2 bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">구글 검색광고 클릭수 유입 추이</h3>
+                <span class="text-[10px] text-gray-400 font-bold font-mono">단위: 클릭수</span>
+              </div>
+              <div id="google-clicks-chart-container" class="w-full h-60 relative">
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Terms Table -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-gray-150 dark-mode:border-gray-700">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">실제 검색 유입 검색어 성과 (Google Search Terms)</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-gray-450 border-b border-gray-150 dark-mode:border-gray-700 font-black">
+                    <th class="py-3.5 px-3">검색어 (Query)</th>
+                    <th class="py-3.5 px-3">매치 유형 (Match Type)</th>
+                    <th class="py-3.5 px-3 text-center">클릭수</th>
+                    <th class="py-3.5 px-3 text-center">노출수</th>
+                    <th class="py-3.5 px-3 text-center">클릭률 (CTR)</th>
+                    <th class="py-3.5 px-3 text-right">평균클릭비용 (CPC)</th>
+                    <th class="py-3.5 px-3 text-right">지출 광고비 (Cost)</th>
+                  </tr>
+                </thead>
+                <tbody id="google-terms-tbody" class="divide-y divide-gray-100 dark-mode:divide-gray-700">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Target Keyword Catalog (Collapsible) -->
+          <details class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm group">
+            <summary class="p-5 flex items-center justify-between cursor-pointer focus:outline-none select-none">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white flex items-center gap-2">🎯 내가 등록한 타겟 키워드 리스트</h3>
+              <span class="text-xs text-gray-400 font-bold group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-6 border-t border-gray-150 dark-mode:border-gray-700 flex flex-wrap gap-2">
+              <span class="px-3 py-1.5 bg-blue-50 dark-mode:bg-blue-950/20 text-blue-600 dark-mode:text-blue-400 border border-blue-100 dark-mode:border-blue-900/30 rounded-xl text-xs font-bold font-mono">[EXACT] 부산 상가 인테리어</span>
+              <span class="px-3 py-1.5 bg-blue-50 dark-mode:bg-blue-950/20 text-blue-600 dark-mode:text-blue-400 border border-blue-100 dark-mode:border-blue-900/30 rounded-xl text-xs font-bold font-mono">[PHRASE] 학원 인테리어 전문</span>
+              <span class="px-3 py-1.5 bg-blue-50 dark-mode:bg-blue-950/20 text-blue-600 dark-mode:text-blue-400 border border-blue-100 dark-mode:border-blue-900/30 rounded-xl text-xs font-bold font-mono">[BROAD] 재송동 사무실인테리어</span>
+              <span class="px-3 py-1.5 bg-blue-50 dark-mode:bg-blue-950/20 text-blue-600 dark-mode:text-blue-400 border border-blue-100 dark-mode:border-blue-900/30 rounded-xl text-xs font-bold font-mono">[EXACT] 부산인테리어디자인</span>
+            </div>
+          </details>
+
+          <!-- Setup Guide -->
+          <details class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm group">
+            <summary class="p-5 flex items-center justify-between cursor-pointer focus:outline-none select-none">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white flex items-center gap-2">📘 구글 Ads SA API 연동 가이드</h3>
+              <span class="text-xs text-gray-400 font-bold group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-6 border-t border-gray-150 dark-mode:border-gray-700 space-y-4 text-xs font-semibold leading-relaxed text-gray-600 dark-mode:text-gray-305">
+              <div class="space-y-1">
+                <h4 class="text-orange-500 font-bold text-[13px]">1단계: API 가져오는 방법 및 절차</h4>
+                <p>1. 구글 Ads 관리자 페이지에서 개발자 토큰(Developer Token)을 신청하여 발급 받습니다.</p>
+                <p>2. Google Cloud Console에서 OAuth 2.0 클라이언트 ID 및 보안 비밀번호(Client Secret)를 생성합니다.</p>
+                <p>3. 생성된 OAuth 인증 정보를 기반으로 OAuth Playground 등을 통해 리프레시 토큰(Refresh Token)을 획득합니다.</p>
+                <p>4. 획득한 각 키 정보들을 로컬 서버의 <code>config.json</code> 내 <code>google</code> 섹션에 매핑하여 연동합니다.</p>
+              </div>
+              <div class="space-y-2 pt-2 border-t border-gray-150 dark-mode:border-gray-700">
+                <h4 class="text-orange-500 font-bold text-[13px]">💡 구글 광고 투명성 센터 모든 광고 검색기능 API 연동 여부</h4>
+                <p><strong>[연동 가능 여부: 불가능]</strong></p>
+                <p>구글 광고 투명성 센터는 공식적으로 일반 대중 개발자를 위한 공용 검색 API를 제공하고 있지 않습니다. 크롤러나 스크래퍼 등의 방식으로 강제 연동을 시도할 경우 구글의 봇 디텍션 시스템(reCAPTCHA v3 등)에 의해 즉시 차단되므로 투명성 센터 검색 API 구현은 불가능합니다.</p>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+    }
+
+    function getImwebStatisticsHTML() {
+      return `
+        <div class="max-w-6xl mx-auto space-y-6">
+          <!-- Date Filter Header -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-black text-gray-855 dark-mode:text-white flex items-center gap-2">🌐 아임웹(I'mWeb) 방문자 통계</h2>
+              <p class="text-xs text-gray-555 font-medium mt-1">공식 웹사이트의 유입 트래픽, 주요 리퍼러(유입 사이트) 경로, 호스팅 계약 상태를 집계합니다.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
+                <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일</button>
+                <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="this-month">이번달</button>
+                <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-month">지난달</button>
+                <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-3-months">최근3개월</button>
+                <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="custom">직접지정</button>
+              </div>
+              <div id="imweb-custom-date-container" class="flex items-center gap-1.5 hidden">
+                <input type="date" id="imweb-start-date" class="px-3 py-1.5 bg-white dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold text-gray-755 dark-mode:text-white focus:outline-none focus:ring-1 focus:ring-orange-500" />
+                <span class="text-gray-400 text-xs">~</span>
+                <input type="date" id="imweb-end-date" class="px-3 py-1.5 bg-white dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded-lg text-xs font-bold text-gray-755 dark-mode:text-white focus:outline-none focus:ring-1 focus:ring-orange-500" />
+                <button id="imweb-date-apply-btn" class="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-extrabold transition-all shadow-sm">조회</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Expiry Warning Banner Container -->
+          <div id="imweb-expiry-banner-container"></div>
+
+          <!-- KPI & Chart Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div id="imweb-comparison-cards" class="lg:col-span-1 flex flex-col gap-4">
+            </div>
+            
+            <div class="lg:col-span-2 bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-4">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">웹사이트 일별 순 방문자수 추이</h3>
+                <span class="text-[10px] text-gray-400 font-bold font-mono">단위: 명</span>
+              </div>
+              <div id="imweb-visitors-chart-container" class="w-full h-60 relative">
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Visitors Breakdown Table -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-gray-150 dark-mode:border-gray-700">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">선택 기간 일별 방문자수 상세 표</h3>
+            </div>
+            <div class="overflow-x-auto max-h-60 overflow-y-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-gray-450 border-b border-gray-150 dark-mode:border-gray-700 font-black">
+                    <th class="py-3.5 px-3">날짜</th>
+                    <th class="py-3.5 px-3 text-center">방문자 수 (명)</th>
+                  </tr>
+                </thead>
+                <tbody id="imweb-daily-tbody" class="divide-y divide-gray-100 dark-mode:divide-gray-700">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Referral Domains Table -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-gray-150 dark-mode:border-gray-700">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">방문 유입 경로별 상세 분포 (Referrer Domains)</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-gray-450 border-b border-gray-150 dark-mode:border-gray-700 font-black">
+                    <th class="py-3.5 px-3">유입 도메인 경로</th>
+                    <th class="py-3.5 px-3 text-center">방문자 수</th>
+                    <th class="py-3.5 px-3 text-center">유입 비율</th>
+                  </tr>
+                </thead>
+                <tbody id="imweb-referrers-tbody" class="divide-y divide-gray-100 dark-mode:divide-gray-700">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Setup Guide -->
+          <details class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm group">
+            <summary class="p-5 flex items-center justify-between cursor-pointer focus:outline-none select-none">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white flex items-center gap-2">📘 아임웹 API 연동 가이드</h3>
+              <span class="text-xs text-gray-400 font-bold group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-6 border-t border-gray-150 dark-mode:border-gray-700 space-y-4 text-xs font-semibold leading-relaxed text-gray-650 dark-mode:text-gray-305">
+              <div class="space-y-1">
+                <h4 class="text-orange-500 font-bold text-[11px]">1. API 키 발급 방법</h4>
+                <p class="text-gray-500">아임웹 대시보드 관리자 화면 > 환경설정 > API 설정에서 REST API Key 및 Secret Key를 신규 발급합니다.</p>
+              </div>
+              <div class="space-y-1">
+                <h4 class="text-orange-500 font-bold text-[11px]">2. 로컬 서버 설정</h4>
+                <p class="text-gray-500">발급된 키값을 로컬 서버 내 <code>config.json</code> 내의 <code>imweb.apiKey</code> 및 <code>imweb.secretKey</code> 필드에 입력하여 데이터 연동을 마칩니다.</p>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+    }
+
+
     function getPlaceStatisticsHTML() {
       return `
         <div class="max-w-7xl mx-auto space-y-6">
@@ -9309,9 +9841,9 @@
       `;
     }
 
-        function setupPlaceStatistics() {
+            function setupPlaceStatistics() {
       let activePlaceId = "4093046";
-      let activePeriod = "custom"; // Default to custom (past 7 days excluding today)
+      let activePeriod = "last-7-days"; // Default to last-7-days
       let placeHistory = {};
 
       const tabBtns = document.querySelectorAll(".place-tab-btn");
@@ -9323,7 +9855,7 @@
       const authBtn = document.getElementById("place-auth-btn");
       const scrapeBtn = document.getElementById("place-scrape-btn");
 
-      // Initialize custom date fields with the past 7 days excluding today
+      // Initialize date inputs with the default range
       const defaultRange = getLast7DaysExcludingToday();
       if (startDateInput && endDateInput) {
         startDateInput.value = defaultRange.start;
@@ -9442,7 +9974,8 @@
 
       async function loadPlaceData(placeId) {
         try {
-          const res = await fetch(getLocalServerUrl(`/api/place-statistics?placeId=${placeId}`));
+          // Smartplace GET API only exists on Cloudflare Pages KV, fetch it directly from CF Pages to avoid 404 Not Found!
+          const res = await fetch(`https://springmoons.pages.dev/api/place-statistics?placeId=${placeId}`);
           if (!res.ok) throw new Error("HTTP " + res.status);
           const data = await res.json();
           placeHistory = data.history || {};
@@ -9469,7 +10002,11 @@
         let start = "";
         let end = todayStr;
 
-        if (activePeriod === "this-month") {
+        if (activePeriod === "last-7-days") {
+          const defaultRange = getLast7DaysExcludingToday();
+          start = defaultRange.start;
+          end = defaultRange.end;
+        } else if (activePeriod === "this-month") {
           start = `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-01`;
         } else if (activePeriod === "last-month") {
           const d = new Date(kst.getFullYear(), kst.getMonth() - 1, 1);
@@ -9579,9 +10116,9 @@
             keywordTbody.innerHTML += `
               <tr class="bg-gray-50 dark-mode:bg-gray-750/30 font-black border-t border-gray-200 dark-mode:border-gray-700">
                 <td class="py-3 px-3 text-center text-gray-500 font-bold">합계</td>
-                <td class="py-3 px-3 text-gray-855 dark-mode:text-gray-100">키워드 총 클릭수</td>
+                <td class="py-3 px-3 text-gray-855 dark-mode:text-gray-100 font-black">키워드 총 클릭수</td>
                 <td class="py-3 px-3 text-center text-orange-600 dark-mode:text-orange-400 font-mono font-black">${sumKws}</td>
-                <td class="py-3 px-3 text-center font-mono">100%</td>
+                <td class="py-3 px-3 text-center font-mono font-black">100%</td>
               </tr>
             `;
           }
@@ -10002,14 +10539,18 @@
         endInput.value = defaultRange.end;
       }
 
-      let activePeriod = "custom";
+      let activePeriod = "last-7-days";
 
       periodBtns.forEach(btn => {
         btn.addEventListener("click", () => {
           periodBtns.forEach(b => b.className = "total-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-555 dark-mode:text-gray-400");
-          btn.className = "total-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-800 dark-mode:text-white shadow-sm";
+          btn.className = "total-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-805 dark-mode:text-white shadow-sm";
           activePeriod = btn.dataset.period;
-          if (activePeriod !== "custom") {
+          const customDateContainer = document.getElementById("total-custom-date-container");
+          if (activePeriod === "custom") {
+            customDateContainer.classList.remove("hidden");
+          } else {
+            customDateContainer.classList.add("hidden");
             calculateDateAndLoad();
           }
         });
@@ -10026,7 +10567,11 @@
         let start = "";
         let end = kst.toISOString().split("T")[0];
 
-        if (activePeriod === "this-month") {
+        if (activePeriod === "last-7-days") {
+          const defaultRange = getLast7DaysExcludingToday();
+          start = defaultRange.start;
+          end = defaultRange.end;
+        } else if (activePeriod === "this-month") {
           start = `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-01`;
         } else if (activePeriod === "last-month") {
           const d = new Date(kst.getFullYear(), kst.getMonth() - 1, 1);
@@ -10053,9 +10598,9 @@
         let metaClicks = 0, metaSpend = 0, googleClicks = 0, googleSpend = 0, imwebVisitors = 0;
         try {
           const [metaRes, googleRes, imwebRes] = await Promise.all([
-            fetch(getLocalServerUrl(`/api/meta-ads?start=${start}&end=${end}`)).then(r => r.json()).catch(() => null),
-            fetch(getLocalServerUrl(`/api/google-sa?start=${start}&end=${end}`)).then(r => r.json()).catch(() => null),
-            fetch(getLocalServerUrl(`/api/imweb?start=${start}&end=${end}`)).then(r => r.json()).catch(() => null)
+            fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`)).then(r => r.json()).catch(() => null),
+            fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}&start=${start}&end=${end}`)).then(r => r.json()).catch(() => null),
+            fetch(getLocalServerUrl(`/api/imweb?startDate=${start}&endDate=${end}&start=${start}&end=${end}`)).then(r => r.json()).catch(() => null)
           ]);
 
           if (metaRes && metaRes.campaignStats) {
@@ -10133,7 +10678,7 @@
         }
       }
 
-      loadTotalDashboard();
+      calculateDateAndLoad();
     }
 
     function setupMetaStatistics() {
@@ -10150,14 +10695,18 @@
         endInput.value = defaultRange.end;
       }
 
-      let activePeriod = "custom";
+      let activePeriod = "last-7-days";
 
       periodBtns.forEach(btn => {
         btn.addEventListener("click", () => {
           periodBtns.forEach(b => b.className = "meta-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-555 dark-mode:text-gray-400");
-          btn.className = "meta-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-800 dark-mode:text-white shadow-sm";
+          btn.className = "meta-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-805 dark-mode:text-white shadow-sm";
           activePeriod = btn.dataset.period;
-          if (activePeriod !== "custom") {
+          const customDateContainer = document.getElementById("meta-custom-date-container");
+          if (activePeriod === "custom") {
+            customDateContainer.classList.remove("hidden");
+          } else {
+            customDateContainer.classList.add("hidden");
             calculateDateAndLoad();
           }
         });
@@ -10172,7 +10721,11 @@
         let start = "";
         let end = kst.toISOString().split("T")[0];
 
-        if (activePeriod === "this-month") {
+        if (activePeriod === "last-7-days") {
+          const defaultRange = getLast7DaysExcludingToday();
+          start = defaultRange.start;
+          end = defaultRange.end;
+        } else if (activePeriod === "this-month") {
           start = `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-01`;
         } else if (activePeriod === "last-month") {
           const d = new Date(kst.getFullYear(), kst.getMonth() - 1, 1);
@@ -10197,7 +10750,7 @@
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
         try {
-          const res = await fetch(getLocalServerUrl(`/api/meta-ads?start=${start}&end=${end}`));
+          const res = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
           const data = await res.json();
 
           let campaign = data.campaignStats || {};
@@ -10302,7 +10855,7 @@
         } catch (_) {}
       }
 
-      loadMetaStats();
+      calculateDateAndLoad();
     }
 
     function setupGoogleSAStatistics() {
@@ -10319,14 +10872,18 @@
         endInput.value = defaultRange.end;
       }
 
-      let activePeriod = "custom";
+      let activePeriod = "last-7-days";
 
       periodBtns.forEach(btn => {
         btn.addEventListener("click", () => {
           periodBtns.forEach(b => b.className = "google-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-555 dark-mode:text-gray-400");
-          btn.className = "google-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-800 dark-mode:text-white shadow-sm";
+          btn.className = "google-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-805 dark-mode:text-white shadow-sm";
           activePeriod = btn.dataset.period;
-          if (activePeriod !== "custom") {
+          const customDateContainer = document.getElementById("google-custom-date-container");
+          if (activePeriod === "custom") {
+            customDateContainer.classList.remove("hidden");
+          } else {
+            customDateContainer.classList.add("hidden");
             calculateDateAndLoad();
           }
         });
@@ -10341,7 +10898,11 @@
         let start = "";
         let end = kst.toISOString().split("T")[0];
 
-        if (activePeriod === "this-month") {
+        if (activePeriod === "last-7-days") {
+          const defaultRange = getLast7DaysExcludingToday();
+          start = defaultRange.start;
+          end = defaultRange.end;
+        } else if (activePeriod === "this-month") {
           start = `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-01`;
         } else if (activePeriod === "last-month") {
           const d = new Date(kst.getFullYear(), kst.getMonth() - 1, 1);
@@ -10366,7 +10927,7 @@
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
         try {
-          const res = await fetch(getLocalServerUrl(`/api/google-sa?start=${start}&end=${end}`));
+          const res = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
           const data = await res.json();
 
           let terms = data.searchTerms || [];
@@ -10389,11 +10950,13 @@
           const avgCpc = campaignClicks > 0 ? Math.round(campaignSpend / campaignClicks) : 0;
 
           cardsContainer.innerHTML = `
-            <div class="bg-blue-50/50 dark-mode:bg-blue-950/10 border border-blue-100/50 dark-mode:border-blue-900/30 rounded-2xl p-5 shadow-sm space-y-2">
-              <span class="text-[10px] text-blue-700 font-bold uppercase tracking-wider block">총 클릭 수</span>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-blue-600 font-mono">${campaignClicks.toLocaleString()}</span>
-                <span class="text-xs font-bold text-blue-500/80">회 클릭</span>
+            <div class="bg-blue-50/50 dark-mode:bg-blue-950/10 border border-blue-100/50 dark-mode:border-blue-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <span class="text-[10px] text-blue-700 font-bold uppercase tracking-wider block">총 클릭 수</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-2xl font-black text-blue-600 font-mono">${campaignClicks.toLocaleString()}</span>
+                  <span class="text-xs font-bold text-blue-500/80">회 클릭</span>
+                </div>
               </div>
             </div>
             <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
@@ -10475,7 +11038,7 @@
         } catch (_) {}
       }
 
-      loadGoogleSA();
+      calculateDateAndLoad();
     }
 
     function setupImwebStatistics() {
@@ -10493,14 +11056,18 @@
         endInput.value = defaultRange.end;
       }
 
-      let activePeriod = "custom";
+      let activePeriod = "last-7-days";
 
       periodBtns.forEach(btn => {
         btn.addEventListener("click", () => {
           periodBtns.forEach(b => b.className = "imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-555 dark-mode:text-gray-400");
-          btn.className = "imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm";
+          btn.className = "imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-805 dark-mode:text-white shadow-sm";
           activePeriod = btn.dataset.period;
-          if (activePeriod !== "custom") {
+          const customDateContainer = document.getElementById("imweb-custom-date-container");
+          if (activePeriod === "custom") {
+            customDateContainer.classList.remove("hidden");
+          } else {
+            customDateContainer.classList.add("hidden");
             calculateDateAndLoad();
           }
         });
@@ -10515,7 +11082,11 @@
         let start = "";
         let end = kst.toISOString().split("T")[0];
 
-        if (activePeriod === "this-month") {
+        if (activePeriod === "last-7-days") {
+          const defaultRange = getLast7DaysExcludingToday();
+          start = defaultRange.start;
+          end = defaultRange.end;
+        } else if (activePeriod === "this-month") {
           start = `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-01`;
         } else if (activePeriod === "last-month") {
           const d = new Date(kst.getFullYear(), kst.getMonth() - 1, 1);
@@ -10540,8 +11111,41 @@
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
         try {
-          const res = await fetch(getLocalServerUrl(`/api/imweb?start=${start}&end=${end}`));
+          const res = await fetch(getLocalServerUrl(`/api/imweb?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
           const data = await res.json();
+
+          const subExp = data.subscriptionExpiry || "2028-01-19";
+          const domExp = data.domainExpiry || "2028-01-19";
+          const sslExp = data.sslExpiry || "2028-01-19";
+
+          const getDaysLeft = (dateStr) => {
+            const diff = new Date(dateStr) - new Date();
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
+          };
+
+          const subDays = getDaysLeft(subExp);
+          const domDays = getDaysLeft(domExp);
+          const sslDays = getDaysLeft(sslExp);
+
+          const bannerContainer = document.getElementById("imweb-expiry-banner-container");
+          if (bannerContainer) {
+            bannerContainer.innerHTML = `
+              <div class="bg-red-50 dark-mode:bg-red-950/20 border border-red-200 dark-mode:border-red-900/40 rounded-2xl p-4 flex items-center gap-3">
+                <span class="text-lg">🚨</span>
+                <div class="text-xs font-bold text-red-850 dark-mode:text-red-300 leading-relaxed flex-1 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                  <div>
+                    <span>아임웹 도메인 호스팅 및 보안서버(SSL) 인증 만료 예정 알림</span>
+                    <p class="text-[10px] text-red-600 dark-mode:text-red-400/80 font-medium mt-0.5">
+                      도메인 (${data.domain || 'inde.co.kr'}): <strong>${domExp} (${domDays}일 남음)</strong> | 
+                      보안서버(SSL): <strong>${sslExp} (${sslDays}일 남음)</strong> |
+                      호스팅구독: <strong>${subExp} (${subDays}일 남음)</strong>
+                    </p>
+                  </div>
+                  <span class="px-3 py-1 bg-red-500 text-white rounded-xl text-[10px] font-black text-center whitespace-nowrap self-start md:self-auto">만료 확인 필요</span>
+                </div>
+              </div>
+            `;
+          }
 
           let visitorsList = data.dailyVisitors || [];
           let referrers = data.referrers || [];
@@ -10562,8 +11166,11 @@
             ];
           }
 
+          // Filter visitorsList to selected date range
+          visitorsList = visitorsList.filter(v => v.date >= start && v.date <= end);
+
           const totalVisitors = visitorsList.reduce((a, b) => a + (b.count || 0), 0);
-          const dailyAvg = Math.round(totalVisitors / days);
+          const dailyAvg = Math.round(totalVisitors / Math.max(1, visitorsList.length));
 
           cardsContainer.innerHTML = `
             <div class="bg-emerald-50/50 dark-mode:bg-emerald-950/10 border border-emerald-100/50 dark-mode:border-emerald-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
@@ -10575,7 +11182,7 @@
             </div>
             <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
               <div class="space-y-1">
-                <span class="text-[10px] text-gray-550 font-bold uppercase tracking-wider block">일평균 방문자수</span>
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">일평균 방문자수</span>
                 <div class="flex items-baseline gap-1.5">
                   <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${dailyAvg.toLocaleString()}</span>
                   <span class="text-xs font-bold text-gray-550">명 / 일</span>
@@ -10622,7 +11229,7 @@
             const pct = totalRef > 0 ? ((row.count / totalRef) * 100).toFixed(1) : 0;
             referrersTbody.innerHTML += `
               <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
-                <td class="py-3 px-3">${row.domain}</td>
+                <td class="py-3 px-3">${row.domain || row.site}</td>
                 <td class="py-3 px-3 text-center font-mono text-emerald-500">${row.count.toLocaleString()}</td>
                 <td class="py-3 px-3 text-center font-mono">${pct}%</td>
               </tr>
@@ -10631,7 +11238,7 @@
         } catch (_) {}
       }
 
-      loadImwebStats();
+      calculateDateAndLoad();
     }
 
 
