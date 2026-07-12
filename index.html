@@ -365,7 +365,6 @@
     let currentCategories = [];
     let isDarkMode = false;
     let isAuthenticated = false;
-    let placeHistory = {};
 
     // ============================================
     // 로컬스토리지 관리
@@ -9869,6 +9868,7 @@
             function setupPlaceStatistics() {
       let activePlaceId = "4093046";
       let activePeriod = "last-7-days"; // Default to last-7-days
+      let placeHistory = {};
 
       const tabBtns = document.querySelectorAll(".place-tab-btn");
       const periodBtns = document.querySelectorAll(".place-period-btn");
@@ -10717,15 +10717,6 @@
         const pcImps = pcClicks * 87;
 
         // 3. 플레이스 (스마트플레이스 유입수 동적 집계)
-        if (!placeHistory || Object.keys(placeHistory).length === 0) {
-          try {
-            const res = await fetch(`https://springmoons.pages.dev/api/place-statistics?placeId=4093046`);
-            if (res.ok) {
-              const data = await res.json();
-              placeHistory = data.history || {};
-            }
-          } catch (_) {}
-        }
         let placeClicks = 0;
         let cur = new Date(start);
         const limit = new Date(end);
@@ -10871,111 +10862,110 @@
 
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
-        let campaign = {
-          clicks: Math.round(4.2 * days),
-          impressions: Math.round(4.2 * 45 * days),
-          spend: Math.round(4.2 * days) * 1540
-        };
-        let adsList = [
-          { name: "슬라이드_최적이동_소재A", status: "ACTIVE", clicks: Math.round(2.5 * days), spend: Math.round(2.5 * days) * 1540, impressions: Math.round(2.5 * 45 * days), dailyBudget: 50000, cpr: 1540 },
-          { name: "슬라이드_최적이동_소재B", status: "ACTIVE", clicks: Math.round(1.7 * days), spend: Math.round(1.7 * days) * 1540, impressions: Math.round(1.7 * 45 * days), dailyBudget: 50000, cpr: 1540 }
-        ];
-
         try {
           const res = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.campaignStats) {
-              campaign = data.campaignStats;
-              adsList = data.activeAds || [];
-            }
+          const data = await res.json();
+
+          let campaign = data.campaignStats || {};
+          let adsList = data.activeAds || [];
+
+          if (!data.campaignStats) {
+            campaign = {
+              clicks: Math.round(4.2 * days),
+              impressions: Math.round(4.2 * 45 * days),
+              spend: Math.round(4.2 * days) * 1540
+            };
+            adsList = [
+              { name: "슬라이드_최적이동_소재A", status: "ACTIVE", clicks: Math.round(2.5 * days), spend: Math.round(2.5 * days) * 1540, impressions: Math.round(2.5 * 45 * days), dailyBudget: 50000, cpr: 1540 },
+              { name: "슬라이드_최적이동_소재B", status: "ACTIVE", clicks: Math.round(1.7 * days), spend: Math.round(1.7 * days) * 1540, impressions: Math.round(1.7 * 45 * days), dailyBudget: 50000, cpr: 1540 }
+            ];
           }
-        } catch (_) {}
 
-        const avgCpc = campaign.clicks > 0 ? Math.round(campaign.spend / campaign.clicks) : 0;
+          const avgCpc = campaign.clicks > 0 ? Math.round(campaign.spend / campaign.clicks) : 0;
 
-        // Render Cards
-        cardsContainer.innerHTML = `
-          <div class="bg-orange-50/50 dark-mode:bg-orange-950/10 border border-orange-100/50 dark-mode:border-orange-900/30 rounded-2xl p-5 shadow-sm space-y-2">
-            <span class="text-[10px] text-orange-700 font-bold uppercase tracking-wider block">총 클릭 수</span>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-2xl font-black text-orange-600 font-mono">${campaign.clicks.toLocaleString()}</span>
-              <span class="text-xs font-bold text-orange-500/80">회 클릭</span>
-            </div>
-          </div>
-          <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-            <div class="space-y-1">
-              <span class="text-[10px] text-gray-550 font-bold uppercase tracking-wider block">총 지출 금액</span>
+          // Render Cards
+          cardsContainer.innerHTML = `
+            <div class="bg-orange-50/50 dark-mode:bg-orange-950/10 border border-orange-100/50 dark-mode:border-orange-900/30 rounded-2xl p-5 shadow-sm space-y-2">
+              <span class="text-[10px] text-orange-700 font-bold uppercase tracking-wider block">총 클릭 수</span>
               <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${campaign.spend.toLocaleString()}</span>
-                <span class="text-xs font-bold text-gray-550">원</span>
+                <span class="text-2xl font-black text-orange-600 font-mono">${campaign.clicks.toLocaleString()}</span>
+                <span class="text-xs font-bold text-orange-500/80">회 클릭</span>
               </div>
             </div>
-          </div>
-          <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-            <div class="space-y-1">
-              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">결과당 평균 비용 (CPC)</span>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${avgCpc.toLocaleString()}</span>
-                <span class="text-xs font-bold text-gray-555">원</span>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <span class="text-[10px] text-gray-550 font-bold uppercase tracking-wider block">총 지출 금액</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${campaign.spend.toLocaleString()}</span>
+                  <span class="text-xs font-bold text-gray-550">원</span>
+                </div>
               </div>
             </div>
-          </div>
-        `;
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">결과당 평균 비용 (CPC)</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${avgCpc.toLocaleString()}</span>
+                  <span class="text-xs font-bold text-gray-555">원</span>
+                </div>
+              </div>
+            </div>
+          `;
 
-        const trendData = [];
-        let cur = new Date(start);
-        const limit = new Date(end);
-        while (cur <= limit) {
-          const dateStr = cur.toISOString().split("T")[0];
-          const dailyClicks = Math.round(3 + Math.random() * 3);
-          trendData.push({ date: dateStr, clicks: dailyClicks });
-          cur.setDate(cur.getDate() + 1);
-        }
-        drawChartSVG("meta-clicks-chart-container", trendData, "clicks", "#EA580C", "#F97316");
+          const trendData = [];
+          let cur = new Date(start);
+          const limit = new Date(end);
+          while (cur <= limit) {
+            const dateStr = cur.toISOString().split("T")[0];
+            const dailyClicks = Math.round(3 + Math.random() * 3);
+            trendData.push({ date: dateStr, clicks: dailyClicks });
+            cur.setDate(cur.getDate() + 1);
+          }
+          drawChartSVG("meta-clicks-chart-container", trendData, "clicks", "#EA580C", "#F97316");
 
-        // Active Ads table
-        adsTbody.innerHTML = "";
-        let sumClicks = 0, sumBudget = 0, sumSpend = 0, sumImps = 0;
-        
-        adsList.forEach(ad => {
-          const adCpr = ad.clicks > 0 ? Math.round(ad.spend / ad.clicks) : 0;
-          sumClicks += ad.clicks;
-          sumBudget += ad.dailyBudget;
-          sumSpend += ad.spend;
-          sumImps += ad.impressions;
+          // Active Ads table
+          adsTbody.innerHTML = "";
+          let sumClicks = 0, sumBudget = 0, sumSpend = 0, sumImps = 0;
           
+          adsList.forEach(ad => {
+            const adCpr = ad.clicks > 0 ? Math.round(ad.spend / ad.clicks) : 0;
+            sumClicks += ad.clicks;
+            sumBudget += ad.dailyBudget;
+            sumSpend += ad.spend;
+            sumImps += ad.impressions;
+            
+            adsTbody.innerHTML += `
+              <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
+                <td class="py-3 px-3">
+                  <div class="w-10 h-10 bg-gray-100 dark-mode:bg-gray-750 rounded-lg overflow-hidden border border-gray-200 dark-mode:border-gray-650 flex items-center justify-center text-[10px] text-gray-400">IMG</div>
+                </td>
+                <td class="py-3 px-3">${ad.name}</td>
+                <td class="py-3 px-3 text-center">
+                  <span class="px-2 py-0.5 bg-green-100 dark-mode:bg-green-950/40 text-green-700 dark-mode:text-green-400 rounded-full text-[10px]">ON</span>
+                </td>
+                <td class="py-3 px-3 text-center font-mono text-orange-500">${ad.clicks.toLocaleString()}</td>
+                <td class="py-3 px-3 text-right font-mono">${ad.dailyBudget.toLocaleString()}원</td>
+                <td class="py-3 px-3 text-right font-mono">${ad.spend.toLocaleString()}원</td>
+                <td class="py-3 px-3 text-right font-mono">${adCpr.toLocaleString()}원</td>
+                <td class="py-3 px-3 text-right font-mono">${ad.impressions.toLocaleString()}</td>
+              </tr>
+            `;
+          });
+
+          // Add Total Sum Row
+          const totalCpr = sumClicks > 0 ? Math.round(sumSpend / sumClicks) : 0;
           adsTbody.innerHTML += `
-            <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
-              <td class="py-3 px-3">
-                <div class="w-10 h-10 bg-gray-100 dark-mode:bg-gray-750 rounded-lg overflow-hidden border border-gray-200 dark-mode:border-gray-650 flex items-center justify-center text-[10px] text-gray-400">IMG</div>
-              </td>
-              <td class="py-3 px-3">${ad.name}</td>
-              <td class="py-3 px-3 text-center">
-                <span class="px-2 py-0.5 bg-green-100 dark-mode:bg-green-950/40 text-green-700 dark-mode:text-green-400 rounded-full text-[10px]">ON</span>
-              </td>
-              <td class="py-3 px-3 text-center font-mono text-orange-500">${ad.clicks.toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono">${ad.dailyBudget.toLocaleString()}원</td>
-              <td class="py-3 px-3 text-right font-mono">${ad.spend.toLocaleString()}원</td>
-              <td class="py-3 px-3 text-right font-mono">${adCpr.toLocaleString()}원</td>
-              <td class="py-3 px-3 text-right font-mono">${ad.impressions.toLocaleString()}</td>
+            <tr class="bg-gray-50 dark-mode:bg-gray-750/30 font-black border-t border-gray-200 dark-mode:border-gray-700 text-gray-900 dark-mode:text-white">
+              <td class="py-3.5 px-3 text-center" colspan="2">합계</td>
+              <td class="py-3.5 px-3 text-center">-</td>
+              <td class="py-3.5 px-3 text-center font-mono text-orange-600 dark-mode:text-orange-400">${sumClicks.toLocaleString()}</td>
+              <td class="py-3.5 px-3 text-right font-mono">${sumBudget.toLocaleString()}원</td>
+              <td class="py-3.5 px-3 text-right font-mono">${sumSpend.toLocaleString()}원</td>
+              <td class="py-3.5 px-3 text-right font-mono">${totalCpr.toLocaleString()}원</td>
+              <td class="py-3.5 px-3 text-right font-mono">${sumImps.toLocaleString()}</td>
             </tr>
           `;
-        });
-
-        // Add Total Sum Row
-        const totalCpr = sumClicks > 0 ? Math.round(sumSpend / sumClicks) : 0;
-        adsTbody.innerHTML += `
-          <tr class="bg-gray-50 dark-mode:bg-gray-750/30 font-black border-t border-gray-200 dark-mode:border-gray-700 text-gray-900 dark-mode:text-white">
-            <td class="py-3.5 px-3 text-center" colspan="2">합계</td>
-            <td class="py-3.5 px-3 text-center">-</td>
-            <td class="py-3.5 px-3 text-center font-mono text-orange-600 dark-mode:text-orange-400">${sumClicks.toLocaleString()}</td>
-            <td class="py-3.5 px-3 text-right font-mono">${sumBudget.toLocaleString()}원</td>
-            <td class="py-3.5 px-3 text-right font-mono">${sumSpend.toLocaleString()}원</td>
-            <td class="py-3.5 px-3 text-right font-mono">${totalCpr.toLocaleString()}원</td>
-            <td class="py-3.5 px-3 text-right font-mono">${sumImps.toLocaleString()}</td>
-          </tr>
-        `;
+        } catch (_) {}
       }
 
       // Meta Ad Library Search event binding
@@ -11136,117 +11126,116 @@
 
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
-        let terms = [
-          { term: "부산 상가 인테리어", type: "PHRASE", clicks: Math.round(1.5 * days), impressions: Math.round(1.5 * 40 * days), avgCpc: 2100 },
-          { term: "학원 인테리어 전문 업체", type: "EXACT", clicks: Math.round(1.3 * days), impressions: Math.round(1.3 * 40 * days), avgCpc: 1850 }
-        ];
-
         try {
           const res = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.searchTerms && data.searchTerms.length > 0) {
-              terms = data.searchTerms;
-            }
+          const data = await res.json();
+
+          let terms = data.searchTerms || [];
+
+          if (terms.length === 0) {
+            terms = [
+              { term: "부산 상가 인테리어", type: "PHRASE", clicks: Math.round(1.5 * days), impressions: Math.round(1.5 * 40 * days), avgCpc: 2100 },
+              { term: "학원 인테리어 전문 업체", type: "EXACT", clicks: Math.round(1.3 * days), impressions: Math.round(1.3 * 40 * days), avgCpc: 1850 }
+            ];
           }
-        } catch (_) {}
 
-        let campaignClicks = 0, campaignImps = 0, campaignSpend = 0;
-        terms.forEach(t => {
-          campaignClicks += t.clicks;
-          campaignImps += t.impressions;
-          campaignSpend += (t.clicks * t.avgCpc);
-        });
+          let campaignClicks = 0, campaignImps = 0, campaignSpend = 0;
+          terms.forEach(t => {
+            campaignClicks += t.clicks;
+            campaignImps += t.impressions;
+            campaignSpend += (t.clicks * t.avgCpc);
+          });
 
-        const ctr = campaignImps > 0 ? ((campaignClicks / campaignImps) * 100).toFixed(2) + "%" : "0.00%";
-        const avgCpc = campaignClicks > 0 ? Math.round(campaignSpend / campaignClicks) : 0;
+          const ctr = campaignImps > 0 ? ((campaignClicks / campaignImps) * 100).toFixed(2) + "%" : "0.00%";
+          const avgCpc = campaignClicks > 0 ? Math.round(campaignSpend / campaignClicks) : 0;
 
-        cardsContainer.innerHTML = `
-          <div class="bg-blue-50/50 dark-mode:bg-blue-950/10 border border-blue-100/50 dark-mode:border-blue-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-            <div class="space-y-1">
-              <span class="text-[10px] text-blue-700 font-bold uppercase tracking-wider block">총 클릭 수</span>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-blue-600 font-mono">${campaignClicks.toLocaleString()}</span>
-                <span class="text-xs font-bold text-blue-500/80">회 클릭</span>
+          cardsContainer.innerHTML = `
+            <div class="bg-blue-50/50 dark-mode:bg-blue-950/10 border border-blue-100/50 dark-mode:border-blue-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <span class="text-[10px] text-blue-700 font-bold uppercase tracking-wider block">총 클릭 수</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-2xl font-black text-blue-600 font-mono">${campaignClicks.toLocaleString()}</span>
+                  <span class="text-xs font-bold text-blue-500/80">회 클릭</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-            <div class="space-y-1">
-              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">총 지출 금액</span>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${campaignSpend.toLocaleString()}</span>
-                <span class="text-xs font-bold text-gray-550">원</span>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">총 지출 금액</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${campaignSpend.toLocaleString()}</span>
+                  <span class="text-xs font-bold text-gray-550">원</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-            <div class="space-y-1">
-              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">평균 클릭비용 (CPC)</span>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${avgCpc.toLocaleString()}</span>
-                <span class="text-xs font-bold text-gray-555">원</span>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">평균 클릭비용 (CPC)</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${avgCpc.toLocaleString()}</span>
+                  <span class="text-xs font-bold text-gray-555">원</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-            <div class="space-y-1">
-              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">평균 클릭률 (CTR)</span>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${ctr}</span>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <div class="space-y-1">
+                <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">평균 클릭률 (CTR)</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${ctr}</span>
+                </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
 
-        const trendData = [];
-        let cur = new Date(start);
-        const limit = new Date(end);
-        while (cur <= limit) {
-          const dateStr = cur.toISOString().split("T")[0];
-          const dailyClicks = Math.round(2 + Math.random() * 2);
-          trendData.push({ date: dateStr, clicks: dailyClicks });
-          cur.setDate(cur.getDate() + 1);
-        }
-        drawChartSVG("google-clicks-chart-container", trendData, "clicks", "#2563EB", "#3B82F6");
+          const trendData = [];
+          let cur = new Date(start);
+          const limit = new Date(end);
+          while (cur <= limit) {
+            const dateStr = cur.toISOString().split("T")[0];
+            const dailyClicks = Math.round(2 + Math.random() * 2);
+            trendData.push({ date: dateStr, clicks: dailyClicks });
+            cur.setDate(cur.getDate() + 1);
+          }
+          drawChartSVG("google-clicks-chart-container", trendData, "clicks", "#2563EB", "#3B82F6");
 
-        // Terms table
-        termsTbody.innerHTML = "";
-        let sumClicks = 0, sumImps = 0, sumCost = 0;
-        
-        terms.forEach(row => {
-          const termCost = row.clicks * row.avgCpc;
-          sumClicks += row.clicks;
-          sumImps += row.impressions;
-          sumCost += termCost;
+          // Terms table
+          termsTbody.innerHTML = "";
+          let sumClicks = 0, sumImps = 0, sumCost = 0;
           
-          const termCtr = row.impressions > 0 ? ((row.clicks / row.impressions) * 100).toFixed(2) + "%" : "0.00%";
+          terms.forEach(row => {
+            const termCost = row.clicks * row.avgCpc;
+            sumClicks += row.clicks;
+            sumImps += row.impressions;
+            sumCost += termCost;
+            
+            const termCtr = row.impressions > 0 ? ((row.clicks / row.impressions) * 100).toFixed(2) + "%" : "0.00%";
+            termsTbody.innerHTML += `
+              <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
+                <td class="py-3 px-3">${row.term}</td>
+                <td class="py-3 px-3 font-mono text-gray-550">${row.type}</td>
+                <td class="py-3 px-3 text-center font-mono text-orange-500">${row.clicks.toLocaleString()}</td>
+                <td class="py-3 px-3 text-center font-mono">${row.impressions.toLocaleString()}</td>
+                <td class="py-3 px-3 text-center font-mono">${termCtr}</td>
+                <td class="py-3 px-3 text-right font-mono">${Math.round(row.avgCpc).toLocaleString()}원</td>
+                <td class="py-3 px-3 text-right font-mono">${termCost.toLocaleString()}원</td>
+              </tr>
+            `;
+          });
+
+          // Add Total Sum Row
+          const totalCtr = sumImps > 0 ? ((sumClicks / sumImps) * 100).toFixed(2) + "%" : "0.00%";
+          const totalCpc = sumClicks > 0 ? Math.round(sumCost / sumClicks) : 0;
           termsTbody.innerHTML += `
-            <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
-              <td class="py-3 px-3">${row.term}</td>
-              <td class="py-3 px-3 font-mono text-gray-550">${row.type}</td>
-              <td class="py-3 px-3 text-center font-mono text-orange-500">${row.clicks.toLocaleString()}</td>
-              <td class="py-3 px-3 text-center font-mono">${row.impressions.toLocaleString()}</td>
-              <td class="py-3 px-3 text-center font-mono">${termCtr}</td>
-              <td class="py-3 px-3 text-right font-mono">${Math.round(row.avgCpc).toLocaleString()}원</td>
-              <td class="py-3 px-3 text-right font-mono">${termCost.toLocaleString()}원</td>
+            <tr class="bg-gray-50 dark-mode:bg-gray-750/30 font-black border-t border-gray-200 dark-mode:border-gray-700 text-gray-900 dark-mode:text-white">
+              <td class="py-3.5 px-3 text-center" colspan="2">합계</td>
+              <td class="py-3.5 px-3 text-center font-mono text-orange-600 dark-mode:text-orange-400">${sumClicks.toLocaleString()}</td>
+              <td class="py-3.5 px-3 text-center font-mono">${sumImps.toLocaleString()}</td>
+              <td class="py-3.5 px-3 text-center font-mono">${totalCtr}</td>
+              <td class="py-3.5 px-3 text-right font-mono">${totalCpc.toLocaleString()}원</td>
+              <td class="py-3.5 px-3 text-right font-mono">${sumCost.toLocaleString()}원</td>
             </tr>
           `;
-        });
-
-        // Add Total Sum Row
-        const totalCtr = sumImps > 0 ? ((sumClicks / sumImps) * 100).toFixed(2) + "%" : "0.00%";
-        const totalCpc = sumClicks > 0 ? Math.round(sumCost / sumClicks) : 0;
-        termsTbody.innerHTML += `
-          <tr class="bg-gray-50 dark-mode:bg-gray-750/30 font-black border-t border-gray-200 dark-mode:border-gray-700 text-gray-900 dark-mode:text-white">
-            <td class="py-3.5 px-3 text-center" colspan="2">합계</td>
-            <td class="py-3.5 px-3 text-center font-mono text-orange-600 dark-mode:text-orange-400">${sumClicks.toLocaleString()}</td>
-            <td class="py-3.5 px-3 text-center font-mono">${sumImps.toLocaleString()}</td>
-            <td class="py-3.5 px-3 text-center font-mono">${totalCtr}</td>
-            <td class="py-3.5 px-3 text-right font-mono">${totalCpc.toLocaleString()}원</td>
-            <td class="py-3.5 px-3 text-right font-mono">${sumCost.toLocaleString()}원</td>
-          </tr>
-        `;
+        } catch (_) {}
       }
 
       calculateDateAndLoad();
@@ -11591,73 +11580,69 @@
 
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
-        let stats = { clicks: Math.round(3 * days), impressions: Math.round(3 * 120 * days), spend: Math.round(3 * days) * 980, reach: Math.round(3 * 80 * days), cpr: 980 };
-        let campaigns = [];
-
         try {
           const res = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.campaignStats) {
-              stats = data.campaignStats;
-              campaigns = data.activeCampaigns || [];
-            }
+          const data = await res.json();
+
+          const stats = data.campaignStats || { clicks: 0, impressions: 0, spend: 0, reach: 0 };
+          const campaigns = data.activeCampaigns || [];
+
+          cardsContainer.innerHTML = `
+            <div class="bg-emerald-50/50 dark-mode:bg-emerald-950/10 border border-emerald-100/50 dark-mode:border-emerald-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between flex-1">
+              <span class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">총 지출 금액</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-emerald-600 font-mono">${stats.spend.toLocaleString()}</span>
+                <span class="text-xs font-bold text-emerald-500/80">원</span>
+              </div>
+            </div>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between flex-1">
+              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">총 클릭 수</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${stats.clicks.toLocaleString()}</span>
+                <span class="text-xs font-bold text-gray-550">회 클릭</span>
+              </div>
+            </div>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between flex-1">
+              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">평균 클릭단가 (CPC)</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${Math.round(stats.cpr).toLocaleString()}</span>
+                <span class="text-xs font-bold text-gray-555">원</span>
+              </div>
+            </div>
+          `;
+
+          // Generate trend data
+          const trendData = [];
+          let cur = new Date(start);
+          const limit = new Date(end);
+          while (cur <= limit) {
+            const dateStr = cur.toISOString().split("T")[0];
+            const dailyClicks = Math.round(2 + Math.random() * 2);
+            trendData.push({ date: dateStr, clicks: dailyClicks });
+            cur.setDate(cur.getDate() + 1);
+          }
+          drawChartSVG("gfa-clicks-chart-container", trendData, "clicks", "#059669", "#10B981");
+
+          // Render campaigns
+          campaignsTbody.innerHTML = "";
+          if (campaigns.length === 0) {
+            campaignsTbody.innerHTML = `<tr><td colspan="7" class="py-6 px-3 text-center text-sm text-gray-400 font-semibold">진행 중인 GFA 캠페인이 없습니다.</td></tr>`;
+          } else {
+            campaigns.forEach(c => {
+              campaignsTbody.innerHTML += `
+                <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
+                  <td class="py-3 px-3">${c.name}</td>
+                  <td class="py-3 px-3 text-center"><span class="px-2 py-0.5 bg-emerald-50 dark-mode:bg-emerald-950 text-emerald-600 rounded-full text-[10px] font-black">집행 중</span></td>
+                  <td class="py-3 px-3 text-right font-mono text-orange-500">${c.clicks.toLocaleString()}</td>
+                  <td class="py-3 px-3 text-right font-mono">${c.impressions.toLocaleString()}</td>
+                  <td class="py-3 px-3 text-right font-mono">${c.ctr}%</td>
+                  <td class="py-3 px-3 text-right font-mono">${c.cpc.toLocaleString()}원</td>
+                  <td class="py-3 px-3 text-right font-mono">${c.spend.toLocaleString()}원</td>
+                </tr>
+              `;
+            });
           }
         } catch (_) {}
-
-        cardsContainer.innerHTML = `
-          <div class="bg-emerald-50/50 dark-mode:bg-emerald-950/10 border border-emerald-100/50 dark-mode:border-emerald-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between flex-1">
-            <span class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">총 지출 금액</span>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-2xl font-black text-emerald-600 font-mono">${stats.spend.toLocaleString()}</span>
-              <span class="text-xs font-bold text-emerald-500/80">원</span>
-            </div>
-          </div>
-          <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between flex-1">
-            <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">총 클릭 수</span>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${stats.clicks.toLocaleString()}</span>
-              <span class="text-xs font-bold text-gray-550">회 클릭</span>
-            </div>
-          </div>
-          <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between flex-1">
-            <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">평균 클릭단가 (CPC)</span>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${Math.round(stats.cpr).toLocaleString()}</span>
-              <span class="text-xs font-bold text-gray-555">원</span>
-            </div>
-          </div>
-        `;
-
-        const trendData = [];
-        let cur = new Date(start);
-        const limit = new Date(end);
-        while (cur <= limit) {
-          const dateStr = cur.toISOString().split("T")[0];
-          const dailyClicks = Math.round(2 + Math.random() * 2);
-          trendData.push({ date: dateStr, clicks: dailyClicks });
-          cur.setDate(cur.getDate() + 1);
-        }
-        drawChartSVG("gfa-clicks-chart-container", trendData, "clicks", "#059669", "#10B981");
-
-        campaignsTbody.innerHTML = "";
-        if (campaigns.length === 0) {
-          campaignsTbody.innerHTML = `<tr><td colspan="7" class="py-6 px-3 text-center text-sm text-gray-400 font-semibold">진행 중인 GFA 캠페인이 없습니다.</td></tr>`;
-        } else {
-          campaigns.forEach(c => {
-            campaignsTbody.innerHTML += `
-              <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
-                <td class="py-3 px-3">${c.name}</td>
-                <td class="py-3 px-3 text-center"><span class="px-2 py-0.5 bg-emerald-50 dark-mode:bg-emerald-950 text-emerald-600 rounded-full text-[10px] font-black">집행 중</span></td>
-                <td class="py-3 px-3 text-right font-mono text-orange-500">${c.clicks.toLocaleString()}</td>
-                <td class="py-3 px-3 text-right font-mono">${c.impressions.toLocaleString()}</td>
-                <td class="py-3 px-3 text-right font-mono">${c.ctr}%</td>
-                <td class="py-3 px-3 text-right font-mono">${c.cpc.toLocaleString()}원</td>
-                <td class="py-3 px-3 text-right font-mono">${c.spend.toLocaleString()}원</td>
-              </tr>
-            `;
-          });
-        }
       }
 
       calculateDateAndLoad();
