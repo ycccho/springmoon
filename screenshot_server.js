@@ -2124,6 +2124,32 @@ app.get('/api/gfa-ads', cors(), async (req, res) => {
   });
 });
 
+app.options('/api/meta-ad-library', cors(), (req, res) => { res.sendStatus(200); });
+
+// Proxy endpoint for Meta Ad Library (ads_archive)
+app.get('/api/meta-ad-library', cors(), async (req, res) => {
+  const query = req.query.query || '';
+  const metaConf = globalConfig.meta || {};
+  const accessToken = metaConf.accessToken;
+
+  if (!accessToken) {
+    return res.json({ success: false, error: "Meta Access Token이 config.json에 등록되지 않았습니다." });
+  }
+
+  try {
+    // ads_archive query: search for active competitor ads in South Korea (KR)
+    const url = `https://graph.facebook.com/v19.0/ads_archive?search_terms=${encodeURIComponent(query)}&ad_reached_countries=['KR']&ad_active_status=ACTIVE&fields=page_name,ad_creative_bodies,publisher_platforms,ad_delivery_start_time,page_id&limit=10&access_token=${accessToken}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error?.message || "Meta Ad Library API 오류");
+    }
+    res.json({ success: true, data: data.data || [] });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
 const PORT = 3888;
 app.listen(PORT, () => {
   console.log(`================================================================`);

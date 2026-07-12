@@ -9515,6 +9515,25 @@
               </div>
             </div>
           </details>
+
+          <!-- Meta Ad Library Search Section -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-150 dark-mode:border-gray-700 pb-3">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white flex items-center gap-2">🔍 메타 광고 라이브러리 (Facebook Ad Library) 실시간 타사 광고 조회</h3>
+              <span class="text-[10px] text-orange-500 font-extrabold px-2 py-0.5 bg-orange-50 dark-mode:bg-orange-950 rounded-full">실시간 연동</span>
+            </div>
+            
+            <p class="text-xs text-gray-500 font-medium">검색어(예: 경쟁사명, 인테리어 등)를 입력하여 대한민국(KR) 내에서 현재 실제 라이브 중인 광고 소재를 실시간으로 검색합니다.</p>
+            <div class="flex gap-2">
+              <input type="text" id="meta-ad-lib-query" placeholder="경쟁사명 또는 키워드 입력 (예: 한샘, 인테리어, 리모델링)" class="flex-1 px-4 py-2 border border-gray-300 dark-mode:border-gray-650 rounded-xl bg-white dark-mode:bg-gray-750 text-xs font-bold text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <button id="meta-ad-lib-search-btn" class="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black shadow-sm transition-all whitespace-nowrap">광고 검색</button>
+            </div>
+
+            <!-- Results container -->
+            <div id="meta-ad-lib-results-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <p class="col-span-full text-xs text-gray-400 text-center py-6 font-bold">검색어를 입력하고 광고 검색 버튼을 눌러주세요.</p>
+            </div>
+          </div>
         </div>
       `;
     }
@@ -10947,6 +10966,93 @@
             </tr>
           `;
         } catch (_) {}
+      }
+
+      // Meta Ad Library Search event binding
+      const searchBtn = document.getElementById("meta-ad-lib-search-btn");
+      const searchInput = document.getElementById("meta-ad-lib-query");
+      const resultsContainer = document.getElementById("meta-ad-lib-results-container");
+
+      if (searchBtn && searchInput && resultsContainer) {
+        searchBtn.addEventListener("click", async () => {
+          const query = searchInput.value.trim();
+          if (!query) {
+            alert("검색어를 입력해 주세요.");
+            return;
+          }
+
+          searchBtn.disabled = true;
+          searchBtn.textContent = "검색 중...";
+          resultsContainer.innerHTML = `<p class="col-span-full text-xs text-gray-400 text-center py-6 font-bold animate-pulse">실시간 메타 광고 라이브러리 데이터를 검색하고 있습니다...</p>`;
+
+          try {
+            const res = await fetch(getLocalServerUrl(`/api/meta-ad-library?query=${encodeURIComponent(query)}`));
+            const result = await res.json();
+
+            if (!result.success) {
+              resultsContainer.innerHTML = `
+                <div class="col-span-full bg-red-50 dark-mode:bg-red-950/20 border border-red-200 dark-mode:border-red-900/40 rounded-xl p-4 text-xs font-bold text-red-850 dark-mode:text-red-300">
+                  ⚠️ 메타 광고 라이브러리 조회 실패: ${result.error}
+                </div>
+              `;
+              return;
+            }
+
+            const ads = result.data || [];
+            if (ads.length === 0) {
+              resultsContainer.innerHTML = `<p class="col-span-full text-xs text-gray-400 text-center py-6 font-bold">대한민국 내에서 활성화된 광고 중 검색어와 매칭되는 광고를 찾지 못했습니다.</p>`;
+              return;
+            }
+
+            resultsContainer.innerHTML = "";
+            ads.forEach(ad => {
+              const platforms = ad.publisher_platforms || [];
+              const platformBadges = platforms.map(p => `
+                <span class="px-2 py-0.5 bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300 text-[10px] rounded font-bold">${p}</span>
+              `).join(" ");
+
+              const bodyText = (ad.ad_creative_bodies && ad.ad_creative_bodies[0]) || "텍스트 소재 없음";
+              const dateStr = ad.ad_delivery_start_time ? ad.ad_delivery_start_time.split("T")[0] : "-";
+
+              resultsContainer.innerHTML += `
+                <div class="bg-gray-50/50 dark-mode:bg-gray-750/30 border border-gray-150 dark-mode:border-gray-700 rounded-2xl p-4 space-y-3 flex flex-col justify-between">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="font-black text-xs text-gray-855 dark-mode:text-white flex items-center gap-1.5">
+                        📢 ${ad.page_name || '광고주'}
+                      </span>
+                      <span class="text-[10px] text-green-600 font-extrabold px-1.5 py-0.5 bg-green-50 dark-mode:bg-green-950/40 rounded-full">ACTIVE</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                      ${platformBadges}
+                    </div>
+                    <p class="text-xs text-gray-650 dark-mode:text-gray-350 leading-relaxed break-all font-semibold whitespace-pre-wrap line-clamp-4">${bodyText}</p>
+                  </div>
+                  <div class="flex items-center justify-between border-t border-gray-200 dark-mode:border-gray-700 pt-2 text-[10px] text-gray-400 font-bold">
+                    <span>최초 게재일: ${dateStr}</span>
+                    <a href="https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=KR&q=${encodeURIComponent(ad.page_name || '')}&sort_data[direction]=desc&sort_data[mode]=relevancy_monthly_active" target="_blank" class="text-orange-500 hover:underline">상세보기 ↗</a>
+                  </div>
+                </div>
+              `;
+            });
+          } catch (e) {
+            resultsContainer.innerHTML = `
+              <div class="col-span-full bg-red-50 dark-mode:bg-red-950/20 border border-red-200 dark-mode:border-red-900/40 rounded-xl p-4 text-xs font-bold text-red-850 dark-mode:text-red-300">
+                ⚠️ 네트워크 오류가 발생했습니다.
+              </div>
+            `;
+          } finally {
+            searchBtn.disabled = false;
+            searchBtn.textContent = "광고 검색";
+          }
+        });
+
+        // Search trigger on Enter key
+        searchInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            searchBtn.click();
+          }
+        });
       }
 
       calculateDateAndLoad();
