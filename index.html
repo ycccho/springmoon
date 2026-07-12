@@ -365,6 +365,7 @@
     let currentCategories = [];
     let isDarkMode = false;
     let isAuthenticated = false;
+    let placeHistory = {};
 
     // ============================================
     // 로컬스토리지 관리
@@ -9868,7 +9869,7 @@
             function setupPlaceStatistics() {
       let activePlaceId = "4093046";
       let activePeriod = "last-7-days"; // Default to last-7-days
-      let placeHistory = {};
+
 
       const tabBtns = document.querySelectorAll(".place-tab-btn");
       const periodBtns = document.querySelectorAll(".place-period-btn");
