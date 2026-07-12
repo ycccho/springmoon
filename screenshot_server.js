@@ -1740,14 +1740,12 @@ app.get('/api/meta-ads', cors(), async (req, res) => {
 
   const adAccountId = metaConf.adAccountId;
   const accessToken = metaConf.accessToken;
-  const targetCampaignName = "2025-02-10_슬라이드_최적이동";
 
   try {
     const timeRange = JSON.stringify({ since: startDate, until: endDate });
-    const filtering = JSON.stringify([{ field: 'campaign.name', operator: 'EQUAL', value: targetCampaignName }]);
-    const fields = 'campaign_name,clicks,impressions,spend,actions';
+    const fields = 'campaign_name,clicks,impressions,spend,reach,actions';
     
-    const insightsUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?level=campaign&filtering=${encodeURIComponent(filtering)}&time_range=${encodeURIComponent(timeRange)}&fields=${fields}&access_token=${accessToken}`;
+    const insightsUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/insights?time_range=${encodeURIComponent(timeRange)}&fields=${fields}&access_token=${accessToken}`;
     
     const insightsRes = await fetch(insightsUrl);
     const insightsData = await insightsRes.json();
@@ -1798,12 +1796,13 @@ app.get('/api/meta-ads', cors(), async (req, res) => {
       }
     }
 
-    let campaignStats = { clicks: 0, impressions: 0, spend: 0, cpr: 0, results: 0 };
+    let campaignStats = { clicks: 0, impressions: 0, spend: 0, cpr: 0, results: 0, reach: 0 };
     if (insightsData.data && insightsData.data.length > 0) {
       const insight = insightsData.data[0];
       campaignStats.clicks = parseInt(insight.clicks, 10) || 0;
       campaignStats.impressions = parseInt(insight.impressions, 10) || 0;
       campaignStats.spend = parseFloat(insight.spend) || 0;
+      campaignStats.reach = parseInt(insight.reach, 10) || 0;
       
       let results = 0;
       if (insight.actions) {
@@ -1866,7 +1865,7 @@ app.get('/api/google-sa', cors(), async (req, res) => {
     });
     const tokenRes = await fetch(tokenUrl, { method: 'POST', body: params });
     const tokenData = await tokenRes.json();
-    if (!tokenRes.ok) throw new Error(tokenData.error_description || "Google Ads OAuth token exchange failed.");
+    if (!tokenRes.ok) throw new Error("Token exchange failed: " + JSON.stringify(tokenData));
 
     const accessToken = tokenData.access_token;
     
@@ -1897,7 +1896,7 @@ app.get('/api/google-sa', cors(), async (req, res) => {
     });
     
     const searchData = await searchRes.json();
-    if (!searchRes.ok) throw new Error(searchData[0]?.error?.message || "Google Ads query failed.");
+    if (!searchRes.ok) throw new Error(JSON.stringify(searchData).substring(0, 500) || "Google Ads query failed.");
 
     const searchTerms = [];
     if (searchData.results) {
@@ -1964,31 +1963,14 @@ app.get('/api/imweb', cors(), async (req, res) => {
   const domainExpiry = imwebConf.domainExpiry || "2028-01-19";
   const sslExpiry = imwebConf.sslExpiry || "2028-01-19";
 
-  const today = new Date();
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-  const dailyVisitors = [];
-  const startDay = 1;
-  const currentDay = today.getDate();
-  
-  for (let d = startDay; d <= daysInMonth; d++) {
-    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const count = d <= currentDay ? Math.round(180 + Math.sin(d) * 60 + Math.random() * 40) : 0;
-    dailyVisitors.push({ date: dateStr, count });
-  }
-
+  // 아임웹 Open API는 방문자 통계 엔드포인트를 공식 제공하지 않음
+  // 만료일 정보만 config에서 읽어서 반환
   res.json({
     success: true,
     subscriptionExpiry,
     domainExpiry,
     sslExpiry,
-    dailyVisitors,
-    referrers: [
-      { site: "네이버 검색", count: 850, ratio: 45.2 },
-      { site: "네이버 블로그", count: 480, ratio: 25.5 },
-      { site: "메타/인스타그램 광고", count: 320, ratio: 17.0 },
-      { site: "구글 검색", count: 120, ratio: 6.4 },
-      { site: "직접 유입 및 기타", count: 110, ratio: 5.9 }
-    ]
+    noVisitorApi: true
   });
 });
 

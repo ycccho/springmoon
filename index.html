@@ -10606,23 +10606,15 @@
           if (metaRes && metaRes.campaignStats) {
             metaClicks = metaRes.campaignStats.clicks || 0;
             metaSpend = metaRes.campaignStats.spend || 0;
-          } else {
-            metaClicks = Math.round(4.2 * days);
-            metaSpend = metaClicks * 1540;
           }
 
           if (googleRes && googleRes.searchTerms) {
             googleClicks = googleRes.searchTerms.reduce((sum, r) => sum + r.clicks, 0);
             googleSpend = googleRes.searchTerms.reduce((sum, r) => sum + (r.clicks * r.avgCpc), 0);
-          } else {
-            googleClicks = Math.round(2.8 * days);
-            googleSpend = googleClicks * 1560;
           }
 
           if (imwebRes && imwebRes.dailyVisitors) {
             imwebVisitors = imwebRes.dailyVisitors.reduce((a, b) => a + (b.count || 0), 0);
-          } else {
-            imwebVisitors = Math.round(85 * days);
           }
         } catch (_) {}
 
@@ -11147,94 +11139,93 @@
             `;
           }
 
-          let visitorsList = data.dailyVisitors || [];
-          let referrers = data.referrers || [];
-
-          if (visitorsList.length === 0) {
-            let cur = new Date(start);
-            const limit = new Date(end);
-            while (cur <= limit) {
-              const dStr = cur.toISOString().split("T")[0];
-              visitorsList.push({ date: dStr, count: Math.round(60 + Math.random() * 40) });
-              cur.setDate(cur.getDate() + 1);
-            }
-            referrers = [
-              { domain: "m.naver.com", count: Math.round(45 * days) },
-              { domain: "naver.com", count: Math.round(25 * days) },
-              { domain: "google.co.kr", count: Math.round(10 * days) },
-              { domain: "instagram.com", count: Math.round(5 * days) }
-            ];
-          }
-
-          // Filter visitorsList to selected date range
-          visitorsList = visitorsList.filter(v => v.date >= start && v.date <= end);
-
-          const totalVisitors = visitorsList.reduce((a, b) => a + (b.count || 0), 0);
-          const dailyAvg = Math.round(totalVisitors / Math.max(1, visitorsList.length));
-
-          cardsContainer.innerHTML = `
-            <div class="bg-emerald-50/50 dark-mode:bg-emerald-950/10 border border-emerald-100/50 dark-mode:border-emerald-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-              <span class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">총 웹사이트 방문자수</span>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-emerald-600 font-mono">${totalVisitors.toLocaleString()}</span>
-                <span class="text-xs font-bold text-emerald-500/80">명</span>
+          if (data.noVisitorApi) {
+            // 아임웹 API에서 방문자 통계를 공식 제공하지 않음
+            cardsContainer.innerHTML = `
+              <div class="col-span-full bg-amber-50/60 dark-mode:bg-amber-950/20 border border-amber-200 dark-mode:border-amber-800/40 rounded-2xl p-5 text-center">
+                <span class="text-lg">⚠️</span>
+                <p class="text-sm font-bold text-amber-700 dark-mode:text-amber-400 mt-2">아임웹 Open API는 방문자 통계를 공식 제공하지 않습니다</p>
+                <p class="text-xs text-amber-600 dark-mode:text-amber-500 mt-1">방문자 데이터는 아임웹 관리자 페이지 또는 Google Analytics 연동을 통해 확인해 주세요.</p>
               </div>
-            </div>
-            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-              <div class="space-y-1">
-                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">일평균 방문자수</span>
+            `;
+            const chartContainer = document.getElementById("imweb-visitors-chart-container");
+            if (chartContainer) chartContainer.innerHTML = "";
+            if (dailyTbody) dailyTbody.innerHTML = `<tr><td colspan="2" class="py-6 px-3 text-center text-sm text-gray-400">데이터 없음</td></tr>`;
+            referrersTbody.innerHTML = `<tr><td colspan="3" class="py-6 px-3 text-center text-sm text-gray-400">데이터 없음</td></tr>`;
+          } else {
+            let visitorsList = data.dailyVisitors || [];
+            let referrers = data.referrers || [];
+
+            // Filter visitorsList to selected date range
+            visitorsList = visitorsList.filter(v => v.date >= start && v.date <= end);
+
+            const totalVisitors = visitorsList.reduce((a, b) => a + (b.count || 0), 0);
+            const dailyAvg = Math.round(totalVisitors / Math.max(1, visitorsList.length));
+
+            cardsContainer.innerHTML = `
+              <div class="bg-emerald-50/50 dark-mode:bg-emerald-950/10 border border-emerald-100/50 dark-mode:border-emerald-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+                <span class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">총 웹사이트 방문자수</span>
                 <div class="flex items-baseline gap-1.5">
-                  <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${dailyAvg.toLocaleString()}</span>
-                  <span class="text-xs font-bold text-gray-550">명 / 일</span>
+                  <span class="text-2xl font-black text-emerald-600 font-mono">${totalVisitors.toLocaleString()}</span>
+                  <span class="text-xs font-bold text-emerald-500/80">명</span>
                 </div>
               </div>
-            </div>
-            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
-              <div class="space-y-1">
-                <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">주요 유입 도메인 수</span>
-                <div class="flex items-baseline gap-1.5">
-                  <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${referrers.length}</span>
-                  <span class="text-xs font-bold text-gray-555">개</span>
+              <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+                <div class="space-y-1">
+                  <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">일평균 방문자수</span>
+                  <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${dailyAvg.toLocaleString()}</span>
+                    <span class="text-xs font-bold text-gray-550">명 / 일</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          `;
+              <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+                <div class="space-y-1">
+                  <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">주요 유입 도메인 수</span>
+                  <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl font-black text-gray-855 dark-mode:text-white font-mono">${referrers.length}</span>
+                    <span class="text-xs font-bold text-gray-555">개</span>
+                  </div>
+                </div>
+              </div>
+            `;
 
-          drawChartSVG("imweb-visitors-chart-container", visitorsList, "count", "#059669", "#10B981");
+            drawChartSVG("imweb-visitors-chart-container", visitorsList, "count", "#059669", "#10B981");
 
-          // Daily Table
-          if (dailyTbody) {
-            dailyTbody.innerHTML = "";
-            visitorsList.forEach(day => {
+            // Daily Table
+            if (dailyTbody) {
+              dailyTbody.innerHTML = "";
+              visitorsList.forEach(day => {
+                dailyTbody.innerHTML += `
+                  <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
+                    <td class="py-3 px-3 font-mono">${day.date}</td>
+                    <td class="py-3 px-3 text-center font-mono text-emerald-500">${day.count.toLocaleString()}</td>
+                  </tr>
+                `;
+              });
+              // Total Sum
               dailyTbody.innerHTML += `
+                <tr class="bg-gray-50 dark-mode:bg-gray-750/30 font-black border-t border-gray-200 dark-mode:border-gray-700 text-gray-900 dark-mode:text-white">
+                  <td class="py-3.5 px-3">합계</td>
+                  <td class="py-3.5 px-3 text-center font-mono text-emerald-600 dark-mode:text-emerald-400">${totalVisitors.toLocaleString()}</td>
+                </tr>
+              `;
+            }
+
+            // Referrers table
+            referrersTbody.innerHTML = "";
+            const totalRef = referrers.reduce((a, b) => a + b.count, 0);
+            referrers.forEach(row => {
+              const pct = totalRef > 0 ? ((row.count / totalRef) * 100).toFixed(1) : 0;
+              referrersTbody.innerHTML += `
                 <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
-                  <td class="py-3 px-3 font-mono">${day.date}</td>
-                  <td class="py-3 px-3 text-center font-mono text-emerald-500">${day.count.toLocaleString()}</td>
+                  <td class="py-3 px-3">${row.domain || row.site}</td>
+                  <td class="py-3 px-3 text-center font-mono text-emerald-500">${row.count.toLocaleString()}</td>
+                  <td class="py-3 px-3 text-center font-mono">${pct}%</td>
                 </tr>
               `;
             });
-            // Total Sum
-            dailyTbody.innerHTML += `
-              <tr class="bg-gray-50 dark-mode:bg-gray-750/30 font-black border-t border-gray-200 dark-mode:border-gray-700 text-gray-900 dark-mode:text-white">
-                <td class="py-3.5 px-3">합계</td>
-                <td class="py-3.5 px-3 text-center font-mono text-emerald-600 dark-mode:text-emerald-400">${totalVisitors.toLocaleString()}</td>
-              </tr>
-            `;
           }
-
-          // Referrers table
-          referrersTbody.innerHTML = "";
-          const totalRef = referrers.reduce((a, b) => a + b.count, 0);
-          referrers.forEach(row => {
-            const pct = totalRef > 0 ? ((row.count / totalRef) * 100).toFixed(1) : 0;
-            referrersTbody.innerHTML += `
-              <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
-                <td class="py-3 px-3">${row.domain || row.site}</td>
-                <td class="py-3 px-3 text-center font-mono text-emerald-500">${row.count.toLocaleString()}</td>
-                <td class="py-3 px-3 text-center font-mono">${pct}%</td>
-              </tr>
-            `;
-          });
         } catch (_) {}
       }
 
