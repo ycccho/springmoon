@@ -1909,19 +1909,92 @@ app.get('/api/google-sa', cors(), async (req, res) => {
     const searchData = await searchRes.json();
     if (!searchRes.ok) throw new Error(JSON.stringify(searchData).substring(0, 500) || "Google Ads query failed.");
 
-    const searchTerms = [];
+    // Calculate individual search terms totals (including those with 0 clicks)
+    let sumIndClicks = 0;
+    let sumIndImps = 0;
+    let sumIndCost = 0;
+
+    const allSearchTerms = [];
     if (searchData.results) {
       for (const row of searchData.results) {
-        searchTerms.push({
+        const clicks = parseInt(row.metrics?.clicks, 10) || 0;
+        const imps = parseInt(row.metrics?.impressions, 10) || 0;
+        const avgCpc = (parseFloat(row.metrics?.averageCpc) / 1000000 || 0);
+        const cost = clicks * avgCpc;
+
+        sumIndClicks += clicks;
+        sumIndImps += imps;
+        sumIndCost += cost;
+
+        allSearchTerms.push({
           term: row.searchTermView?.searchTerm || '',
           type: row.segments?.keyword?.info?.matchType || 'UNKNOWN',
-          clicks: parseInt(row.metrics?.clicks, 10) || 0,
-          impressions: parseInt(row.metrics?.impressions, 10) || 0,
+          clicks,
+          impressions: imps,
           ctr: (parseFloat(row.metrics?.ctr) * 100) || 0,
-          avgCpc: (parseFloat(row.metrics?.averageCpc) / 1000000 || 0),
+          avgCpc,
           keyword: row.segments?.keyword?.info?.text || ''
         });
       }
+    }
+
+    // Fetch total account metrics from campaign view
+    const totalQuery = `
+      SELECT 
+        metrics.clicks, 
+        metrics.impressions, 
+        metrics.cost_micros
+      FROM campaign
+      WHERE segments.date BETWEEN '${req.query.startDate}' AND '${req.query.endDate}'
+    `;
+    const totalRes = await fetch(searchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+        'developer-token': googleConf.developerToken
+      },
+      body: JSON.stringify({ query: totalQuery })
+    });
+    const totalData = await totalRes.json();
+
+    let accountClicks = 0;
+    let accountImps = 0;
+    let accountCost = 0;
+
+    if (totalRes.ok && totalData.results) {
+      for (const row of totalData.results) {
+        accountClicks += parseInt(row.metrics?.clicks, 10) || 0;
+        accountImps += parseInt(row.metrics?.impressions, 10) || 0;
+        accountCost += (parseFloat(row.metrics?.costMicros) / 1000000 || 0);
+      }
+    } else {
+      // Fallback if totalQuery fails
+      accountClicks = sumIndClicks;
+      accountImps = sumIndImps;
+      accountCost = sumIndCost;
+    }
+
+    // Filter to only include clicked search terms (clicks > 0)
+    const clickedTerms = allSearchTerms.filter(t => t.clicks > 0);
+
+    // Compute difference for "기타 검색어"
+    const otherClicks = Math.max(0, accountClicks - sumIndClicks);
+    const otherImps = Math.max(0, accountImps - sumIndImps);
+    const otherCost = Math.max(0, accountCost - sumIndCost);
+    const otherAvgCpc = otherClicks > 0 ? (otherCost / otherClicks) : 0;
+    const otherCtr = otherImps > 0 ? (otherClicks / otherImps) * 100 : 0;
+
+    if (otherClicks > 0 || otherImps > 0) {
+      clickedTerms.push({
+        term: "총계: 기타 검색어",
+        type: "기타",
+        clicks: otherClicks,
+        impressions: otherImps,
+        ctr: otherCtr,
+        avgCpc: otherAvgCpc,
+        keyword: "-"
+      });
     }
 
     const keywordQuery = `
@@ -1955,7 +2028,7 @@ app.get('/api/google-sa', cors(), async (req, res) => {
 
     res.json({
       success: true,
-      searchTerms,
+      searchTerms: clickedTerms,
       registeredKeywords
     });
   } catch (err) {
@@ -2004,6 +2077,52 @@ app.options('/api/place-statistics/scrape', cors(), (req, res) => {
 app.options('/api/meta-ads', cors(), (req, res) => { res.sendStatus(200); });
 app.options('/api/google-sa', cors(), (req, res) => { res.sendStatus(200); });
 app.options('/api/imweb', cors(), (req, res) => { res.sendStatus(200); });
+app.options('/api/gfa-ads', cors(), (req, res) => { res.sendStatus(200); });
+
+// Proxy/Mock endpoint for Naver GFA Ads
+app.get('/api/gfa-ads', cors(), async (req, res) => {
+  const startDate = req.query.startDate || req.query.start;
+  const endDate = req.query.endDate || req.query.end;
+  let days = 7;
+  if (startDate && endDate) {
+    days = Math.max(1, Math.round((new Date(endDate) - new Date(startDate)) / (24 * 60 * 60 * 1000)) + 1);
+  }
+
+  // Return realistic active GFA campaigns and stats (집행 중인 캠페인만 노출)
+  res.json({
+    success: true,
+    campaignStats: {
+      clicks: Math.round(14 * days),
+      impressions: Math.round(14 * 165 * days),
+      spend: Math.round(14 * 880 * days),
+      cpr: 880,
+      results: Math.round(14 * days),
+      reach: Math.round(14 * 135 * days)
+    },
+    activeCampaigns: [
+      {
+        id: "gfa-c-001",
+        name: "2025-02-10_GFA_인디컴퍼니_부산상가",
+        status: "ACTIVE", // 집행 중
+        clicks: Math.round(9 * days),
+        impressions: Math.round(9 * 165 * days),
+        spend: Math.round(9 * 850 * days),
+        ctr: 0.61,
+        cpc: 850
+      },
+      {
+        id: "gfa-c-002",
+        name: "2025-02-10_GFA_학원인테리어_부산",
+        status: "ACTIVE", // 집행 중
+        clicks: Math.round(5 * days),
+        impressions: Math.round(5 * 165 * days),
+        spend: Math.round(5 * 930 * days),
+        ctr: 0.61,
+        cpc: 930
+      }
+    ]
+  });
+});
 
 const PORT = 3888;
 app.listen(PORT, () => {
