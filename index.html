@@ -7838,10 +7838,15 @@
             </p>
           </div>
 
-          <!-- Action Button -->
-          <button id="ad-download-btn" class="w-full py-4 bg-orange-600 hover:bg-orange-700 active:scale-[0.99] text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
-            🚀 네이버 광고 데이터 엑셀 다운로드
-          </button>
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-4">
+            <button id="ad-check-btn" class="flex-1 py-4 bg-orange-600 hover:bg-orange-700 active:scale-[0.99] text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+              🔍 통계 확인
+            </button>
+            <button id="ad-download-btn" class="flex-1 py-4 bg-gray-800 hover:bg-gray-900 active:scale-[0.99] text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+              📥 엑셀 다운로드
+            </button>
+          </div>
 
           <!-- Progress Console -->
           <div id="ad-progress-box" class="hidden p-5 bg-gray-50 dark-mode:bg-gray-900 border border-gray-150 dark-mode:border-gray-750 rounded-2xl space-y-3">
@@ -7856,6 +7861,9 @@
             <!-- Console Logs -->
             <div id="ad-progress-logs" class="max-h-36 overflow-y-auto p-3 bg-black rounded-lg text-[10px] text-green-400 font-mono space-y-1 leading-relaxed"></div>
           </div>
+
+          <!-- Preview Stats Panel -->
+          <div id="ad-stats-preview-container" class="hidden border-t border-gray-150 dark-mode:border-gray-750 pt-6 space-y-6"></div>
           
           <!-- Guide details -->
           <div class="border-t border-gray-150 dark-mode:border-gray-750 pt-6 space-y-4">
@@ -7887,8 +7895,11 @@
       const startInput = document.getElementById("ad-start-date");
       const endInput = document.getElementById("ad-end-date");
       const downloadBtn = document.getElementById("ad-download-btn");
+      const checkBtn = document.getElementById("ad-check-btn");
       
-      if (!startInput || !endInput || !downloadBtn) return;
+      if (!startInput || !endInput || !downloadBtn || !checkBtn) return;
+      
+      let cachedAdReport = null; // Stores sheet1Data, sheet2Data, sheet3Data, etc.
       
       // Setup default dates: yesterday and 7 days prior
       const today = new Date();
@@ -7995,7 +8006,7 @@
         return rows;
       }
       
-      downloadBtn.onclick = async () => {
+      async function executeReportProcess(action) {
         const customerId = document.getElementById("ad-cust-id").value.trim();
         const startDateVal = startInput.value;
         const endDateVal = endInput.value;
@@ -8026,13 +8037,20 @@
           alert("동기화 대상 광고를 최소 하나 이상 선택해주세요.");
           return;
         }
+
+        const cacheKey = `${customerId}_${startDateVal}_${endDateVal}_${powerlink}_${place}_${powercontent}_${includeQuery}`;
         
+        if (action === "download" && cachedAdReport && cachedAdReport.key === cacheKey) {
+          XLSX.writeFile(cachedAdReport.wb, cachedAdReport.filename);
+          alert("🎉 (캐시된 데이터로 즉시 다운로드) 브라우저 다운로드 폴더를 확인해 주세요.");
+          return;
+        }
+
         const allowedProducts = [];
         if (powerlink) allowedProducts.push("파워링크");
         if (place) allowedProducts.push("플레이스광고");
         if (powercontent) allowedProducts.push("파워컨텐츠");
         
-        // Setup dates array YYYYMMDD
         const dates = [];
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
           const y = d.getFullYear();
@@ -8041,17 +8059,21 @@
           dates.push(`${y}${m}${day}`);
         }
         
-        // Show progress box
         const progressBox = document.getElementById("ad-progress-box");
         const logBox = document.getElementById("ad-progress-logs");
         const statusTxt = document.getElementById("ad-progress-status");
         const percentTxt = document.getElementById("ad-progress-percent");
         const progressBar = document.getElementById("ad-progress-bar");
-        
+        const previewContainer = document.getElementById("ad-stats-preview-container");
+
         progressBox.classList.remove("hidden");
         logBox.innerHTML = "";
+        previewContainer.classList.add("hidden");
+
         downloadBtn.disabled = true;
         downloadBtn.classList.add("opacity-50", "cursor-not-allowed");
+        checkBtn.disabled = true;
+        checkBtn.classList.add("opacity-50", "cursor-not-allowed");
         
         const addLog = (msg) => {
           const time = new Date().toLocaleTimeString();
@@ -8096,7 +8118,6 @@
             progressBar.style.width = `${pct}%`;
           };
           
-          // Process in batches of 3 dates to avoid Naver API rate-limiting
           const batchSize = 3;
           for (let i = 0; i < dates.length; i += batchSize) {
             const batch = dates.slice(i, i + batchSize);
@@ -8127,7 +8148,6 @@
             }));
           }
           
-          // Match and format rows
           addLog("3. 수집 데이터 필터링 및 이름 매핑 처리 중...");
           statusTxt.innerText = "데이터 이름 매핑 진행 중...";
           
@@ -8180,7 +8200,6 @@
             });
           }
           
-          // Fetch keyword texts in chunks
           if (kwIds.size > 0) {
             addLog(`신규 키워드 ID (${kwIds.size}개) 매칭 텍스트 실시간 조회 중...`);
             statusTxt.innerText = "키워드 명칭 변환 중...";
@@ -8195,71 +8214,14 @@
             }
           }
           
-          // Map resolved keyword texts back to rows
           for (const r of filteredAdRows) {
             r.keyword = keywordCache[r.kwId] || "";
           }
           
           addLog("키워드 명칭 매핑 성공.");
           
-          // Helper to add summary rows (PC Total, Mobile Total, Grand Total) at the bottom
-          function addSummaryRows(dataList, labelKey) {
-            if (!dataList || dataList.length === 0) return;
-            
-            let pcImp = 0, pcClicks = 0, pcCost = 0;
-            let mobImp = 0, mobClicks = 0, mobCost = 0;
-            
-            for (const r of dataList) {
-              if (r["기기"] === "PC") {
-                pcImp += r["노출수"] || 0;
-                pcClicks += r["클릭수"] || 0;
-                pcCost += r["총 비용 (원)"] || 0;
-              } else if (r["기기"] === "모바일") {
-                mobImp += r["노출수"] || 0;
-                mobClicks += r["클릭수"] || 0;
-                mobCost += r["총 비용 (원)"] || 0;
-              }
-            }
-            
-            const totalImp = pcImp + mobImp;
-            const totalClicks = pcClicks + mobClicks;
-            const totalCost = pcCost + mobCost;
-            
-            const pcCtr = pcImp > 0 ? (pcClicks / pcImp * 100) : 0;
-            const pcCpc = pcClicks > 0 ? (pcCost / pcClicks) : 0;
-            
-            const mobCtr = mobImp > 0 ? (mobClicks / mobImp * 100) : 0;
-            const mobCpc = mobClicks > 0 ? (mobCost / mobClicks) : 0;
-            
-            const totalCtr = totalImp > 0 ? (totalClicks / totalImp * 100) : 0;
-            const totalCpc = totalClicks > 0 ? (totalCost / totalClicks) : 0;
-            
-            const template = dataList[0] || {};
-            const createEmptyRow = (label, device, imp, clk, ctr, cost, cpc) => {
-              const row = {};
-              Object.keys(template).forEach(k => {
-                row[k] = "";
-              });
-              row[labelKey] = label;
-              row["기기"] = device;
-              row["노출수"] = imp;
-              row["클릭수"] = clk;
-              row["클릭률 (CTR %)"] = parseFloat(ctr.toFixed(2));
-              row["총 비용 (원)"] = cost;
-              row["평균 CPC (원)"] = Math.round(cpc);
-              return row;
-            };
-            
-            dataList.push(createEmptyRow("PC 합계", "PC", pcImp, pcClicks, pcCtr, pcCost, pcCpc));
-            dataList.push(createEmptyRow("모바일 합계", "모바일", mobImp, mobClicks, mobCtr, mobCost, mobCpc));
-            dataList.push(createEmptyRow("전체 총합계", "전체", totalImp, totalClicks, totalCtr, totalCost, totalCpc));
-          }
-
-          // Build Sheet 1: 파워링크 성과
           const sheet1Data = [];
-          
           if (includeQuery && expReportRows.length > 0) {
-            // Use search query report as primary source to show actual keywords and avoid duplication
             for (const r of expReportRows) {
               if (r.length < 10) continue;
               const dateVal = r[0];
@@ -8304,7 +8266,6 @@
               });
             }
           } else {
-            // Fallback to AD report keywords if search queries are not requested
             for (const r of filteredAdRows) {
               if (r.product === "파워링크" && r.clicks > 0) {
                 const ctr = r.imp > 0 ? (r.clicks / r.imp * 100) : 0;
@@ -8324,11 +8285,8 @@
               }
             }
           }
-          
           sheet1Data.sort((a, b) => b["날짜"].localeCompare(a["날짜"]) || b["클릭수"] - a["클릭수"]);
-          addSummaryRows(sheet1Data, "키워드");
           
-          // Build Sheet 2: 파워컨텐츠 성과 (Only Power Content, clicks > 0)
           const sheet2Data = filteredAdRows
             .filter(r => r.product === "파워컨텐츠" && r.clicks > 0)
             .map(r => {
@@ -8348,9 +8306,7 @@
               };
             });
           sheet2Data.sort((a, b) => b["날짜"].localeCompare(a["날짜"]) || b["클릭수"] - a["클릭수"]);
-          addSummaryRows(sheet2Data, "키워드/소재");
           
-          // Build Sheet 3: 플레이스 성과 (Only Place, clicks > 0)
           const sheet3Data = filteredAdRows
             .filter(r => r.product === "플레이스광고" && r.clicks > 0)
             .map(r => {
@@ -8370,9 +8326,17 @@
               };
             });
           sheet3Data.sort((a, b) => b["날짜"].localeCompare(a["날짜"]) || b["클릭수"] - a["클릭수"]);
+          
+          const previewRawData = {
+            sheet1Data: JSON.parse(JSON.stringify(sheet1Data)),
+            sheet2Data: JSON.parse(JSON.stringify(sheet2Data)),
+            sheet3Data: JSON.parse(JSON.stringify(sheet3Data))
+          };
+
+          addSummaryRows(sheet1Data, "키워드");
+          addSummaryRows(sheet2Data, "키워드/소재");
           addSummaryRows(sheet3Data, "키워드");
           
-          // Create Excel Workbook
           addLog("4. 엑셀 워크북 빌드 및 변환 작업 중...");
           statusTxt.innerText = "엑셀 변환 진행 중...";
           
@@ -8388,10 +8352,25 @@
           
           const fileStart = startDateVal.replace(/-/g, "");
           const fileEnd = endDateVal.replace(/-/g, "");
-          XLSX.writeFile(wb, `네이버검색광고_성과분석보고서_${fileStart}_${fileEnd}.xlsx`);
-          
-          statusTxt.innerText = "✅ 엑셀 다운로드 완료!";
-          addLog("🎉 다운로드 성공! 브라우저 다운로드 폴더를 확인해 주세요.");
+          const filename = `네이버검색광고_성과분석보고서_${fileStart}_${fileEnd}.xlsx`;
+
+          cachedAdReport = {
+            key: cacheKey,
+            wb,
+            filename,
+            previewData: previewRawData
+          };
+
+          if (action === "check") {
+            statusTxt.innerText = "✅ 통계 연동 및 분석 완료!";
+            addLog("🎉 성과 분석이 완료되었습니다. 하단에서 요약 통계를 바로 확인할 수 있습니다.");
+            renderAdPreview(previewRawData);
+          } else {
+            XLSX.writeFile(wb, filename);
+            statusTxt.innerText = "✅ 엑셀 다운로드 완료!";
+            addLog("🎉 다운로드 성공! 브라우저 다운로드 폴더를 확인해 주세요.");
+            renderAdPreview(previewRawData);
+          }
           
         } catch (error) {
           addLog(`❌ 오류 발생: ${error.message}`);
@@ -8399,8 +8378,190 @@
         } finally {
           downloadBtn.disabled = false;
           downloadBtn.classList.remove("opacity-50", "cursor-not-allowed");
+          checkBtn.disabled = false;
+          checkBtn.classList.remove("opacity-50", "cursor-not-allowed");
         }
-      };
+      }
+
+      checkBtn.onclick = () => executeReportProcess("check");
+      downloadBtn.onclick = () => executeReportProcess("download");
+
+      function renderAdPreview(reportData) {
+        const previewContainer = document.getElementById("ad-stats-preview-container");
+        if (!previewContainer) return;
+
+        previewContainer.classList.remove("hidden");
+        previewContainer.innerHTML = "";
+
+        let totalSpend = 0;
+        let totalClicks = 0;
+        let totalImpressions = 0;
+
+        const filterRegularRows = (list) => list.filter(r => r["키워드"] !== "PC 합계" && r["키워드"] !== "모바일 합계" && r["키워드"] !== "전체 총합계" && r["키워드/소재"] !== "PC 합계" && r["키워드/소재"] !== "모바일 합계" && r["키워드/소재"] !== "전체 총합계");
+        
+        const r1 = filterRegularRows(reportData.sheet1Data);
+        const r2 = filterRegularRows(reportData.sheet2Data);
+        const r3 = filterRegularRows(reportData.sheet3Data);
+
+        const allRows = [...r1, ...r2, ...r3];
+
+        allRows.forEach(r => {
+          totalSpend += r["총 비용 (원)"] || 0;
+          totalClicks += r["클릭수"] || 0;
+          totalImpressions += r["노출수"] || 0;
+        });
+
+        const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
+        const avgCpc = totalClicks > 0 ? (totalSpend / totalClicks) : 0;
+
+        let html = `
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="bg-orange-50/50 dark-mode:bg-orange-950/10 border border-orange-100/50 dark-mode:border-orange-900/30 rounded-2xl p-5 shadow-sm space-y-2">
+              <span class="text-[10px] text-orange-700 font-bold uppercase tracking-wider block">총 지출 금액</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-orange-600 font-mono">${Math.round(totalSpend).toLocaleString()}</span>
+                <span class="text-xs font-bold text-orange-500/80">원</span>
+              </div>
+            </div>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">총 클릭 수</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-gray-800 dark-mode:text-white font-mono">${totalClicks.toLocaleString()}</span>
+                <span class="text-xs font-bold text-gray-550">회 클릭</span>
+              </div>
+            </div>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">평균 클릭률 (CTR)</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-gray-800 dark-mode:text-white font-mono">${avgCtr.toFixed(2)}</span>
+                <span class="text-xs font-bold text-gray-550">%</span>
+              </div>
+            </div>
+            <div class="bg-white dark-mode:bg-gray-800 border border-gray-200 dark-mode:border-gray-700 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between">
+              <span class="text-[10px] text-gray-555 font-bold uppercase tracking-wider block">평균 클릭단가 (CPC)</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-gray-800 dark-mode:text-white font-mono">${Math.round(avgCpc).toLocaleString()}</span>
+                <span class="text-xs font-bold text-gray-550">원</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const productsSummary = [];
+        const computeProductStats = (rowsList, name) => {
+          let imp = 0, clk = 0, cost = 0;
+          rowsList.forEach(r => {
+            imp += r["노출수"] || 0;
+            clk += r["클릭수"] || 0;
+            cost += r["총 비용 (원)"] || 0;
+          });
+          if (imp > 0 || clk > 0 || cost > 0) {
+            productsSummary.push({
+              name,
+              imp,
+              clk,
+              ctr: imp > 0 ? (clk / imp * 100) : 0,
+              cost,
+              cpc: clk > 0 ? (cost / clk) : 0
+            });
+          }
+        };
+        computeProductStats(r1, "파워링크");
+        computeProductStats(r2, "파워컨텐츠");
+        computeProductStats(r3, "플레이스광고");
+
+        html += `
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-gray-150 dark-mode:border-gray-700">
+              <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">광고 상품별 성과 요약</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-gray-450 border-b border-gray-150 dark-mode:border-gray-700 font-black">
+                    <th class="py-3 px-4">광고 상품</th>
+                    <th class="py-3 px-4 text-right">노출수</th>
+                    <th class="py-3 px-4 text-right">클릭수</th>
+                    <th class="py-3 px-4 text-right">클릭률 (CTR)</th>
+                    <th class="py-3 px-4 text-right">총 비용 (원)</th>
+                    <th class="py-3 px-4 text-right">평균 CPC</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark-mode:divide-gray-700">
+        `;
+
+        productsSummary.forEach(p => {
+          html += `
+            <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-700 dark-mode:text-gray-200">
+              <td class="py-3 px-4">${p.name}</td>
+              <td class="py-3 px-4 text-right font-mono">${p.imp.toLocaleString()}</td>
+              <td class="py-3 px-4 text-right font-mono text-orange-500">${p.clk.toLocaleString()}</td>
+              <td class="py-3 px-4 text-right font-mono">${p.ctr.toFixed(2)}%</td>
+              <td class="py-3 px-4 text-right font-mono">${Math.round(p.cost).toLocaleString()}원</td>
+              <td class="py-3 px-4 text-right font-mono">${Math.round(p.cpc).toLocaleString()}원</td>
+            </tr>
+          `;
+        });
+
+        html += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        const topKeywords = [...allRows]
+          .sort((a, b) => (b["클릭수"] || 0) - (a["클릭수"] || 0))
+          .slice(0, 15);
+
+        if (topKeywords.length > 0) {
+          html += `
+            <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm">
+              <div class="p-5 border-b border-gray-150 dark-mode:border-gray-700">
+                <h3 class="text-sm font-black text-gray-855 dark-mode:text-white">실시간 고성과 키워드 Top 15</h3>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border-collapse">
+                  <thead>
+                    <tr class="bg-gray-50/50 dark-mode:bg-gray-750/30 text-gray-450 border-b border-gray-150 dark-mode:border-gray-700 font-black">
+                      <th class="py-3 px-4">키워드 / 검색어</th>
+                      <th class="py-3 px-4">광고 상품 (캠페인)</th>
+                      <th class="py-3 px-4 text-right">노출수</th>
+                      <th class="py-3 px-4 text-right">클릭수</th>
+                      <th class="py-3 px-4 text-right">클릭률 (CTR)</th>
+                      <th class="py-3 px-4 text-right">총 비용 (원)</th>
+                      <th class="py-3 px-4 text-right">평균 CPC</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100 dark-mode:divide-gray-700">
+          `;
+
+          topKeywords.forEach(k => {
+            const kwName = k["키워드"] || k["키워드/소재"] || "-";
+            const product = k["campaign"] || k["캠페인"] || "-";
+            html += `
+              <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-semibold text-gray-700 dark-mode:text-gray-200">
+                <td class="py-3 px-4 font-bold text-gray-900 dark-mode:text-white">${kwName}</td>
+                <td class="py-3 px-4 text-[10px] text-gray-400">${product}</td>
+                <td class="py-3 px-4 text-right font-mono text-gray-500">${k["노출수"].toLocaleString()}</td>
+                <td class="py-3 px-4 text-right font-mono text-orange-500 font-bold">${k["클릭수"].toLocaleString()}</td>
+                <td class="py-3 px-4 text-right font-mono">${k["클릭률 (CTR %)"].toFixed(2)}%</td>
+                <td class="py-3 px-4 text-right font-mono">${k["총 비용 (원)"].toLocaleString()}원</td>
+                <td class="py-3 px-4 text-right font-mono">${k["평균 CPC (원)"].toLocaleString()}원</td>
+              </tr>
+            `;
+          });
+
+          html += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        }
+
+        previewContainer.innerHTML = html;
+      }
     }
 
     // ============================================
