@@ -2148,8 +2148,88 @@ app.get('/api/meta-ad-library', cors(), async (req, res) => {
   const metaConf = globalConfig.meta || {};
   const accessToken = metaConf.accessToken;
 
+  // Mock generator helper
+  const getMockAdLibraryData = (searchQuery) => {
+    const queryLower = searchQuery.toLowerCase();
+    const isHospital = queryLower.includes('병원') || queryLower.includes('의원') || queryLower.includes('치과') || queryLower.includes('메디컬') || queryLower.includes('클리닉');
+    const isInterior = queryLower.includes('인테리어') || queryLower.includes('디자인') || queryLower.includes('시공') || queryLower.includes('리모델링');
+
+    if (isHospital && isInterior) {
+      return [
+        {
+          page_name: "부산 메디컬디자인 연구소",
+          publisher_platforms: ["facebook", "instagram"],
+          ad_creative_bodies: ["부산/경남 병원·의원 인테리어 전문 브랜드!\n개원 동선 분석부터 인허가 소방 규격까지 원스톱 솔루션.\n원장님의 성공적인 첫걸음, 메디컬 스페이스 기획 포트폴리오를 무료로 받아보세요."],
+          ad_delivery_start_time: "2026-06-15T00:00:00Z",
+          page_id: "109283749"
+        },
+        {
+          page_name: "디자인인디 (Design Indi)",
+          publisher_platforms: ["facebook", "instagram", "messenger"],
+          ad_creative_bodies: ["[치과/피부과/성형외과 개원 인테리어]\n의료 전문 면허 보유, 하자보수 100% 보증.\n트렌디하고 감각적인 디자인으로 공간의 품격을 높여드립니다.\n지금 간편 견적 상담을 신청해 보세요."],
+          ad_delivery_start_time: "2026-06-28T00:00:00Z",
+          page_id: "298374829"
+        },
+        {
+          page_name: "인디컴퍼니 (INDE COMPANY)",
+          publisher_platforms: ["facebook", "instagram"],
+          ad_creative_bodies: ["학원/상가/병원 인테리어 투명하고 신속한 비교 견적 서비스!\n과도한 추가 비용 없이 설계 도면 그대로 책임 시공합니다.\n공식 포트폴리오 확인하고 부산 병원 인테리어 비용을 상담받으세요."],
+          ad_delivery_start_time: "2026-07-02T00:00:00Z",
+          page_id: "309283749"
+        }
+      ];
+    } else if (isInterior) {
+      return [
+        {
+          page_name: "인디컴퍼니 상업공간 연구소",
+          publisher_platforms: ["facebook", "instagram"],
+          ad_creative_bodies: ["학원, 카페, 사무실, 병원 인테리어 전문 브랜드 [인디컴퍼니]\n상권 분석과 주 고객층 동선 설계로 매출을 올리는 공간을 디자인합니다.\n무료 방문 실측 및 3D 도면 무료 제공 프로모션 진행 중."],
+          ad_delivery_start_time: "2026-06-20T00:00:00Z",
+          page_id: "309283749"
+        },
+        {
+          page_name: "부산 인테리어 파트너스",
+          publisher_platforms: ["facebook", "instagram", "messenger"],
+          ad_creative_bodies: ["상가 및 주거공간 리모델링 견적이 고민이신가요?\n정밀 설계와 친환경 자재 사용, 거품 없는 합리적인 평단가 시공.\n부산/울산/경남 전 지역 무료 컨설팅 진행 중!"],
+          ad_delivery_start_time: "2026-06-25T00:00:00Z",
+          page_id: "409384729"
+        },
+        {
+          page_name: "디자인하우스 IND",
+          publisher_platforms: ["facebook", "instagram"],
+          ad_creative_bodies: ["머물고 싶은 공간을 만드는 차별화된 인테리어 디자인.\n사무실/오피스 인테리어 기획부터 완공까지 체계적인 공정 프로세스로 정직하게 시공합니다."],
+          ad_delivery_start_time: "2026-07-05T00:00:00Z",
+          page_id: "509283749"
+        }
+      ];
+    } else {
+      return [
+        {
+          page_name: `${searchQuery} 전문 디자인`,
+          publisher_platforms: ["facebook", "instagram"],
+          ad_creative_bodies: [`${searchQuery} 공간 기획부터 시공까지 전문적인 프로세스로 완벽하게.\n공간 트렌드 분석을 통한 맞춤형 인테리어 솔루션을 경험해 보세요.`],
+          ad_delivery_start_time: "2026-06-18T00:00:00Z",
+          page_id: "609283749"
+        },
+        {
+          page_name: `${searchQuery} 파트너스`,
+          publisher_platforms: ["facebook", "instagram", "messenger"],
+          ad_creative_bodies: [`고객 감동을 실현하는 합리적인 가격의 ${searchQuery} 서비스!\n지금 공식 채널을 통해 포트폴리오를 확인해 보세요.`],
+          ad_delivery_start_time: "2026-07-01T00:00:00Z",
+          page_id: "709283749"
+        }
+      ];
+    }
+  };
+
   if (!accessToken) {
-    return res.json({ success: false, error: "Meta Access Token이 config.json에 등록되지 않았습니다." });
+    // If no access token, return mock data directly as demo
+    return res.json({
+      success: true,
+      isDemo: true,
+      data: getMockAdLibraryData(query),
+      errorNotice: "Meta Access Token이 config.json에 등록되지 않았습니다."
+    });
   }
 
   try {
@@ -2162,7 +2242,13 @@ app.get('/api/meta-ad-library', cors(), async (req, res) => {
     }
     res.json({ success: true, data: data.data || [] });
   } catch (err) {
-    res.json({ success: false, error: err.message });
+    console.warn(`[Meta Ad Library API] API 호출 에러 발생, 시뮬레이션 데이터로 대체하여 반환합니다. 원인: ${err.message}`);
+    res.json({
+      success: true,
+      isDemo: true,
+      data: getMockAdLibraryData(query),
+      errorNotice: err.message
+    });
   }
 });
 
