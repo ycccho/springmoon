@@ -4462,12 +4462,37 @@
       }
     }
 
+    function sanitizeFetchedMenus(menus) {
+      if (!Array.isArray(menus)) return [];
+      let cleanMenus = menus.filter(m => m.id !== "stats" && m.id !== "marketing" && m.id !== "home" && m.name !== "1" && m.id !== "1");
+      
+      if (!cleanMenus.some(m => m.id === "popular-posts-search")) {
+        cleanMenus.push({ id: "popular-posts-search", name: "9.인기글 찾기", protected: true });
+      }
+      if (!cleanMenus.some(m => m.id === "place-statistics")) {
+        cleanMenus.push({ id: "place-statistics", name: "3. 플레이스 통계", categoryId: "cat-stats", protected: true });
+      }
+      if (!cleanMenus.some(m => m.id === "meta-statistics")) {
+        cleanMenus.push({ id: "meta-statistics", name: "4. 메타광고 통계", categoryId: "cat-stats", protected: true });
+      }
+      if (!cleanMenus.some(m => m.id === "google-sa-statistics")) {
+        cleanMenus.push({ id: "google-sa-statistics", name: "5. 구글SA 통계", categoryId: "cat-stats", protected: true });
+      }
+      if (!cleanMenus.some(m => m.id === "imweb-statistics")) {
+        cleanMenus.push({ id: "imweb-statistics", name: "6. 아임웹 통계", categoryId: "cat-stats", protected: true });
+      }
+      if (!cleanMenus.some(m => m.id === "gfa-statistics")) {
+        cleanMenus.push({ id: "gfa-statistics", name: "7. gfa 통계", categoryId: "cat-stats", protected: true });
+      }
+      return cleanMenus;
+    }
+
     async function syncMenusFromServer() {
       try {
         const res = await fetch("https://springmoons.pages.dev/api/menus");
         const data = await res.json();
         if (data.success && data.menus && data.menus.length > 0) {
-          currentMenus = data.menus;
+          currentMenus = sanitizeFetchedMenus(data.menus);
           currentCategories = data.categories || [];
           localStorage.setItem("menuOrder", JSON.stringify(currentMenus));
           localStorage.setItem("categories", JSON.stringify(currentCategories));
@@ -4481,7 +4506,7 @@
         const res = await fetch(getLocalServerUrl("/api/menus"));
         const data = await res.json();
         if (data.success && data.menus && data.menus.length > 0) {
-          currentMenus = data.menus;
+          currentMenus = sanitizeFetchedMenus(data.menus);
           currentCategories = data.categories || [];
           localStorage.setItem("menuOrder", JSON.stringify(currentMenus));
           localStorage.setItem("categories", JSON.stringify(currentCategories));
