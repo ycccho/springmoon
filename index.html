@@ -178,6 +178,7 @@
       { id: "backlink-check", name: "백링크점검", categoryId: "cat-homepage", protected: true },
       { id: "keyword-screenshot", name: "9.키워드 스크린샷", protected: true },
       { id: "blog-post-screenshot", name: "9.블로그게시글 샷", protected: true },
+      { id: "popular-posts-search", name: "9.인기글 찾기", protected: true },
       { id: "daily-report", name: "9.데일리보고서 작성", protected: false, hidden: true }
     ];
 
@@ -1076,6 +1077,7 @@
         setupBacklinkCheck();
         setupKeywordScreenshot();
         setupBlogPostScreenshot();
+        setupPopularPostsSearch();
         setupDailyReport();
         setupAdDashboard();
         setupCompetitorBlog();
@@ -1108,6 +1110,7 @@
       if (id === "backlink-check") return getBacklinkCheckHTML();
       if (id === "keyword-screenshot") return getKeywordScreenshotHTML();
       if (id === "blog-post-screenshot") return getBlogPostScreenshotHTML();
+      if (id === "popular-posts-search") return getPopularPostsSearchHTML();
       if (id === "daily-report") return getDailyReportHTML();
       if (id === "ad-dashboard") return getAdDashboardHTML();
       if (id === "competitor-blog") return getCompetitorBlogHTML();
@@ -8125,14 +8128,22 @@
           </div>
 
           <!-- Date Range Picker -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-black text-gray-700 dark-mode:text-gray-300 mb-1.5 uppercase tracking-wider">동기화 시작일</label>
-              <input type="date" id="ad-start-date" class="w-full px-4 py-3 bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-xl text-xs font-semibold text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-black text-gray-700 dark-mode:text-gray-300 uppercase tracking-wider">기간 설정</label>
+              <button type="button" id="ad-btn-last-7-days" class="px-3 py-1 bg-orange-100 hover:bg-orange-200 dark-mode:bg-orange-950/40 dark-mode:hover:bg-orange-950 text-orange-700 dark-mode:text-orange-300 rounded-lg text-[10px] font-extrabold transition-all shadow-sm">
+                지난 7일 (지난주 월~일)
+              </button>
             </div>
-            <div>
-              <label class="block text-xs font-black text-gray-700 dark-mode:text-gray-300 mb-1.5 uppercase tracking-wider">동기화 종료일</label>
-              <input type="date" id="ad-end-date" class="w-full px-4 py-3 bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-xl text-xs font-semibold text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 dark-mode:text-gray-400 mb-1">동기화 시작일</label>
+                <input type="date" id="ad-start-date" class="w-full px-4 py-3 bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-xl text-xs font-semibold text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 dark-mode:text-gray-400 mb-1">동기화 종료일</label>
+                <input type="date" id="ad-end-date" class="w-full px-4 py-3 bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-xl text-xs font-semibold text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              </div>
             </div>
           </div>
 
@@ -8205,8 +8216,17 @@
       const endInput = document.getElementById("ad-end-date");
       const downloadBtn = document.getElementById("ad-download-btn");
       const checkBtn = document.getElementById("ad-check-btn");
+      const btnLast7Days = document.getElementById("ad-btn-last-7-days");
       
       if (!startInput || !endInput || !downloadBtn || !checkBtn) return;
+
+      if (btnLast7Days) {
+        btnLast7Days.addEventListener("click", () => {
+          const range = getLast7DaysExcludingToday();
+          startInput.value = range.start;
+          endInput.value = range.end;
+        });
+      }
       
       let cachedAdReport = null; // Stores sheet1Data, sheet2Data, sheet3Data, etc.
       
@@ -9934,6 +9954,76 @@
             </div>
           </div>
 
+          <!-- Media Descriptions Panel (Open by default) -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 p-6 shadow-sm space-y-6">
+            <h3 class="text-sm font-black text-gray-855 dark-mode:text-white flex items-center gap-2 border-b border-gray-150 dark-mode:border-gray-700 pb-3">
+              📢 매체별 광고 노출 방식 및 설명
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed text-gray-650 dark-mode:text-gray-305 font-bold">
+              <!-- 네이버검색광고 -->
+              <div class="space-y-3 bg-gray-50/50 dark-mode:bg-gray-900/40 p-4 rounded-xl border border-gray-150/40 dark-mode:border-gray-750/30">
+                <h4 class="font-black text-[13px] text-green-600 dark-mode:text-green-400 flex items-center gap-1.5">
+                  🟢 네이버 검색광고
+                </h4>
+                <ul class="space-y-2">
+                  <li><strong class="text-gray-800 dark-mode:text-gray-200">파워링크:</strong> 설정된 각 키워드에 노출</li>
+                  <li class="border-t border-gray-150 dark-mode:border-gray-750 pt-2"><strong class="text-gray-800 dark-mode:text-gray-200">플레이스광고:</strong> 설정된 정보(태그 등)들로 노출</li>
+                  <li class="bg-white dark-mode:bg-gray-850 p-2.5 rounded border border-gray-150 dark-mode:border-gray-750 text-[11px] leading-relaxed text-gray-500 dark-mode:text-gray-400 font-semibold">
+                    <strong class="text-orange-500 block mb-0.5">💡 플레이스광고 노출 알고리즘:</strong>
+                    네이버 스마트플레이스 광고는 사용자의 검색 키워드와 플레이스 등록 정보(업종, 태그, 대표 키워드, 찾아오는 길 등) 간의 연관도를 분석하여 매칭 점수를 결정합니다. 검색 의도에 부합하는 업체를 필터링하고 입찰가와 품질지수(클릭률, 사용자 피드백)를 결합하여 최종 광고 순위를 산정하고 노출시킵니다.
+                  </li>
+                  <li class="border-t border-gray-150 dark-mode:border-gray-750 pt-2"><strong class="text-gray-800 dark-mode:text-gray-200">파워컨텐츠:</strong> 설정된 각 키워드에 노출</li>
+                </ul>
+              </div>
+
+              <!-- GFA & Meta -->
+              <div class="space-y-4">
+                <div class="space-y-2 bg-gray-50/50 dark-mode:bg-gray-900/40 p-4 rounded-xl border border-gray-150/40 dark-mode:border-gray-750/30">
+                  <h4 class="font-black text-[13px] text-blue-600 dark-mode:text-blue-450 flex items-center gap-1.5">
+                    🔵 메타 광고 (인스타그램/페이스북)
+                  </h4>
+                  <p class="text-gray-700 dark-mode:text-gray-300">설정된 타겟, 지역 등을 토대로 노출</p>
+                </div>
+                
+                <div class="space-y-2 bg-gray-50/50 dark-mode:bg-gray-900/40 p-4 rounded-xl border border-gray-150/40 dark-mode:border-gray-750/30">
+                  <h4 class="font-black text-[13px] text-sky-600 dark-mode:text-sky-400 flex items-center gap-1.5">
+                    🔵 네이버 GFA 성과형 디스플레이 광고
+                  </h4>
+                  <p class="text-gray-700 dark-mode:text-gray-300">설정된 타겟, 지역 등을 토대로 노출</p>
+                </div>
+              </div>
+
+              <!-- 구글 검색광고 -->
+              <div class="col-span-full space-y-3 bg-gray-50/50 dark-mode:bg-gray-900/40 p-4 rounded-xl border border-gray-150/40 dark-mode:border-gray-750/30">
+                <h4 class="font-black text-[13px] text-orange-600 dark-mode:text-orange-400 flex items-center gap-1.5">
+                  🟡 구글 검색광고 (Search Ads)
+                </h4>
+                <ul class="space-y-2">
+                  <li><strong class="text-gray-800 dark-mode:text-gray-200">노출 방식:</strong> 설정된 각 키워드에 노출</li>
+                  <li class="bg-white dark-mode:bg-gray-850 p-3 rounded border border-gray-150 dark-mode:border-gray-750 text-[11px] leading-relaxed text-gray-500 dark-mode:text-gray-400 font-semibold space-y-1.5">
+                    <strong class="text-orange-500 block">💡 구글 검색광고 매칭 설명:</strong>
+                    구글 검색광고는 키워드 매칭 옵션으로 '일치검색(Exact Match)', '구문검색(Phrase Match)', '확장검색(Broad Match)'을 제공합니다.
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 text-[10px]">
+                      <div class="p-2 bg-gray-50 dark-mode:bg-gray-900 rounded">
+                        <span class="font-black text-gray-800 dark-mode:text-gray-200 block mb-0.5">1) 일치검색 (Exact Match)</span>
+                        입력한 키워드와 의미가 완전히 일치하는 검색어에만 광고를 노출합니다.
+                      </div>
+                      <div class="p-2 bg-gray-50 dark-mode:bg-gray-900 rounded">
+                        <span class="font-black text-gray-800 dark-mode:text-gray-200 block mb-0.5">2) 구문검색 (Phrase Match)</span>
+                        특정 문구를 포함하며 의미가 유사한 단어 조합에 광고를 노출합니다.
+                      </div>
+                      <div class="p-2 bg-gray-50 dark-mode:bg-gray-900 rounded">
+                        <span class="font-black text-gray-800 dark-mode:text-gray-200 block mb-0.5">3) 확장검색 (Broad Match)</span>
+                        오탈자, 유의어, 관련 주제를 포함하는 가장 넓은 범위의 검색어에 대해 시스템 판단 하에 유연하게 광고를 노출시킵니다.
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           <!-- Integration Setup Guide -->
           <details class="bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-200 dark-mode:border-gray-700 overflow-hidden shadow-sm group">
             <summary class="p-5 flex items-center justify-between cursor-pointer focus:outline-none select-none">
@@ -11292,56 +11382,99 @@
           placeAdImps = Math.round(placeAdClicks * 40);
         }
 
-        const totalNaverClicks = naverClicks + pcClicks + placeAdClicks;
-        const totalNaverSpend = naverSpend + pcSpend + placeAdSpend;
-        const totalNaverImps = naverImps + pcImps + placeAdImps;
-        const totalNaverCtr = totalNaverImps > 0 ? ((totalNaverClicks / totalNaverImps) * 100).toFixed(2) : "0.00";
-        const totalNaverCpc = totalNaverClicks > 0 ? Math.round(totalNaverSpend / totalNaverClicks) : 0;
+        const channels = [
+          {
+            name: "네이버 플레이스광고",
+            imps: placeAdImps,
+            clicks: placeAdClicks,
+            spend: placeAdSpend,
+            ctr: placeAdImps > 0 ? ((placeAdClicks / placeAdImps) * 100).toFixed(2) : "0.00",
+            cpc: placeAdClicks > 0 ? Math.round(placeAdSpend / placeAdClicks) : 0
+          },
+          {
+            name: "네이버 파워컨텐츠",
+            imps: naverImps,
+            clicks: naverClicks,
+            spend: naverSpend,
+            ctr: naverImps > 0 ? ((naverClicks / naverImps) * 100).toFixed(2) : "0.00",
+            cpc: naverClicks > 0 ? Math.round(naverSpend / naverClicks) : 0
+          },
+          {
+            name: "네이버 파워링크",
+            imps: pcImps,
+            clicks: pcClicks,
+            spend: pcSpend,
+            ctr: pcImps > 0 ? ((pcClicks / pcImps) * 100).toFixed(2) : "0.00",
+            cpc: pcClicks > 0 ? Math.round(pcSpend / pcClicks) : 0
+          },
+          {
+            name: "메타 광고 (인스타그램/페이스북)",
+            imps: Math.round(metaClicks * 45),
+            clicks: metaClicks,
+            spend: metaSpend,
+            ctr: "2.22",
+            cpc: metaClicks > 0 ? Math.round(metaSpend / metaClicks) : 1540
+          },
+          {
+            name: "네이버 GFA 성과형 디스플레이 광고",
+            imps: Math.round(gfaClicks * 165),
+            clicks: gfaClicks,
+            spend: gfaSpend,
+            ctr: "0.61",
+            cpc: gfaClicks > 0 ? Math.round(gfaSpend / gfaClicks) : 880
+          },
+          {
+            name: "구글 검색광고 (Search Ads)",
+            imps: Math.round(googleClicks * 40),
+            clicks: googleClicks,
+            spend: googleSpend,
+            ctr: "2.50",
+            cpc: googleClicks > 0 ? Math.round(googleSpend / googleClicks) : 1562
+          }
+        ];
 
-        const totalSpend = metaSpend + googleSpend + totalNaverSpend + gfaSpend;
-        const totalClicks = metaClicks + googleClicks + totalNaverClicks + gfaClicks;
-        const avgCpc = totalClicks > 0 ? Math.round(totalSpend / totalClicks) : 0;
+        // Sort channels by spend ASC (광고비 적은 순으로 정렬)
+        channels.sort((a, b) => a.spend - b.spend);
+
+        // Sum values for the total/sum row
+        const totalImps = channels.reduce((sum, ch) => sum + ch.imps, 0);
+        const totalClicks = channels.reduce((sum, ch) => sum + ch.clicks, 0);
+        const totalSpend = channels.reduce((sum, ch) => sum + ch.spend, 0);
+        const totalCtr = totalImps > 0 ? ((totalClicks / totalImps) * 100).toFixed(2) : "0.00";
+        const totalCpc = totalClicks > 0 ? Math.round(totalSpend / totalClicks) : 0;
 
         document.getElementById("total-spend-val").textContent = totalSpend.toLocaleString();
         document.getElementById("total-clicks-val").textContent = totalClicks.toLocaleString();
-        document.getElementById("total-cpc-val").textContent = avgCpc.toLocaleString();
+        document.getElementById("total-cpc-val").textContent = totalCpc.toLocaleString();
 
         const tbody = document.getElementById("total-channels-tbody");
         if (tbody) {
-          tbody.innerHTML = `
-            <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold">
-              <td class="py-3 px-3">네이버검색광고</td>
-              <td class="py-3 px-3 text-right font-mono">${totalNaverImps.toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono text-orange-500">${totalNaverClicks.toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono">${totalNaverCtr}%</td>
-              <td class="py-3 px-3 text-right font-mono">${totalNaverSpend.toLocaleString()}원</td>
-              <td class="py-3 px-3 text-right font-mono">${totalNaverCpc.toLocaleString()}원</td>
-            </tr>
-            <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold">
-              <td class="py-3 px-3">메타 광고 (인스타그램/페이스북)</td>
-              <td class="py-3 px-3 text-right font-mono">${Math.round(metaClicks * 45).toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono text-orange-500">${metaClicks.toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono">2.22%</td>
-              <td class="py-3 px-3 text-right font-mono">${metaSpend.toLocaleString()}원</td>
-              <td class="py-3 px-3 text-right font-mono">1,540원</td>
-            </tr>
-            <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold">
-              <td class="py-3 px-3">네이버 GFA 성과형 디스플레이 광고</td>
-              <td class="py-3 px-3 text-right font-mono">${Math.round(gfaClicks * 165).toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono text-orange-500">${gfaClicks.toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono">0.61%</td>
-              <td class="py-3 px-3 text-right font-mono">${gfaSpend.toLocaleString()}원</td>
-              <td class="py-3 px-3 text-right font-mono">880원</td>
-            </tr>
-            <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold">
-              <td class="py-3 px-3">구글 검색광고 (Search Ads)</td>
-              <td class="py-3 px-3 text-right font-mono">${Math.round(googleClicks * 40).toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono text-orange-500">${googleClicks.toLocaleString()}</td>
-              <td class="py-3 px-3 text-right font-mono">2.50%</td>
-              <td class="py-3 px-3 text-right font-mono">${googleSpend.toLocaleString()}원</td>
-              <td class="py-3 px-3 text-right font-mono">1,562원</td>
+          let rowsHtml = "";
+          channels.forEach(ch => {
+            rowsHtml += `
+              <tr class="hover:bg-gray-50/50 dark-mode:hover:bg-gray-750/30 font-bold text-gray-855 dark-mode:text-gray-200">
+                <td class="py-3 px-3">${ch.name}</td>
+                <td class="py-3 px-3 text-right font-mono">${ch.imps.toLocaleString()}</td>
+                <td class="py-3 px-3 text-right font-mono text-orange-500">${ch.clicks.toLocaleString()}</td>
+                <td class="py-3 px-3 text-right font-mono">${ch.ctr}%</td>
+                <td class="py-3 px-3 text-right font-mono">${ch.spend.toLocaleString()}원</td>
+                <td class="py-3 px-3 text-right font-mono">${ch.cpc.toLocaleString()}원</td>
+              </tr>
+            `;
+          });
+
+          // Add sum row
+          rowsHtml += `
+            <tr class="bg-orange-50/50 dark-mode:bg-orange-950/20 font-black text-gray-900 dark-mode:text-white border-t-2 border-gray-200 dark-mode:border-gray-700">
+              <td class="py-3.5 px-3">합계</td>
+              <td class="py-3.5 px-3 text-right font-mono">${totalImps.toLocaleString()}</td>
+              <td class="py-3.5 px-3 text-right font-mono text-orange-600">${totalClicks.toLocaleString()}</td>
+              <td class="py-3.5 px-3 text-right font-mono">${totalCtr}%</td>
+              <td class="py-3.5 px-3 text-right font-mono text-emerald-600">${totalSpend.toLocaleString()}원</td>
+              <td class="py-3.5 px-3 text-right font-mono">${totalCpc.toLocaleString()}원</td>
             </tr>
           `;
+          tbody.innerHTML = rowsHtml;
         }
       }
 
@@ -12341,6 +12474,195 @@
       }
 
       calculateDateAndLoad();
+    }
+
+    // ============================================
+    // 12: 9.인기글 찾기 UI 및 기능 구현
+    // ============================================
+    function getPopularPostsSearchHTML() {
+      return `
+        <div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-10 border border-gray-150 dark-mode:border-gray-700 space-y-6">
+          <div class="border-b border-gray-150 dark-mode:border-gray-700 pb-4">
+            <h1 class="text-2xl font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
+              🔍 네이버 통합검색 인기글 노출 판별기
+            </h1>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-1 font-medium leading-relaxed">
+              입력한 키워드 목록을 네이버에 자동으로 검색하여 통합검색 화면에 <strong class="text-orange-500">인기글(스마트블록)</strong> 섹션이 활성화되어 있는지 실시간으로 판별합니다.<br>
+              과도한 트래픽으로 인한 차단을 방지하기 위해 키워드별로 2~4초 사이의 무작위 대기 시간을 적용하여 사람이 검색하는 것처럼 안전하게 순차 조회합니다.
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Keyword Input Area -->
+            <div>
+              <label class="block text-xs font-black text-gray-700 dark-mode:text-gray-300 mb-1.5 uppercase tracking-wider">
+                키워드 리스트 입력 (한 줄에 하나씩 입력)
+              </label>
+              <textarea id="pop-keywords-input" rows="8" class="w-full px-4 py-3 bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-xl text-xs font-bold text-gray-800 dark-mode:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed" placeholder="예시:\n부산인테리어\n부산병원인테리어\n부산학원인테리어"></textarea>
+            </div>
+
+            <!-- Start Button -->
+            <button id="pop-search-btn" class="w-full py-4 bg-orange-600 hover:bg-orange-700 active:scale-[0.99] text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+              🔍 인기글 판별 시작
+            </button>
+
+            <!-- Progress Console -->
+            <div id="pop-progress-box" class="hidden p-5 bg-gray-50 dark-mode:bg-gray-900 border border-gray-150 dark-mode:border-gray-750 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span id="pop-progress-status" class="text-xs font-black text-gray-800 dark-mode:text-gray-200">조회 준비 중...</span>
+                <span id="pop-progress-percent" class="text-xs font-black text-orange-600">0%</span>
+              </div>
+              <!-- Progress Bar -->
+              <div class="w-full bg-gray-200 dark-mode:bg-gray-750 rounded-full h-2 overflow-hidden">
+                <div id="pop-progress-bar" class="bg-orange-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+              <!-- Console Logs -->
+              <div id="pop-progress-logs" class="max-h-40 overflow-y-auto p-3 bg-black rounded-lg text-[10px] text-green-400 font-mono space-y-1 leading-relaxed"></div>
+            </div>
+
+            <!-- Result List Area -->
+            <div class="space-y-3 pt-4 border-t border-gray-150 dark-mode:border-gray-700">
+              <h3 class="text-xs font-black text-gray-800 dark-mode:text-gray-200 tracking-wider">
+                🎯 인기글 노출 키워드 결과 목록 (미노출 키워드는 미표시)
+              </h3>
+              
+              <div id="pop-results-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="col-span-full py-8 text-center text-xs text-gray-400 font-semibold border border-dashed border-gray-200 dark-mode:border-gray-700 rounded-xl">
+                  키워드를 입력하고 판별 시작 버튼을 눌러주세요.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function setupPopularPostsSearch() {
+      const keywordsInput = document.getElementById("pop-keywords-input");
+      const searchBtn = document.getElementById("pop-search-btn");
+      const progressBox = document.getElementById("pop-progress-box");
+      const progressStatus = document.getElementById("pop-progress-status");
+      const progressPercent = document.getElementById("pop-progress-percent");
+      const progressBar = document.getElementById("pop-progress-bar");
+      const progressLogs = document.getElementById("pop-progress-logs");
+      const resultsContainer = document.getElementById("pop-results-container");
+
+      if (!keywordsInput || !searchBtn || !progressBox || !resultsContainer) return;
+
+      searchBtn.addEventListener("click", () => {
+        const text = keywordsInput.value;
+        const keywords = text.split("\n")
+          .map(k => k.trim())
+          .filter(k => k.length > 0);
+
+        if (keywords.length === 0) {
+          alert("조회할 키워드를 입력해 주세요.");
+          return;
+        }
+
+        // Start UI state
+        keywordsInput.disabled = true;
+        searchBtn.disabled = true;
+        searchBtn.className = "w-full py-4 bg-gray-400 text-white font-black text-sm rounded-xl cursor-not-allowed flex items-center justify-center gap-2";
+        progressBox.classList.remove("hidden");
+        
+        progressLogs.innerHTML = "";
+        resultsContainer.innerHTML = "";
+        
+        appendLog("🚀 인기글 판별 작업을 시작합니다.");
+        appendLog(`총 ${keywords.length}개의 키워드가 접수되었습니다.`);
+
+        let currentIndex = 0;
+        let matchedCount = 0;
+
+        function appendLog(msg) {
+          const time = new Date().toLocaleTimeString("ko-KR", { hour12: false });
+          const logItem = document.createElement("div");
+          logItem.textContent = `[${time}] ${msg}`;
+          progressLogs.appendChild(logItem);
+          progressLogs.scrollTop = progressLogs.scrollHeight;
+        }
+
+        async function runNext() {
+          if (currentIndex >= keywords.length) {
+            // Completed
+            progressStatus.textContent = "모든 키워드 판별 완료";
+            progressPercent.textContent = "100%";
+            progressBar.style.width = "100%";
+            appendLog("✅ 모든 키워드 인기글 판별 작업이 성공적으로 종료되었습니다.");
+
+            if (matchedCount === 0) {
+              resultsContainer.innerHTML = `
+                <div class="col-span-full py-8 text-center text-xs text-orange-500 font-extrabold bg-orange-50/50 dark-mode:bg-orange-950/20 border border-orange-100 dark-mode:border-orange-900/40 rounded-xl">
+                  ⚠️ 모두없음 (인기글 노출 키워드가 발견되지 않았습니다.)
+                </div>
+              `;
+            }
+
+            keywordsInput.disabled = false;
+            searchBtn.disabled = false;
+            searchBtn.className = "w-full py-4 bg-orange-600 hover:bg-orange-700 active:scale-[0.99] text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2";
+            return;
+          }
+
+          const keyword = keywords[currentIndex];
+          const displayIdx = currentIndex + 1;
+          const total = keywords.length;
+
+          progressStatus.textContent = `[${displayIdx}/${total}] "${keyword}" 판별 중...`;
+          const pct = Math.round(((currentIndex) / total) * 100);
+          progressPercent.textContent = `${pct}%`;
+          progressBar.style.width = `${pct}%`;
+
+          appendLog(`[${displayIdx}/${total}] Naver 통합검색 "${keyword}" 조회 시작...`);
+
+          try {
+            const apiTarget = getLocalServerUrl(`/api/search-popular-posts?keyword=${encodeURIComponent(keyword)}`);
+            const res = await fetch(apiTarget);
+            if (!res.ok) {
+              throw new Error(`HTTP Status ${res.status}`);
+            }
+
+            const data = await res.json();
+            if (data.success && data.hasPopularPosts) {
+              matchedCount++;
+              appendLog(`👉 [발견] "${keyword}" 검색결과에서 [인기글] 스마트블록을 발견했습니다.`);
+              
+              // Remove placeholder if it's the first match
+              if (resultsContainer.querySelector(".col-span-full")) {
+                resultsContainer.innerHTML = "";
+              }
+
+              const card = document.createElement("div");
+              card.className = "flex items-center gap-2.5 p-3.5 bg-emerald-50/50 dark-mode:bg-emerald-950/15 border border-emerald-100 dark-mode:border-emerald-900/35 rounded-xl transition-all hover:scale-[1.01]";
+              card.innerHTML = `
+                <span class="px-2 py-0.5 bg-emerald-500 dark-mode:bg-emerald-600 text-white rounded text-[10px] font-black uppercase tracking-wider shadow-sm select-none">있음</span>
+                <span class="font-extrabold text-xs text-gray-800 dark-mode:text-gray-100 select-all">${keyword}</span>
+              `;
+              resultsContainer.appendChild(card);
+            } else {
+              appendLog(`❌ [미발견] "${keyword}" 검색결과에는 인기글이 존재하지 않습니다.`);
+            }
+          } catch (err) {
+            appendLog(`⚠️ [오류] "${keyword}" 조회 중 실패: ${err.message}`);
+          }
+
+          currentIndex++;
+          
+          if (currentIndex < keywords.length) {
+            // Apply human-like delay (2 to 4 seconds)
+            const delay = Math.round(2000 + Math.random() * 2000);
+            appendLog(`인간 행동 모방 대기 중 (${(delay/1000).toFixed(1)}초)...`);
+            setTimeout(runNext, delay);
+          } else {
+            // Immediately run completed state
+            setTimeout(runNext, 0);
+          }
+        }
+
+        // Trigger first keyword
+        runNext();
+      });
     }
 
     window.addEventListener("load", initApp);

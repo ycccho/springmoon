@@ -1739,6 +1739,7 @@ async function extractStatsFromDOM(page, stats) {
 
 // Proxy endpoint for Meta Ads Stats
 app.get('/api/meta-ads', cors(), async (req, res) => {
+  loadConfig(); // Reload config dynamically
   const { startDate, endDate } = req.query;
   const metaConf = globalConfig.meta || {};
   
@@ -1839,6 +1840,7 @@ app.get('/api/meta-ads', cors(), async (req, res) => {
 
 // Proxy endpoint for Google Ads SA Stats
 app.get('/api/google-sa', cors(), async (req, res) => {
+  loadConfig(); // Reload config dynamically
   const googleConf = globalConfig.google || {};
   
   if (!googleConf.refreshToken || !googleConf.customerId) {
@@ -2041,6 +2043,7 @@ app.get('/api/google-sa', cors(), async (req, res) => {
 
 // Proxy endpoint for I'mWeb Site Stats
 app.get('/api/imweb', cors(), async (req, res) => {
+  loadConfig(); // Reload config dynamically
   const imwebConf = globalConfig.imweb || {};
   
   const subscriptionExpiry = imwebConf.subscriptionExpiry || "2028-01-19";
@@ -2144,6 +2147,7 @@ app.options('/api/meta-ad-library', cors(), (req, res) => { res.sendStatus(200);
 
 // Proxy endpoint for Meta Ad Library (ads_archive)
 app.get('/api/meta-ad-library', cors(), async (req, res) => {
+  loadConfig(); // Reload config dynamically
   const query = req.query.query || '';
   const metaConf = globalConfig.meta || {};
   const accessToken = metaConf.accessToken;
@@ -2275,6 +2279,38 @@ app.post('/api/menus', cors(), async (req, res) => {
     const data = req.body;
     fs.writeFileSync(menusFilePath, JSON.stringify(data, null, 2), 'utf8');
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/search-popular-posts
+app.options('/api/search-popular-posts', cors(), (req, res) => { res.sendStatus(200); });
+app.get('/api/search-popular-posts', cors(), async (req, res) => {
+  const keyword = req.query.keyword;
+  if (!keyword) {
+    return res.status(400).json({ success: false, error: "keyword is required" });
+  }
+
+  try {
+    const searchUrl = `https://search.naver.com/search.naver?where=nexearch&query=${encodeURIComponent(keyword)}`;
+    const response = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Referer': 'https://www.naver.com/'
+      }
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).json({ success: false, error: `Naver status: ${response.status}` });
+    }
+
+    const html = await response.text();
+    const hasPopularPosts = html.includes('인기글');
+
+    res.json({ success: true, keyword, hasPopularPosts });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
