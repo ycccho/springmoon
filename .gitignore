@@ -12,3 +12,8 @@ scratch/
 scratch_*
 __pycache__/
 *.db
+tmp_chrome_profile/
+chrome_naver_session/
+*.bak
+tmp_*
+config.json

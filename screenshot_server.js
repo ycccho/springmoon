@@ -2252,6 +2252,34 @@ app.get('/api/meta-ad-library', cors(), async (req, res) => {
   }
 });
 
+app.options('/api/menus', cors(), (req, res) => { res.sendStatus(200); });
+
+// GET /api/menus
+app.get('/api/menus', cors(), async (req, res) => {
+  const menusFilePath = path.join(__dirname, 'menus.json');
+  try {
+    if (fs.existsSync(menusFilePath)) {
+      const dataStr = fs.readFileSync(menusFilePath, 'utf8');
+      return res.json(JSON.parse(dataStr));
+    }
+    res.json({ success: true, menus: [], categories: [] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/menus
+app.post('/api/menus', cors(), async (req, res) => {
+  const menusFilePath = path.join(__dirname, 'menus.json');
+  try {
+    const data = req.body;
+    fs.writeFileSync(menusFilePath, JSON.stringify(data, null, 2), 'utf8');
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 const PORT = 3888;
 app.listen(PORT, () => {
   console.log(`================================================================`);

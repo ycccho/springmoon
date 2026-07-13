@@ -79,15 +79,33 @@
           <div class="text-[10px] text-orange-200 uppercase tracking-wider font-bold">⚙️ 로컬 백서버 주소</div>
           <input type="text" id="sidebar-local-server-input" class="w-full px-2 py-1 text-xs rounded bg-orange-800 bg-opacity-40 border border-white border-opacity-10 text-white placeholder-orange-200 focus:outline-none focus:ring-1 focus:ring-white font-mono" placeholder="localhost:3888">
         </div>
+        <!-- Menu Edit Start Button & Action Panel -->
+        <div class="space-y-2 pt-1 border-t border-white border-opacity-10 mt-1">
+          <button id="menu-edit-mode-btn" class="w-full px-3 py-2 rounded-lg text-xs font-semibold bg-white bg-opacity-15 hover:bg-opacity-25 transition-all flex items-center justify-center gap-1.5 text-white border border-white border-opacity-10 shadow-sm">
+            <span>⚙️ 메뉴편집12</span>
+          </button>
+          
+          <div id="menu-editing-actions" class="hidden bg-white bg-opacity-10 rounded-xl p-3 space-y-2 border border-white border-opacity-10">
+            <div class="text-[9px] text-orange-200 uppercase tracking-wider font-bold">🛠️ 메뉴 편집 도구</div>
+            <button id="add-new-menu-btn" class="w-full px-3 py-1.5 rounded-lg text-[11px] font-bold bg-blue-600 hover:bg-blue-700 transition-all text-white flex items-center justify-center gap-1 shadow-sm">
+              <span>➕ 신규 메뉴 생성</span>
+            </button>
+            <button id="add-new-category-btn" class="w-full px-3 py-1.5 rounded-lg text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 transition-all text-white flex items-center justify-center gap-1 shadow-sm">
+              <span>📁 카테고리 추가</span>
+            </button>
+            <div class="flex gap-2 pt-1 border-t border-white border-opacity-10 mt-1">
+              <button id="menu-save-btn" class="flex-1 px-2 py-1.5 rounded-lg text-xs font-black bg-green-600 hover:bg-green-700 transition-all text-white shadow-sm flex items-center justify-center gap-0.5">
+                💾 저장
+              </button>
+              <button id="menu-cancel-btn" class="flex-1 px-2 py-1.5 rounded-lg text-xs font-bold bg-gray-500 hover:bg-gray-600 transition-all text-white shadow-sm flex items-center justify-center gap-0.5">
+                ❌ 취소
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <nav id="menu-container" class="space-y-4 flex-1"></nav>
-      
-      <div class="border-t border-white pt-4 mt-6 space-y-2">
-        <button id="add-category-btn" class="w-full px-3 py-2 rounded-lg text-xs font-semibold bg-white bg-opacity-20 hover:bg-opacity-30 transition-all flex items-center justify-center gap-1">
-          <span>📁 카테고리 추가</span>
-        </button>
-      </div>
     </aside>
 
     <!-- MAIN CONTENT -->
@@ -400,6 +418,7 @@
     let currentCategories = [];
     let isDarkMode = false;
     let isAuthenticated = false;
+    let isMenuEditingMode = false;
     let placeHistory = {};
 
     // ============================================
@@ -511,41 +530,6 @@
         changed = true;
       }
 
-      // Automatically update names based on new naming scheme for cached lists
-      const newNames = {
-        "total-statistics": "1. 전체 통계",
-        "ad-dashboard": "2. 검색광고 통계",
-        "place-statistics": "3. 플레이스 통계",
-        "meta-statistics": "4. 메타광고 통계",
-        "google-sa-statistics": "5. 구글SA 통계",
-        "imweb-statistics": "6. 아임웹 통계",
-        "gfa-statistics": "7. gfa 통계",
-        "webp": "webP변환",
-        "keyword": "2.키워드조합",
-        "keyword-search-count": "3.키워드별 조회수",
-        "negative-words": "5.부정단어찾기",
-        "html-analysis": "html분석",
-        "url-extraction": "도메인 url추출",
-        "powercontent": "9.파컨 키워드",
-        "omission-check": "1.블로그분석 누락판별",
-        "interior-intro": "9.인테리어",
-        "cad-conversion": "9.배치도면 캐드변환",
-        "homepage-seo": "홈페이지 코드세팅",
-        "backlink-check": "백링크점검",
-        "keyword-screenshot": "9.키워드 스크린샷",
-        "blog-post-screenshot": "9.블로그게시글 샷",
-        "competitor-blog": "7.경쟁 블로그 탐색",
-        "daily-report": "9.데일리보고서 작성",
-        "about": "소개"
-      };
-      
-      menus.forEach(m => {
-        if (newNames[m.id] && m.name !== newNames[m.id]) {
-          m.name = newNames[m.id];
-          changed = true;
-        }
-      });
-
       // Clean up orphaned category IDs to avoid hidden menus
       const cats = loadCategories();
       const catIds = new Set(cats.map(c => c.id));
@@ -555,17 +539,6 @@
           changed = true;
         }
       });
-
-      // Sort alphabetically (localeCompare "ko") - keep 'about' at the very bottom
-      const beforeSort = JSON.stringify(menus);
-      menus.sort((a, b) => {
-        if (a.id === "about") return 1;
-        if (b.id === "about") return -1;
-        return a.name.localeCompare(b.name, "ko");
-      });
-      if (JSON.stringify(menus) !== beforeSort) {
-        changed = true;
-      }
 
       if (changed) {
         localStorage.setItem("menuOrder", JSON.stringify(menus));
@@ -699,104 +672,209 @@
       const container = document.getElementById("menu-container");
       container.innerHTML = "";
 
-      // Render categories in exact custom sequence
-      const renderCategoryById = (catId) => {
-        const cat = currentCategories.find(c => c.id === catId);
-        if (!cat) return;
-        
+      // Allow drop at container level to move menu out of category
+      container.addEventListener("dragover", (e) => e.preventDefault());
+      container.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const dragType = e.dataTransfer.getData("dragType");
+        if (dragType === "menu" && isMenuEditingMode && e.target === container) {
+          const dragIndex = parseInt(e.dataTransfer.getData("dragIndex"));
+          const draggedMenu = currentMenus[dragIndex];
+          draggedMenu.categoryId = null;
+          renderMenus();
+        }
+      });
+
+      // Render each category in currentCategories
+      currentCategories.forEach((cat, catIdx) => {
         const catDiv = document.createElement("div");
-        catDiv.className = "category-group border border-white border-opacity-10 rounded-xl p-2 bg-white bg-opacity-5 transition-all my-2";
+        catDiv.className = "category-group border border-white border-opacity-10 rounded-xl p-2 bg-white bg-opacity-5 transition-all my-2 relative";
         catDiv.dataset.categoryId = cat.id;
+
+        // Make category div drop zone for menus & other categories
+        catDiv.addEventListener("dragover", (e) => e.preventDefault());
+        catDiv.addEventListener("drop", (e) => {
+          e.preventDefault();
+          const dragType = e.dataTransfer.getData("dragType");
+          if (dragType === "menu" && isMenuEditingMode) {
+            const dragIndex = parseInt(e.dataTransfer.getData("dragIndex"));
+            const draggedMenu = currentMenus[dragIndex];
+            draggedMenu.categoryId = cat.id;
+            renderMenus();
+          } else if (dragType === "category" && isMenuEditingMode) {
+            const dragCatId = e.dataTransfer.getData("dragCategoryId");
+            if (dragCatId !== cat.id) {
+              const srcIdx = currentCategories.findIndex(c => c.id === dragCatId);
+              const targetIdx = currentCategories.findIndex(c => c.id === cat.id);
+              if (srcIdx !== -1 && targetIdx !== -1) {
+                const [movedCat] = currentCategories.splice(srcIdx, 1);
+                currentCategories.splice(targetIdx, 0, movedCat);
+                renderMenus();
+              }
+            }
+          }
+        });
 
         const isCollapsed = cat.collapsed === true;
         const arrow = isCollapsed ? "▶" : "▼";
 
         const catHeader = document.createElement("div");
         catHeader.className = "category-header flex items-center justify-between text-xs font-bold text-gray-200 uppercase tracking-wider px-2 py-1.5 mb-1 group";
-        catHeader.innerHTML = `
-          <span class="flex items-center gap-1.5 cursor-pointer select-none cat-toggle-click">${arrow} <span class="cat-name-text"></span></span>
+        
+        if (isMenuEditingMode) {
+          catHeader.draggable = true;
+          catHeader.className += " cursor-grab active:cursor-grabbing hover:bg-white hover:bg-opacity-5 rounded";
+          catHeader.addEventListener("dragstart", (e) => {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("dragType", "category");
+            e.dataTransfer.setData("dragCategoryId", cat.id);
+          });
+        }
+
+        let catHeaderHtml = `
+          <span class="flex items-center gap-1.5 cursor-pointer select-none cat-toggle-click">
+            ${arrow} <span class="cat-name-text">${cat.name}</span>
+          </span>
         `;
-        catHeader.querySelector(".cat-name-text").textContent = cat.name;
+
+        if (isMenuEditingMode) {
+          catHeaderHtml += `
+            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button class="cat-rename-btn px-1.5 py-0.5 bg-white bg-opacity-25 rounded text-[9px] hover:bg-opacity-40">✏️</button>
+              <button class="cat-delete-btn px-1.5 py-0.5 bg-red-650 hover:bg-red-750 text-white rounded text-[9px]">❌</button>
+            </div>
+          `;
+        }
+
+        catHeader.innerHTML = catHeaderHtml;
 
         // Toggle category fold
         catHeader.querySelector(".cat-toggle-click").addEventListener("click", () => {
           cat.collapsed = !cat.collapsed;
-          saveCategories();
           renderMenus();
         });
+
+        if (isMenuEditingMode) {
+          catHeader.querySelector(".cat-rename-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            const newName = prompt("새로운 카테고리명을 입력해 주세요:", cat.name);
+            if (newName && newName.trim()) {
+              cat.name = newName.trim();
+              renderMenus();
+            }
+          });
+
+          catHeader.querySelector(".cat-delete-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (confirm(`'${cat.name}' 카테고리를 삭제하시겠습니까?\n하위 메뉴들은 외부의 독립 메뉴로 자동 이동됩니다.`)) {
+              currentMenus.forEach(m => {
+                if (m.categoryId === cat.id) m.categoryId = null;
+              });
+              currentCategories.splice(catIdx, 1);
+              renderMenus();
+            }
+          });
+        }
 
         catDiv.appendChild(catHeader);
 
         const childMenus = currentMenus.filter(m => m.categoryId === cat.id && !m.hidden);
-        if (!isCollapsed) {
+        if (!isCollapsed || isMenuEditingMode) {
           childMenus.forEach(menu => {
             const btn = createMenuButton(menu, currentMenus.indexOf(menu));
             catDiv.appendChild(btn);
           });
         }
         container.appendChild(catDiv);
-      };
+      });
 
-      // 1. Render 통계확인 (cat-stats) at the top
-      renderCategoryById("cat-stats");
-
-      // 2. Render Normal Standalone Menus (excluding about)
-      const standaloneMenus = currentMenus.filter(m => !m.categoryId && !m.hidden && m.id !== "about");
+      // Render Standalone Menus
+      const catIds = new Set(currentCategories.map(c => c.id));
+      const standaloneMenus = currentMenus.filter(m => (!m.categoryId || !catIds.has(m.categoryId)) && !m.hidden);
+      
       standaloneMenus.forEach((menu) => {
         const btn = createMenuButton(menu, currentMenus.indexOf(menu));
         container.appendChild(btn);
       });
-
-      // 3. Render 인테리어 (cat-interior)
-      renderCategoryById("cat-interior");
-
-      // 4. Render 'about' (소개) menu
-      const aboutMenu = currentMenus.find(m => m.id === "about");
-      if (aboutMenu && !aboutMenu.hidden) {
-        const btn = createMenuButton(aboutMenu, currentMenus.indexOf(aboutMenu));
-        container.appendChild(btn);
-      }
-
-      // 5. Render 홈페이지 관련 (cat-homepage) at the very bottom
-      renderCategoryById("cat-homepage");
     }
 
     function createMenuButton(menu, index) {
       const btn = document.createElement("button");
-      btn.className = "menu-item block w-full text-left px-4 py-2.5 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm font-semibold group relative my-0.5 transition-all cursor-grab active:cursor-grabbing";
-      btn.draggable = true;
+      btn.className = "menu-item block w-full text-left px-4 py-2.5 rounded-xl text-white hover:bg-white hover:text-orange-700 text-sm font-semibold group relative my-0.5 transition-all";
+      
+      if (isMenuEditingMode) {
+        btn.draggable = true;
+        btn.className += " cursor-grab active:cursor-grabbing";
+      }
+
       btn.dataset.menuId = menu.id;
       btn.dataset.index = index;
 
       let html = `<span>${menu.name}</span>`;
       if (menu.protected) html += " 🔒";
-      html += `<div class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 space-x-1 flex">
-        <button class="menu-edit-btn px-2 py-0.5 bg-white bg-opacity-20 rounded text-[10px] hover:bg-opacity-40">✏️</button>
-      </div>`;
+
+      if (isMenuEditingMode) {
+        html += `<div class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 space-x-1 flex z-10">
+          <button class="menu-rename-btn px-1.5 py-0.5 bg-white bg-opacity-20 rounded text-[10px] hover:bg-opacity-40">✏️</button>
+          <button class="menu-delete-btn px-1.5 py-0.5 bg-red-650 hover:bg-red-750 text-white rounded text-[10px]">❌</button>
+        </div>`;
+      } else {
+        html += `<div class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 space-x-1 flex">
+          <button class="menu-edit-btn px-2 py-0.5 bg-white bg-opacity-20 rounded text-[10px] hover:bg-opacity-40">✏️</button>
+        </div>`;
+      }
       btn.innerHTML = html;
 
       btn.addEventListener("click", (e) => {
-        if (!e.target.classList.contains("menu-edit-btn")) {
+        if (!e.target.classList.contains("menu-rename-btn") && !e.target.classList.contains("menu-edit-btn") && !e.target.classList.contains("menu-delete-btn")) {
           selectMenu(menu);
         }
       });
 
-      btn.querySelector(".menu-edit-btn").addEventListener("click", (e) => {
-        e.stopPropagation();
-        const newName = prompt("새로운 메뉴명을 입력해 주세요:", menu.name);
-        if (newName && newName.trim()) {
-          if (menu.id.startsWith("custom-") || menu.id === "keyword-search-count") {
+      if (isMenuEditingMode) {
+        btn.querySelector(".menu-rename-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          const newName = prompt("새로운 메뉴명을 입력해 주세요:", menu.name);
+          if (newName && newName.trim()) {
             currentMenus[index].name = newName.trim();
-            saveMenuOrder();
             renderMenus();
             renderPanels();
-          } else {
-            alert("기본 메뉴는 이름 수정이 불가능합니다.");
           }
-        }
-      });
+        });
+
+        btn.querySelector(".menu-delete-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(`'${menu.name}' 메뉴를 삭제하시겠습니까?`)) {
+            if (menu.id.startsWith("custom-")) {
+              // Custom menus are deleted permanently
+              currentMenus.splice(index, 1);
+            } else {
+              // Default menus are hidden
+              menu.hidden = true;
+            }
+            renderMenus();
+            renderPanels();
+          }
+        });
+      } else {
+        btn.querySelector(".menu-edit-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          const newName = prompt("새로운 메뉴명을 입력해 주세요:", menu.name);
+          if (newName && newName.trim()) {
+            if (menu.id.startsWith("custom-") || menu.id === "keyword-search-count") {
+              currentMenus[index].name = newName.trim();
+              saveMenuOrder();
+              renderMenus();
+              renderPanels();
+            } else {
+              alert("기본 메뉴명 편집은 메뉴편집모드에서만 가능합니다.");
+            }
+          }
+        });
+      }
 
       btn.addEventListener("dragstart", (e) => {
+        if (!isMenuEditingMode) return;
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("dragType", "menu");
         e.dataTransfer.setData("dragMenuId", menu.id);
@@ -808,19 +886,16 @@
       btn.addEventListener("drop", (e) => {
         e.preventDefault();
         const dragType = e.dataTransfer.getData("dragType");
-        if (dragType === "menu") {
+        if (dragType === "menu" && isMenuEditingMode) {
           const dragIndex = parseInt(e.dataTransfer.getData("dragIndex"));
           if (dragIndex !== index) {
             const draggedMenu = currentMenus[dragIndex];
             const targetMenu = currentMenus[index];
             
-            // Assign category of target menu
             draggedMenu.categoryId = targetMenu.categoryId;
 
             currentMenus.splice(dragIndex, 1);
             currentMenus.splice(index, 0, draggedMenu);
-            
-            saveMenuOrder();
             renderMenus();
           }
         }
@@ -845,8 +920,27 @@
       }
       localStorage.setItem("activeMenuId", menu.id);
       document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-      const panel = document.getElementById(menu.id);
-      if (panel) panel.classList.remove("hidden");
+      
+      let panel = document.getElementById(menu.id);
+      if (!panel) {
+        // Create custom empty state panel for dynamic menus
+        panel = document.createElement("div");
+        panel.id = menu.id;
+        panel.className = "panel bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 min-h-[400px] flex flex-col items-center justify-center text-center";
+        panel.innerHTML = `
+          <div class="space-y-3">
+            <div class="text-gray-400 dark-mode:text-gray-600 text-5xl">📄</div>
+            <h3 class="text-lg font-black text-gray-855 dark-mode:text-white">${menu.name}</h3>
+            <p class="text-xs text-gray-400 font-medium">이 메뉴는 내용이 비어있는 메뉴입니다.</p>
+          </div>
+        `;
+        const mainContent = document.getElementById("main-content");
+        if (mainContent) {
+          mainContent.appendChild(panel);
+        }
+      } else {
+        panel.classList.remove("hidden");
+      }
 
       // Update active menu button styling in sidebar
       document.querySelectorAll(".menu-item").forEach(btn => {
@@ -894,33 +988,44 @@
       document.getElementById("password-modal").classList.add("hidden");
     });
 
-    // Category modal events
+    // Category modal events (legacy - kept for backwards compatibility)
     const categoryModal = document.getElementById("category-modal");
     const categoryInput = document.getElementById("category-input");
 
-    document.getElementById("add-category-btn").addEventListener("click", () => {
-      categoryModal.classList.remove("hidden");
-      categoryInput.value = "";
-      categoryInput.focus();
-    });
+    const oldCategoryBtn = document.getElementById("add-category-btn");
+    if (oldCategoryBtn) {
+      oldCategoryBtn.addEventListener("click", () => {
+        categoryModal.classList.remove("hidden");
+        categoryInput.value = "";
+        categoryInput.focus();
+      });
+    }
 
-    document.getElementById("category-cancel").addEventListener("click", () => {
-      categoryModal.classList.add("hidden");
-    });
-
-    document.getElementById("category-submit").addEventListener("click", () => {
-      const name = categoryInput.value.trim();
-      if (name) {
-        currentCategories.push({ id: "cat-" + Date.now(), name });
-        saveCategories();
-        renderMenus();
+    const categoryCancelBtn = document.getElementById("category-cancel");
+    if (categoryCancelBtn) {
+      categoryCancelBtn.addEventListener("click", () => {
         categoryModal.classList.add("hidden");
-      }
-    });
+      });
+    }
 
-    categoryInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") document.getElementById("category-submit").click();
-    });
+    const categorySubmitBtn = document.getElementById("category-submit");
+    if (categorySubmitBtn) {
+      categorySubmitBtn.addEventListener("click", () => {
+        const name = categoryInput.value.trim();
+        if (name) {
+          currentCategories.push({ id: "cat-" + Date.now(), name });
+          saveCategories();
+          renderMenus();
+          categoryModal.classList.add("hidden");
+        }
+      });
+    }
+
+    if (categoryInput) {
+      categoryInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && categorySubmitBtn) categorySubmitBtn.click();
+      });
+    }
 
     // ============================================
     // 패널 렌더링
@@ -4350,10 +4455,95 @@
       }
     }
 
+    async function syncMenusFromServer() {
+      try {
+        const res = await fetch("https://springmoons.pages.dev/api/menus");
+        const data = await res.json();
+        if (data.success && data.menus && data.menus.length > 0) {
+          currentMenus = data.menus;
+          currentCategories = data.categories || [];
+          localStorage.setItem("menuOrder", JSON.stringify(currentMenus));
+          localStorage.setItem("categories", JSON.stringify(currentCategories));
+          return true;
+        }
+      } catch (err) {
+        console.warn("Failed to load menus from Cloudflare KV:", err);
+      }
+
+      try {
+        const res = await fetch(getLocalServerUrl("/api/menus"));
+        const data = await res.json();
+        if (data.success && data.menus && data.menus.length > 0) {
+          currentMenus = data.menus;
+          currentCategories = data.categories || [];
+          localStorage.setItem("menuOrder", JSON.stringify(currentMenus));
+          localStorage.setItem("categories", JSON.stringify(currentCategories));
+          return true;
+        }
+      } catch (err) {
+        console.warn("Failed to load menus from local server:", err);
+      }
+      return false;
+    }
+
+    async function saveMenusToServer() {
+      const payload = {
+        success: true,
+        menus: currentMenus,
+        categories: currentCategories
+      };
+
+      let successCount = 0;
+
+      // 1. Post to Cloudflare Pages (Production KV)
+      try {
+        const res = await fetch("https://springmoons.pages.dev/api/menus", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (result.success) {
+          successCount++;
+        }
+      } catch (err) {
+        console.error("Failed to save to Cloudflare Pages KV:", err);
+      }
+
+      // 2. Post to Local Server
+      try {
+        const res = await fetch(getLocalServerUrl("/api/menus"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (result.success) {
+          successCount++;
+        }
+      } catch (err) {
+        console.error("Failed to save to local backend server:", err);
+      }
+
+      // Also save to LocalStorage for immediate use
+      localStorage.setItem("menuOrder", JSON.stringify(currentMenus));
+      localStorage.setItem("categories", JSON.stringify(currentCategories));
+
+      if (successCount > 0) {
+        alert("메뉴 설정이 서버에 영구적으로 저장되었습니다!");
+        isMenuEditingMode = false;
+        document.getElementById("menu-editing-actions").classList.add("hidden");
+        renderMenus();
+        renderPanels();
+      } else {
+        alert("서버 저장에 실패했습니다. 네트워크 연결 상태를 확인해 주세요.");
+      }
+    }
+
     // ============================================
     // 초기화
     // ============================================
-    function initApp() {
+    async function initApp() {
       isDarkMode = loadDarkMode();
       isAuthenticated = loadAuthStatus();
       currentMenus = loadMenuOrder();
@@ -4409,9 +4599,93 @@
       renderMenus();
       renderPanels();
 
+      // Menu editing event handlers
+      const editModeBtn = document.getElementById("menu-edit-mode-btn");
+      const editingActions = document.getElementById("menu-editing-actions");
+      const saveBtn = document.getElementById("menu-save-btn");
+      const cancelBtn = document.getElementById("menu-cancel-btn");
+      const addMenuBtn = document.getElementById("add-new-menu-btn");
+      const addCatBtn = document.getElementById("add-new-category-btn");
+
+      if (editModeBtn && editingActions) {
+        editModeBtn.addEventListener("click", () => {
+          if (!isMenuEditingMode) {
+            const pwd = prompt("비밀번호를 입력하세요.");
+            if (pwd === "12") {
+              isMenuEditingMode = true;
+              editingActions.classList.remove("hidden");
+              renderMenus();
+              renderPanels();
+            } else if (pwd !== null) {
+              alert("비밀번호가 일치하지 않습니다.");
+            }
+          } else {
+            isMenuEditingMode = false;
+            editingActions.classList.add("hidden");
+            renderMenus();
+            renderPanels();
+          }
+        });
+      }
+
+      if (addMenuBtn) {
+        addMenuBtn.addEventListener("click", () => {
+          const newName = prompt("생성할 신규 메뉴명을 입력해 주세요:");
+          if (newName && newName.trim()) {
+            const newId = "custom-menu-" + Date.now();
+            currentMenus.push({
+              id: newId,
+              name: newName.trim(),
+              protected: false,
+              categoryId: null
+            });
+            renderMenus();
+          }
+        });
+      }
+
+      if (addCatBtn) {
+        addCatBtn.addEventListener("click", () => {
+          const newCatName = prompt("생성할 카테고리명을 입력해 주세요:");
+          if (newCatName && newCatName.trim()) {
+            const newId = "cat-" + Date.now();
+            currentCategories.push({
+              id: newId,
+              name: newCatName.trim(),
+              collapsed: false
+            });
+            renderMenus();
+          }
+        });
+      }
+
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+          saveMenusToServer();
+        });
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => {
+          currentMenus = loadMenuOrder();
+          currentCategories = loadCategories();
+          isMenuEditingMode = false;
+          editingActions.classList.add("hidden");
+          renderMenus();
+          renderPanels();
+        });
+      }
+
       updateClock();
       setInterval(updateClock, 1000);
       loadVisitorIP();
+
+      // Sync menu settings from server in background
+      const synced = await syncMenusFromServer();
+      if (synced) {
+        renderMenus();
+        renderPanels();
+      }
 
       // 실시간 편집 저장 이벤트 등록
       const main = document.getElementById("main-content");
@@ -11281,48 +11555,85 @@
           searchBtn.textContent = "검색 중...";
           resultsContainer.innerHTML = `<p class="col-span-full text-xs text-gray-400 text-center py-6 font-bold animate-pulse">실시간 메타 광고 라이브러리 데이터를 검색하고 있습니다...</p>`;
 
-          try {
-            const res = await fetch(getLocalServerUrl(`/api/meta-ad-library?query=${encodeURIComponent(query)}`));
-            const result = await res.json();
+          function getFrontendMockAdLibraryData(searchQuery) {
+            const queryLower = searchQuery.toLowerCase();
+            const isHospital = queryLower.includes('병원') || queryLower.includes('의원') || queryLower.includes('치과') || queryLower.includes('메디컬') || queryLower.includes('클리닉');
+            const isInterior = queryLower.includes('인테리어') || queryLower.includes('디자인') || queryLower.includes('시공') || queryLower.includes('리모델링');
 
-            if (!result.success) {
-              resultsContainer.innerHTML = `
-                <div class="col-span-full bg-red-50 dark-mode:bg-red-950/20 border border-red-200 dark-mode:border-red-900/40 rounded-xl p-4 text-xs font-bold text-red-855 dark-mode:text-red-300">
-                  ⚠️ 메타 광고 라이브러리 조회 실패: ${result.error}
-                </div>
-              `;
-              return;
+            if (isHospital && isInterior) {
+              return [
+                {
+                  page_name: "부산 메디컬디자인 연구소",
+                  publisher_platforms: ["facebook", "instagram"],
+                  ad_creative_bodies: ["부산/경남 병원·의원 인테리어 전문 브랜드!\n개원 동선 분석부터 인허가 소방 규격까지 원스톱 솔루션.\n원장님의 성공적인 첫걸음, 메디컬 스페이스 기획 포트폴리오를 무료로 받아보세요."],
+                  ad_delivery_start_time: "2026-06-15T00:00:00Z",
+                  page_id: "109283749"
+                },
+                {
+                  page_name: "디자인인디 (Design Indi)",
+                  publisher_platforms: ["facebook", "instagram", "messenger"],
+                  ad_creative_bodies: ["[치과/피부과/성형외과 개원 인테리어]\n의료 전문 면허 보유, 하자보수 100% 보증.\n트렌디하고 감각적인 디자인으로 공간의 품격을 높여드립니다.\n지금 간편 견적 상담을 신청해 보세요."],
+                  ad_delivery_start_time: "2026-06-28T00:00:00Z",
+                  page_id: "298374829"
+                },
+                {
+                  page_name: "인디컴퍼니 (INDE COMPANY)",
+                  publisher_platforms: ["facebook", "instagram"],
+                  ad_creative_bodies: ["학원/상가/병원 인테리어 투명하고 신속한 비교 견적 서비스!\n과도한 추가 비용 없이 설계 도면 그대로 책임 시공합니다.\n공식 포트폴리오 확인하고 부산 병원 인테리어 비용을 상담받으세요."],
+                  ad_delivery_start_time: "2026-07-02T00:00:00Z",
+                  page_id: "309283749"
+                }
+              ];
+            } else if (isInterior) {
+              return [
+                {
+                  page_name: "인디컴퍼니 상업공간 연구소",
+                  publisher_platforms: ["facebook", "instagram"],
+                  ad_creative_bodies: ["학원, 카페, 사무실, 병원 인테리어 전문 브랜드 [인디컴퍼니]\n상권 분석과 주 고객층 동선 설계로 매출을 올리는 공간을 디자인합니다.\n무료 방문 실측 및 3D 도면 무료 제공 프로모션 진행 중."],
+                  ad_delivery_start_time: "2026-06-20T00:00:00Z",
+                  page_id: "309283749"
+                },
+                {
+                  page_name: "부산 인테리어 파트너스",
+                  publisher_platforms: ["facebook", "instagram", "messenger"],
+                  ad_creative_bodies: ["상가 및 주거공간 리모델링 견적이 고민이신가요?\n정밀 설계와 친환경 자재 사용, 거품 없는 합리적인 평단가 시공.\n부산/울산/경남 전 지역 무료 견적 상담 진행 중!"],
+                  ad_delivery_start_time: "2026-06-25T00:00:00Z",
+                  page_id: "409384729"
+                },
+                {
+                  page_name: "디자인하우스 IND",
+                  publisher_platforms: ["facebook", "instagram"],
+                  ad_creative_bodies: ["머물고 싶은 공간을 만드는 차별화된 인테리어 디자인.\n사무실/오피스 인테리어 기획부터 완공까지 체계적인 공정 프로세스로 정직하게 시공합니다."],
+                  ad_delivery_start_time: "2026-07-05T00:00:00Z",
+                  page_id: "509283749"
+                }
+              ];
+            } else {
+              return [
+                {
+                  page_name: `${searchQuery} 전문 디자인`,
+                  publisher_platforms: ["facebook", "instagram"],
+                  ad_creative_bodies: [`${searchQuery} 공간 기획부터 시공까지 전문적인 프로세스로 완벽하게.\n공간 트렌드 분석을 통한 맞춤형 인테리어 솔루션을 경험해 보세요.`],
+                  ad_delivery_start_time: "2026-06-18T00:00:00Z",
+                  page_id: "609283749"
+                },
+                {
+                  page_name: `${searchQuery} 파트너스`,
+                  publisher_platforms: ["facebook", "instagram", "messenger"],
+                  ad_creative_bodies: [`고객 감동을 실현하는 합리적인 가격의 ${searchQuery} 서비스!\n지금 공식 채널을 통해 포트폴리오를 확인해 보세요.`],
+                  ad_delivery_start_time: "2026-07-01T00:00:00Z",
+                  page_id: "709283749"
+                }
+              ];
             }
+          }
 
-            resultsContainer.innerHTML = "";
-
-            if (result.isDemo) {
-              const noticeHtml = `
-                <div class="col-span-full bg-amber-50 dark-mode:bg-amber-950/20 border border-amber-200 dark-mode:border-amber-900/40 rounded-2xl p-4 text-xs font-bold text-amber-855 dark-mode:text-amber-300 mb-2">
-                  <p class="flex items-center gap-1.5 text-sm font-black text-amber-600 dark-mode:text-amber-400">
-                    ⚠️ 메타 라이브러리 API 권한 필요 (시뮬레이션 데이터 표시 중)
-                  </p>
-                  <p class="mt-1 font-medium leading-relaxed">
-                    실시간 광고 라이브러리 검색 API(ads_archive) 권한을 정상 승인 받으려면 메타 개발자 센터에서 **비즈니스 인증 및 신원 인증**이 필요합니다.
-                    (오류 원인: <span class="font-mono text-orange-500">${result.errorNotice || 'API access blocked'}</span>)
-                    <br>임시로 입력하신 검색어 <strong>"${query}"</strong>에 부합하는 시뮬레이션 데이터를 제공해 드립니다.
-                  </p>
-                  <div class="mt-2.5">
-                    <a href="https://www.facebook.com/ads/library/api" target="_blank" class="inline-block px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-extrabold text-[10px] transition-all shadow-sm">
-                      메타 Ad Library API 권한 신청 ↗
-                    </a>
-                  </div>
-                </div>
-              `;
-              resultsContainer.innerHTML += noticeHtml;
-            }
-
-            const ads = result.data || [];
-            if (ads.length === 0) {
+          function renderMetaAdList(adsList) {
+            if (adsList.length === 0) {
               resultsContainer.innerHTML += `<p class="col-span-full text-xs text-gray-400 text-center py-6 font-bold">대한민국 내에서 활성화된 광고 중 검색어와 매칭되는 광고를 찾지 못했습니다.</p>`;
               return;
             }
-            ads.forEach(ad => {
+            adsList.forEach(ad => {
               const platforms = ad.publisher_platforms || [];
               const platformBadges = platforms.map(p => `
                 <span class="px-2 py-0.5 bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300 text-[10px] rounded font-bold">${p}</span>
@@ -11352,12 +11663,61 @@
                 </div>
               `;
             });
-          } catch (e) {
-            resultsContainer.innerHTML = `
-              <div class="col-span-full bg-red-50 dark-mode:bg-red-950/20 border border-red-200 dark-mode:border-red-900/40 rounded-xl p-4 text-xs font-bold text-red-850 dark-mode:text-red-300">
-                ⚠️ 네트워크 오류가 발생했습니다.
+          }
+
+          function showSimulationResults(searchQuery, reason) {
+            resultsContainer.innerHTML = "";
+            const noticeHtml = `
+              <div class="col-span-full bg-amber-50 dark-mode:bg-amber-950/20 border border-amber-200 dark-mode:border-amber-900/40 rounded-2xl p-4 text-xs font-bold text-amber-855 dark-mode:text-amber-300 mb-2">
+                <p class="flex items-center gap-1.5 text-sm font-black text-amber-600 dark-mode:text-amber-400">
+                  ⚠️ 메타 라이브러리 API 권한 필요 (시뮬레이션 데이터 표시 중)
+                </p>
+                <p class="mt-1 font-medium leading-relaxed">
+                  실시간 광고 라이브러리 검색 API(ads_archive) 권한을 정상 승인 받으려면 메타 개발자 센터에서 **비즈니스 인증 및 신원 인증**이 필요합니다.
+                  (오류 원인: <span class="font-mono text-orange-500">${reason || 'API access blocked'}</span>)
+                  <br>임시로 입력하신 검색어 <strong>"${searchQuery}"</strong>에 부합하는 시뮬레이션 데이터를 제공해 드립니다.
+                </p>
+                <div class="mt-2.5">
+                  <a href="https://www.facebook.com/ads/library/api" target="_blank" class="inline-block px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-extrabold text-[10px] transition-all shadow-sm">
+                    메타 Ad Library API 권한 신청 ↗
+                  </a>
+                </div>
               </div>
             `;
+            resultsContainer.innerHTML += noticeHtml;
+            const mockAds = getFrontendMockAdLibraryData(searchQuery);
+            renderMetaAdList(mockAds);
+          }
+
+          try {
+            const res = await fetch(getLocalServerUrl(`/api/meta-ad-library?query=${encodeURIComponent(query)}`));
+            const result = await res.json();
+
+            if (!result.success) {
+              const errMsg = String(result.error || '');
+              if (errMsg.includes('blocked') || errMsg.includes('permission') || errMsg.includes('token') || errMsg.includes('설정되지 않았습니다')) {
+                showSimulationResults(query, errMsg);
+                return;
+              }
+              resultsContainer.innerHTML = `
+                <div class="col-span-full bg-red-50 dark-mode:bg-red-950/20 border border-red-200 dark-mode:border-red-900/40 rounded-xl p-4 text-xs font-bold text-red-855 dark-mode:text-red-300">
+                  ⚠️ 메타 광고 라이브러리 조회 실패: ${result.error}
+                </div>
+              `;
+              return;
+            }
+
+            resultsContainer.innerHTML = "";
+
+            if (result.isDemo) {
+              showSimulationResults(query, result.errorNotice);
+              return;
+            }
+
+            renderMetaAdList(result.data || []);
+
+          } catch (e) {
+            showSimulationResults(query, e.message || '로컬 서버 미연동');
           } finally {
             searchBtn.disabled = false;
             searchBtn.textContent = "광고 검색";
