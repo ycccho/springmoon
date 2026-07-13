@@ -166,18 +166,32 @@
     function getLast7DaysExcludingToday() {
       const now = new Date();
       const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-      const end = new Date(kstTime.getTime() - (24 * 60 * 60 * 1000));
-      const start = new Date(kstTime.getTime() - (7 * 24 * 60 * 60 * 1000));
+      const day = kstTime.getUTCDay(); // 0: Sun, 1: Mon, ..., 6: Sat
+      const dayOfWeek = day === 0 ? 7 : day; // 1: Mon, ..., 7: Sun
+      
+      const mondayOffset = -dayOfWeek - 6;
+      const sundayOffset = -dayOfWeek;
+      
+      const lastMonday = new Date(kstTime.getTime() + (mondayOffset * 24 * 60 * 60 * 1000));
+      const lastSunday = new Date(kstTime.getTime() + (sundayOffset * 24 * 60 * 60 * 1000));
+      
       const format = (d) => {
         const y = d.getUTCFullYear();
         const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
+        const dayStr = String(d.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${dayStr}`;
       };
       return {
-        start: format(start),
-        end: format(end)
+        start: format(lastMonday),
+        end: format(lastSunday)
       };
+    }
+
+    function getLast7DaysExcludingTodayRangeText() {
+      const range = getLast7DaysExcludingToday();
+      const s = new Date(range.start + "T00:00:00Z");
+      const e = new Date(range.end + "T00:00:00Z");
+      return `${s.getUTCMonth() + 1}/${s.getUTCDate()} ~ ${e.getUTCMonth() + 1}/${e.getUTCDate()}`;
     }
 
     function drawChartSVG(containerId, dataList, valueKey, strokeColor, fillColor) {
@@ -272,17 +286,24 @@
     function getLast7DaysExcludingToday() {
       const now = new Date();
       const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-      const end = new Date(kstTime.getTime() - (24 * 60 * 60 * 1000));
-      const start = new Date(kstTime.getTime() - (7 * 24 * 60 * 60 * 1000));
+      const day = kstTime.getUTCDay(); // 0: Sun, 1: Mon, ..., 6: Sat
+      const dayOfWeek = day === 0 ? 7 : day; // 1: Mon, ..., 7: Sun
+      
+      const mondayOffset = -dayOfWeek - 6;
+      const sundayOffset = -dayOfWeek;
+      
+      const lastMonday = new Date(kstTime.getTime() + (mondayOffset * 24 * 60 * 60 * 1000));
+      const lastSunday = new Date(kstTime.getTime() + (sundayOffset * 24 * 60 * 60 * 1000));
+      
       const format = (d) => {
         const y = d.getUTCFullYear();
         const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
+        const dayStr = String(d.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${dayStr}`;
       };
       return {
-        start: format(start),
-        end: format(end)
+        start: format(lastMonday),
+        end: format(lastSunday)
       };
     }
 
@@ -9568,7 +9589,10 @@
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
-                <button class="total-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-7-days">지난 7일</button>
+                <button class="total-period-btn px-4 py-1 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400 flex flex-col items-center justify-center text-center font-bold" data-period="last-7-days">
+                  <span>지난 7일</span>
+                  <span class="text-[9px] font-normal opacity-80 pointer-events-none mt-0.5">${getLast7DaysExcludingTodayRangeText()}</span>
+                </button>
                 <div class="flex items-center">
                   <button class="total-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-850 dark-mode:text-white shadow-sm" data-period="month-unit">1개월 단위</button>
                   <div id="total-month-nav-container" class="flex items-center gap-2 ml-2 border-l border-gray-300 dark-mode:border-gray-600 pl-2">
@@ -9668,7 +9692,10 @@
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
-                <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일</button>
+                <button class="meta-period-btn px-4 py-1 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400 flex flex-col items-center justify-center text-center font-bold" data-period="last-7-days">
+                  <span>지난 7일</span>
+                  <span class="text-[9px] font-normal opacity-80 pointer-events-none mt-0.5">${getLast7DaysExcludingTodayRangeText()}</span>
+                </button>
                 <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="this-month">이번달</button>
                 <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-month">지난달</button>
                 <button class="meta-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-3-months">최근3개월</button>
@@ -9793,7 +9820,10 @@
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
-                <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일</button>
+                <button class="google-period-btn px-4 py-1 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400 flex flex-col items-center justify-center text-center font-bold" data-period="last-7-days">
+                  <span>지난 7일</span>
+                  <span class="text-[9px] font-normal opacity-80 pointer-events-none mt-0.5">${getLast7DaysExcludingTodayRangeText()}</span>
+                </button>
                 <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="this-month">이번달</button>
                 <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-month">지난달</button>
                 <button class="google-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-3-months">최근3개월</button>
@@ -9897,7 +9927,10 @@
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
-                <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일</button>
+                <button class="imweb-period-btn px-4 py-1 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400 flex flex-col items-center justify-center text-center font-bold" data-period="last-7-days">
+                  <span>지난 7일</span>
+                  <span class="text-[9px] font-normal opacity-80 pointer-events-none mt-0.5">${getLast7DaysExcludingTodayRangeText()}</span>
+                </button>
                 <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="this-month">이번달</button>
                 <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-month">지난달</button>
                 <button class="imweb-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-3-months">최근3개월</button>
