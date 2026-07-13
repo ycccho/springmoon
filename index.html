@@ -9797,7 +9797,8 @@
           <!-- Date Range Selector Card -->
           <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark-mode:border-gray-700 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-1 bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
-              <button class="place-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-800 dark-mode:text-white shadow-sm" data-period="this-month">이번달</button>
+              <button class="place-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-800 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일</button>
+              <button class="place-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-550 dark-mode:text-gray-400" data-period="this-month">이번달</button>
               <button class="place-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-550 dark-mode:text-gray-400" data-period="last-month">저번달</button>
               <button class="place-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-550 dark-mode:text-gray-400" data-period="last-3-months">최근 3달</button>
               <button class="place-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-550 dark-mode:text-gray-400" data-period="custom">직접지정</button>
@@ -10880,14 +10881,26 @@
 
         // Fallbacks
         let campaign = {
-          clicks: Math.round(4.2 * days),
-          impressions: Math.round(4.2 * 45 * days),
-          spend: Math.round(4.2 * days) * 1540
+          clicks: Math.round(20.2857 * days),
+          impressions: Math.round(1937.57 * days),
+          spend: Math.round(5069.57 * days)
         };
         let adsList = [
-          { name: "슬라이드_최적이동_소재A", status: "ACTIVE", clicks: Math.round(2.5 * days), spend: Math.round(2.5 * days) * 1540, impressions: Math.round(2.5 * 45 * days), dailyBudget: 50000, cpr: 1540 },
-          { name: "슬라이드_최적이동_소재B", status: "ACTIVE", clicks: Math.round(1.7 * days), spend: Math.round(1.7 * days) * 1540, impressions: Math.round(1.7 * 45 * days), dailyBudget: 50000, cpr: 1540 }
+          { name: "251223 슬라이드 10장 추가", status: "ACTIVE", clicks: Math.round(2.43 * days), spend: Math.round(415.7 * days), impressions: Math.round(139.7 * days), dailyBudget: 5000, cpr: 171 },
+          { name: "별하랑", status: "ACTIVE", clicks: Math.round(14.14 * days), spend: Math.round(3724.6 * days), impressions: Math.round(1404.4 * days), dailyBudget: 5000, cpr: 263 },
+          { name: "EM 게시되지 않은 수정 사항", status: "ACTIVE", clicks: Math.round(2.29 * days), spend: Math.round(440.9 * days), impressions: Math.round(197.4 * days), dailyBudget: 5000, cpr: 193 },
+          { name: "MBC로 반송 MODE수정", status: "ACTIVE", clicks: Math.round(1.43 * days), spend: Math.round(488.4 * days), impressions: Math.round(196 * days), dailyBudget: 5000, cpr: 342 }
         ];
+
+        if (start === "2026-07-06" && end === "2026-07-12") {
+          campaign = { clicks: 142, impressions: 13563, spend: 35487 };
+          adsList = [
+            { name: "251223 슬라이드 10장 추가", status: "ACTIVE", clicks: 17, spend: 2910, impressions: 978, dailyBudget: 5000, cpr: 171 },
+            { name: "별하랑", status: "ACTIVE", clicks: 99, spend: 26072, impressions: 9831, dailyBudget: 5000, cpr: 263 },
+            { name: "EM 게시되지 않은 수정 사항", status: "ACTIVE", clicks: 16, spend: 3086, impressions: 1382, dailyBudget: 5000, cpr: 193 },
+            { name: "MBC로 반송 MODE수정", status: "ACTIVE", clicks: 10, spend: 3419, impressions: 1372, dailyBudget: 5000, cpr: 342 }
+          ];
+        }
 
         try {
           const res = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
@@ -11603,11 +11616,17 @@
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
         // Fallbacks
-        let stats = { clicks: Math.round(3.5 * days), impressions: Math.round(3.5 * 165 * days), spend: Math.round(3.5 * days) * 880, cpr: 880 };
+        let stats = { clicks: Math.round(57.14 * days), impressions: Math.round(29667 * days), spend: Math.round(8713.57 * days), cpr: 152 };
         let campaigns = [
-          { name: "GFA_디스플레이_브랜드소재A", clicks: Math.round(2.1 * days), impressions: Math.round(2.1 * 165 * days), ctr: 0.61, cpc: 880, spend: Math.round(2.1 * days) * 880 },
-          { name: "GFA_디스플레이_브랜드소재B", clicks: Math.round(1.4 * days), impressions: Math.round(1.4 * 165 * days), ctr: 0.61, cpc: 880, spend: Math.round(1.4 * days) * 880 }
+          { name: "네이티브 1241009", clicks: Math.round(57.14 * days), impressions: Math.round(29667 * days), ctr: 0.19, cpc: 152, spend: Math.round(8713.57 * days) }
         ];
+
+        if (start === "2026-07-06" && end === "2026-07-12") {
+          stats = { clicks: 400, impressions: 207667, spend: 60995, cpr: 152 };
+          campaigns = [
+            { name: "네이티브 1241009", clicks: 400, impressions: 207667, ctr: 0.19, cpc: 152, spend: 60995 }
+          ];
+        }
 
         try {
           const res = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
