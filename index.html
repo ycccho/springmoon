@@ -11516,6 +11516,7 @@
           googleImps += t.impressions || 0;
           googleSpend += ((t.clicks || 0) * (t.avgCpc || 0));
         });
+        googleSpend = Math.round(googleSpend);
 
         let naverClicks = 0, naverSpend = 0, naverImps = 0;
         let pcClicks = 0, pcSpend = 0, pcImps = 0;
