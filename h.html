@@ -41,15 +41,17 @@ DOCTYPE html>
     <div class="common-inner">
       <h1 id="logo"><a href="/h" class="ga4__GNB" ga4-text="logo_hd">INDECOMPANY</a></h1>
       <div class="header-actions hidden_pc">
+        <a href="/h-0" class="header-link-about ga4__GNB" ga4-text="about">소개</a>
         <a href="/h-1" class="header-link-portfolio ga4__GNB" ga4-text="project">포트폴리오</a>
-        <a href="/h-2" class="header-link-interior ga4__GNB" ga4-text="interior">인테리어</a>
+        <a href="/h-2" class="header-link-interior ga4__GNB" ga4-text="interior">게시판</a>
         <a href="/h-3" class="bt-header-contact ga4__GNB" ga4-text="contact">상담 신청</a>
       </div>
       <nav class="header-nav">
         <div class="nav-wrapper">
           <ul>
+            <li class="hidden_mo"><a href="/h-0" class="header-link-about ga4__GNB" ga4-text="about">소개</a></li>
             <li class="hidden_mo"><a href="/h-1" class="header-link-portfolio ga4__GNB" ga4-text="project">포트폴리오</a></li>
-            <li class="hidden_mo"><a href="/h-2" class="header-link-interior ga4__GNB" ga4-text="interior">인테리어</a></li>
+            <li class="hidden_mo"><a href="/h-2" class="header-link-interior ga4__GNB" ga4-text="interior">게시판</a></li>
           </ul>
           <a href="/h-3" class="bt-header-contact hidden_mo ga4__GNB" ga4-text="contact">상담 신청</a>
         </div>
@@ -325,60 +327,36 @@ DOCTYPE html>
 
     <section class="common-leadform" id="contact">
       <div class="common-inner">
-        <h2 class="common-title _left">
-          인디컴퍼니와
-          <div class="leadform_phrase">
-            <span class="phrase_mark">
-              <span class="phrase_mark__fill" aria-hidden="true"></span>
-              <span class="phrase_mark__word">합리적으로.</span>
-            </span>
-          </div>
-          인테리어 하세요!
+        <h2 class="common-title _left" style="line-height: 1.4;">
+          공간의 시작과 완성<br>
+          <strong style="font-weight: 800; font-size: 1.25em;">인디컴퍼니</strong>
         </h2>
         <div class="leadform_box">
           <p class="contact-form_notice" id="contact_form_notice" role="status" aria-live="polite" hidden></p>
           <form class="contact-form" id="main_contact_form" action="#" method="post" aria-label="문의 양식">
             <input type="hidden" name="fieldName" value="인디컴퍼니_무료상담" />
-            <div class="contact_box">
+                                    <div class="contact_box">
               <div class="contact_item contact_company">
-                <p><label><span class="label_title _mark">회사명</span><input type="text" name="your-company" placeholder="회사명을 입력해 주세요" required /></label></p>
-              </div>
-              <div class="contact_item contact_name">
-                <p><label><span class="label_title _mark">담당자 성함/직함</span><input type="text" name="your-name" placeholder="ex. 홍길동/대표" required /></label></p>
+                <p><label><span class="label_title _mark">업종</span><input type="text" name="your-subject" placeholder="개원예정 진료과목을 입력해주세요." required /></label></p>
               </div>
               <div class="contact_item fld_tel">
-                <p><label><span class="label_title _mark">담당자 연락처</span><input type="tel" name="your-tel" placeholder="연락처를 입력해 주세요" required /></label></p>
+                <p><label><span class="label_title _mark">연락처</span><input type="tel" name="your-tel" placeholder="연락받으실 연락처를 입력해 주세요" required /></label></p>
               </div>
               <div class="contact_item fld_mail">
-                <p><label><span class="label_title _mark">업무 이메일</span><input type="email" name="your-email" autocomplete="email" inputmode="email" placeholder="이메일을 입력해 주세요" required /></label></p>
+                <p><label><span class="label_title _mark">공사 지역</span><input type="text" name="your-location" placeholder="인테리어 진행 예정 지역을 입력해 주세요" required /></label></p>
               </div>
               <div class="contact_item fld_size">
-                <p><label><span class="label_title _mark">공사 필요 면적</span><span class="fld_unit"><input type="number" name="your-scale-es" min="1" placeholder="ex. 100" required /><u class="fld_txt">평</u></span></label></p>
-              </div>
-              <div class="contact_item fld_pick">
-                <p>
-                  <span class="label_title _mark">상담 희망 영역<small>중복 선택 가능</small></span>
-                  <span class="check_group">
-                    <label><input type="checkbox" name="your-checkbox[]" value="교육 인테리어" /><span>교육 인테리어</span></label>
-                    <label><input type="checkbox" name="your-checkbox[]" value="사무실 인테리어" /><span>사무실 인테리어</span></label>
-                    <label><input type="checkbox" name="your-checkbox[]" value="병원 인테리어" /><span>병원 인테리어</span></label>
-                    <label><input type="checkbox" name="your-checkbox[]" value="상업 인테리어" /><span>상업 인테리어</span></label>
-                    <label><input type="checkbox" name="your-checkbox[]" value="3D 인테리어 디자인" /><span>3D 인테리어 디자인</span></label>
-                  </span>
-                </p>
+                <p><label><span class="label_title _mark">공사 면적</span><span class="fld_unit"><input type="number" name="your-scale-es" min="1" placeholder="면적(평)을 숫자만 입력해주세요." /><u class="fld_txt">평</u></span></label></p>
               </div>
               <footer class="lead_agree_form checked_all">
                 <h4 class="check_round"><label><input type="checkbox" checked class="checked" /><span>약관에 모두 동의합니다.</span></label></h4>
                 <div class="contact_agree contact_personal">
                   <p><label><input type="checkbox" name="your-personal" value="1" checked /><span>상담을 위한 <a href="https://indecompany2.mycafe24.com/privacy" target="_blank" rel="noopener">개인정보 수집과 이용</a> 동의 <b class="c_required">(필수)</b></span></label></p>
                 </div>
-                <div class="contact_agree contact_marketing">
-                  <p><label><input type="checkbox" name="check-marketing" value="true" checked /><span>할인 등 혜택 안내를 위한 <a href="javascript:;">마케팅 활용</a> 동의 <b class="c_option">(선택)</b></span></label></p>
-                </div>
               </footer>
             </div>
             <div class="contact_submit btn_group">
-              <p><button type="submit" class="bt-base"><b>무료 상담 신청하기</b></button></p>
+              <p><button type="submit" class="bt-base"><b>무료실측 신청하기</b></button></p>
             </div>
           </form>
         </div>
