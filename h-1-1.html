@@ -214,6 +214,57 @@ DOCTYPE html>
       padding: 0;
       cursor: pointer;
     }
+
+    /* Accordion Card Styles */
+    .accordion-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background-color: #fff;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: box-shadow 0.2s;
+    }
+    .accordion-card:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background-color: #f9fafb;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #1f2937;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+    .accordion-header:hover {
+      background-color: #f3f4f6;
+    }
+    .accordion-icon {
+      font-size: 0.85rem;
+      transition: transform 0.2s;
+      color: #6b7280;
+    }
+    .accordion-card.active .accordion-icon {
+      transform: rotate(180deg);
+    }
+    .accordion-content {
+      display: none;
+      padding: 20px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #4b5563;
+      border-top: 1px solid #e5e7eb;
+      background-color: #fff;
+      white-space: pre-wrap;
+    }
+    .accordion-card.active .accordion-content {
+      display: block;
+    }
   </style>
 </head>
 <body class="page-portfolio-detail">
@@ -291,6 +342,9 @@ DOCTYPE html>
 
                 <div class="portfolio_detail_copy">
           <hr><h2>시공 계획</h2><p><img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43c5deab590.webp" alt="평면도"></p><h3><br></h3><h3>1. 진료 과목의 특성을 반영한 120평대 공간 기획</h3><p>부산 용호동 병원 인테리어 프로젝트는 내과와 안과가 126평이라는 대형 공간을 함께 영위하는 공동개원 사례입니다. 원장님께서 요청하신 사항으로 두 진료 과목의 환자군이 겹치면서도 대기 공간이 혼잡해지지 않도록, 접수처를 중심으로 뻗어나가는 효율적인 'Y자형 동선'을 설계하였으며, 원장님과 방문자 모두의 이동 피로도를 최소화하는 데 집중했습니다.</p><p><br></p><h3>2. 브랜드 아이덴티티와 심리적 안정감을 결합한 디자인</h3><p>공간의 첫인상을 결정하는 대기실은 전체적으로 깨끗하고 확장감이 느껴지는 화이트 톤을 베이스로 마감하였습니다. 자칫 차가워 보일 수 있는 병원의 이미지를 상쇄하기 위해, 병원의 공식 브랜드 컬러인 '연한 블루(Light Blue)'를 파사드와 인포메이션 데스크에 포인트 요소로 매치하여 전문적이고 신뢰감 있는 아이덴티티를 명확히 표현했습니다.</p><p>여기에 특유의 곧고 반듯한 '사각 모양'의 입체적인 조형물들을 천장과 벽면에 배치하여 공간의 밋밋함을 없애고 모던한 포인트를 더했습니다.</p><p><br></p><h3>3. 환자를 배려하는 디테일, 조명과 자재의 선택</h3><p>시력 검사와 진료가 잦은 안과의 특성을 고려하여 눈부심을 유발하는 직접적인 직부등 사용을 최소화했습니다. 대신 시선이 머무는 곳곳에 은은한 전구색(3000K) 간접조명을 배치하고, 대기 공간의 벽면을 따뜻한 질감의 우드(Wood) 템바보드 마감재로 시공하였습니다. 이는 내원하는 환자분들의 시각적 피로를 덜고 심리적인 긴장감을 완화해 주는 치유의 공간으로 기능하도록 의도한 결과입니다.</p><p>철저한 자재 선정과 마감 퀄리티를 통해, 클라이언트의 요청사항과 병원이라는 공간의 목적성에 완벽히 부합하는 쾌적한 의료 환경을 완성하였습니다.</p><hr><h2>디자인 컨셉</h2><p><img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43d1e4209ea.webp" alt="디자인컨셉"></p><hr><p><br></p><h2>인테리어 준공 촬영이미지</h2><p><img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43c609d3488.webp" alt="내과 대기실"><img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43c61cb98b5.webp" alt="내과 대기실2"></p><hr><p><br></p><h2>추가 페이지뷰</h2><p><br></p><p>※ <a href="https://blog.naver.com/dudu8882/224324029094" rel="noopener noreferrer" target="_blank">고화질이미지 보러 가기 - 인디컴퍼니 공식블로그</a></p><p><br></p><p><br></p><h2>병원인테리어 팁</h2><ul><li>대형 평수의 공동개원 시에는 접수처를 중심으로 진료 과목별 동선을 분리하여 환자의 혼잡도를 낮추고 의료진의 이동 효율을 극대화해야 합니다.</li><li>화이트 톤의 베이스에 브랜드 컬러와 조형미 있는 포인트를 활용하면 병원의 전문적인 신뢰감과 고유한 아이덴티티를 효과적으로 표현할 수 있습니다.</li><li>안과처럼 눈의 피로도가 높은 진료 과목은 직접 조명 대신 은은한 간접 조명을 적절히 배치하여 환자의 시각적 편안함을 최우선으로 고려해야 합니다.</li><li>우드 소재나 템바보드 같은 따뜻한 질감의 마감재를 대기 공간에 적용하면 병원 특유의 차가운 이미지를 상쇄하고 환자에게 안정감을 제공합니다.</li><li>천장이나 벽면에 입체적인 구조적 요소를 더하면 대형 공간에서 느껴질 수 있는 단조로움을 탈피하고 공간의 입체감과 세련미를 높일 수 있습니다.</li><li>디스플레이 모니터 위치 선정도 중요합니다. 간혹 동선을 방해하거나, 대기자가 볼 수 없는 각도로 설치되지 않도록 설치되어야 합니다.</li></ul><p><br></p>        </div>
+        </div>
+        <!-- 접힘/펼침 카드 영역 (Accordion Cards) -->
+        <div class="portfolio_detail_accordions" id="portfolio-accordions" style="margin-top: 40px; margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; padding: 0 20px;"></div>
         <!-- 수정하기 버튼 -->
         <div style="text-align: center; margin-top: 60px; margin-bottom: 60px;">
           <button type="button" id="open-edit-btn" class="bt-base bt-solid" style="background-color: #f05e21; color: white; border: none; padding: 12px 30px; font-weight: 700; cursor: pointer; border-radius: 4px;">수정하기</button>
@@ -394,6 +448,15 @@ DOCTYPE html>
           <div class="form-group">
             <label class="form-label">프로젝트 포인트</label>
             <textarea id="edit-points" class="form-input form-textarea" rows="4"></textarea>
+          </div>
+
+          <div class="form-group" style="margin-top: 24px;">
+            <label class="form-label" style="font-size: 1.1rem; font-weight: 700; color: #111827;">접힘/펼침 카드</label>
+            <div class="form-hint">접힌 상태(디폴트)로 카드를 생성하며, 클릭 시 카드가 펼쳐져 기입한 내용을 보여줍니다.</div>
+            <div id="accordionsRepeater" style="margin-bottom: 12px;">
+              <!-- Dynamic accordion rows will go here -->
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="accordionAdd">카드 추가</button>
           </div>
 
           <div class="form-group">
@@ -510,9 +573,35 @@ DOCTYPE html>
           if (data.body) {
             document.querySelector('.portfolio_detail_copy').innerHTML = data.body;
           }
+
+          // Load accordions
+          if (data.accordions && Array.isArray(data.accordions)) {
+            renderAccordions(data.accordions);
+          }
         } catch (e) {
           console.error("Failed to parse saved state:", e);
         }
+      }
+
+      function renderAccordions(list) {
+        var container = document.getElementById('portfolio-accordions');
+        if (!container) return;
+        container.innerHTML = '';
+        list.forEach(function(item) {
+          var card = document.createElement('div');
+          card.className = 'accordion-card';
+          card.innerHTML = 
+            '<div class="accordion-header">' +
+              '<span>' + item.title + '</span>' +
+              '<span class="accordion-icon">▼</span>' +
+            '</div>' +
+            '<div class="accordion-content">' + item.content + '</div>';
+          
+          card.querySelector('.accordion-header').addEventListener('click', function() {
+            card.classList.toggle('active');
+          });
+          container.appendChild(card);
+        });
       }
 
       loadSavedState();
@@ -558,6 +647,30 @@ DOCTYPE html>
         }
       });
 
+      // Accordion Repeater Helpers
+      var accordionsContainer = document.getElementById('accordionsRepeater');
+      function addAccordionRow(title, content) {
+        var row = document.createElement('div');
+        row.className = 'accordion-row';
+        row.style.cssText = 'display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start;';
+        row.innerHTML = 
+          '<input type="text" class="form-input accordion-row-title" style="flex: 1;" value="' + (title || '') + '" placeholder="카드 제목">' +
+          '<textarea class="form-input form-textarea accordion-row-content" style="flex: 2; height: 60px;" placeholder="카드 본문 내용">' + (content || '') + '</textarea>' +
+          '<button type="button" class="btn btn-outline btn-sm accordion-remove" style="align-self: center;">삭제</button>';
+        accordionsContainer.appendChild(row);
+      }
+
+      document.getElementById('accordionAdd').addEventListener('click', function() {
+        addAccordionRow('', '');
+      });
+
+      accordionsContainer.addEventListener('click', function(e) {
+        if (e.target.matches('.accordion-remove')) {
+          var row = e.target.closest('.accordion-row');
+          if (row) row.remove();
+        }
+      });
+
       // Modal open/close bindings
       var modal = document.getElementById('edit-modal');
       var openBtn = document.getElementById('open-edit-btn');
@@ -587,6 +700,20 @@ DOCTYPE html>
 
         // Populate body
         quill.root.innerHTML = document.querySelector('.portfolio_detail_copy').innerHTML;
+
+        // Populate accordions in repeater
+        accordionsContainer.innerHTML = '';
+        var saved = localStorage.getItem('portfolio_h_1_1_data');
+        if (saved) {
+          try {
+            var data = JSON.parse(saved);
+            if (data.accordions && Array.isArray(data.accordions)) {
+              data.accordions.forEach(function(item) {
+                addAccordionRow(item.title, item.content);
+              });
+            }
+          } catch(e) {}
+        }
 
         modal.style.display = 'flex';
       });
@@ -641,13 +768,25 @@ DOCTYPE html>
         var bodyHTML = quill.root.innerHTML;
         document.querySelector('.portfolio_detail_copy').innerHTML = bodyHTML;
 
+        // Collect accordions from repeater and render
+        var accordions = [];
+        accordionsContainer.querySelectorAll('.accordion-row').forEach(function(row) {
+          var t = row.querySelector('.accordion-row-title').value.trim();
+          var c = row.querySelector('.accordion-row-content').value.trim();
+          if (t || c) {
+            accordions.push({ title: t, content: c });
+          }
+        });
+        renderAccordions(accordions);
+
         // Save to localStorage
         var state = {
           title: title,
           subtitle: subtitle,
           specs: specs,
           points: points,
-          body: bodyHTML
+          body: bodyHTML,
+          accordions: accordions
         };
         localStorage.setItem('portfolio_h_1_1_data', JSON.stringify(state));
 
