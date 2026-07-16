@@ -116,56 +116,10 @@ if(window.wcs) {
     <div class="headerTop">
       <div class="inner w1400">
         <div class="flexBox">
-          <div class="operationBox">
-            <dl>
-              <dt class="br_close1024">
-                <img src="https://www.uenvsurgery.com/assets/img/main/ic_operation.png" alt="주요실적 아이콘" />
-                <span>수술실적</span><span class="date">26.06.30 기준</span>
-              </dt>
-              <dd>
-                <ul>
-                  <li>
-                    <div class="name">복강경수술<span>(담낭, 맹장, 탈장)</span></div>
-                    <div class="count"><span>1</span><span>8</span><span>9</span><span>2</span>건</div>
-                  </li>
-                  <li>
-                    <div class="name">유방질환수술<span>(맘모톰/여성형유방증/부유방)</span></div>
-                    <div class="count"><span>1</span><span>5</span><span>1</span><span>5</span>건</div>
-                  </li>
-                </ul>
-              </dd>
-            </dl>
           </div>
-          <h1 class="logo">
-            <a href="https://www.uenvsurgery.com" class="link__block"><img src="https://www.uenvsurgery.com/assets/img/common/logo_250326.png"
-                alt="선두외과의원"></a>
-          </h1>
-          <div class="snsLoginBox">
-            <ul class="login">
-                            <li>
-                <a href="/bbs/login.php" class="link__block color1">
-                  <p>로그인</p>
-                </a>
-              </li>
-              <li>
-                <a href="/bbs/register.php" class=" h-social-box link__block">
-                  <p>회원가입</p>
-                </a>
-              </li>
-                          </ul>
-            <ul class="sns">
-              <li class="mobileMenuBt" onclick="hMenuOnOff(0, 'hidden',1)">
-                <button type="button">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
       </div>
     </div>
+    
     
     <div class="headerGnb">
       <div class="inner w1400">
@@ -195,10 +149,17 @@ if(window.wcs) {
                 <li class="dep2-con"><a href="/c-2-5" class="dep2 link__block">기타 클리닉</a></li>
               </ul>
             </li>
+            <li class="dep1-con">
+              <a href="/c-3" class="dep1 link__block">게시판</a>
+              <ul class="dep2-wrap">
+                <li class="dep2-con"><a href="/c-3-1" class="dep2 link__block">문의하기</a></li>
+              </ul>
+            </li>
           </ul>
         </nav>
       </div>
     </div>
+    
     
     <nav class="solo_dep2Nav">
       <div class="w1400">
@@ -227,6 +188,12 @@ if(window.wcs) {
               <li class="solo_dep2-con"><a href="/c-2-5" class="solo_dep2">기타 클리닉</a></li>
             </ul>
           </li>
+          <li class="solo_dep1-con">
+            <p class="solo_dep1">게시판</p>
+            <ul class="solo_dep2-wrap">
+              <li class="solo_dep2-con"><a href="/c-3-1" class="solo_dep2">문의하기</a></li>
+            </ul>
+          </li>
         </ul>
       </div>
     </nav>
@@ -237,8 +204,10 @@ if(window.wcs) {
           <span></span>
         </button>
         
+        
+        
         <div class="mobile__logo">
-          <img src="https://www.uenvsurgery.com/assets/img/common/logo.png" alt="선두외과">
+          <img src="/cc.png" alt="선두외과" style="max-height: 50px; width: auto;">
         </div>
         <div class="loginArea">
           <div class="nameArea">
@@ -273,6 +242,12 @@ if(window.wcs) {
                 <li class="mdep2-con"><a href="/c-2-3" class="mdep2 link__block">탈장 클리닉</a></li>
                 <li class="mdep2-con"><a href="/c-2-4" class="mdep2 link__block">하지정맥류 클리닉</a></li>
                 <li class="mdep2-con"><a href="/c-2-5" class="mdep2 link__block">기타 클리닉</a></li>
+              </ul>
+            </li>
+            <li class="modep1-con">
+              <a href="/c-3" class="modep1 link__block">게시판</a>
+              <ul class="mdep2-wrap">
+                <li class="mdep2-con"><a href="/c-3-1" class="mdep2 link__block">문의하기</a></li>
               </ul>
             </li>
           </ul>
@@ -311,7 +286,7 @@ if(window.wcs) {
           </div>
           <div class="callAr">
             <p>
-              주간 응급수술문의<a href="tel:02-939-2022"> <b>02.939.2022</b></a><br class="br_on1400" /> <span class="time">오전
+              주간 응급수술문의<a href="tel:"> <b></b></a><br class="br_on1400" /> <span class="time">오전
                 9시 ~ 오후 5시</span><br class="br_on768" />
               <span>※ 당일수술 여부는 환자의 상태에 따라 다를 수 있습니다. </span>
             </p>
@@ -571,7 +546,7 @@ if(window.wcs) {
   <div class="inner w1400">
     <div class="mainTitleAr">
       <p class="eng">Seondu Surgery</p>
-      <p class="title"><span class="color1">UENV</span> : system</p>
+      <p class="title"><span class="color1"></span> : system</p>
       <p class="text1">신속한 치료로 환자의 <b>안전과 편의를 우선</b>합니다. <br />
         <b>진단부터 수술까지 <span class="color1" style="font-weight: 600;">"당일 수술 센터"</span></b>
       </p>
@@ -648,53 +623,10 @@ if(window.wcs) {
 </article>
 
 
-<article class="mainDoctors">
-  <h3 class="blind">메인 의료진 소개</h3>
-  <div class="inner w1400">
-    <div class="mainTitleAr">
-      <p class="eng">Seondu Surgery</p>
-      <p class="title"><span class="color1">SPECIALIST</span> doctor’s</p>
-      <p class="text1">불필요한 시술, 검사 등 과잉 진료 없는 환자중심의 시스템 <br />
-        <b><span>정직하고 우수한</span> 외과 전문의 2인 진료</b>
-      </p>
-    </div>
-  </div>
-  <div class="doctorBox">
-    <ul class="mainDoctorsUl">
-      <li>
-        <div class="imgAr"><img src="https://www.uenvsurgery.com/assets/img/main/mainDoctors_doctor1.png" alt="이승근 대표원장"></div>
-        <div class="textAr right">
-          <p class="text1">외과 전문의, 의학박사</p>
-          <p class="text2"><span>대표원장</span> 이 승 근</p>
-          <hr />
-          <ul class="careerUl">
-            <li>유방질환 분과 전문의<br />前 담소유병원 원장</li>
-          </ul>
-          <p class="text3" style="margin-top:1.25rem;">[주요 진료]</p>
-          <ul class="careerUl">
-            <li>유방양성종양 / 맘모톰<br />여성형유방증 / 부유방 / 유두교정<Br />하지정맥류(베나실/플레보그립) </li>
-          </ul>
-        </div>
-      </li>
-      <li>
-        <div class="textAr ar2">
-          <p class="text1">외과 전문의</p>
-          <p class="text2">김 명 진 <span>대표원장</span></p>
-          <hr />
-          <ul class="careerUl">
-            <li>이화여자대학교 외과 외래교수<br />前 담소유병원 원장</li>
-          </ul>
-          <p class="text3" style="margin-top:1.25rem;">[주요 진료]</p>
-          <ul class="careerUl">
-            <li>담석증 / 담낭염 / 맹장염 / 단일통로 복강경<br />배꼽탈장 / 서혜부탈장 / 복막내접근술(TAPP)<br />하지정맥류 (베나실/플레보그립)</li>
-          </ul>
-        </div>
-        <div class="imgAr"><img src="https://www.uenvsurgery.com/assets/img/main/mainDoctors_doctor2.png" alt="김명진 대표원장"></div>
-      </li>
-    </ul>
-    <div class="moreBt"><a href="/c-1-2" class="link__block">VIEW &nbsp;&nbsp;&nbsp;+</a></div>
-  </div>
-</article>
+
+<div class="mainDoctors-image-container" style="text-align: center; padding: 60px 0; background-color: #f9fafb;">
+  <img src="/ccc.png" alt="의료진 소개" style="max-width: 100%; height: auto;">
+</div>
 <article class="mainSafety paddingArticle">
   <h3 class="blind">의료환경 소개 영역</h3>
   <div class="inner w1400">
@@ -978,7 +910,7 @@ if(window.wcs) {
   <div class="inner">
     <a href="/c-1-4" class="link__block">
       <div class="mainTitleAr">
-        <p class="title noTop">UENV <span class="color2">Interior</span></p>
+        <p class="title noTop"> <span class="color2">Interior</span></p>
         <p class="eng ver2">Seondu Surgery</p>
         <p class="text2">선두외과의 감각적인 인테리어와 환자분들을 위한 <br />
           깨끗하고 프라이빗한 안락한 공간을 제공합니다.
@@ -1147,7 +1079,7 @@ $('.cooperation__slide').slick({
           <span class="iconAr"><img src="https://www.uenvsurgery.com/assets/img/main/mainComingMap_icon1.png" alt="지도마커아이콘"></span>
           <div class="infor">
             <p class="text1"><b>오시는 길</b> <a class="coming" href="/c-1-7">자세히보기 +</a></p>
-            <p class="text2">서울 노원구 동일로 215길 2 하나빌딩 5,6층 <br />
+            <p class="text2">서울 노원구 노해로 456 동방빌딩4층 <br />
               <b class="color1">노원역 6번출구</b> 200m, 도보 3분
             </p>
           </div>
@@ -1157,7 +1089,7 @@ $('.cooperation__slide').slick({
         <div class="cen">
           <span class="iconAr"><img src="https://www.uenvsurgery.com/assets/img/main/mainComingMap_icon2.png" alt="전화기아이콘"></span>
           <div class="infor">
-            <p class="text1"><b>진료문의</b> <a href="tel:029392022">02.939.2022</a></p>
+            <p class="text1"><b>진료문의</b> <a href="tel:"></a></p>
           </div>
         </div>
       </div>
@@ -1265,7 +1197,10 @@ function mapKaKao(lat, lon, address, id) {
   <!-- 하단 시작 { -->
   <footer id="footer" class="footer">
     <div class="footer-inner w1400">
-      <div class="footer__logo"><img src="https://www.uenvsurgery.com/assets/img/common/logo.png" alt=""></div>
+      
+      <div class="footer__logo">
+        <img src="/cc.png" alt="선두외과" style="max-height: 50px; width: auto;">
+      </div>
       <ul class="footer__menu">
         <li><a href="/sub/etc/privacy.php">개인정보처리방침</a></li>
         <li><a href="/sub/etc/service.php">이용약관</a></li>
@@ -1273,8 +1208,8 @@ function mapKaKao(lat, lon, address, id) {
         <li><a href="/c-1-8">비급여항목</a></li>
       </ul>
       <div class="footer__detail">
-        선두외과의원<span class="dsIB">대표자 : 이승근, 김명진</span><br class="br_on768" /><span class="dsIB ds768">사업자등록번호 : 508-14-51863</span><br class="br_on1400" /><span class="dsIB ds1400">서울 노원구 동일로 215길 2 하나빌딩 5,6층</span><br />
-        TEL : 02.939.2022<span class="dsIB">FAX : 02.939.2023</span>
+        선두외과의원<span class="dsIB">대표자 : , </span><br class="br_on768" /><span class="dsIB ds768">사업자등록번호 : </span><br class="br_on1400" /><span class="dsIB ds1400">서울 노원구 노해로 456 동방빌딩4층</span><br />
+        TEL : <span class="dsIB">FAX : </span>
         <br>
         <p>Copyright 2022 U en V Surgery. all rights reserved.</p>
       </div>
