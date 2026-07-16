@@ -473,6 +473,49 @@ DOCTYPE html>
       // Sync hex text and color picker
       var colorPicker = document.getElementById('custom-color-picker');
       var colorHex = document.getElementById('custom-color-hex');
+      // Load saved state from localStorage if exists (Requirement 7)
+      function loadSavedState() {
+        var saved = localStorage.getItem('portfolio_h_1_1_data');
+        if (!saved) return;
+        try {
+          var data = JSON.parse(saved);
+          if (data.title) {
+            document.querySelector('.portfolio_detail_title').textContent = data.title;
+          }
+          if (data.subtitle) {
+            document.querySelector('.portfolio_detail_subtitle').textContent = data.subtitle;
+          }
+          
+          if (data.specs && Array.isArray(data.specs)) {
+            var detailsContainer = document.querySelector('.portfolio_detail_specs');
+            detailsContainer.innerHTML = '';
+            data.specs.forEach(function(spec) {
+              var div = document.createElement('div');
+              div.className = 'portfolio_detail_spec';
+              div.innerHTML = '<dt>' + spec.label + '</dt><dd>' + spec.value + '</dd>';
+              detailsContainer.appendChild(div);
+            });
+          }
+
+          if (data.points && Array.isArray(data.points)) {
+            var pointsContainer = document.querySelector('.portfolio_detail_points_list');
+            pointsContainer.innerHTML = '';
+            data.points.forEach(function(p) {
+              var li = document.createElement('li');
+              li.textContent = p;
+              pointsContainer.appendChild(li);
+            });
+          }
+
+          if (data.body) {
+            document.querySelector('.portfolio_detail_copy').innerHTML = data.body;
+          }
+        } catch (e) {
+          console.error("Failed to parse saved state:", e);
+        }
+      }
+
+      loadSavedState();
       
       colorPicker.addEventListener('input', function() {
         colorHex.value = colorPicker.value.toUpperCase();
@@ -557,11 +600,15 @@ DOCTYPE html>
 
       // Save Action
       saveBtn.addEventListener('click', function() {
-        // Update DOM Title and Subtitle
-        document.querySelector('.portfolio_detail_title').textContent = document.getElementById('edit-title').value;
-        document.querySelector('.portfolio_detail_subtitle').textContent = document.getElementById('edit-desc').value;
+        var title = document.getElementById('edit-title').value;
+        var subtitle = document.getElementById('edit-desc').value;
 
-        // Update DOM Specs
+        // Update DOM Title and Subtitle
+        document.querySelector('.portfolio_detail_title').textContent = title;
+        document.querySelector('.portfolio_detail_subtitle').textContent = subtitle;
+
+        // Update DOM Specs and build array
+        var specs = [];
         var detailsContainer = document.querySelector('.portfolio_detail_specs');
         detailsContainer.innerHTML = '';
         specsContainer.querySelectorAll('.repeater-row').forEach(function(row) {
@@ -572,10 +619,12 @@ DOCTYPE html>
             div.className = 'portfolio_detail_spec';
             div.innerHTML = '<dt>' + lbl + '</dt><dd>' + val + '</dd>';
             detailsContainer.appendChild(div);
+            specs.push({ label: lbl, value: val });
           }
         });
 
         // Update DOM Points
+        var points = [];
         var pointsContainer = document.querySelector('.portfolio_detail_points_list');
         pointsContainer.innerHTML = '';
         var pointsText = document.getElementById('edit-points').value;
@@ -584,11 +633,23 @@ DOCTYPE html>
             var li = document.createElement('li');
             li.textContent = line.trim();
             pointsContainer.appendChild(li);
+            points.push(line.trim());
           }
         });
 
         // Update DOM Body Content
-        document.querySelector('.portfolio_detail_copy').innerHTML = quill.root.innerHTML;
+        var bodyHTML = quill.root.innerHTML;
+        document.querySelector('.portfolio_detail_copy').innerHTML = bodyHTML;
+
+        // Save to localStorage
+        var state = {
+          title: title,
+          subtitle: subtitle,
+          specs: specs,
+          points: points,
+          body: bodyHTML
+        };
+        localStorage.setItem('portfolio_h_1_1_data', JSON.stringify(state));
 
         closeModal();
       });
