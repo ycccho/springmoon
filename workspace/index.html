@@ -48,12 +48,31 @@
     /* WYSIWYG Rich Editor & Content View styles */
     #rich-editor-content img, #modal-view-content img {
       max-width: 100%;
-      height: auto;
       border-radius: 16px;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
       margin: 20px auto;
       display: block;
       border: 1px solid #e5e2d9;
+      cursor: pointer;
+    }
+    #rich-editor-content table, #modal-view-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #ffffff;
+    }
+    #rich-editor-content th, #modal-view-content th,
+    #rich-editor-content td, #modal-view-content td {
+      border: 1px solid #d1d5db;
+      padding: 10px 14px;
+      text-align: left;
+      min-height: 40px;
+      font-size: 0.95rem;
+    }
+    #rich-editor-content hr, #modal-view-content hr {
+      border: 0;
+      border-top: 2px dashed #e5e2d9;
+      margin: 24px 0;
     }
     #rich-editor-content p, #modal-view-content p {
       margin-bottom: 12px;
@@ -312,11 +331,36 @@
             
             <div class="h-6 w-px bg-gray-300 mx-1"></div>
             
+            <button type="button" onclick="insertTableDialog()" class="px-2.5 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1" title="표 삽입">
+              📅 표 삽입
+            </button>
+            <button type="button" onclick="formatDoc('insertHorizontalRule')" class="px-2.5 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1" title="가로줄 추가">
+              ➖ 가로줄
+            </button>
+            
+            <div class="h-6 w-px bg-gray-300 mx-1"></div>
+
             <button type="button" onclick="document.getElementById('editor-img-file').click()" class="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1">
               🖼️ 통계 이미지 추가
             </button>
             <input type="file" id="editor-img-file" accept="image/*" class="hidden" onchange="handleEditorImageFile(this)" />
           </div>
+          
+          <!-- Image Resize Control Panel -->
+          <div id="image-resize-bar" class="hidden flex flex-wrap items-center gap-3 p-2.5 bg-amber-50 border border-gray-300 text-xs font-semibold">
+            <span class="text-amber-800 font-bold">🖼️ 선택된 이미지 크기 조절:</span>
+            <div class="flex items-center gap-1">
+              <label class="text-gray-500 font-bold">가로(width):</label>
+              <input type="text" id="img-width-input" class="w-20 px-2 py-1 border border-gray-300 rounded bg-white text-gray-800 text-xs font-semibold focus:outline-none" placeholder="예: 100% 또는 300px">
+            </div>
+            <div class="flex items-center gap-1">
+              <label class="text-gray-500 font-bold">세로(height):</label>
+              <input type="text" id="img-height-input" class="w-20 px-2 py-1 border border-gray-300 rounded bg-white text-gray-800 text-xs font-semibold focus:outline-none" placeholder="예: auto 또는 200px">
+            </div>
+            <button type="button" onclick="applyImageSize()" class="px-3 py-1 bg-amber-600 text-white rounded font-bold hover:bg-amber-700 text-xs shadow-sm">적용</button>
+            <button type="button" onclick="cancelImageSize()" class="px-3 py-1 bg-gray-250 text-gray-700 rounded hover:bg-gray-350 text-xs shadow-sm">취소</button>
+          </div>
+
           <!-- Rich Content Area -->
           <div id="rich-editor-content" contenteditable="true" class="p-4 border border-gray-300 rounded-b-xl min-h-[300px] max-h-[450px] bg-white focus:outline-none overflow-y-auto text-sm text-[#1e1e10]"></div>
         </div>
@@ -336,6 +380,8 @@
     let isEditMode = false;
     let portfolios = [];
     let isServerStorage = false;
+    let categoryOrder = [];
+    let activeCategory = "전체";
 
     // Header text state variables
     let headerTitle = "springmoon WorkSpace";
@@ -404,19 +450,68 @@
         counts[cat] = (counts[cat] || 0) + 1;
       });
 
-      let html = `<button class="px-4 py-2 bg-[#1e1e10] text-white text-xs font-bold rounded-full shadow-sm">전체 ${counts["전체"]}</button>`;
+      const foundCats = Array.from(new Set(portfolios.map(p => p.businessType || "기타"))).filter(c => c !== "");
       
-      const uniqueCats = Array.from(new Set(portfolios.map(p => p.businessType || "기타"))).filter(c => c !== "");
+      // Sort categories according to categoryOrder
+      let uniqueCats = [...foundCats];
+      uniqueCats.sort((a, b) => {
+        let idxA = categoryOrder.indexOf(a);
+        let idxB = categoryOrder.indexOf(b);
+        if (idxA === -1) idxA = 999;
+        if (idxB === -1) idxB = 999;
+        return idxA - idxB;
+      });
+
+      let html = `<div class="flex flex-wrap gap-2 items-center">`;
       
-      uniqueCats.forEach(cat => {
+      if (isEditMode) {
+        // Drag-and-drop reordering view in Edit Mode
+        html += `<button class="px-4 py-2 bg-[#1e1e10] text-white text-xs font-bold rounded-full shadow-sm select-none">전체 ${counts["전체"]}</button>`;
+        html += `<div id="draggable-cats-list" class="flex flex-wrap gap-2">`;
+        uniqueCats.forEach(cat => {
+          html += `
+            <div data-cat="${cat}" class="px-4 py-2 bg-white text-gray-650 border border-amber-300 hover:bg-[#fffdf9] text-xs font-bold rounded-full shadow-sm cursor-move flex items-center gap-1 select-none">
+              <span>⠿</span> ${cat} ${counts[cat] || 0}
+            </div>
+          `;
+        });
+        html += `</div>`;
+      } else {
+        // Click-to-filter view in Normal Mode
         html += `
-          <button class="px-4 py-2 bg-white text-gray-650 border border-[#e5e2d9] hover:bg-[#fffdf9] text-xs font-bold rounded-full shadow-sm transition-all">
-            ${cat} ${counts[cat] || 0}
+          <button onclick="filterCategory('전체')" class="px-4 py-2 text-xs font-bold rounded-full shadow-sm transition-all select-none ${activeCategory === '전체' ? 'bg-[#1e1e10] text-white' : 'bg-white text-gray-650 border border-[#e5e2d9] hover:bg-[#fffdf9]' }">
+            전체 ${counts["전체"]}
           </button>
         `;
-      });
+        uniqueCats.forEach(cat => {
+          const isActive = activeCategory === cat;
+          html += `
+            <button onclick="filterCategory('${cat}')" class="px-4 py-2 text-xs font-bold rounded-full shadow-sm transition-all ${isActive ? 'bg-[#1e1e10] text-white' : 'bg-white text-gray-650 border border-[#e5e2d9] hover:bg-[#fffdf9]' }">
+              ${cat} ${counts[cat] || 0}
+            </button>
+          `;
+        });
+      }
       
+      html += `</div>`;
       tabsContainer.innerHTML = html;
+
+      // Instantiate SortableJS for categories reordering
+      if (isEditMode && document.getElementById("draggable-cats-list")) {
+        new Sortable(document.getElementById("draggable-cats-list"), {
+          animation: 150,
+          onEnd: function() {
+            const catEls = document.querySelectorAll("#draggable-cats-list [data-cat]");
+            categoryOrder = Array.from(catEls).map(el => el.dataset.cat);
+            console.log("New categoryOrder list:", categoryOrder);
+          }
+        });
+      }
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+      renderPortfolios();
     }
 
     // Load Portfolios from Cloudflare API or fallback to LocalStorage
@@ -466,11 +561,13 @@
         headerDesc = rawData.headerDesc || "스프링문이 직접 집행하고 검증한 마케팅 성과 및 포트폴리오 리스트입니다.";
         btnText = rawData.btnText || "1";
         portfolios = rawData.portfolios || [];
+        categoryOrder = rawData.categoryOrder || [];
       } else {
         portfolios = Array.isArray(rawData) ? rawData : [];
         headerTitle = "springmoon WorkSpace";
         headerDesc = "스프링문이 직접 집행하고 검증한 마케팅 성과 및 포트폴리오 리스트입니다.";
         btnText = "1";
+        categoryOrder = [];
       }
 
       // If empty, supply default template
@@ -510,7 +607,8 @@
         headerTitle,
         headerDesc,
         btnText,
-        portfolios
+        portfolios,
+        categoryOrder
       };
 
       let uploadSuccess = false;
@@ -728,7 +826,13 @@
         grid.appendChild(addCardBar);
       }
       
-      if (portfolios.length === 0) {
+      // Filter list based on activeCategory in View Mode
+      let listToRender = portfolios;
+      if (!isEditMode && activeCategory !== "전체") {
+        listToRender = portfolios.filter(p => (p.businessType || "기타") === activeCategory);
+      }
+      
+      if (listToRender.length === 0) {
         const emptyDiv = document.createElement("div");
         emptyDiv.className = "col-span-full text-center py-20 bg-white border border-[#e5e2d9] rounded-2xl shadow-sm";
         emptyDiv.innerHTML = `
@@ -740,7 +844,7 @@
         return;
       }
       
-      portfolios.forEach((item, index) => {
+      listToRender.forEach((item, index) => {
         const card = document.createElement("div");
         card.dataset.id = item.id;
         card.dataset.businessType = item.businessType || "";
@@ -1095,6 +1199,85 @@
           }
         }
       }
+    }
+
+    // Insert Table Dialog
+    function insertTableDialog() {
+      const rows = parseInt(prompt("삽입할 표의 행(Row) 개수:", "2"));
+      const cols = parseInt(prompt("삽입할 표의 열(Column) 개수:", "2"));
+      if (isNaN(rows) || isNaN(cols) || rows <= 0 || cols <= 0) {
+        alert("올바른 행/열 개수를 입력해 주세요.");
+        return;
+      }
+      
+      let tableHtml = '<table style="width:100%; border-collapse:collapse; margin:20px 0; background-color:#ffffff;">';
+      for (let r = 0; r < rows; r++) {
+        tableHtml += '<tr>';
+        for (let c = 0; c < cols; c++) {
+          tableHtml += '<td style="border:1px solid #d1d5db; padding:10px 14px; min-height:40px;">&nbsp;</td>';
+        }
+        tableHtml += '</tr>';
+      }
+      tableHtml += '</table>';
+      
+      document.getElementById("rich-editor-content").focus();
+      insertHtmlAtCursor(tableHtml);
+    }
+
+    // Image resizing operations
+    let activeEditorImg = null;
+    
+    // Register image click inside rich-editor-content
+    document.addEventListener("click", function(e) {
+      const editor = document.getElementById("rich-editor-content");
+      if (!editor) return;
+      
+      if (e.target.tagName === "IMG" && editor.contains(e.target)) {
+        activeEditorImg = e.target;
+        const resizeBar = document.getElementById("image-resize-bar");
+        
+        // Populate inputs
+        document.getElementById("img-width-input").value = activeEditorImg.style.width || activeEditorImg.width || "";
+        document.getElementById("img-height-input").value = activeEditorImg.style.height || activeEditorImg.height || "";
+        
+        resizeBar.classList.remove("hidden");
+      }
+    });
+
+    function applyImageSize() {
+      if (activeEditorImg) {
+        const w = document.getElementById("img-width-input").value.trim();
+        const h = document.getElementById("img-height-input").value.trim();
+        
+        if (w) {
+          activeEditorImg.style.width = w;
+          if (/^\d+$/.test(w)) {
+            activeEditorImg.style.width = w + "px";
+          }
+        } else {
+          activeEditorImg.style.width = "";
+        }
+        
+        if (h) {
+          activeEditorImg.style.height = h;
+          if (/^\d+$/.test(h)) {
+            activeEditorImg.style.height = h + "px";
+          }
+        } else {
+          activeEditorImg.style.height = "auto";
+        }
+      }
+      closeImageResizeBar();
+    }
+
+    function cancelImageSize() {
+      closeImageResizeBar();
+    }
+
+    function closeImageResizeBar() {
+      const resizeBar = document.getElementById("image-resize-bar");
+      if (resizeBar) resizeBar.classList.add("hidden");
+      activeEditorImg = null;
     }
 
     // App Startup
