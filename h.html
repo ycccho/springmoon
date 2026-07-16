@@ -503,6 +503,234 @@ DOCTYPE html>
       }
     </style>
 
+    
+    <!-- 예비 견적 산출하기 섹션 -->
+    <section class="calculator-section" style="padding: 80px 0; background-color: #ffffff; border-top: 1px solid #f3f4f6;">
+      <div class="common-inner" style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
+        
+        <div style="text-align: center; margin-bottom: 50px;">
+          <h2 style="font-size: 2.4rem; font-weight: 800; color: #111827; margin-bottom: 12px; letter-spacing: -0.5px;">
+            예비 견적 산출하기
+          </h2>
+          <p style="font-size: 1.15rem; color: #6b7280;">업종과 평수만 입력하시면 대략적인 공정별 상세 견적을 산출해 드립니다.</p>
+        </div>
+
+        <!-- Calculator Box -->
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 40px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+          <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 30px;">
+            
+            <!-- Select Specialty -->
+            <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-size: 1rem; font-weight: 700; color: #374151;">진료 과목 / 업종</label>
+              <select id="calc-specialty" style="height: 52px; border: 1px solid #d1d5db; border-radius: 8px; padding: 0 16px; font-size: 1.05rem; color: #1f2937; background-color: #ffffff; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
+                <option value="dentistry">치과</option>
+                <option value="ophthalmology">안과/내과</option>
+                <option value="pharmacy">약국</option>
+              </select>
+            </div>
+
+            <!-- Input Pyung -->
+            <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-size: 1rem; font-weight: 700; color: #374151;">공사 면적 (평수)</label>
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="number" id="calc-pyung" min="1" max="1000" placeholder="면적을 입력해 주세요." style="width: 100%; height: 52px; border: 1px solid #d1d5db; border-radius: 8px; padding: 0 45px 0 16px; font-size: 1.05rem; color: #1f2937; background-color: #ffffff; box-sizing: border-box; outline: none; transition: border-color 0.2s;" />
+                <span style="position: absolute; right: 16px; font-size: 1.05rem; font-weight: 600; color: #4b5563;">평</span>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="min-width: 120px;">
+              <button type="button" onclick="calculateEstimate()" style="width: 100%; height: 52px; background-color: #f05e21; color: #ffffff; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; box-shadow: 0 4px 6px rgba(240, 94, 33, 0.15);">
+                견적 산출하기
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Result Table Area (Hidden initially) -->
+          <div id="calc-result-area" style="display: none; border-top: 2px solid #e5e7eb; padding-top: 30px; margin-top: 20px;">
+            <h3 style="font-size: 1.3rem; font-weight: 800; color: #111827; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              📋 산출된 견적서 내역
+            </h3>
+
+            <!-- Table Container -->
+            <div style="overflow-x: auto; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 20px;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 1.05rem; text-align: left; min-width: 600px;">
+                <thead>
+                  <tr style="background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb; color: #374151; font-weight: 700;">
+                    <th style="padding: 16px 20px; border-right: 1px solid #e5e7eb;">공정명</th>
+                    <th style="padding: 16px 20px; border-right: 1px solid #e5e7eb; text-align: right;">재료비 (원)</th>
+                    <th style="padding: 16px 20px; border-right: 1px solid #e5e7eb; text-align: right;">노무비 (원)</th>
+                    <th style="padding: 16px 20px; border-right: 1px solid #e5e7eb; text-align: right;">경비 (원)</th>
+                    <th style="padding: 16px 20px; text-align: right;">공정 소계 (원)</th>
+                  </tr>
+                </thead>
+                <tbody id="calc-table-body">
+                  <!-- Dynamically populated rows -->
+                </tbody>
+                <tfoot>
+                  <tr style="background-color: #fff7ed; border-top: 2px solid #f97316; font-weight: 800; color: #c2410c;">
+                    <td style="padding: 18px 20px; border-right: 1px solid #ffedd5;">총합계</td>
+                    <td id="calc-total-mat" style="padding: 18px 20px; border-right: 1px solid #ffedd5; text-align: right;">-</td>
+                    <td id="calc-total-lab" style="padding: 18px 20px; border-right: 1px solid #ffedd5; text-align: right;">-</td>
+                    <td id="calc-total-exp" style="padding: 18px 20px; border-right: 1px solid #ffedd5; text-align: right;">-</td>
+                    <td id="calc-total-sum" style="padding: 18px 20px; text-align: right;">-</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <!-- Recommend Portfolio Button -->
+            <div id="calc-recommend-area" style="text-align: center; margin: 30px 0 20px 0;">
+              <!-- Dynamically populated button -->
+            </div>
+
+            <!-- Notices -->
+            <div style="font-size: 0.95rem; color: #6b7280; line-height: 1.7; border-top: 1px dashed #e5e7eb; padding-top: 20px;">
+              <p style="font-weight: 700; color: #dc2626; margin-bottom: 8px;">⚠️ 안내 및 주의사항</p>
+              <ul style="list-style-type: disc; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
+                <li>부가세는 별도입니다.</li>
+                <li>별도공사: 간판, 가구, 소방 등 별도공사 견적은 제외됩니다.</li>
+                <li>견적 산출에 대한 데이터는 인디컴퍼니가 제출한 수백개의 견적서를 바탕으로 계산되며, 해당 견적은 이해를 돕기위한 참고용이며 실제 견적이 아닙니다.</li>
+                <li>신축/구옥 여부, 수술실/x-ray실 등 각 실 개수, 철거 여부, 현장의 구조, 건물 컨디션, 건물 종류 등 오차범위가 넓기때문에 러프하게 산출된 견적서입니다.</li>
+              </ul>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <script>
+      var originalData = {
+        dentistry: {
+          name: "치과",
+          originalPyung: 37,
+          categories: [
+            { name: "01. 가설 공사", material: 2450000, labor: 1152000, expense: 390000 },
+            { name: "02. 철거 공사", material: 3120000, labor: 3120000, expense: 0 },
+            { name: "03. 경량 공사", material: 4665000, labor: 4010000, expense: 359000 },
+            { name: "04. 도어 공사", material: 1642000, labor: 400000, expense: 35000 },
+            { name: "05. 전기 공사", material: 3441800, labor: 4680000, expense: 0 },
+            { name: "06. 도장 공사", material: 1540000, labor: 1820000, expense: 0 },
+            { name: "07. 타일 공사", material: 1912500, labor: 2065500, expense: 0 },
+            { name: "08. 금속,유리 공사", material: 2632500, labor: 1125000, expense: 100000 },
+            { name: "09. 대리석,인조석 공사", material: 1200000, labor: 300000, expense: 90000 },
+            { name: "10. 설비 공사", material: 3570000, labor: 1750000, expense: 0 },
+            { name: "11. 유리 공사", material: 2312800, labor: 0, expense: 5000 },
+            { name: "12. 수장 공사", material: 2212550, labor: 2742350, expense: 0 },
+            { name: "13. 데코타일,난방판넬 공사", material: 1596750, labor: 848500, expense: 0 },
+            { name: "14. 목 공사", material: 2290300, labor: 4035500, expense: 0 }
+          ],
+          portfolioName: "남천동 늘푸른치과의원",
+          matchRate: 95
+        },
+        ophthalmology: {
+          name: "안과/내과",
+          originalPyung: 126,
+          categories: [
+            { name: "01. 가설 공사", material: 2405000, labor: 2925000, expense: 0 },
+            { name: "02. 경량 공사", material: 17734000, labor: 12223000, expense: 430000 },
+            { name: "03. 금속,유리 공사", material: 2899000, labor: 1103000, expense: 100000 },
+            { name: "04. 설비 공사", material: 4690000, labor: 3950000, expense: 100000 },
+            { name: "05. 전기 공사", material: 11661000, labor: 10080000, expense: 630000 },
+            { name: "06. 바닥 공사", material: 9730800, labor: 8426500, expense: 0 },
+            { name: "07. 목공 공사", material: 10454000, labor: 4660000, expense: 0 },
+            { name: "08. 필름 공사", material: 3447000, labor: 5362000, expense: 0 },
+            { name: "09. 도배 공사", material: 2175000, labor: 5220000, expense: 0 },
+            { name: "10. 도장 공사", material: 1476000, labor: 2592000, expense: 0 },
+            { name: "11. 인조 대리석", material: 3420000, labor: 0, expense: 0 }
+          ],
+          portfolioName: "용호동 삼성스마트내과의원",
+          matchRate: 92
+        },
+        pharmacy: {
+          name: "약국",
+          originalPyung: 13.2,
+          categories: [
+            { name: "01. 가설 공사", material: 1070000, labor: 630000, expense: 0 },
+            { name: "02. 철거 공사", material: 300000, labor: 300000, expense: 0 },
+            { name: "03. 경량 공사", material: 986000, labor: 655000, expense: 64000 },
+            { name: "04. 설비 공사", material: 510000, labor: 350000, expense: 50000 },
+            { name: "05. 전기 공사", material: 1845400, labor: 2020000, expense: 0 },
+            { name: "06. 목공 공사", material: 1512000, labor: 868000, expense: 0 },
+            { name: "07. 주출입구 필름 공사", material: 204000, labor: 476000, expense: 0 },
+            { name: "08. 도장 공사", material: 718500, labor: 1005900, expense: 0 },
+            { name: "09. 바닥 공사", material: 1152000, labor: 1200000, expense: 0 }
+          ],
+          portfolioName: "온천동 늘푸른약국",
+          matchRate: 90
+        }
+      };
+
+      function calculateEstimate() {
+        var specialtyKey = document.getElementById('calc-specialty').value;
+        var pyungInput = document.getElementById('calc-pyung').value;
+        
+        if (!pyungInput || pyungInput <= 0) {
+          alert("면적(평수)을 입력해 주세요.");
+          document.getElementById('calc-pyung').focus();
+          return;
+        }
+        
+        var pyung = parseFloat(pyungInput);
+        var data = originalData[specialtyKey];
+        if (!data) return;
+        
+        var scale = pyung / data.originalPyung;
+        var contingency = 1.15; // 15% 예비비 가중치
+        
+        var tableBody = document.getElementById('calc-table-body');
+        tableBody.innerHTML = '';
+        
+        var grandMat = 0;
+        var grandLab = 0;
+        var grandExp = 0;
+        var grandSum = 0;
+        
+        data.categories.forEach(function(cat) {
+          // 15% 예비비 계산 포함
+          var matScaled = Math.round((cat.material * scale * contingency) / 10000) * 10000;
+          var labScaled = Math.round((cat.labor * scale * contingency) / 10000) * 10000;
+          var expScaled = Math.round((cat.expense * scale * contingency) / 10000) * 10000;
+          var totalScaled = matScaled + labScaled + expScaled;
+          
+          grandMat += matScaled;
+          grandLab += labScaled;
+          grandExp += expScaled;
+          grandSum += totalScaled;
+          
+          var row = document.createElement('tr');
+          row.style.borderBottom = '1px solid #e5e7eb';
+          row.innerHTML = 
+            '<td style="padding: 14px 20px; border-right: 1px solid #e5e7eb; font-weight: 600; color: #374151;">' + cat.name + '</td>' +
+            '<td style="padding: 14px 20px; border-right: 1px solid #e5e7eb; text-align: right; color: #4b5563;">' + matScaled.toLocaleString() + '</td>' +
+            '<td style="padding: 14px 20px; border-right: 1px solid #e5e7eb; text-align: right; color: #4b5563;">' + labScaled.toLocaleString() + '</td>' +
+            '<td style="padding: 14px 20px; border-right: 1px solid #e5e7eb; text-align: right; color: #4b5563;">' + expScaled.toLocaleString() + '</td>' +
+            '<td style="padding: 14px 20px; text-align: right; font-weight: 700; color: #111827;">' + totalScaled.toLocaleString() + '</td>';
+          tableBody.appendChild(row);
+        });
+        
+        document.getElementById('calc-total-mat').innerText = grandMat.toLocaleString();
+        document.getElementById('calc-total-lab').innerText = grandLab.toLocaleString();
+        document.getElementById('calc-total-exp').innerText = grandExp.toLocaleString();
+        document.getElementById('calc-total-sum').innerText = grandSum.toLocaleString();
+        
+        // Recommend Portfolio Link
+        var recArea = document.getElementById('calc-recommend-area');
+        recArea.innerHTML = 
+          '<a href="/h-1-1" class="ga4__cta_btn_link" style="display: inline-block; background-color: #1e3a8a; color: #ffffff; padding: 14px 28px; border-radius: 8px; font-size: 1.1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 6px rgba(30, 58, 138, 0.15); transition: background-color 0.2s;">' +
+            '✨ 작성해주신 조건과 ' + data.matchRate + '% 유사하게 시공된 ' + data.portfolioName + ' 시공 견적(실제 포트폴리오) 확인하기' +
+          '</a>';
+        
+        var resultArea = document.getElementById('calc-result-area');
+        resultArea.style.display = 'block';
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    </script>
+
     <section class="common-leadform" id="contact">
       <div class="common-inner">
         <h2 class="common-title _left" style="line-height: 1.4;">
