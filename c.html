@@ -700,32 +700,32 @@ if(window.wcs) {
   <div class="inner w1400" style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
     
     <div class="mainTitleAr" style="text-align: center; margin-bottom: 40px;">
-      <p class="eng" style="color: #0b2e6a; font-weight: 700; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px;">Seondu AI Counselor</p>
-      <p class="title" style="font-size: 2.2rem; font-weight: 700; margin-top: 10px; color: #111827;"><span class="color1" style="color: #0b2e6a;">선두외과</span> AI 챗봇 상담</p>
-      <p class="text1" style="font-size: 1.1rem; color: #4b5563; margin-top: 10px;">자주 묻는 질문을 선택하시면 AI 상담원이 즉시 답변해 드립니다.</p>
+      <p class="eng" style="color: #0b2e6a; font-weight: 700; text-transform: uppercase; font-size: 1.1rem; letter-spacing: 2px;">Seondu AI Counselor</p>
+      <p class="title" style="font-size: 2.5rem; font-weight: 800; margin-top: 10px; color: #111827;"><span class="color1" style="color: #0b2e6a;">선두외과</span> AI 챗봇 상담</p>
+      <p class="text1" style="font-size: 1.3rem; color: #4b5563; margin-top: 10px;">자주 묻는 질문을 선택하시면 AI 상담원이 즉시 답변해 드립니다.</p>
     </div>
 
     <!-- Chat Box Window -->
-    <div class="ai-chat-box" style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03); overflow: hidden; display: flex; flex-direction: column; height: 500px;">
+    <div class="ai-chat-box" style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03); overflow: hidden; display: flex; flex-direction: column; height: 520px;">
       
       <!-- Chat Header -->
-      <div class="chat-header" style="background-color: #0b2e6a; color: #ffffff; padding: 15px 20px; display: flex; align-items: center; gap: 10px;">
-        <div class="chat-avatar" style="width: 32px; height: 32px; background-color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">🤖</div>
+      <div class="chat-header" style="background-color: #0b2e6a; color: #ffffff; padding: 18px 24px; display: flex; align-items: center; gap: 12px;">
+        <div class="chat-avatar" style="width: 38px; height: 38px; background-color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🤖</div>
         <div>
-          <div style="font-weight: 700; font-size: 1rem;">선두외과 AI 상담봇 (테스트 모드)</div>
-          <div style="font-size: 0.75rem; color: #a5b4fc; display: flex; align-items: center; gap: 4px;">
-            <span style="width: 6px; height: 6px; background-color: #10b981; border-radius: 50%; display: inline-block;"></span>실시간 상담 가동 중
+          <div style="font-weight: 700; font-size: 1.2rem;">선두외과 AI 상담봇 (테스트 모드)</div>
+          <div style="font-size: 0.95rem; color: #a5b4fc; display: flex; align-items: center; gap: 4px;">
+            <span style="width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; display: inline-block;"></span>실시간 상담 가동 중
           </div>
         </div>
       </div>
 
       <!-- Chat Messages Container -->
-      <div id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background-color: #f3f4f6;">
+      <div id="chat-messages" style="flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; background-color: #f3f4f6;">
         
         <!-- Bot Initial Message -->
-        <div class="message bot" style="display: flex; gap: 10px; max-width: 80%;">
-          <div style="width: 30px; height: 30px; background-color: #0b2e6a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0;">🤖</div>
-          <div style="background-color: #ffffff; color: #1f2937; padding: 12px 16px; border-radius: 0 12px 12px 12px; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+        <div class="message bot" style="display: flex; gap: 12px; max-width: 85%;">
+          <div style="width: 36px; height: 36px; background-color: #0b2e6a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;">🤖</div>
+          <div style="background-color: #ffffff; color: #1f2937; padding: 14px 18px; border-radius: 0 12px 12px 12px; font-size: 1.15rem; line-height: 1.6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
             안녕하세요! 선두외과 AI 상담원입니다. 아래의 질문 중에서 원하시는 내용을 클릭하시면 즉시 상세 답변을 안내해 드립니다.
           </div>
         </div>
@@ -733,22 +733,22 @@ if(window.wcs) {
       </div>
 
       <!-- Question Suggestions Chips Area -->
-      <div class="chat-suggestions" style="padding: 15px 20px; background-color: #ffffff; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-        <button type="button" onclick="triggerMockChat(1)" class="suggestion-chip" style="background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 8px 16px; border-radius: 20px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s, border-color 0.2s;">
+      <div class="chat-suggestions" style="padding: 18px 24px; background-color: #ffffff; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+        <button type="button" onclick="triggerMockChat(1)" class="suggestion-chip" style="background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 10px 18px; border-radius: 24px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.2s; outline: none;">
           💡 탈장 수술 비용과 당일 퇴원 가능 여부
         </button>
-        <button type="button" onclick="triggerMockChat(2)" class="suggestion-chip" style="background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 8px 16px; border-radius: 20px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s, border-color 0.2s;">
+        <button type="button" onclick="triggerMockChat(2)" class="suggestion-chip" style="background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 10px 18px; border-radius: 24px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.2s; outline: none;">
           💡 맹장염 초기 증상과 당일 응급 수술
         </button>
-        <button type="button" onclick="triggerMockChat(3)" class="suggestion-chip" style="background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 8px 16px; border-radius: 20px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s, border-color 0.2s;">
+        <button type="button" onclick="triggerMockChat(3)" class="suggestion-chip" style="background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 10px 18px; border-radius: 24px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.2s; outline: none;">
           💡 여유증 수술 흉터 최소화 방법
         </button>
       </div>
 
       <!-- Fake Chat Input -->
-      <div class="chat-input-area" style="padding: 12px 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; align-items: center;">
-        <input type="text" placeholder="자주 묻는 질문 버튼을 클릭하여 테스트해 보세요." disabled style="flex: 1; height: 38px; border: 1px solid #d1d5db; border-radius: 6px; padding: 0 12px; font-size: 0.9rem; background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed; box-sizing: border-box;" />
-        <button type="button" disabled style="height: 38px; padding: 0 16px; background-color: #9ca3af; color: #ffffff; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: not-allowed;">전송</button>
+      <div class="chat-input-area" style="padding: 14px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; align-items: center;">
+        <input type="text" placeholder="채팅질문은 아직 안됩니다요 자주 묻는 질문 버튼을 클릭하여 테스트해 보세요." disabled style="flex: 1; height: 44px; border: 1px solid #d1d5db; border-radius: 6px; padding: 0 15px; font-size: 1.1rem; background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed; box-sizing: border-box;" />
+        <button type="button" disabled style="height: 44px; padding: 0 20px; background-color: #9ca3af; color: #ffffff; border: none; border-radius: 6px; font-size: 1.05rem; font-weight: 700; cursor: not-allowed;">전송</button>
       </div>
 
     </div>
@@ -782,9 +782,9 @@ if(window.wcs) {
     // 1. Add User Message
     var userMsg = document.createElement('div');
     userMsg.className = 'message user';
-    userMsg.style.cssText = 'display: flex; gap: 10px; max-width: 80%; align-self: flex-end; justify-content: flex-end;';
+    userMsg.style.cssText = 'display: flex; gap: 12px; max-width: 85%; align-self: flex-end; justify-content: flex-end; margin-bottom: 12px;';
     userMsg.innerHTML = 
-      '<div style="background-color: #0b2e6a; color: #ffffff; padding: 12px 16px; border-radius: 12px 0 12px 12px; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">' +
+      '<div style="background-color: #0b2e6a; color: #ffffff; padding: 14px 18px; border-radius: 12px 0 12px 12px; font-size: 1.15rem; line-height: 1.6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">' +
         data.question +
       '</div>';
     chatContainer.appendChild(userMsg);
@@ -793,10 +793,10 @@ if(window.wcs) {
     // 2. Add Bot Typing Indicator
     var typingMsg = document.createElement('div');
     typingMsg.className = 'message bot typing';
-    typingMsg.style.cssText = 'display: flex; gap: 10px; max-width: 80%;';
+    typingMsg.style.cssText = 'display: flex; gap: 12px; max-width: 85%; margin-bottom: 12px;';
     typingMsg.innerHTML = 
-      '<div style="width: 30px; height: 30px; background-color: #0b2e6a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0;">🤖</div>' +
-      '<div style="background-color: #ffffff; color: #6b7280; padding: 12px 16px; border-radius: 0 12px 12px 12px; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-style: italic;">' +
+      '<div style="width: 36px; height: 36px; background-color: #0b2e6a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;">🤖</div>' +
+      '<div style="background-color: #ffffff; color: #6b7280; padding: 14px 18px; border-radius: 0 12px 12px 12px; font-size: 1.15rem; line-height: 1.6; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-style: italic;">' +
         'AI 상담원이 답변을 생각하고 있습니다...' +
       '</div>';
     chatContainer.appendChild(typingMsg);
@@ -806,24 +806,43 @@ if(window.wcs) {
     var chips = document.querySelectorAll('.suggestion-chip');
     chips.forEach(function(c) { c.disabled = true; c.style.opacity = '0.5'; });
 
-    // 3. Complete Typing after 1 second
+    // 3. Complete Typing after 800ms with Typewriter effect
     setTimeout(function() {
       typingMsg.remove();
 
       var botMsg = document.createElement('div');
       botMsg.className = 'message bot';
-      botMsg.style.cssText = 'display: flex; gap: 10px; max-width: 80%;';
+      botMsg.style.cssText = 'display: flex; gap: 12px; max-width: 85%; margin-bottom: 12px;';
       botMsg.innerHTML = 
-        '<div style="width: 30px; height: 30px; background-color: #0b2e6a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0;">🤖</div>' +
-        '<div style="background-color: #ffffff; color: #1f2937; padding: 12px 16px; border-radius: 0 12px 12px 12px; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">' +
-          data.answer.replace(/\\n/g, '<br>') +
+        '<div style="width: 36px; height: 36px; background-color: #0b2e6a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;">🤖</div>' +
+        '<div class="typewriter-text" style="background-color: #ffffff; color: #1f2937; padding: 14px 18px; border-radius: 0 12px 12px 12px; font-size: 1.15rem; line-height: 1.6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">' +
         '</div>';
       chatContainer.appendChild(botMsg);
       chatContainer.scrollTop = chatContainer.scrollHeight;
 
-      // Re-enable buttons
-      chips.forEach(function(c) { c.disabled = false; c.style.opacity = '1'; });
-    }, 1000);
+      var textElement = botMsg.querySelector('.typewriter-text');
+      var fullText = data.answer.replace(/\\n/g, '\n');
+      
+      var i = 0;
+      function type() {
+        if (i < fullText.length) {
+          var char = fullText.charAt(i);
+          if (char === '\n') {
+            textElement.innerHTML += '<br>';
+          } else {
+            textElement.innerHTML += char;
+          }
+          i++;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          setTimeout(type, 15);
+        } else {
+          // Re-enable buttons
+          chips.forEach(function(c) { c.disabled = false; c.style.opacity = '1'; });
+        }
+      }
+      type();
+
+    }, 800);
   }
 </script>
 
