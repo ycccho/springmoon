@@ -1015,121 +1015,19 @@ function mapKaKao(lat, lon, address, id) {
     </div>
   </footer>
 </div>
-<article class="fastConAr">
-	<div class="fastAr w1400">
-		<h4>빠른상담</h4>
-		<div class="consulting">
-			<form  id="no_spam_form" class="form__consulting" name="forQmuickReserve" onsubmit="return quickReserveSubmit(this);" action="https://www.seondusurgery.com/bbs/write_update_fast.php" method="post" autocomplete="off">
-					<input type="hidden" name="spam_check_skip" value="1">
-					<input type="hidden" name="uid" value="2026071618234731" />
-					<input type="hidden" name="bo_table" value="fast_consulting" />
-					<input type="hidden" name="w" id="" value="" />
-					<input type="hidden" name="wr_2" id="quickReserveClinic" value="" />
-					<input type="hidden" name="wr_subject" id="quickReserveSubject" value="" />
-					<input type="hidden" name="wr_content" id="quickReserveContent" value="." />
-					<input type="hidden" name="token" value=7bd3ea481a79c0b54a571b4f74e24f31 /> 
-					<input type="hidden" name="wr_types" value="1" /> 
-
-					<fieldset class="fieldset">
-							<div class="field__input">
-									<div class="field-cont textAr">
-											<label for="agree" class="form-check">													
-													<p>	※성함과 연락처를 남겨주시면 순차적으로 연락드립니다.</p>
-													<p class="checkAr">
-														<input type="checkbox" id="agree" name="agree" value="1" class="checkbox"/>							
-														<!-- <span class="checkmark"></span> -->개인정보 수집 및 이용에 동의합니다.
-														 <a class="link-privacy" href="/sub/etc/privacy.php" target="_blank">[자세히보기]</a>
-													</p>
-											</label>											
-									</div>			
-									<div class="flexWrap">
-										<div class="field-cont">
-												<label for="quickReserveClinic" class="label2 blind">진료과목</label>
-												<select name="wr_2" id="quickReserveClinic" required>
-														<option value="">진료과목</option>
-														<option value="담낭염/담석증">담낭염/담석증</option>
-														<option value="하지정맥류">하지정맥류</option>
-														<option value="유방질환">유방질환</option>
-														<option value="여유증">여유증</option>
-														<option value="부유방">부유방</option>
-														<option value="탈장">탈장</option>
-														<option value="맹장">맹장</option>
-														<option value="기타">기타</option>
-												</select>
-										</div>											
-										<div class="field-cont">
-												<label for="quickReserveName" class="label2 blind">이름</label>
-												<input type="text" name="wr_name" id="quickReserveName" minlength="2" maxlength="10" placeholder="이름" required/>
-										</div>
-										<div class="field-cont">
-												<label for="quickReserveTel" class="label2 blind">연락처</label>
-												<input type="tel" name="wr_1" class="marTop" id="quickReserveTel" placeholder="- 없이 전화번호를 입력하세요." required/>
-										</div>
-										
-										<!--div class="field-cont">
-												<label for="quickReserveContent" class="label2 blind">내용</label>
-												<textarea name="wr_content" id="quickReserveContent" class="content" placeholder="내용을 입력하세요." required></textarea>
-										</div-->
-									
-										<button type="submit" id="quickReserveSubmitButton" class="field__submit">전화상담신청</button>
-									</div>
-							</div>
-					</fieldset>
-			</form>
-		</div>
+<article class="fastConAr" style="background-color: #f3f4f6; padding: 40px 0; border-top: 1px solid #e5e7eb;">
+	<div class="w1400 inner" style="max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; gap: 20px; justify-content: center; align-items: center; flex-wrap: wrap;">
+		<a href="/c" style="flex: 1; min-width: 280px; max-width: 500px; display: flex; align-items: center; justify-content: center; gap: 12px; height: 60px; background-color: #0b2e6a; color: #ffffff; font-size: 1.15rem; font-weight: 700; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 6px rgba(11, 46, 106, 0.15); transition: background-color 0.2s, transform 0.2s; box-sizing: border-box; border: none;">
+			<span style="font-size: 1.3rem;">📞</span> 전화문의
+		</a>
+		<a href="/c" style="flex: 1; min-width: 280px; max-width: 500px; display: flex; align-items: center; justify-content: center; gap: 12px; height: 60px; background-color: #03c75a; color: #ffffff; font-size: 1.15rem; font-weight: 700; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 6px rgba(3, 199, 90, 0.15); transition: background-color 0.2s, transform 0.2s; box-sizing: border-box; border: none;">
+			<span style="font-size: 1.3rem;">📅</span> 네이버예약
+		</a>
 	</div>
 </article>
 
 <script>
-    function quickReserveSubmit(f) {
-        
-    if (!f.wr_name.value) {
-        alert("성함을 입력해주세요.");
-        $('#quickReserveName').focus();
-        return false;
-    }
-    // 연락처
-    var regExp = /^\d{9,11}$/; // 휴대폰 번호 검사 정규식
-    var $inputTel = $('#quickReserveTel');
-
-    var phoneNum = $inputTel.val();
-
-    if (phoneNum == '') {
-        alert('연락처를 입력해주세요.');
-        $inputTel.focus();
-        return false;
-    }
-
-    phoneNum = phoneNum.replace(/-/gi, '');
-
-    // 정규식 검사
-    if (!regExp.test(phoneNum)) {
-        alert('연락처 형식이 잘못되었습니다. 다시 확인해주세요.');
-        $inputTel.focus();
-        return false;
-    }
-
-    // if (!f.wr_content.value) {
-    //     alert("상담 내용을 입력해주세요.");
-    //     $('#quickReserveContent').focus();
-    //     return false;
-    // }
-
-    if ($(':checkbox[name="agree"]:checked').length <= 0) {
-        alert("개인정보처리방침에 동의해야 빠른상담을 신청하실 수 있습니다.");
-        $('#agree').focus();
-        return false;
-    }
-
-    $('#quickReserveTel').val(phoneNum);
-
-
-    $('#quickReserveSubject').val(f.wr_name.value + '님의 빠른 상담 신청');
-
-    document.getElementById("quickReserveSubmitButton").disabled = "disabled";
-
-    return true;
-    }
+    
 </script> 
 
 
