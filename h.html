@@ -589,10 +589,13 @@ DOCTYPE html>
             <div style="font-size: 0.95rem; color: #6b7280; line-height: 1.7; border-top: 1px dashed #e5e7eb; padding-top: 20px;">
               <p style="font-weight: 700; color: #dc2626; margin-bottom: 8px;">⚠️ 안내 및 주의사항</p>
               <ul style="list-style-type: disc; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
-                <li>부가세는 별도입니다.</li>
-                <li>별도공사: 간판, 가구, 소방 등 별도공사 견적은 제외됩니다.</li>
-                <li>견적 산출에 대한 데이터는 인디컴퍼니가 제출한 수백개의 견적서를 바탕으로 계산되며, 해당 견적은 이해를 돕기위한 참고용이며 실제 견적이 아닙니다.</li>
-                <li>신축/구옥 여부, 수술실/x-ray실 등 각 실 개수, 철거 여부, 현장의 구조, 건물 컨디션, 건물 종류 등 오차범위가 넓기때문에 러프하게 산출된 견적서입니다.</li>
+                <li><strong>부가세는 별도입니다.</strong></li>
+                <li><strong>별도공사: 간판, 가구, 소방 등 별도공사 견적은 제외됩니다.</strong></li>
+                <li>견적 산출에 대한 데이터는 인디컴퍼니가 제출한 수백개의 견적서를 바탕으로 계산되며, <strong>해당 견적은 이해를 돕기위한 참고용이며 실제 견적이 아닙니다.</strong></li>
+                <li>신축/구옥 여부, 수술실/x-ray실 등 각 실 개수, 철거 여부, 현장의 구조, 건물 컨디션, 건물 종류 등 <strong>오차범위가 넓기때문에 러프하게 산출된 견적서</strong>입니다.</li>
+                <li style="color: #ea580c; font-weight: 700; background-color: #fff7ed; padding: 10px 15px; border-radius: 6px; border-left: 4px solid #f97316; list-style-type: none; margin-left: -20px; margin-top: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                  해당 산출 견적은 평수만을 입력받았기 때문에, 인디컴퍼니에서 동일 업종에 제출된 견적서의 상세견적서를 <strong>기초</strong>로 합니다.
+                </li>
               </ul>
             </div>
 
@@ -722,7 +725,7 @@ DOCTYPE html>
         var recArea = document.getElementById('calc-recommend-area');
         recArea.innerHTML = 
           '<a href="/h-1-1" class="ga4__cta_btn_link" style="display: inline-block; background-color: #1e3a8a; color: #ffffff; padding: 14px 28px; border-radius: 8px; font-size: 1.1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 6px rgba(30, 58, 138, 0.15); transition: background-color 0.2s;">' +
-            '✨ 작성해주신 조건과 ' + data.matchRate + '% 유사하게 시공된 ' + data.portfolioName + ' 시공 견적(실제 포트폴리오) 확인하기' +
+            '입력된 업종/평수와 유사한 견적의 ' + data.portfolioName + ' 포트폴리오 보러가기' +
           '</a>';
         
         var resultArea = document.getElementById('calc-result-area');
