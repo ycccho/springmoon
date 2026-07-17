@@ -7385,22 +7385,16 @@
 
         function setupSynchronizedScrolling(lightbox) {
           const scrollCols = lightbox.querySelectorAll('.lightbox-scroll-col');
-          let isSyncingScroll = false;
 
           scrollCols.forEach(col => {
-            col.addEventListener('scroll', () => {
-              if (isSyncingScroll) return;
-              isSyncingScroll = true;
-              const targetScrollTop = col.scrollTop;
-              
+            // 마우스 휠 또는 트랙패드 스크롤 시에만 모든 열이 동시에 움직이도록 설정
+            col.addEventListener('wheel', (e) => {
+              e.preventDefault(); // 기본 개별 스크롤 방지
+              const delta = e.deltaY;
               scrollCols.forEach(otherCol => {
-                if (otherCol !== col) {
-                  otherCol.scrollTop = targetScrollTop;
-                }
+                otherCol.scrollTop += delta;
               });
-              
-              isSyncingScroll = false;
-            });
+            }, { passive: false });
           });
         }
 
