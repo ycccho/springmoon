@@ -340,6 +340,18 @@
             
             <div class="h-6 w-px bg-gray-300 mx-1"></div>
 
+            <button type="button" onclick="formatDoc('justifyLeft')" class="px-2.5 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1" title="좌측 정렬">
+              ⬅️ 좌측
+            </button>
+            <button type="button" onclick="formatDoc('justifyCenter')" class="px-2.5 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1" title="중앙 정렬">
+              ↔️ 중앙
+            </button>
+            <button type="button" onclick="formatDoc('justifyRight')" class="px-2.5 py-1 rounded bg-white hover:bg-gray-100 border border-gray-200 text-xs font-bold text-gray-700 shadow-sm flex items-center gap-1" title="우측 정렬">
+              ➡️ 우측
+            </button>
+
+            <div class="h-6 w-px bg-gray-300 mx-1"></div>
+
             <button type="button" onclick="document.getElementById('editor-img-file').click()" class="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1">
               🖼️ 통계 이미지 추가
             </button>
@@ -348,7 +360,7 @@
           
           <!-- Image Resize Control Panel -->
           <div id="image-resize-bar" class="hidden flex flex-wrap items-center gap-3 p-2.5 bg-amber-50 border border-gray-300 text-xs font-semibold">
-            <span class="text-amber-800 font-bold">🖼️ 선택된 이미지 크기 조절:</span>
+            <span class="text-amber-800 font-bold">🖼️ 선택된 이미지 설정:</span>
             <div class="flex items-center gap-1">
               <label class="text-gray-500 font-bold">가로(width):</label>
               <input type="text" id="img-width-input" class="w-20 px-2 py-1 border border-gray-300 rounded bg-white text-gray-800 text-xs font-semibold focus:outline-none" placeholder="예: 100% 또는 300px">
@@ -356,6 +368,16 @@
             <div class="flex items-center gap-1">
               <label class="text-gray-500 font-bold">세로(height):</label>
               <input type="text" id="img-height-input" class="w-20 px-2 py-1 border border-gray-300 rounded bg-white text-gray-800 text-xs font-semibold focus:outline-none" placeholder="예: auto 또는 200px">
+            </div>
+            <div class="flex items-center gap-1">
+              <label class="text-gray-500 font-bold">정렬/배치:</label>
+              <select id="img-align-select" class="px-2 py-1 border border-gray-300 rounded bg-white text-gray-800 text-xs font-semibold focus:outline-none">
+                <option value="default">기본 (중앙/줄바꿈)</option>
+                <option value="inline">가로 나열 (여러 로고 배치용)</option>
+                <option value="left">블록 왼쪽 정렬</option>
+                <option value="center">블록 가운데 정렬</option>
+                <option value="right">블록 오른쪽 정렬</option>
+              </select>
             </div>
             <button type="button" onclick="applyImageSize()" class="px-3 py-1 bg-amber-600 text-white rounded font-bold hover:bg-amber-700 text-xs shadow-sm">적용</button>
             <button type="button" onclick="cancelImageSize()" class="px-3 py-1 bg-gray-250 text-gray-700 rounded hover:bg-gray-350 text-xs shadow-sm">취소</button>
@@ -1240,6 +1262,24 @@
         document.getElementById("img-width-input").value = activeEditorImg.style.width || activeEditorImg.width || "";
         document.getElementById("img-height-input").value = activeEditorImg.style.height || activeEditorImg.height || "";
         
+        // Determine alignment select value
+        const alignSelect = document.getElementById("img-align-select");
+        const disp = activeEditorImg.style.display;
+        const ml = activeEditorImg.style.marginLeft;
+        const mr = activeEditorImg.style.marginRight;
+        
+        if (disp === "inline-block") {
+          alignSelect.value = "inline";
+        } else if (ml === "0px" || ml === "0") {
+          alignSelect.value = "left";
+        } else if (ml === "auto" && mr === "auto") {
+          alignSelect.value = "center";
+        } else if (ml === "auto" && (mr === "0px" || mr === "0")) {
+          alignSelect.value = "right";
+        } else {
+          alignSelect.value = "default";
+        }
+        
         resizeBar.classList.remove("hidden");
       }
     });
@@ -1248,6 +1288,7 @@
       if (activeEditorImg) {
         const w = document.getElementById("img-width-input").value.trim();
         const h = document.getElementById("img-height-input").value.trim();
+        const align = document.getElementById("img-align-select").value;
         
         if (w) {
           activeEditorImg.style.width = w;
@@ -1265,6 +1306,44 @@
           }
         } else {
           activeEditorImg.style.height = "auto";
+        }
+
+        // Apply alignment styles
+        if (align === "inline") {
+          activeEditorImg.style.display = "inline-block";
+          activeEditorImg.style.margin = "10px";
+          activeEditorImg.style.marginLeft = "";
+          activeEditorImg.style.marginRight = "";
+          activeEditorImg.classList.remove("block");
+        } else if (align === "left") {
+          activeEditorImg.style.display = "block";
+          activeEditorImg.style.marginLeft = "0";
+          activeEditorImg.style.marginRight = "auto";
+          activeEditorImg.style.marginTop = "20px";
+          activeEditorImg.style.marginBottom = "20px";
+          activeEditorImg.classList.add("block");
+        } else if (align === "center") {
+          activeEditorImg.style.display = "block";
+          activeEditorImg.style.marginLeft = "auto";
+          activeEditorImg.style.marginRight = "auto";
+          activeEditorImg.style.marginTop = "20px";
+          activeEditorImg.style.marginBottom = "20px";
+          activeEditorImg.classList.add("block");
+        } else if (align === "right") {
+          activeEditorImg.style.display = "block";
+          activeEditorImg.style.marginLeft = "auto";
+          activeEditorImg.style.marginRight = "0";
+          activeEditorImg.style.marginTop = "20px";
+          activeEditorImg.style.marginBottom = "20px";
+          activeEditorImg.classList.add("block");
+        } else {
+          // default behavior
+          activeEditorImg.style.display = "";
+          activeEditorImg.style.margin = "";
+          activeEditorImg.style.marginLeft = "";
+          activeEditorImg.style.marginRight = "";
+          activeEditorImg.style.marginTop = "";
+          activeEditorImg.style.marginBottom = "";
         }
       }
       closeImageResizeBar();
