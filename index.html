@@ -7336,9 +7336,29 @@
                 <!-- Prev Button -->
                 <button onclick="prevLightbox()" class="absolute left-2 md:left-4 z-10 p-3 bg-black/50 hover:bg-black/80 rounded-full text-white text-lg font-bold shadow transition-all leading-none focus:outline-none">&lt;</button>
                 
-                <!-- Image Box (Scrollable for long full-page screenshots) -->
-                <div class="w-full h-full overflow-auto flex justify-center items-start px-8 md:px-16 py-2 select-none" id="lightbox-img-box">
-                  <img id="lightbox-img" src="" class="rounded shadow-2xl border border-gray-850 mx-auto" style="min-width: 320px; max-width: 1000px; width: 100%; display: block;" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
+                <!-- 3-Column Comparison Box with Sync Scroll -->
+                <div class="w-full h-full flex gap-4 px-4 py-2 select-none overflow-hidden" id="lightbox-comparison-container">
+                  <!-- Column 1 (Older Date - Previous) -->
+                  <div class="flex-1 h-full overflow-y-auto border border-gray-800 rounded-lg bg-gray-900/50 lightbox-scroll-col" id="col-prev">
+                     <div class="text-white text-center font-bold text-xs bg-black/80 py-1.5 sticky top-0 z-10 border-b border-gray-800" id="col-prev-date">이전일</div>
+                     <div class="p-1 flex justify-center">
+                       <img id="img-prev" class="rounded shadow-2xl border border-gray-850" style="min-width: 320px; max-width: 1000px; width: 100%; display: block;" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=No+Data'">
+                     </div>
+                  </div>
+                  <!-- Column 2 (Selected Date - Current) -->
+                  <div class="flex-1 h-full overflow-y-auto border border-orange-500/30 rounded-lg bg-gray-900/50 lightbox-scroll-col" id="col-current">
+                     <div class="text-white text-center font-bold text-xs bg-orange-600/90 py-1.5 sticky top-0 z-10 border-b border-orange-600" id="col-current-date">선택일</div>
+                     <div class="p-1 flex justify-center">
+                       <img id="img-current" class="rounded shadow-2xl border border-gray-850" style="min-width: 320px; max-width: 1000px; width: 100%; display: block;" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Load+Error'">
+                     </div>
+                  </div>
+                  <!-- Column 3 (Newer Date - Next) -->
+                  <div class="flex-1 h-full overflow-y-auto border border-gray-800 rounded-lg bg-gray-900/50 lightbox-scroll-col" id="col-next">
+                     <div class="text-white text-center font-bold text-xs bg-black/80 py-1.5 sticky top-0 z-10 border-b border-gray-800" id="col-next-date">다음일</div>
+                     <div class="p-1 flex justify-center">
+                       <img id="img-next" class="rounded shadow-2xl border border-gray-850" style="min-width: 320px; max-width: 1000px; width: 100%; display: block;" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=No+Data'">
+                     </div>
+                  </div>
                 </div>
                 
                 <!-- Next Button -->
@@ -7354,11 +7374,35 @@
             `;
             document.body.appendChild(lightbox);
             document.addEventListener("keydown", handleLightboxKeydown);
+
+            // Setup synchronized scrolling
+            setupSynchronizedScrolling(lightbox);
           }
           
           lightbox.classList.remove("hidden");
           updateLightboxContent();
         };
+
+        function setupSynchronizedScrolling(lightbox) {
+          const scrollCols = lightbox.querySelectorAll('.lightbox-scroll-col');
+          let isSyncingScroll = false;
+
+          scrollCols.forEach(col => {
+            col.addEventListener('scroll', () => {
+              if (isSyncingScroll) return;
+              isSyncingScroll = true;
+              const targetScrollTop = col.scrollTop;
+              
+              scrollCols.forEach(otherCol => {
+                if (otherCol !== col) {
+                  otherCol.scrollTop = targetScrollTop;
+                }
+              });
+              
+              isSyncingScroll = false;
+            });
+          });
+        }
 
         window.closeLightbox = function() {
           const lightbox = document.getElementById("screenshot-lightbox");
@@ -7380,20 +7424,26 @@
         };
 
         window.zoomInLightbox = function() {
-          const imgEl = document.getElementById("lightbox-img");
-          if (!imgEl) return;
           zoomScale = Math.min(3.0, zoomScale + 0.1);
-          imgEl.style.maxWidth = (zoomScale * 1000) + "px";
-          updateZoomIndicator();
+          applyZoomScale();
         };
 
         window.zoomOutLightbox = function() {
-          const imgEl = document.getElementById("lightbox-img");
-          if (!imgEl) return;
           zoomScale = Math.max(0.3, zoomScale - 0.1);
-          imgEl.style.maxWidth = (zoomScale * 1000) + "px";
-          updateZoomIndicator();
+          applyZoomScale();
         };
+
+        function applyZoomScale() {
+          const imgs = [
+            document.getElementById("img-prev"),
+            document.getElementById("img-current"),
+            document.getElementById("img-next")
+          ];
+          imgs.forEach(img => {
+            if (img) img.style.maxWidth = (zoomScale * 1000) + "px";
+          });
+          updateZoomIndicator();
+        }
 
         function updateZoomIndicator() {
           const indicator = document.getElementById("lightbox-zoom-indicator");
@@ -7403,28 +7453,74 @@
         }
 
         function updateLightboxContent() {
-          const file = currentFilteredFiles[activeIndex];
-          if (!file) return;
+          const currentFile = currentFilteredFiles[activeIndex];
+          if (!currentFile) return;
+          
+          const prevFile = currentFilteredFiles[activeIndex + 1]; // Older date
+          const nextFile = currentFilteredFiles[activeIndex - 1]; // Newer date
           
           const folderPath = dirInput.value.trim() || "D:\\rank";
-          const imgUrl = isCloudMode
-            ? `/api/sync-screenshots?action=view-file&folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`
-            : getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`);
+          
+          const getImgUrl = (file) => {
+            if (!file) return "";
+            return isCloudMode
+              ? `/api/sync-screenshots?action=view-file&folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`
+              : getLocalServerUrl(`/api/local-screenshots/view?folderPath=${encodeURIComponent(folderPath)}&fileName=${encodeURIComponent(file.fileName)}`);
+          };
           
           const titleEl = document.getElementById("lightbox-title");
-          const imgEl = document.getElementById("lightbox-img");
-          const imgBox = document.getElementById("lightbox-img-box");
+          const colPrev = document.getElementById("col-prev");
+          const colCurrent = document.getElementById("col-current");
+          const colNext = document.getElementById("col-next");
+          
+          const imgPrev = document.getElementById("img-prev");
+          const imgCurrent = document.getElementById("img-current");
+          const imgNext = document.getElementById("img-next");
+          
+          const datePrev = document.getElementById("col-prev-date");
+          const dateCurrent = document.getElementById("col-current-date");
+          const dateNext = document.getElementById("col-next-date");
           
           if (titleEl) {
-            titleEl.textContent = `📂 [${file.keyword}] - ${file.date} (${activeIndex + 1} / ${currentFilteredFiles.length})`;
+            titleEl.textContent = `📂 [${currentFile.keyword}] 비교 뷰어 (${activeIndex + 1} / ${currentFilteredFiles.length})`;
           }
-          if (imgEl) {
-            imgEl.src = imgUrl;
-            imgEl.style.maxWidth = (zoomScale * 1000) + "px";
+          
+          // 1. Current
+          if (imgCurrent) {
+            imgCurrent.src = getImgUrl(currentFile);
+            imgCurrent.style.maxWidth = (zoomScale * 1000) + "px";
           }
-          if (imgBox) {
-            imgBox.scrollTop = 0; // 새 이미지 로드 시 스크롤을 맨 위로 초기화
+          if (dateCurrent) {
+            dateCurrent.textContent = `🗓️ ${currentFile.date} (선택일)`;
           }
+          
+          // 2. Previous (Older)
+          if (prevFile) {
+            colPrev.style.display = "block";
+            imgPrev.src = getImgUrl(prevFile);
+            imgPrev.style.maxWidth = (zoomScale * 1000) + "px";
+            datePrev.textContent = `⬅️ 이전일 (${prevFile.date})`;
+          } else {
+            colPrev.style.display = "none";
+            imgPrev.src = "";
+          }
+          
+          // 3. Next (Newer)
+          if (nextFile) {
+            colNext.style.display = "block";
+            imgNext.src = getImgUrl(nextFile);
+            imgNext.style.maxWidth = (zoomScale * 1000) + "px";
+            dateNext.textContent = `➡️ 다음일 (${nextFile.date})`;
+          } else {
+            colNext.style.display = "none";
+            imgNext.src = "";
+          }
+          
+          // Reset scroll tops
+          [colPrev, colCurrent, colNext].forEach(col => {
+            if (col) col.scrollTop = 0;
+          });
+          
           updateZoomIndicator();
         }
 

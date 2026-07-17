@@ -719,14 +719,14 @@ async function cropScreenshotMargins(browser, buffer, platform) {
     const base64Image = buffer.toString('base64');
     const page = await browser.newPage();
     
-    // 네이버 PC 검색 결과: 약 80px 시작, 콘텐츠 폭 1050px
-    // 구글 PC 검색 결과: 약 140px 시작, 콘텐츠 폭 800px
+    // 네이버 PC 검색 결과: 콘텐츠 영역 시작 약 80px, 메인 팩 폭 730px (사이드바 광고/위젯 제거)
+    // 구글 PC 검색 결과: 콘텐츠 영역 시작 약 140px, 메인 영역 폭 650px (사이드바 광고 제거)
     let xStart = 80;
-    let cropWidth = 1050;
+    let cropWidth = 730;
     
     if (platform === 'google') {
       xStart = 140;
-      cropWidth = 800;
+      cropWidth = 650;
     }
     
     const htmlContent = `
@@ -862,6 +862,20 @@ async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
         }
 
         await autoScroll(page);
+
+        // 불필요한 푸터(footer) 영역 숨기기 처리
+        await page.evaluate(() => {
+          const footerSelectors = [
+            '#footer', 'footer', '#fbar', '.footer',
+            '#policy', '.policy', '#address', '.address'
+          ];
+          footerSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => {
+              el.style.display = 'none';
+            });
+          });
+        });
+
         await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1500)));
 
         const safeFilename = cleanKeyword.replace(/[\\/:*?"<>|]/g, '_');
