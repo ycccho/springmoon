@@ -1256,7 +1256,18 @@
         if (!editor) return;
         
         if (e.target && e.target.tagName === "IMG" && editor.contains(e.target)) {
+          // Clear outline from previous image if exists
+          if (activeEditorImg) {
+            activeEditorImg.style.outline = "";
+            activeEditorImg.style.outlineOffset = "";
+          }
+
           activeEditorImg = e.target;
+
+          // Add custom highlight outline to show active selection clearly
+          activeEditorImg.style.outline = "3px solid #b08b5c";
+          activeEditorImg.style.outlineOffset = "3px";
+          
           const resizeBar = document.getElementById("image-resize-bar");
           if (!resizeBar) return;
           
@@ -1285,6 +1296,14 @@
           }
           
           resizeBar.classList.remove("hidden");
+
+          // Auto-focus and highlight input for fast typing
+          if (widthInput) {
+            setTimeout(() => {
+              widthInput.focus();
+              widthInput.select();
+            }, 50);
+          }
         }
       } catch (err) {
         console.error("Image selection error: ", err);
@@ -1370,12 +1389,42 @@
 
     function closeImageResizeBar() {
       try {
+        if (activeEditorImg) {
+          activeEditorImg.style.outline = "";
+          activeEditorImg.style.outlineOffset = "";
+        }
         const resizeBar = document.getElementById("image-resize-bar");
         if (resizeBar) resizeBar.classList.add("hidden");
         activeEditorImg = null;
       } catch (err) {
         console.error(err);
       }
+    }
+
+    // Bind event listeners for the resize bar
+    const resizeBarEl = document.getElementById("image-resize-bar");
+    if (resizeBarEl) {
+      resizeBarEl.addEventListener("click", function(e) {
+        e.stopPropagation();
+      });
+    }
+    const widthInputEl = document.getElementById("img-width-input");
+    const heightInputEl = document.getElementById("img-height-input");
+    if (widthInputEl) {
+      widthInputEl.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          applyImageSize();
+        }
+      });
+    }
+    if (heightInputEl) {
+      heightInputEl.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          applyImageSize();
+        }
+      });
     }
 
     // App Startup
