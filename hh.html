@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>면허업체 자동견적 시스템 | 스마트 인테리어 플랫폼</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #FF5E14;
+      --primary-hover: #E04D0C;
+      --dark-gray: #12141C;
+      --medium-gray: #1E222E;
+      --light-gray: #F5F7FA;
+      --border-color: #E2E8F0;
+      --text-dark: #1E293B;
+      --text-light: #64748B;
+      --glass-bg: rgba(255, 255, 255, 0.8);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+      background-color: #F8FAFC;
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--dark-gray) 0%, #202535 100%);
+      color: white;
+      padding: 3rem 1rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: #F8FAFC;
+      clip-path: polygon(0 100%, 100% 100%, 100% 0);
+    }
+
+    .badge-primary {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 1rem;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(255, 94, 20, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      word-break: keep-all;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: #A0AEC0;
+      font-weight: 300;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: -2.5rem auto 4rem;
+      padding: 0 1rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+      .grid-layout {
+        grid-template-columns: 380px 1fr;
+      }
+    }
+
+    /* 설정 카드 */
+    .config-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--glass-shadow);
+      border: 1px solid var(--border-color);
+      height: fit-content;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid var(--primary);
+      padding-left: 0.8rem;
+      color: var(--dark-gray);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #475569;
+    }
+
+    .form-select, .form-input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #CBD5E1;
+      background-color: white;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-select:focus, .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 94, 20, 0.15);
+    }
+
+    /* 옵션 칩 그룹 */
+    .chip-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+
+    .chip-btn {
+      background: white;
+      border: 1px solid #CBD5E1;
+      padding: 0.8rem 0.5rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .chip-btn.active {
+      border-color: var(--primary);
+      background-color: rgba(255, 94, 20, 0.05);
+      color: var(--primary);
+    }
+
+    .chip-btn:hover:not(.active) {
+      border-color: #94A3B8;
+      background-color: #F8FAFC;
+    }
+
+    /* 견적 대시보드 */
+    .estimation-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--glass-shadow);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* 요약 패널 */
+    .summary-panel {
+      background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1.5rem;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-panel::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -10%;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(255, 94, 20, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .summary-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .summary-header .label {
+      font-size: 0.85rem;
+      color: #94A3B8;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-header .apt-info {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .summary-total {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .summary-total .price {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .summary-total .unit {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 1.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .summary-item .lbl {
+      font-size: 0.75rem;
+      color: #94A3B8;
+    }
+
+    .summary-item .val {
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* 탭 헤더 */
+    .tabs-header {
+      display: flex;
+      border-bottom: 2px solid #E2E8F0;
+      gap: 1.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tabs-header::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      padding: 0.8rem 0.2rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-light);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* 테이블 스타일링 */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    thead {
+      background-color: var(--light-gray);
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    th {
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      color: #334155;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: #475569;
+    }
+
+    tbody tr:hover {
+      background-color: #F8FAFC;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .font-bold {
+      font-weight: 700;
+    }
+
+    .subtotal-row {
+      background-color: rgba(255, 94, 20, 0.03);
+      font-weight: 700;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .subtotal-row td {
+      color: var(--text-dark);
+    }
+
+    /* 버튼 그룹 */
+    .actions-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      outline: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(255, 94, 20, 0.2);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: #475569;
+      border: 1px solid #CBD5E1;
+    }
+
+    .btn-secondary:hover {
+      background-color: #F8FAFC;
+      border-color: #94A3B8;
+    }
+
+    /* 안내 경고 문구 */
+    .caution-note {
+      background-color: #FFFBEB;
+      border-left: 4px solid #F59E0B;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #B45309;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .caution-title {
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="badge-primary">건설업 등록증 보유 면허업체 매칭</div>
+    <h1>면허업체만 활동하는 아파트 전문 인테리어 플랫폼의 자동견적 시스템</h1>
+    <p>네이버 실시간 아파트 DB 및 실제 공사 상세 견적서를 기반으로 가공된 정밀 자동 산출 알고리즘</p>
+  </header>
+
+  <!-- Container -->
+  <div class="container">
+    <div class="grid-layout">
+      
+      <!-- Left Config Card -->
+      <div class="config-card">
+        <div class="section-title">아파트 정보 설정</div>
+        
+        <!-- 아파트 검색 (테스트 프리셋) -->
+        <div class="form-group">
+          <label for="apt-select">아파트 단지 선택</label>
+          <select id="apt-select" class="form-select">
+            <option value="lct" data-pyeong="43" data-rooms="3" data-baths="2" data-year="2020">해운대 엘시티 더샵</option>
+            <option value="samik" data-pyeong="32" data-rooms="3" data-baths="2" data-year="1979">광안동 삼익비치 아파트 (노후단지)</option>
+            <option value="centum" data-pyeong="24" data-rooms="3" data-baths="1" data-year="2003">센텀센시빌 아파트</option>
+            <option value="custom">직접 평형 설정하기</option>
+          </select>
+        </div>
+
+        <!-- 직접 입력 시 노출할 입력단 -->
+        <div id="custom-inputs" style="display: none;">
+          <div class="form-group">
+            <label for="custom-pyeong">평형 (평)</label>
+            <input type="number" id="custom-pyeong" class="form-input" value="32">
+          </div>
+          <div class="form-group">
+            <label for="custom-rooms">방 개수 (개)</label>
+            <input type="number" id="custom-rooms" class="form-input" value="3">
+          </div>
+          <div class="form-group">
+            <label for="custom-baths">화장실 개수 (개)</label>
+            <input type="number" id="custom-baths" class="form-input" value="2">
+          </div>
+          <div class="form-group">
+            <label for="custom-year">준공 연도</label>
+            <input type="number" id="custom-year" class="form-input" value="2010">
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 2rem;">시공 옵션 설정</div>
+
+        <!-- 자재 등급 -->
+        <div class="form-group">
+          <label>자재/시공 등급</label>
+          <div class="chip-group" id="grade-group">
+            <button class="chip-btn" data-value="basic">실속형</button>
+            <button class="chip-btn active" data-value="standard">표준형</button>
+            <button class="chip-btn" data-value="premium">고급형</button>
+          </div>
+        </div>
+
+        <!-- 확장 여부 -->
+        <div class="form-group">
+          <label>발코니 확장 여부</label>
+          <div class="chip-group" id="expand-group">
+            <button class="chip-btn" data-value="none">비확장형</button>
+            <button class="chip-btn active" data-value="expanded">거실 확장형</button>
+          </div>
+        </div>
+
+        <!-- 샷시(창호) 교체 여부 -->
+        <div class="form-group">
+          <label>창호 교체</label>
+          <div class="chip-group" id="window-group">
+            <button class="chip-btn active" data-value="keep">기존창 필름/보존</button>
+            <button class="chip-btn" data-value="replace">전체 KCC창호 교체</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Estimate Dashboard -->
+      <div class="estimation-card">
+        
+        <!-- Summary Panel -->
+        <div class="summary-panel">
+          <div class="summary-header">
+            <span class="label">예상 공사 견적금액</span>
+            <span class="apt-info" id="summary-apt-name">해운대 엘시티 더샵 (43평형)</span>
+          </div>
+          <div class="summary-total">
+            <span class="price" id="total-price">0</span>
+            <span class="unit">원 (공급가액 기준)</span>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="lbl">공급면적</span>
+              <span class="val" id="summary-area">142㎡ (43평)</span>
+            </div>
+            <div class="summary-item">
+              <span class="lbl">방/화장실</span>
+              <span class="val" id="summary-layout">방 3개 / 욕실 2개</span>
+            </div>
+            <div class="summary-item">
+              <span class="lbl">준공 경과</span>
+              <span class="val" id="summary-age">신축급 (2020년 준공)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="all">전체공정</button>
+          <button class="tab-btn" data-tab="0">가설/철거</button>
+          <button class="tab-btn" data-tab="1">목공/창호</button>
+          <button class="tab-btn" data-tab="2">타일/욕실</button>
+          <button class="tab-btn" data-tab="3">도배/바닥</button>
+          <button class="tab-btn" data-tab="4">가구/기타</button>
+        </div>
+
+        <!-- 테이블 내용 -->
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 120px;">공정</th>
+                <th>품목</th>
+                <th>규격</th>
+                <th style="width: 60px;" class="text-right">단위</th>
+                <th style="width: 60px;" class="text-right">수량</th>
+                <th style="width: 100px;" class="text-right">재료비</th>
+                <th style="width: 100px;" class="text-right">노무비</th>
+                <th style="width: 110px;" class="text-right">합계금액</th>
+              </tr>
+            </thead>
+            <tbody id="estimate-tbody">
+              <!-- JS에서 동적으로 채워짐 -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 안내 사항 -->
+        <div class="caution-note">
+          <span class="caution-title">⚠️ 견적 참고 안내</span>
+          <span>• 본 견적은 실제 인테리어 공사의 도면 및 수량 단가 데이터를 기초로 자동 계산된 시뮬레이션 금액입니다.</span>
+          <span>• 면허업체 기준 자재(친환경 벽지, 고품질 자재)와 숙련 시공팀의 표준 노무비율이 일괄 적용되어 있습니다.</span>
+          <span>• 아파트 단지의 상태, 엘리베이터 양중 여부, 추가 요구사항에 따라 실제 미팅 시 견적이 일부 조절될 수 있습니다.</span>
+        </div>
+
+        <!-- 하단 액션 버튼 -->
+        <div class="actions-row">
+          <button class="btn btn-secondary" onclick="window.print()">🖨️ 견적서 프린트/PDF 저장</button>
+          <button class="btn btn-primary" onclick="alert('💬 상담 신청이 접수되었습니다! 면허 업체를 통한 무료 실측 미팅을 연동해 드립니다.')">📞 무료 실측 및 상담 신청</button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Calculations Logic -->
+  <script>
+    // 등급 가중치 설정
+    const GRADES = {
+      basic: { label: "실속형", multiplier: 0.8, name: "실속 친환경 자재" },
+      standard: { label: "표준형", multiplier: 1.0, name: "표준 친환경 자재" },
+      premium: { label: "고급형", multiplier: 1.35, name: "고급 프리미엄 수입 자재" }
+    };
+
+    // 옵션 변경 이벤트 바인딩
+    const aptSelect = document.getElementById("apt-select");
+    const customInputs = document.getElementById("custom-inputs");
+    const chipGroups = ['grade-group', 'expand-group', 'window-group'];
+
+    // 아파트 선택 시 작동
+    aptSelect.addEventListener("change", function() {
+      if (this.value === "custom") {
+        customInputs.style.display = "block";
+      } else {
+        customInputs.style.display = "none";
+      }
+      calculateEstimate();
+    });
+
+    // 직접 입력 값 변경 시 작동
+    document.querySelectorAll("#custom-inputs input").forEach(input => {
+      input.addEventListener("input", calculateEstimate);
+    });
+
+    // 칩 그룹 동작 연동
+    chipGroups.forEach(id => {
+      const group = document.getElementById(id);
+      group.querySelectorAll(".chip-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          group.querySelectorAll(".chip-btn").forEach(b => b.classList.remove("active"));
+          this.classList.add("active");
+          calculateEstimate();
+        });
+      });
+    });
+
+    // 탭 동작 연동
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+        renderTableRows(this.dataset.tab);
+      });
+    });
+
+    // 전역 변수
+    let calculatedEstimateData = [];
+
+    // 견적서 계산 핵심 알고리즘
+    function calculateEstimate() {
+      const isCustom = aptSelect.value === "custom";
+      let pyeong = 32;
+      let rooms = 3;
+      let baths = 2;
+      let year = 2010;
+      let aptName = "커스텀 설정 아파트";
+
+      if (!isCustom) {
+        const opt = aptSelect.options[aptSelect.selectedIndex];
+        pyeong = parseFloat(opt.dataset.pyeong);
+        rooms = parseInt(opt.dataset.rooms);
+        baths = parseInt(opt.dataset.baths);
+        year = parseInt(opt.dataset.year);
+        aptName = opt.textContent.split("(")[0].trim();
+      } else {
+        pyeong = parseFloat(document.getElementById("custom-pyeong").value) || 32;
+        rooms = parseInt(document.getElementById("custom-rooms").value) || 3;
+        baths = parseInt(document.getElementById("custom-baths").value) || 2;
+        year = parseInt(document.getElementById("custom-year").value) || 2010;
+      }
+
+      // 준공 경과 연수 계산
+      const currentYear = new Date().getFullYear();
+      const age = currentYear - year;
+      let ageText = `${year}년 준공 (경과 ${age}년)`;
+      if (age < 5) ageText = `신축급 (경과 ${age}년)`;
+      else if (age >= 15) ageText = `노후단지 (경과 ${age}년, 배관보수 권장)`;
+
+      // 옵션 칩 값 읽기
+      const grade = document.querySelector("#grade-group .chip-btn.active").dataset.value;
+      const expand = document.querySelector("#expand-group .chip-btn.active").dataset.value;
+      const windowReplace = document.querySelector("#window-group .chip-btn.active").dataset.value;
+
+      const gradeInfo = GRADES[grade];
+      const mult = gradeInfo.multiplier;
+
+      // 요약 UI 업데이트
+      document.getElementById("summary-apt-name").textContent = `${aptName} (${pyeong}평형)`;
+      document.getElementById("summary-area").textContent = `${Math.round(pyeong * 3.305)}㎡ (${pyeong}평)`;
+      document.getElementById("summary-layout").textContent = `방 ${rooms}개 / 욕실 ${baths}개`;
+      document.getElementById("summary-age").textContent = ageText;
+
+      // 43평 실계약 기준 데이터 기반 공정별 내역서 시뮬레이션 데이터 빌드
+      calculatedEstimateData = [];
+
+      // ----------------- 01. 가설/철거공사 -----------------
+      const scrapCost = pyeong * 38000; // 철거 평당 단가
+      const protectCost = pyeong * 11000; // 바닥 보양
+      calculatedEstimateData.push({
+        catId: 0,
+        catName: "가설/철거",
+        item: "실내 철거 및 수거",
+        spec: "씽크대/도어/마루/몰딩 일체",
+        unit: "평",
+        qty: pyeong,
+        matPrice: 0,
+        labPrice: Math.round(38000 * (age >= 15 ? 1.25 : 1.0)), // 노후 아파트 철거 난이도 반영
+        note: "내부 몰딩/싱크대/바닥재 포함"
+      });
+      calculatedEstimateData.push({
+        catId: 0,
+        catName: "가설/철거",
+        item: "바닥 보양 공사",
+        spec: "플로베니아 시공 (공용 엘리베이터 포함)",
+        unit: "식",
+        qty: 1,
+        matPrice: Math.round(protectCost * 0.4),
+        labPrice: Math.round(protectCost * 0.6),
+        note: "공용 구간 보양 보존"
+      });
+
+      // ----------------- 02. 목공/창호공사 -----------------
+      // 몰딩 길이 계산식 (평수의 약 2.4배 미터 환산)
+      const moldingLength = Math.round(pyeong * 2.4);
+      calculatedEstimateData.push({
+        catId: 1,
+        catName: "목공/창호",
+        item: "천정 몰딩 및 걸레받이 시공",
+        spec: "영림 MDF 몰딩재",
+        unit: "m",
+        qty: moldingLength,
+        matPrice: Math.round(3500 * mult),
+        labPrice: 6500,
+        note: "친환경 방염 몰딩재"
+      });
+      
+      // 문 교체 (방 개수 + 공용부)
+      const doorsQty = rooms + 2; 
+      calculatedEstimateData.push({
+        catId: 1,
+        catName: "목공/창호",
+        item: "도어 및 도어프레임 교체",
+        spec: "영림 ABS 도어 (경첩/실린더 포함)",
+        unit: "조",
+        qty: doorsQty,
+        matPrice: Math.round(180000 * mult),
+        labPrice: 90000,
+        note: "틀/문짝 포함 일체형"
+      });
+
+      // 발코니 확장 목공 (확장 옵션 시 추가)
+      if (expand === "expanded") {
+        calculatedEstimateData.push({
+          catId: 1,
+          catName: "목공/창호",
+          item: "발코니 확장부 단열 및 가벽공사",
+          spec: "아이소핑크 2중 단열 + 석고 마감",
+          unit: "개소",
+          qty: 1,
+          matPrice: Math.round(350000 * mult),
+          labPrice: 450000,
+          note: "이중 단열 및 결로 방지 공법"
+        });
+      }
+
+      // 샷시 교체 옵션 연동
+      if (windowReplace === "replace") {
+        calculatedEstimateData.push({
+          catId: 1,
+          catName: "목공/창호",
+          item: "외부 샷시 전체 교체",
+          spec: "KCC 140/242 발코니 전용 이중창",
+          unit: "틀",
+          qty: Math.max(3, Math.round(pyeong / 10)),
+          matPrice: Math.round(1200000 * mult),
+          labPrice: 350000,
+          note: "로이유리 업그레이드 포함"
+        });
+      } else {
+        // 기존 샷시 필름 리폼
+        calculatedEstimateData.push({
+          catId: 1,
+          catName: "목공/창호",
+          item: "기존 외부 샷시 필름 리폼",
+          spec: "LG 친환경 인테리어 필름 랩핑",
+          unit: "식",
+          qty: 1,
+          matPrice: Math.round(pyeong * 15000 * mult),
+          labPrice: Math.round(pyeong * 25000),
+          note: "유리 실리콘 재코킹 포함"
+        });
+      }
+
+      // ----------------- 03. 타일/욕실공사 -----------------
+      // 욕실 공사 비용 (욕실 수 연동)
+      calculatedEstimateData.push({
+        catId: 2,
+        catName: "타일/욕실",
+        item: "욕실 패키지 리모델링",
+        spec: baths === 2 ? "공용+안방 욕실 전체 리모델링" : "공용 욕실 리모델링",
+        unit: "칸",
+        qty: baths,
+        matPrice: Math.round(1500000 * mult),
+        labPrice: 950000,
+        note: baths === 2 ? "아메리칸 스탠다드 도기 적용" : "기본형 도기 적용"
+      });
+
+      // 주방/현관/베란다 타일 시공
+      calculatedEstimateData.push({
+        catId: 2,
+        catName: "타일/욕실",
+        item: "주방 벽면 및 현관 타일 시공",
+        spec: "300x600각 국산 도기질/자기질 타일",
+        unit: "㎡",
+        qty: Math.round(pyeong * 0.7),
+        matPrice: Math.round(22000 * mult),
+        labPrice: 28000,
+        note: "친환경 에폭시 고정 시공"
+      });
+
+      // ----------------- 04. 도배/바닥공사 -----------------
+      // 도배 평수 계산 (실 공급평수 기준 약 2.8배가 벽지 시공 면적)
+      const wallpaperQty = Math.round(pyeong * 2.8);
+      calculatedEstimateData.push({
+        catId: 3,
+        catName: "도배/바닥",
+        item: grade === "basic" ? "친환경 소형 광폭합지" : "친환경 실크벽지 도배 시공",
+        spec: "개나리/신한 친환경 벽지",
+        unit: "㎡",
+        qty: wallpaperQty,
+        matPrice: Math.round((grade === "basic" ? 1800 : 3800) * mult),
+        labPrice: 4200,
+        note: "네오텍스 친환경 초배지 기본 시공"
+      });
+
+      // 바닥재 면적 계산 (전용면적의 약 0.9배가 실바닥 평수)
+      const floorPyeong = Math.round(pyeong * 0.9 + (expand === "expanded" ? 3 : 0));
+      calculatedEstimateData.push({
+        catId: 3,
+        catName: "도배/바닥",
+        item: grade === "basic" ? "친환경 고급 2.2T 장판" : (grade === "premium" ? "수입 최고급 원목마루" : "친환경 강마루 바닥재 시공"),
+        spec: grade === "basic" ? "LG 하우시스 장판" : "동화자연마루/구정마루",
+        unit: "평",
+        qty: floorPyeong,
+        matPrice: Math.round((grade === "basic" ? 45000 : (grade === "premium" ? 195000 : 85000)) * mult),
+        labPrice: grade === "basic" ? 15000 : 35000,
+        note: "친환경 황토풀 친환경 접착제 시공"
+      });
+
+      // ----------------- 05. 가구/기타공사 -----------------
+      // 씽크대 (평수에 따라 길이 비례 자(尺) 계산, 30평 = 10자, 40평 = 14자 수준)
+      const sinkLength = Math.max(8, Math.round(pyeong * 0.3));
+      calculatedEstimateData.push({
+        catId: 4,
+        catName: "가구/기타",
+        item: "주방 씽크대 설치 공사",
+        spec: "E0 친환경 MDF + 대리석 상판 포함",
+        unit: "자",
+        qty: sinkLength,
+        matPrice: Math.round(220000 * mult),
+        labPrice: 50000,
+        note: "하츠 3구 하이라이트/인덕션 포함"
+      });
+
+      // 공정별 세부 항목 합계 및 총액 연계
+      let grandTotal = 0;
+      calculatedEstimateData.forEach(row => {
+        row.total = (row.matPrice + row.labPrice) * row.qty;
+        grandTotal += row.total;
+      });
+
+      // 총 공급가액 포맷 출력
+      document.getElementById("total-price").textContent = grandTotal.toLocaleString();
+
+      // 테이블 렌더링
+      const activeTab = document.querySelector(".tabs-header .tab-btn.active").dataset.tab;
+      renderTableRows(activeTab);
+    }
+
+    // 카테고리/공정별 필터링 테이블 행 드로잉 함수
+    function renderTableRows(tab) {
+      const tbody = document.getElementById("estimate-tbody");
+      tbody.innerHTML = "";
+
+      let filtered = calculatedEstimateData;
+      if (tab !== "all") {
+        const catIdInt = parseInt(tab);
+        filtered = calculatedEstimateData.filter(row => row.catId === catIdInt);
+      }
+
+      let currentCatName = "";
+      let catTotal = 0;
+
+      filtered.forEach(row => {
+        // 공정명이 바뀌면 공정별 타이틀 삽입
+        if (row.catName !== currentCatName && tab === "all") {
+          currentCatName = row.catName;
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="font-bold" style="color: var(--primary);">${row.catName}</td>
+          <td class="font-bold">${row.item}</td>
+          <td>${row.spec}</td>
+          <td class="text-right">${row.unit}</td>
+          <td class="text-right font-bold">${row.qty.toLocaleString()}</td>
+          <td class="text-right">${row.matPrice.toLocaleString()}원</td>
+          <td class="text-right">${row.labPrice.toLocaleString()}원</td>
+          <td class="text-right font-bold" style="color: var(--text-dark);">${row.total.toLocaleString()}원</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // 선택 탭 혹은 전체 탭의 총 소계행 추가
+      let matSum = 0;
+      let labSum = 0;
+      let totalSum = 0;
+      filtered.forEach(r => {
+        matSum += r.matPrice * r.qty;
+        labSum += r.labPrice * r.qty;
+        totalSum += r.total;
+      });
+
+      const subtr = document.createElement("tr");
+      subtr.className = "subtotal-row";
+      subtr.innerHTML = `
+        <td colspan="3">${tab === "all" ? "총 합계" : filtered[0]?.catName + " 소계"}</td>
+        <td class="text-right">-</td>
+        <td class="text-right">-</td>
+        <td class="text-right">${matSum.toLocaleString()}원</td>
+        <td class="text-right">${labSum.toLocaleString()}원</td>
+        <td class="text-right font-bold" style="color: var(--primary); font-size: 0.95rem;">${totalSum.toLocaleString()}원</td>
+      `;
+      tbody.appendChild(subtr);
+    }
+
+    // 초기가동 실행
+    calculateEstimate();
+  </script>
+</body>
+</html>
