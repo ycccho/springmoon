@@ -1251,100 +1251,115 @@
     
     // Register image click inside rich-editor-content
     document.addEventListener("click", function(e) {
-      const editor = document.getElementById("rich-editor-content");
-      if (!editor) return;
-      
-      if (e.target.tagName === "IMG" && editor.contains(e.target)) {
-        activeEditorImg = e.target;
-        const resizeBar = document.getElementById("image-resize-bar");
+      try {
+        const editor = document.getElementById("rich-editor-content");
+        if (!editor) return;
         
-        // Populate inputs
-        document.getElementById("img-width-input").value = activeEditorImg.style.width || activeEditorImg.width || "";
-        document.getElementById("img-height-input").value = activeEditorImg.style.height || activeEditorImg.height || "";
-        
-        // Determine alignment select value
-        const alignSelect = document.getElementById("img-align-select");
-        const disp = activeEditorImg.style.display;
-        const ml = activeEditorImg.style.marginLeft;
-        const mr = activeEditorImg.style.marginRight;
-        
-        if (disp === "inline-block") {
-          alignSelect.value = "inline";
-        } else if (ml === "0px" || ml === "0") {
-          alignSelect.value = "left";
-        } else if (ml === "auto" && mr === "auto") {
-          alignSelect.value = "center";
-        } else if (ml === "auto" && (mr === "0px" || mr === "0")) {
-          alignSelect.value = "right";
-        } else {
-          alignSelect.value = "default";
+        if (e.target && e.target.tagName === "IMG" && editor.contains(e.target)) {
+          activeEditorImg = e.target;
+          const resizeBar = document.getElementById("image-resize-bar");
+          if (!resizeBar) return;
+          
+          const widthInput = document.getElementById("img-width-input");
+          const heightInput = document.getElementById("img-height-input");
+          if (widthInput) widthInput.value = activeEditorImg.style.width || activeEditorImg.width || "";
+          if (heightInput) heightInput.value = activeEditorImg.style.height || activeEditorImg.height || "";
+          
+          const alignSelect = document.getElementById("img-align-select");
+          if (alignSelect) {
+            const disp = activeEditorImg.style.display;
+            const ml = activeEditorImg.style.marginLeft;
+            const mr = activeEditorImg.style.marginRight;
+            
+            if (disp === "inline-block") {
+              alignSelect.value = "inline";
+            } else if (ml === "0px" || ml === "0") {
+              alignSelect.value = "left";
+            } else if (ml === "auto" && mr === "auto") {
+              alignSelect.value = "center";
+            } else if (ml === "auto" && (mr === "0px" || mr === "0")) {
+              alignSelect.value = "right";
+            } else {
+              alignSelect.value = "default";
+            }
+          }
+          
+          resizeBar.classList.remove("hidden");
         }
-        
-        resizeBar.classList.remove("hidden");
+      } catch (err) {
+        console.error("Image selection error: ", err);
       }
     });
 
     function applyImageSize() {
-      if (activeEditorImg) {
-        const w = document.getElementById("img-width-input").value.trim();
-        const h = document.getElementById("img-height-input").value.trim();
-        const align = document.getElementById("img-align-select").value;
-        
-        if (w) {
-          activeEditorImg.style.width = w;
-          if (/^\d+$/.test(w)) {
-            activeEditorImg.style.width = w + "px";
+      try {
+        if (activeEditorImg) {
+          const widthInput = document.getElementById("img-width-input");
+          const heightInput = document.getElementById("img-height-input");
+          const alignSelect = document.getElementById("img-align-select");
+          
+          const w = widthInput ? widthInput.value.trim() : "";
+          const h = heightInput ? heightInput.value.trim() : "";
+          const align = alignSelect ? alignSelect.value : "default";
+          
+          if (w) {
+            activeEditorImg.style.width = w;
+            if (/^\d+$/.test(w)) {
+              activeEditorImg.style.width = w + "px";
+            }
+          } else {
+            activeEditorImg.style.width = "";
           }
-        } else {
-          activeEditorImg.style.width = "";
-        }
-        
-        if (h) {
-          activeEditorImg.style.height = h;
-          if (/^\d+$/.test(h)) {
-            activeEditorImg.style.height = h + "px";
+          
+          if (h) {
+            activeEditorImg.style.height = h;
+            if (/^\d+$/.test(h)) {
+              activeEditorImg.style.height = h + "px";
+            }
+          } else {
+            activeEditorImg.style.height = "auto";
           }
-        } else {
-          activeEditorImg.style.height = "auto";
-        }
 
-        // Apply alignment styles
-        if (align === "inline") {
-          activeEditorImg.style.display = "inline-block";
-          activeEditorImg.style.margin = "10px";
-          activeEditorImg.style.marginLeft = "";
-          activeEditorImg.style.marginRight = "";
-          activeEditorImg.classList.remove("block");
-        } else if (align === "left") {
-          activeEditorImg.style.display = "block";
-          activeEditorImg.style.marginLeft = "0";
-          activeEditorImg.style.marginRight = "auto";
-          activeEditorImg.style.marginTop = "20px";
-          activeEditorImg.style.marginBottom = "20px";
-          activeEditorImg.classList.add("block");
-        } else if (align === "center") {
-          activeEditorImg.style.display = "block";
-          activeEditorImg.style.marginLeft = "auto";
-          activeEditorImg.style.marginRight = "auto";
-          activeEditorImg.style.marginTop = "20px";
-          activeEditorImg.style.marginBottom = "20px";
-          activeEditorImg.classList.add("block");
-        } else if (align === "right") {
-          activeEditorImg.style.display = "block";
-          activeEditorImg.style.marginLeft = "auto";
-          activeEditorImg.style.marginRight = "0";
-          activeEditorImg.style.marginTop = "20px";
-          activeEditorImg.style.marginBottom = "20px";
-          activeEditorImg.classList.add("block");
-        } else {
-          // default behavior
-          activeEditorImg.style.display = "";
-          activeEditorImg.style.margin = "";
-          activeEditorImg.style.marginLeft = "";
-          activeEditorImg.style.marginRight = "";
-          activeEditorImg.style.marginTop = "";
-          activeEditorImg.style.marginBottom = "";
+          // Apply alignment styles
+          if (align === "inline") {
+            activeEditorImg.style.display = "inline-block";
+            activeEditorImg.style.margin = "10px";
+            activeEditorImg.style.marginLeft = "";
+            activeEditorImg.style.marginRight = "";
+            activeEditorImg.classList.remove("block");
+          } else if (align === "left") {
+            activeEditorImg.style.display = "block";
+            activeEditorImg.style.marginLeft = "0";
+            activeEditorImg.style.marginRight = "auto";
+            activeEditorImg.style.marginTop = "20px";
+            activeEditorImg.style.marginBottom = "20px";
+            activeEditorImg.classList.add("block");
+          } else if (align === "center") {
+            activeEditorImg.style.display = "block";
+            activeEditorImg.style.marginLeft = "auto";
+            activeEditorImg.style.marginRight = "auto";
+            activeEditorImg.style.marginTop = "20px";
+            activeEditorImg.style.marginBottom = "20px";
+            activeEditorImg.classList.add("block");
+          } else if (align === "right") {
+            activeEditorImg.style.display = "block";
+            activeEditorImg.style.marginLeft = "auto";
+            activeEditorImg.style.marginRight = "0";
+            activeEditorImg.style.marginTop = "20px";
+            activeEditorImg.style.marginBottom = "20px";
+            activeEditorImg.classList.add("block");
+          } else {
+            // default behavior
+            activeEditorImg.style.display = "";
+            activeEditorImg.style.margin = "";
+            activeEditorImg.style.marginLeft = "";
+            activeEditorImg.style.marginRight = "";
+            activeEditorImg.style.marginTop = "";
+            activeEditorImg.style.marginBottom = "";
+          }
         }
+      } catch (err) {
+        alert("크기 및 정렬 적용 중 오류가 발생했습니다: " + err.message);
       }
       closeImageResizeBar();
     }
@@ -1354,9 +1369,13 @@
     }
 
     function closeImageResizeBar() {
-      const resizeBar = document.getElementById("image-resize-bar");
-      if (resizeBar) resizeBar.classList.add("hidden");
-      activeEditorImg = null;
+      try {
+        const resizeBar = document.getElementById("image-resize-bar");
+        if (resizeBar) resizeBar.classList.add("hidden");
+        activeEditorImg = null;
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     // App Startup
