@@ -1183,7 +1183,13 @@
           ctx.drawImage(img, 0, 0, width, height);
 
           const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
-          const imgHtml = `<img src="${compressedDataUrl}" alt="통계 이미지" class="my-4 max-w-full rounded-xl shadow-sm block border border-gray-150" />`;
+          const imgHtml = `
+            <div class="editor-image-container" style="display: block; margin: 20px auto; text-align: center;">
+              <img src="${compressedDataUrl}" alt="통계 이미지" class="my-2 max-w-full rounded-xl shadow-sm block border border-gray-150" style="margin: 0 auto; display: block;" />
+              <div class="editor-image-caption" style="font-size: 0.85rem; color: #4b5563; margin-top: 8px; font-weight: 600; text-align: center; border: 1px dashed #d1d5db; border-radius: 6px; padding: 4px 8px; display: inline-block; min-width: 150px; background-color: #fafafa; cursor: text; outline: none;" contenteditable="true" data-placeholder="업체 정보 입력">업체 정보 입력</div>
+            </div>
+            <p><br></p>
+          `;
           
           document.getElementById("rich-editor-content").focus();
           insertHtmlAtCursor(imgHtml);
@@ -1278,9 +1284,10 @@
           
           const alignSelect = document.getElementById("img-align-select");
           if (alignSelect) {
-            const disp = activeEditorImg.style.display;
-            const ml = activeEditorImg.style.marginLeft;
-            const mr = activeEditorImg.style.marginRight;
+            const targetEl = (activeEditorImg.parentElement && activeEditorImg.parentElement.classList.contains("editor-image-container")) ? activeEditorImg.parentElement : activeEditorImg;
+            const disp = targetEl.style.display;
+            const ml = targetEl.style.marginLeft;
+            const mr = targetEl.style.marginRight;
             
             if (disp === "inline-block") {
               alignSelect.value = "inline";
@@ -1339,42 +1346,44 @@
             activeEditorImg.style.height = "auto";
           }
 
-          // Apply alignment styles
+          // Apply alignment styles to the container if it exists, otherwise to the image itself
+          const targetEl = (activeEditorImg.parentElement && activeEditorImg.parentElement.classList.contains("editor-image-container")) ? activeEditorImg.parentElement : activeEditorImg;
+
           if (align === "inline") {
-            activeEditorImg.style.display = "inline-block";
-            activeEditorImg.style.margin = "10px";
-            activeEditorImg.style.marginLeft = "";
-            activeEditorImg.style.marginRight = "";
-            activeEditorImg.classList.remove("block");
+            targetEl.style.display = "inline-block";
+            targetEl.style.margin = "10px";
+            targetEl.style.marginLeft = "";
+            targetEl.style.marginRight = "";
+            targetEl.classList.remove("block");
           } else if (align === "left") {
-            activeEditorImg.style.display = "block";
-            activeEditorImg.style.marginLeft = "0";
-            activeEditorImg.style.marginRight = "auto";
-            activeEditorImg.style.marginTop = "20px";
-            activeEditorImg.style.marginBottom = "20px";
-            activeEditorImg.classList.add("block");
+            targetEl.style.display = "block";
+            targetEl.style.marginLeft = "0";
+            targetEl.style.marginRight = "auto";
+            targetEl.style.marginTop = "20px";
+            targetEl.style.marginBottom = "20px";
+            targetEl.classList.add("block");
           } else if (align === "center") {
-            activeEditorImg.style.display = "block";
-            activeEditorImg.style.marginLeft = "auto";
-            activeEditorImg.style.marginRight = "auto";
-            activeEditorImg.style.marginTop = "20px";
-            activeEditorImg.style.marginBottom = "20px";
-            activeEditorImg.classList.add("block");
+            targetEl.style.display = "block";
+            targetEl.style.marginLeft = "auto";
+            targetEl.style.marginRight = "auto";
+            targetEl.style.marginTop = "20px";
+            targetEl.style.marginBottom = "20px";
+            targetEl.classList.add("block");
           } else if (align === "right") {
-            activeEditorImg.style.display = "block";
-            activeEditorImg.style.marginLeft = "auto";
-            activeEditorImg.style.marginRight = "0";
-            activeEditorImg.style.marginTop = "20px";
-            activeEditorImg.style.marginBottom = "20px";
-            activeEditorImg.classList.add("block");
+            targetEl.style.display = "block";
+            targetEl.style.marginLeft = "auto";
+            targetEl.style.marginRight = "0";
+            targetEl.style.marginTop = "20px";
+            targetEl.style.marginBottom = "20px";
+            targetEl.classList.add("block");
           } else {
             // default behavior
-            activeEditorImg.style.display = "";
-            activeEditorImg.style.margin = "";
-            activeEditorImg.style.marginLeft = "";
-            activeEditorImg.style.marginRight = "";
-            activeEditorImg.style.marginTop = "";
-            activeEditorImg.style.marginBottom = "";
+            targetEl.style.display = "";
+            targetEl.style.margin = "";
+            targetEl.style.marginLeft = "";
+            targetEl.style.marginRight = "";
+            targetEl.style.marginTop = "";
+            targetEl.style.marginBottom = "";
           }
         }
       } catch (err) {
