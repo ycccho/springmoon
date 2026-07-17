@@ -1271,7 +1271,12 @@ app.get('/api/local-screenshots', (req, res) => {
         });
       }
     }
-    result.sort((a, b) => b.mtime - a.mtime);
+    result.sort((a, b) => {
+      // YYYY.MM.DD 날짜 문자열 기준으로 내림차순 정렬 (최신 날짜 우선)
+      const dateCompare = b.date.localeCompare(a.date);
+      if (dateCompare !== 0) return dateCompare;
+      return b.mtime - a.mtime;
+    });
 
     // Trigger Cloudflare KV sync in the background
     syncLocalScreenshotsToCloud(folderPath, result).catch(() => {});
