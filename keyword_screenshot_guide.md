@@ -133,6 +133,8 @@
 
 ---
 
+---
+
 ## 6. 전체 소스 코드 레퍼런스 (Full Source Code Package)
 
 아래의 코드들을 각각 해당 파일명으로 저장하여 동일한 디렉토리에 배치하십시오.
@@ -306,6 +308,11 @@ app.post('/api/config', (req, res) => {
       }
     }
     globalConfig.schedules = schedules;
+  }
+
+  // keywordOrder 분류 설정 저장 지원
+  if (req.body.keywordOrder) {
+    globalConfig.keywordOrder = req.body.keywordOrder;
   }
 
   saveConfig();

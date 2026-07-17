@@ -6641,6 +6641,11 @@
             if (data.success && data.config) {
               localStorage.setItem("cachedScheduleConfig", JSON.stringify(data.config));
               renderSchedules(data.config.schedules || []);
+              
+              // 서버에 저장된 키워드 순서 설정을 브라우저 로컬 스토리지에 동기화
+              if (data.config.keywordOrder) {
+                localStorage.setItem("local_viewer_keyword_order", JSON.stringify(data.config.keywordOrder));
+              }
               return;
             }
           }
@@ -6967,7 +6972,7 @@
         loadBtn.addEventListener("click", loadLocalScreenshots);
 
         if (saveOrderBtn) {
-          saveOrderBtn.addEventListener("click", () => {
+          saveOrderBtn.addEventListener("click", async () => {
             const config = {
               "병원": [],
               "사무실": [],
@@ -6989,6 +6994,18 @@
             }
             
             saveKeywordOrderConfig(config);
+
+            // 로컬 서버 설정 파일에도 저장 동기화 시도
+            try {
+              await fetch(getLocalServerUrl('/api/config'), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ keywordOrder: config })
+              });
+            } catch (err) {
+              console.warn("로컬 백서버 설정 저장 실패 (브라우저 로컬 저장소에만 보존됨):", err);
+            }
+            
             alert("💾 키워드 분류와 배치 순서가 성공적으로 저장되었습니다!");
           });
         }

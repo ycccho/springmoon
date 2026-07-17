@@ -152,6 +152,11 @@ app.post('/api/config', (req, res) => {
     globalConfig.schedules = schedules;
   }
 
+  // keywordOrder 분류 설정 저장 지원
+  if (req.body.keywordOrder) {
+    globalConfig.keywordOrder = req.body.keywordOrder;
+  }
+
   saveConfig();
   console.log(`[설정 변경] 총 ${globalConfig.schedules.length}개의 예약 설정이 저장되었습니다.`);
   res.json({ success: true, config: globalConfig });
