@@ -758,6 +758,75 @@ DOCTYPE html>
         }
       };
 
+      function getCategoryDetails(catName, mat, lab) {
+        var items = [];
+        if (catName.includes("가설")) {
+          items.push({ name: "바닥 및 엘리베이터 보양 작업", mat: Math.round(mat * 0.4), lab: Math.round(lab * 0.3) });
+          items.push({ name: "현장 정리 및 가설 시설물 설치", mat: Math.round(mat * 0.6), lab: Math.round(lab * 0.7) });
+        } else if (catName.includes("철거")) {
+          items.push({ name: "내부 벽체 및 천장재 철거", mat: Math.round(mat * 0.3), lab: Math.round(lab * 0.5) });
+          items.push({ name: "바닥재 마감재 철거 및 정리", mat: Math.round(mat * 0.2), lab: Math.round(lab * 0.2) });
+          items.push({ name: "폐기물 반출 및 성상별 처리비", mat: Math.round(mat * 0.5), lab: Math.round(lab * 0.3) });
+        } else if (catName.includes("경량")) {
+          items.push({ name: "경량철골 스터드 칸막이 설치", mat: Math.round(mat * 0.6), lab: Math.round(lab * 0.5) });
+          items.push({ name: "천장 석고보드 취부 (2P)", mat: Math.round(mat * 0.4), lab: Math.round(lab * 0.5) });
+        } else if (catName.includes("도어")) {
+          items.push({ name: "목재/유리 도어 및 문틀 설치", mat: Math.round(mat * 0.7), lab: Math.round(lab * 0.7) });
+          items.push({ name: "도어 도어락 및 경첩 철물", mat: Math.round(mat * 0.3), lab: Math.round(lab * 0.3) });
+        } else if (catName.includes("전기")) {
+          items.push({ name: "전선 입선 및 난연 배관 배선 공사", mat: Math.round(mat * 0.4), lab: Math.round(lab * 0.4) });
+          items.push({ name: "조명 기구 및 스위치/콘센트 취부", mat: Math.round(mat * 0.4), lab: Math.round(lab * 0.4) });
+          items.push({ name: "분전함 정리 및 전력 간선 연결", mat: Math.round(mat * 0.2), lab: Math.round(lab * 0.2) });
+        } else if (catName.includes("도장")) {
+          items.push({ name: "벽체 1차/2차 빠데(퍼티) 작업", mat: Math.round(mat * 0.3), lab: Math.round(lab * 0.6) });
+          items.push({ name: "친환경 수성페인트 뿜칠 및 마감", mat: Math.round(mat * 0.7), lab: Math.round(lab * 0.4) });
+        } else if (catName.includes("타일")) {
+          items.push({ name: "벽면/바닥 자기질 타일 시공", mat: Math.round(mat * 0.7), lab: Math.round(lab * 0.8) });
+          items.push({ name: "압착 시멘트, 에폭시, 줄눈 부자재", mat: Math.round(mat * 0.3), lab: Math.round(lab * 0.2) });
+        } else if (catName.includes("금속") || catName.includes("철물")) {
+          items.push({ name: "금속 갈바 프레임 및 행거 제작", mat: Math.round(mat * 0.6), lab: Math.round(lab * 0.7) });
+          items.push({ name: "가마찌 도어 및 가벽 보강 금속 작업", mat: Math.round(mat * 0.4), lab: Math.round(lab * 0.3) });
+        } else if (catName.includes("대리석") || catName.includes("인조석")) {
+          items.push({ name: "안내데스크 상판 인조대리석 시공", mat: Math.round(mat * 0.8), lab: Math.round(lab * 0.7) });
+          items.push({ name: "석재 코너 메움 및 광택 마감", mat: Math.round(mat * 0.2), lab: Math.round(lab * 0.3) });
+        } else if (catName.includes("설비")) {
+          items.push({ name: "급수/배수관 연장 및 배관 입선", mat: Math.round(mat * 0.5), lab: Math.round(lab * 0.6) });
+          items.push({ name: "세면기, 양변기 등 위생기구 설치", mat: Math.round(mat * 0.5), lab: Math.round(lab * 0.4) });
+        } else if (catName.includes("유리")) {
+          items.push({ name: "10T/12T 강화유리 칸막이 시공", mat: Math.round(mat * 0.8), lab: Math.round(lab * 0.8) });
+          items.push({ name: "코킹 마감 및 유리 도어 힌지 세팅", mat: Math.round(mat * 0.2), lab: Math.round(lab * 0.2) });
+        } else if (catName.includes("수장")) {
+          items.push({ name: "벽면 실크벽지 도배 작업", mat: Math.round(mat * 0.4), lab: Math.round(lab * 0.4) });
+          items.push({ name: "바닥 데코타일 및 본드 도포", mat: Math.round(mat * 0.3), lab: Math.round(lab * 0.3) });
+          items.push({ name: "도어 및 알판 인테리어 필름 래핑", mat: Math.round(mat * 0.3), lab: Math.round(lab * 0.3) });
+        } else if (catName.includes("목 공사") || catName.includes("목공")) {
+          items.push({ name: "등박스 및 벽체 디자인 목공틀 제작", mat: Math.round(mat * 0.5), lab: Math.round(lab * 0.5) });
+          items.push({ name: "도어 왁꾸, MDF 및 석고 합판 작업", mat: Math.round(mat * 0.3), lab: Math.round(lab * 0.3) });
+          items.push({ name: "몰딩, 걸레받이 및 코너 부재 마감", mat: Math.round(mat * 0.2), lab: Math.round(lab * 0.2) });
+        } else if (catName.includes("조적")) {
+          items.push({ name: "시멘트 벽돌 벽체 쌓기 시공", mat: Math.round(mat * 0.6), lab: Math.round(lab * 0.6) });
+          items.push({ name: "사춤 및 시멘트 모르타르 미장 작업", mat: Math.round(mat * 0.4), lab: Math.round(lab * 0.4) });
+        } else if (catName.includes("화장실")) {
+          items.push({ name: "방수재 도포 및 벽체 시멘트 액방", mat: Math.round(mat * 0.3), lab: Math.round(lab * 0.4) });
+          items.push({ name: "위생 도기류 및 수전 금구류 취부", mat: Math.round(mat * 0.7), lab: Math.round(lab * 0.6) });
+        } else {
+          items.push({ name: catName.replace(/^\d+\.\s*/, "") + " 일반 부자재", mat: Math.round(mat * 0.5), lab: Math.round(lab * 0.4) });
+          items.push({ name: catName.replace(/^\d+\.\s*/, "") + " 전문 노무 작업", mat: Math.round(mat * 0.5), lab: Math.round(lab * 0.6) });
+        }
+        
+        if (items.length > 0) {
+          var sumMat = 0;
+          var sumLab = 0;
+          for (var j = 0; j < items.length - 1; j++) {
+            sumMat += items[j].mat;
+            sumLab += items[j].lab;
+          }
+          items[items.length - 1].mat = mat - sumMat;
+          items[items.length - 1].lab = lab - sumLab;
+        }
+        return items;
+      }
+
       function calculateEstimate() {
         var specialtyKey = document.getElementById('calc-specialty').value;
         var pyungInput = document.getElementById('calc-pyung').value;
@@ -792,23 +861,58 @@ DOCTYPE html>
           grandLab += labScaled;
           grandSum += totalScaled;
           
+          // Generate sub-items details HTML
+          var detailsHtml = '';
+          var subItems = getCategoryDetails(cat.name, matScaled, labScaled);
+          subItems.forEach(function(sub) {
+            var subTotal = sub.mat + sub.lab;
+            detailsHtml += 
+              '<div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #4b5563; padding: 6px 0; border-top: 1px dashed #e5e7eb;">' +
+                '<div style="flex: 1; min-width: 150px; display: flex; flex-direction: column;">' +
+                  '<div style="display: flex; align-items: center; gap: 6px;">' +
+                    '<span style="color: #f05e21; font-weight: bold;">└</span>' +
+                    '<span style="font-weight: 500;">' + sub.name + '</span>' +
+                  '</div>' +
+                  '<div class="calc-details" style="font-size: 0.8rem; color: #8b8b8b; margin-top: 2px; margin-left: 14px;">' +
+                    '재료: ' + sub.mat.toLocaleString() + '원 | 노무: ' + sub.lab.toLocaleString() + '원' +
+                  '</div>' +
+                '</div>' +
+                '<div class="calc-col-desktop" style="display: flex; gap: 20px; text-align: right; justify-content: flex-end; margin-right: 30px;">' +
+                  '<div style="width: 120px; color: #6b7280; font-size: 0.85rem;">' + sub.mat.toLocaleString() + '</div>' +
+                  '<div style="width: 120px; color: #6b7280; font-size: 0.85rem;">' + sub.lab.toLocaleString() + '</div>' +
+                '</div>' +
+                '<div style="text-align: right; color: #4b5563; font-size: 0.9rem; min-width: 120px; font-weight: 700; white-space: nowrap;">' +
+                  subTotal.toLocaleString() + '원' +
+                '</div>' +
+              '</div>';
+          });
+
           var row = document.createElement('div');
           row.className = 'calc-row';
-          row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding: 14px 20px; box-sizing: border-box;';
+          row.style.cssText = 'display: flex; flex-direction: column; border-bottom: 1px solid #e5e7eb; padding: 18px 20px; box-sizing: border-box;';
           row.innerHTML = 
-            '<div style="flex: 1; min-width: 150px;">' +
-              '<div style="font-weight: 700; color: #374151; font-size: 1.15rem;">' + cat.name + '</div>' +
-              '<div class="calc-details" style="font-size: 0.95rem; color: #6b7280; margin-top: 4px;">' +
-                '재료비: <span class="calc-mat-val">' + matScaled.toLocaleString() + '</span>원 | ' +
-                '노무비: <span class="calc-lab-val">' + labScaled.toLocaleString() + '</span>원' +
+            // Main category row
+            '<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">' +
+              '<div style="flex: 1; min-width: 150px;">' +
+                '<div style="font-weight: 800; color: #111827; font-size: 1.2rem;">' + cat.name + '</div>' +
+                '<div class="calc-details" style="font-size: 0.95rem; color: #4b5563; margin-top: 4px;">' +
+                  '재료비: <span style="font-weight: 700; color: #374151;">' + matScaled.toLocaleString() + '</span>원 | ' +
+                  '노무비: <span style="font-weight: 700; color: #374151;">' + labScaled.toLocaleString() + '</span>원' +
+                '</div>' +
+              '</div>' +
+              '<div class="calc-col-desktop" style="display: flex; gap: 20px; align-items: center; text-align: right; justify-content: flex-end; margin-right: 30px;">' +
+                '<div style="width: 120px; color: #111827; font-weight: 700; font-size: 1.05rem;">' + matScaled.toLocaleString() + '</div>' +
+                '<div style="width: 120px; color: #111827; font-weight: 700; font-size: 1.05rem;">' + labScaled.toLocaleString() + '</div>' +
+              '</div>' +
+              '<div style="text-align: right; font-weight: 850; color: #f05e21; font-size: 1.25rem; min-width: 120px; white-space: nowrap;">' +
+                totalScaled.toLocaleString() + '원' +
               '</div>' +
             '</div>' +
-            '<div class="calc-col-desktop" style="display: flex; gap: 20px; align-items: center; text-align: right; justify-content: flex-end; margin-right: 30px;">' +
-              '<div style="width: 120px; color: #4b5563; font-size: 1.05rem;">' + matScaled.toLocaleString() + '</div>' +
-              '<div style="width: 120px; color: #4b5563; font-size: 1.05rem;">' + labScaled.toLocaleString() + '</div>' +
-            '</div>' +
-            '<div style="text-align: right; font-weight: 800; color: #111827; font-size: 1.15rem; min-width: 120px; white-space: nowrap;">' +
-              totalScaled.toLocaleString() + '</div>';
+            // Sub-items details container
+            '<div style="margin-top: 10px; background-color: #f9fafb; border: 1px solid #f3f4f6; border-radius: 8px; padding: 6px 16px;">' +
+              detailsHtml +
+            '</div>';
+            
           rowsContainer.appendChild(row);
         });
         
