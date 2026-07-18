@@ -11570,11 +11570,20 @@
         let googleTerms = [];
 
         try {
-          const [metaRes, googleRes, gfaRes] = await Promise.all([
-            fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`)).then(r => r.json()).catch(() => null),
-            fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}&start=${start}&end=${end}`)).then(r => r.json()).catch(() => null),
-            fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`)).then(r => r.json()).catch(() => null)
-          ]);
+          let metaRes = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
+          let googleRes = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
+          let gfaRes = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
+
+          // Fallback to Cloudflare KV static API if local server failed
+          if (!metaRes || !metaRes.campaignStats) {
+            metaRes = await fetch(`/api/meta-ads?startDate=${start}&endDate=${end}`).then(r => r.json()).catch(() => null);
+          }
+          if (!googleRes || !googleRes.searchTerms) {
+            googleRes = await fetch(`/api/google-sa?startDate=${start}&endDate=${end}`).then(r => r.json()).catch(() => null);
+          }
+          if (!gfaRes || !gfaRes.campaignStats) {
+            gfaRes = await fetch(`/api/gfa-ads?startDate=${start}&endDate=${end}`).then(r => r.json()).catch(() => null);
+          }
 
           if (metaRes && metaRes.campaignStats) {
             metaStats = metaRes.campaignStats;
@@ -11781,18 +11790,31 @@
         };
         let adsList = [];
 
+        let loaded = false;
         try {
-          const res = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
+          const res = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}`));
           if (res.ok) {
             const data = await res.json();
-            if (data && data.campaignStats) {
+            if (data && data.campaignStats && data.success) {
               campaign = data.campaignStats;
-            }
-            if (data && data.activeAds) {
-              adsList = data.activeAds;
+              adsList = data.activeAds || [];
+              loaded = true;
             }
           }
         } catch (_) {}
+
+        if (!loaded) {
+          try {
+            const res = await fetch(`/api/meta-ads?startDate=${start}&endDate=${end}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.campaignStats) {
+                campaign = data.campaignStats;
+                adsList = data.activeAds || [];
+              }
+            }
+          } catch (_) {}
+        }
 
         const avgCpc = campaign.clicks > 0 ? Math.round(campaign.spend / campaign.clicks) : 0;
 
@@ -12161,15 +12183,29 @@
         // Fallbacks
         let terms = [];
 
+        let loaded = false;
         try {
-          const res = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
+          const res = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}`));
           if (res.ok) {
             const data = await res.json();
             if (data && data.searchTerms && data.searchTerms.length > 0) {
               terms = data.searchTerms;
+              loaded = true;
             }
           }
         } catch (_) {}
+
+        if (!loaded) {
+          try {
+            const res = await fetch(`/api/google-sa?startDate=${start}&endDate=${end}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.searchTerms && data.searchTerms.length > 0) {
+                terms = data.searchTerms;
+              }
+            }
+          } catch (_) {}
+        }
 
         let campaignClicks = 0, campaignImps = 0, campaignSpend = 0;
         terms.forEach(t => {
@@ -12628,16 +12664,31 @@
         let stats = { clicks: 0, impressions: 0, spend: 0, cpr: 0 };
         let campaigns = [];
 
+        let loaded = false;
         try {
-          const res = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
+          const res = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}`));
           if (res.ok) {
             const data = await res.json();
-            if (data) {
+            if (data && data.success) {
               if (data.campaignStats) stats = data.campaignStats;
               if (data.activeCampaigns) campaigns = data.activeCampaigns;
+              loaded = true;
             }
           }
         } catch (_) {}
+
+        if (!loaded) {
+          try {
+            const res = await fetch(`/api/gfa-ads?startDate=${start}&endDate=${end}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.success) {
+                if (data.campaignStats) stats = data.campaignStats;
+                if (data.activeCampaigns) campaigns = data.activeCampaigns;
+              }
+            }
+          } catch (_) {}
+        }
 
         cardsContainer.innerHTML = `
           <div class="bg-emerald-50/50 dark-mode:bg-emerald-950/10 border border-emerald-100/50 dark-mode:border-emerald-900/30 rounded-2xl p-5 shadow-sm space-y-2 flex flex-col justify-between flex-1">
