@@ -147,6 +147,8 @@
 
 ---
 
+---
+
 ## 6. 전체 소스 코드 레퍼런스 (Full Source Code Package)
 
 아래의 코드들을 각각 해당 파일명으로 저장하여 동일한 디렉토리에 배치하십시오.
@@ -7355,6 +7357,11 @@ app.listen(PORT, () => {
       currentMenus = loadMenuOrder();
       currentCategories = loadCategories();
 
+      // Initialize clock and visitor IP instantly to prevent async network blocking from freezing the page
+      updateClock();
+      setInterval(updateClock, 1000);
+      loadVisitorIP();
+
       const serverInput = document.getElementById("sidebar-local-server-input");
       if (serverInput) {
         serverInput.value = localStorage.getItem("localServerAddress") || "localhost:3888";
@@ -7482,16 +7489,13 @@ app.listen(PORT, () => {
         });
       }
 
-      updateClock();
-      setInterval(updateClock, 1000);
-      loadVisitorIP();
-
-      // Sync menu settings from server in background
-      const synced = await syncMenusFromServer();
-      if (synced) {
-        renderMenus();
-        renderPanels();
-      }
+      // Sync menu settings from server in background (non-blocking)
+      syncMenusFromServer().then(synced => {
+        if (synced) {
+          renderMenus();
+          renderPanels();
+        }
+      });
 
       // 실시간 편집 저장 이벤트 등록
       const main = document.getElementById("main-content");

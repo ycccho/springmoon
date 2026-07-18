@@ -4673,6 +4673,11 @@
       currentMenus = loadMenuOrder();
       currentCategories = loadCategories();
 
+      // Initialize clock and visitor IP instantly to prevent async network blocking from freezing the page
+      updateClock();
+      setInterval(updateClock, 1000);
+      loadVisitorIP();
+
       const serverInput = document.getElementById("sidebar-local-server-input");
       if (serverInput) {
         serverInput.value = localStorage.getItem("localServerAddress") || "localhost:3888";
@@ -4800,16 +4805,13 @@
         });
       }
 
-      updateClock();
-      setInterval(updateClock, 1000);
-      loadVisitorIP();
-
-      // Sync menu settings from server in background
-      const synced = await syncMenusFromServer();
-      if (synced) {
-        renderMenus();
-        renderPanels();
-      }
+      // Sync menu settings from server in background (non-blocking)
+      syncMenusFromServer().then(synced => {
+        if (synced) {
+          renderMenus();
+          renderPanels();
+        }
+      });
 
       // 실시간 편집 저장 이벤트 등록
       const main = document.getElementById("main-content");
@@ -10742,10 +10744,9 @@
 
       // Initialize date inputs with the default range
       const defaultRange = getLast7DaysExcludingToday();
-      if (startDateInput && endDateInput) {
-        startDateInput.value = defaultRange.start;
-        endDateInput.value = defaultRange.end;
-      }
+      if (!startDateInput || !endDateInput) return;
+      startDateInput.value = defaultRange.start;
+      endDateInput.value = defaultRange.end;
 
       // Bind Tab Button Switch
       tabBtns.forEach(btn => {
@@ -11423,6 +11424,8 @@
       const applyBtn = document.getElementById("total-date-apply-btn");
       const periodBtns = document.querySelectorAll(".total-period-btn");
 
+      if (!startInput || !endInput) return;
+
       const kstInit = new Date(Date.now() + (9 * 60 * 60 * 1000));
       let currentYear = kstInit.getFullYear();
       let currentMonth = kstInit.getMonth() + 1; // 1-indexed
@@ -11710,11 +11713,11 @@
       const cardsContainer = document.getElementById("meta-comparison-cards");
       const adsTbody = document.getElementById("meta-ads-tbody");
 
+      if (!startInput || !endInput) return;
+
       const defaultRange = getLast7DaysExcludingToday();
-      if (startInput && endInput) {
-        startInput.value = defaultRange.start;
-        endInput.value = defaultRange.end;
-      }
+      startInput.value = defaultRange.start;
+      endInput.value = defaultRange.end;
 
       let activePeriod = "last-7-days";
 
@@ -12095,11 +12098,11 @@
       const cardsContainer = document.getElementById("google-comparison-cards");
       const termsTbody = document.getElementById("google-terms-tbody");
 
+      if (!startInput || !endInput) return;
+
       const defaultRange = getLast7DaysExcludingToday();
-      if (startInput && endInput) {
-        startInput.value = defaultRange.start;
-        endInput.value = defaultRange.end;
-      }
+      startInput.value = defaultRange.start;
+      endInput.value = defaultRange.end;
 
       let activePeriod = "last-7-days";
 
@@ -12291,11 +12294,11 @@
       const referrersTbody = document.getElementById("imweb-referrers-tbody");
       const dailyTbody = document.getElementById("imweb-daily-tbody");
 
+      if (!startInput || !endInput) return;
+
       const defaultRange = getLast7DaysExcludingToday();
-      if (startInput && endInput) {
-        startInput.value = defaultRange.start;
-        endInput.value = defaultRange.end;
-      }
+      startInput.value = defaultRange.start;
+      endInput.value = defaultRange.end;
 
       let activePeriod = "last-7-days";
 
@@ -12557,11 +12560,11 @@
       const cardsContainer = document.getElementById("gfa-comparison-cards");
       const campaignsTbody = document.getElementById("gfa-campaigns-tbody");
 
+      if (!startInput || !endInput) return;
+
       const defaultRange = getLast7DaysExcludingToday();
-      if (startInput && endInput) {
-        startInput.value = defaultRange.start;
-        endInput.value = defaultRange.end;
-      }
+      startInput.value = defaultRange.start;
+      endInput.value = defaultRange.end;
 
       let activePeriod = "last-7-days";
 
