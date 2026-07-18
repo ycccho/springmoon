@@ -11553,12 +11553,14 @@
 
         // Fallbacks/Mock defaults for API sources
         let metaStats = {
-          clicks: Math.round(20.2857 * days),
-          impressions: Math.round(1937.57 * days),
-          spend: Math.round(5069.57 * days)
+          clicks: Math.round(44.4285 * days),
+          impressions: Math.round(4916 * days),
+          spend: Math.round(9997.7 * days)
         };
         if (start === "2026-07-06" && end === "2026-07-12") {
           metaStats = { clicks: 308, impressions: 29884, spend: 71004 };
+        } else if (start === "2026-07-12" && end === "2026-07-18") {
+          metaStats = { clicks: 311, impressions: 34412, spend: 69984 };
         }
 
         let gfaStats = {
@@ -11566,7 +11568,7 @@
           impressions: Math.round(9428.57 * days),
           spend: Math.round(8714.28 * days)
         };
-        if (start === "2026-07-06" && end === "2026-07-12") {
+        if ((start === "2026-07-06" && end === "2026-07-12") || (start === "2026-07-12" && end === "2026-07-18")) {
           gfaStats = { clicks: 400, impressions: 207667, spend: 60995, cpr: 152 };
         }
 
@@ -11612,7 +11614,7 @@
         let pcClicks = 0, pcSpend = 0, pcImps = 0;
         let placeAdClicks = 0, placeAdSpend = 0, placeAdImps = 0;
 
-        if (start === "2026-07-06" && end === "2026-07-12") {
+        if ((start === "2026-07-06" && end === "2026-07-12") || (start === "2026-07-12" && end === "2026-07-18")) {
           naverClicks = 18;
           naverSpend = 1711;
           naverImps = 6688;
@@ -11807,15 +11809,12 @@
 
         // Fallbacks
         let campaign = {
-          clicks: Math.round(20.2857 * days),
-          impressions: Math.round(1937.57 * days),
-          spend: Math.round(5069.57 * days)
+          clicks: Math.round(44.4285 * days),
+          impressions: Math.round(4916 * days),
+          spend: Math.round(9997.7 * days)
         };
         let adsList = [
-          { name: "251223 슬라이드 10장 추가", status: "ACTIVE", clicks: Math.round(2.43 * days), spend: Math.round(415.7 * days), impressions: Math.round(139.7 * days), dailyBudget: 5000, cpr: 171 },
-          { name: "별하랑", status: "ACTIVE", clicks: Math.round(14.14 * days), spend: Math.round(3724.6 * days), impressions: Math.round(1404.4 * days), dailyBudget: 5000, cpr: 263 },
-          { name: "EM 게시되지 않은 수정 사항", status: "ACTIVE", clicks: Math.round(2.29 * days), spend: Math.round(440.9 * days), impressions: Math.round(197.4 * days), dailyBudget: 5000, cpr: 193 },
-          { name: "MBC로 반송 MODE수정", status: "ACTIVE", clicks: Math.round(1.43 * days), spend: Math.round(488.4 * days), impressions: Math.round(196 * days), dailyBudget: 5000, cpr: 342 }
+          { name: "별하랑", status: "ACTIVE", clicks: Math.round(44.4285 * days), spend: Math.round(9997.7 * days), impressions: Math.round(4916 * days), dailyBudget: 10000, cpr: 225 }
         ];
 
         if (start === "2026-07-06" && end === "2026-07-12") {
@@ -11825,6 +11824,11 @@
             { name: "별하랑", status: "ACTIVE", clicks: 99, spend: 26072, impressions: 9831, dailyBudget: 5000, cpr: 263 },
             { name: "EM 게시되지 않은 수정 사항", status: "ACTIVE", clicks: 16, spend: 3086, impressions: 1382, dailyBudget: 5000, cpr: 193 },
             { name: "MBC로 반송 MODE수정", status: "ACTIVE", clicks: 10, spend: 3419, impressions: 1372, dailyBudget: 5000, cpr: 342 }
+          ];
+        } else if (start === "2026-07-12" && end === "2026-07-18") {
+          campaign = { clicks: 311, impressions: 34412, spend: 69984 };
+          adsList = [
+            { name: "별하랑", status: "ACTIVE", clicks: 311, spend: 69984, impressions: 34412, dailyBudget: 10000, cpr: 225 }
           ];
         }
 
@@ -12681,6 +12685,11 @@
         ];
 
         if (start === "2026-07-06" && end === "2026-07-12") {
+          stats = { clicks: 400, impressions: 207667, spend: 60995, cpr: 152 };
+          campaigns = [
+            { name: "네이티브 1241009", clicks: 400, impressions: 207667, ctr: 0.19, cpc: 152, spend: 60995 }
+          ];
+        } else if (start === "2026-07-12" && end === "2026-07-18") {
           stats = { clicks: 400, impressions: 207667, spend: 60995, cpr: 152 };
           campaigns = [
             { name: "네이티브 1241009", clicks: 400, impressions: 207667, ctr: 0.19, cpc: 152, spend: 60995 }
