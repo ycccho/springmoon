@@ -1453,7 +1453,7 @@ setInterval(async () => {
   const minute = String(kst.getMinutes()).padStart(2, '0');
   const currentTimeStr = `${hour}:${minute}`;
 
-  if (currentTimeStr === '23:55') {
+  if (currentTimeStr === '10:00') {
     if (global.lastPlaceScrapedTime === currentTimeStr) return;
     global.lastPlaceScrapedTime = currentTimeStr;
 

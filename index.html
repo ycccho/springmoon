@@ -185,14 +185,6 @@
     function getLast7DaysExcludingToday() {
       const now = new Date();
       const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-      const day = kstTime.getUTCDay(); // 0: Sun, 1: Mon, ..., 6: Sat
-      const dayOfWeek = day === 0 ? 7 : day; // 1: Mon, ..., 7: Sun
-      
-      const mondayOffset = -dayOfWeek - 6;
-      const sundayOffset = -dayOfWeek;
-      
-      const lastMonday = new Date(kstTime.getTime() + (mondayOffset * 24 * 60 * 60 * 1000));
-      const lastSunday = new Date(kstTime.getTime() + (sundayOffset * 24 * 60 * 60 * 1000));
       
       const format = (d) => {
         const y = d.getUTCFullYear();
@@ -200,9 +192,13 @@
         const dayStr = String(d.getUTCDate()).padStart(2, '0');
         return `${y}-${m}-${dayStr}`;
       };
+      
+      const yesterday = new Date(kstTime.getTime() - (1 * 24 * 60 * 60 * 1000));
+      const sevenDaysAgo = new Date(kstTime.getTime() - (7 * 24 * 60 * 60 * 1000));
+      
       return {
-        start: format(lastMonday),
-        end: format(lastSunday)
+        start: format(sevenDaysAgo),
+        end: format(yesterday)
       };
     }
 
@@ -305,14 +301,6 @@
     function getLast7DaysExcludingToday() {
       const now = new Date();
       const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-      const day = kstTime.getUTCDay(); // 0: Sun, 1: Mon, ..., 6: Sat
-      const dayOfWeek = day === 0 ? 7 : day; // 1: Mon, ..., 7: Sun
-      
-      const mondayOffset = -dayOfWeek - 6;
-      const sundayOffset = -dayOfWeek;
-      
-      const lastMonday = new Date(kstTime.getTime() + (mondayOffset * 24 * 60 * 60 * 1000));
-      const lastSunday = new Date(kstTime.getTime() + (sundayOffset * 24 * 60 * 60 * 1000));
       
       const format = (d) => {
         const y = d.getUTCFullYear();
@@ -320,9 +308,13 @@
         const dayStr = String(d.getUTCDate()).padStart(2, '0');
         return `${y}-${m}-${dayStr}`;
       };
+      
+      const yesterday = new Date(kstTime.getTime() - (1 * 24 * 60 * 60 * 1000));
+      const sevenDaysAgo = new Date(kstTime.getTime() - (7 * 24 * 60 * 60 * 1000));
+      
       return {
-        start: format(lastMonday),
-        end: format(lastSunday)
+        start: format(sevenDaysAgo),
+        end: format(yesterday)
       };
     }
 
@@ -10634,7 +10626,7 @@
                 📊 8. 플레이스 통계
               </h2>
               <p class="text-xs text-gray-550 dark-mode:text-gray-400 mt-1">
-                스마트플레이스 유입수, 키워드, 채널, 방문자 정보 통계를 확인합니다. (매일 밤 11시 55분 KST 자동 수집)
+                스마트플레이스 유입수, 키워드, 채널, 방문자 정보 통계를 확인합니다. (매일 아침 10시 00분 KST 자동 수집)
               </p>
             </div>
             <div class="flex items-center gap-2.5">

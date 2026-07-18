@@ -135,6 +135,8 @@
 
 ---
 
+---
+
 ## 6. 전체 소스 코드 레퍼런스 (Full Source Code Package)
 
 아래의 코드들을 각각 해당 파일명으로 저장하여 동일한 디렉토리에 배치하십시오.
@@ -1429,7 +1431,12 @@ app.get('/api/local-screenshots', (req, res) => {
         });
       }
     }
-    result.sort((a, b) => b.mtime - a.mtime);
+    result.sort((a, b) => {
+      // YYYY.MM.DD 날짜 문자열 기준으로 내림차순 정렬 (최신 날짜 우선)
+      const dateCompare = b.date.localeCompare(a.date);
+      if (dateCompare !== 0) return dateCompare;
+      return b.mtime - a.mtime;
+    });
 
     // Trigger Cloudflare KV sync in the background
     syncLocalScreenshotsToCloud(folderPath, result).catch(() => {});
@@ -1606,7 +1613,7 @@ setInterval(async () => {
   const minute = String(kst.getMinutes()).padStart(2, '0');
   const currentTimeStr = `${hour}:${minute}`;
 
-  if (currentTimeStr === '23:55') {
+  if (currentTimeStr === '10:00') {
     if (global.lastPlaceScrapedTime === currentTimeStr) return;
     global.lastPlaceScrapedTime = currentTimeStr;
 
@@ -2850,14 +2857,6 @@ app.listen(PORT, () => {
     function getLast7DaysExcludingToday() {
       const now = new Date();
       const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-      const day = kstTime.getUTCDay(); // 0: Sun, 1: Mon, ..., 6: Sat
-      const dayOfWeek = day === 0 ? 7 : day; // 1: Mon, ..., 7: Sun
-      
-      const mondayOffset = -dayOfWeek - 6;
-      const sundayOffset = -dayOfWeek;
-      
-      const lastMonday = new Date(kstTime.getTime() + (mondayOffset * 24 * 60 * 60 * 1000));
-      const lastSunday = new Date(kstTime.getTime() + (sundayOffset * 24 * 60 * 60 * 1000));
       
       const format = (d) => {
         const y = d.getUTCFullYear();
@@ -2865,9 +2864,13 @@ app.listen(PORT, () => {
         const dayStr = String(d.getUTCDate()).padStart(2, '0');
         return `${y}-${m}-${dayStr}`;
       };
+      
+      const yesterday = new Date(kstTime.getTime() - (1 * 24 * 60 * 60 * 1000));
+      const sevenDaysAgo = new Date(kstTime.getTime() - (7 * 24 * 60 * 60 * 1000));
+      
       return {
-        start: format(lastMonday),
-        end: format(lastSunday)
+        start: format(sevenDaysAgo),
+        end: format(yesterday)
       };
     }
 
@@ -2970,14 +2973,6 @@ app.listen(PORT, () => {
     function getLast7DaysExcludingToday() {
       const now = new Date();
       const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-      const day = kstTime.getUTCDay(); // 0: Sun, 1: Mon, ..., 6: Sat
-      const dayOfWeek = day === 0 ? 7 : day; // 1: Mon, ..., 7: Sun
-      
-      const mondayOffset = -dayOfWeek - 6;
-      const sundayOffset = -dayOfWeek;
-      
-      const lastMonday = new Date(kstTime.getTime() + (mondayOffset * 24 * 60 * 60 * 1000));
-      const lastSunday = new Date(kstTime.getTime() + (sundayOffset * 24 * 60 * 60 * 1000));
       
       const format = (d) => {
         const y = d.getUTCFullYear();
@@ -2985,9 +2980,13 @@ app.listen(PORT, () => {
         const dayStr = String(d.getUTCDate()).padStart(2, '0');
         return `${y}-${m}-${dayStr}`;
       };
+      
+      const yesterday = new Date(kstTime.getTime() - (1 * 24 * 60 * 60 * 1000));
+      const sevenDaysAgo = new Date(kstTime.getTime() - (7 * 24 * 60 * 60 * 1000));
+      
       return {
-        start: format(lastMonday),
-        end: format(lastSunday)
+        start: format(sevenDaysAgo),
+        end: format(yesterday)
       };
     }
 
