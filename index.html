@@ -11883,15 +11883,15 @@
         const totalClicks = campaign.clicks || 0;
         const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
         const trendData = [];
-        let sumClicks = 0;
+        let sumClicksTrend = 0;
         for (let i = 0; i < dateRangeList.length; i++) {
           const ratio = baseRatios[i % baseRatios.length];
           let daily = Math.round(totalClicks * ratio);
           if (i === dateRangeList.length - 1) {
-            daily = totalClicks - sumClicks;
+            daily = totalClicks - sumClicksTrend;
           }
           if (daily < 0) daily = 0;
-          sumClicks += daily;
+          sumClicksTrend += daily;
           trendData.push({ date: dateRangeList[i], clicks: daily });
         }
         drawChartSVG("meta-clicks-chart-container", trendData, "clicks", "#EA580C", "#F97316");
@@ -12280,15 +12280,15 @@
         const totalClicks = campaignClicks || 0;
         const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
         const trendData = [];
-        let sumClicks = 0;
+        let sumClicksTrend = 0;
         for (let i = 0; i < dateRangeList.length; i++) {
           const ratio = baseRatios[i % baseRatios.length];
           let daily = Math.round(totalClicks * ratio);
           if (i === dateRangeList.length - 1) {
-            daily = totalClicks - sumClicks;
+            daily = totalClicks - sumClicksTrend;
           }
           if (daily < 0) daily = 0;
-          sumClicks += daily;
+          sumClicksTrend += daily;
           trendData.push({ date: dateRangeList[i], clicks: daily });
         }
         drawChartSVG("google-clicks-chart-container", trendData, "clicks", "#2563EB", "#3B82F6");
@@ -12734,15 +12734,15 @@
         const totalClicks = stats.clicks || 0;
         const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
         const trendData = [];
-        let sumClicks = 0;
+        let sumClicksTrend = 0;
         for (let i = 0; i < dateRangeList.length; i++) {
           const ratio = baseRatios[i % baseRatios.length];
           let daily = Math.round(totalClicks * ratio);
           if (i === dateRangeList.length - 1) {
-            daily = totalClicks - sumClicks;
+            daily = totalClicks - sumClicksTrend;
           }
           if (daily < 0) daily = 0;
-          sumClicks += daily;
+          sumClicksTrend += daily;
           trendData.push({ date: dateRangeList[i], clicks: daily });
         }
         drawChartSVG("gfa-clicks-chart-container", trendData, "clicks", "#059669", "#10B981");
