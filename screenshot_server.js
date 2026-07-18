@@ -2550,27 +2550,17 @@ async function syncGfaToCloudflare() {
   const kst = new Date(Date.now() + (9 * 60 * 60 * 1000));
   const bulkHistory = {};
 
+  // GFA는 실제 연동된 API가 없으므로 지침에 따라 모두 0과 빈 배열로 초기화합니다.
   for (let i = 0; i < 30; i++) {
     const dObj = new Date(kst.getTime() - (i * 24 * 60 * 60 * 1000));
     const dateStr = dObj.toISOString().split("T")[0];
     
     bulkHistory[dateStr] = {
-      clicks: 57,
-      impressions: 29667,
-      spend: 8713,
-      cpr: 152,
-      activeCampaigns: [
-        {
-          id: "gfa-c-001",
-          name: "네이티브 1241009",
-          status: "ACTIVE",
-          clicks: 57,
-          impressions: 29667,
-          spend: 8713,
-          ctr: 0.19,
-          cpc: 152
-        }
-      ]
+      clicks: 0,
+      impressions: 0,
+      spend: 0,
+      cpr: 0,
+      activeCampaigns: []
     };
   }
 
@@ -2580,7 +2570,7 @@ async function syncGfaToCloudflare() {
     body: JSON.stringify({ bulkHistory })
   });
   if (cfRes.ok) {
-    console.log(`[Cloudflare Sync] GFA 30일 데이터 KV 저장 성공.`);
+    console.log(`[Cloudflare Sync] GFA 30일 데이터 KV 저장 성공 (0으로 초기화).`);
   } else {
     throw new Error(`Cloudflare KV HTTP ${cfRes.status}`);
   }
