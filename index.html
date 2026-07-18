@@ -11881,14 +11881,27 @@
           </div>
         `;
 
-        const trendData = [];
+        const dateRangeList = [];
         let cur = new Date(start + "T00:00:00Z");
         const limit = new Date(end + "T00:00:00Z");
         while (cur <= limit) {
-          const dateStr = cur.toISOString().split("T")[0];
-          const dailyClicks = Math.round(3 + Math.random() * 3);
-          trendData.push({ date: dateStr, clicks: dailyClicks });
+          dateRangeList.push(cur.toISOString().split("T")[0]);
           cur.setUTCDate(cur.getUTCDate() + 1);
+        }
+
+        const totalClicks = campaign.clicks || 0;
+        const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
+        const trendData = [];
+        let sumClicks = 0;
+        for (let i = 0; i < dateRangeList.length; i++) {
+          const ratio = baseRatios[i % baseRatios.length];
+          let daily = Math.round(totalClicks * ratio);
+          if (i === dateRangeList.length - 1) {
+            daily = totalClicks - sumClicks;
+          }
+          if (daily < 0) daily = 0;
+          sumClicks += daily;
+          trendData.push({ date: dateRangeList[i], clicks: daily });
         }
         drawChartSVG("meta-clicks-chart-container", trendData, "clicks", "#EA580C", "#F97316");
 
@@ -12265,14 +12278,27 @@
           </div>
         `;
 
-        const trendData = [];
+        const dateRangeList = [];
         let cur = new Date(start + "T00:00:00Z");
         const limit = new Date(end + "T00:00:00Z");
         while (cur <= limit) {
-          const dateStr = cur.toISOString().split("T")[0];
-          const dailyClicks = Math.round(2 + Math.random() * 2);
-          trendData.push({ date: dateStr, clicks: dailyClicks });
+          dateRangeList.push(cur.toISOString().split("T")[0]);
           cur.setUTCDate(cur.getUTCDate() + 1);
+        }
+
+        const totalClicks = campaignClicks || 0;
+        const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
+        const trendData = [];
+        let sumClicks = 0;
+        for (let i = 0; i < dateRangeList.length; i++) {
+          const ratio = baseRatios[i % baseRatios.length];
+          let daily = Math.round(totalClicks * ratio);
+          if (i === dateRangeList.length - 1) {
+            daily = totalClicks - sumClicks;
+          }
+          if (daily < 0) daily = 0;
+          sumClicks += daily;
+          trendData.push({ date: dateRangeList[i], clicks: daily });
         }
         drawChartSVG("google-clicks-chart-container", trendData, "clicks", "#2563EB", "#3B82F6");
 
@@ -12706,14 +12732,27 @@
         `;
 
         // Generate trend data
-        const trendData = [];
+        const dateRangeList = [];
         let cur = new Date(start + "T00:00:00Z");
         const limit = new Date(end + "T00:00:00Z");
         while (cur <= limit) {
-          const dateStr = cur.toISOString().split("T")[0];
-          const dailyClicks = Math.round(2 + Math.random() * 2);
-          trendData.push({ date: dateStr, clicks: dailyClicks });
+          dateRangeList.push(cur.toISOString().split("T")[0]);
           cur.setUTCDate(cur.getUTCDate() + 1);
+        }
+
+        const totalClicks = stats.clicks || 0;
+        const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
+        const trendData = [];
+        let sumClicks = 0;
+        for (let i = 0; i < dateRangeList.length; i++) {
+          const ratio = baseRatios[i % baseRatios.length];
+          let daily = Math.round(totalClicks * ratio);
+          if (i === dateRangeList.length - 1) {
+            daily = totalClicks - sumClicks;
+          }
+          if (daily < 0) daily = 0;
+          sumClicks += daily;
+          trendData.push({ date: dateRangeList[i], clicks: daily });
         }
         drawChartSVG("gfa-clicks-chart-container", trendData, "clicks", "#059669", "#10B981");
 
