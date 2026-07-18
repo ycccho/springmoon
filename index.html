@@ -11553,29 +11553,18 @@
 
         // Fallbacks/Mock defaults for API sources
         let metaStats = {
-          clicks: Math.round(44.4285 * days),
-          impressions: Math.round(4916 * days),
-          spend: Math.round(9997.7 * days)
+          clicks: 0,
+          impressions: 0,
+          spend: 0
         };
-        if (start === "2026-07-06" && end === "2026-07-12") {
-          metaStats = { clicks: 308, impressions: 29884, spend: 71004 };
-        } else if (start === "2026-07-12" && end === "2026-07-18") {
-          metaStats = { clicks: 311, impressions: 34412, spend: 69984 };
-        }
 
         let gfaStats = {
-          clicks: Math.round(57.14 * days),
-          impressions: Math.round(9428.57 * days),
-          spend: Math.round(8714.28 * days)
+          clicks: 0,
+          impressions: 0,
+          spend: 0
         };
-        if ((start === "2026-07-06" && end === "2026-07-12") || (start === "2026-07-12" && end === "2026-07-18")) {
-          gfaStats = { clicks: 400, impressions: 207667, spend: 60995, cpr: 152 };
-        }
 
-        let googleTerms = [
-          { term: "부산 상가 인테리어", type: "PHRASE", clicks: Math.round(1.5 * days), impressions: Math.round(1.5 * 40 * days), avgCpc: 2100 },
-          { term: "학원 인테리어 전문 업체", type: "EXACT", clicks: Math.round(1.3 * days), impressions: Math.round(1.3 * 40 * days), avgCpc: 1850 }
-        ];
+        let googleTerms = [];
 
         try {
           const [metaRes, googleRes, gfaRes] = await Promise.all([
@@ -11613,32 +11602,6 @@
         let naverClicks = 0, naverSpend = 0, naverImps = 0;
         let pcClicks = 0, pcSpend = 0, pcImps = 0;
         let placeAdClicks = 0, placeAdSpend = 0, placeAdImps = 0;
-
-        if ((start === "2026-07-06" && end === "2026-07-12") || (start === "2026-07-12" && end === "2026-07-18")) {
-          naverClicks = 18;
-          naverSpend = 1711;
-          naverImps = 6688;
-
-          pcClicks = 4;
-          pcSpend = 310;
-          pcImps = 806;
-
-          placeAdClicks = 23;
-          placeAdSpend = 12503;
-          placeAdImps = 913;
-        } else {
-          naverClicks = Math.round(2.5714 * days);
-          naverSpend = Math.round(naverClicks * 95);
-          naverImps = Math.round(naverClicks * 371);
-
-          pcClicks = Math.round(0.5714 * days);
-          pcSpend = Math.round(pcClicks * 77.5);
-          pcImps = Math.round(pcClicks * 201);
-
-          placeAdClicks = Math.round(3.2857 * days);
-          placeAdSpend = Math.round(placeAdClicks * 543.6);
-          placeAdImps = Math.round(placeAdClicks * 40);
-        }
 
         const channels = [
           {
@@ -11809,28 +11772,11 @@
 
         // Fallbacks
         let campaign = {
-          clicks: Math.round(44.4285 * days),
-          impressions: Math.round(4916 * days),
-          spend: Math.round(9997.7 * days)
+          clicks: 0,
+          impressions: 0,
+          spend: 0
         };
-        let adsList = [
-          { name: "별하랑", status: "ACTIVE", clicks: Math.round(44.4285 * days), spend: Math.round(9997.7 * days), impressions: Math.round(4916 * days), dailyBudget: 10000, cpr: 225 }
-        ];
-
-        if (start === "2026-07-06" && end === "2026-07-12") {
-          campaign = { clicks: 142, impressions: 13563, spend: 35487 };
-          adsList = [
-            { name: "251223 슬라이드 10장 추가", status: "ACTIVE", clicks: 17, spend: 2910, impressions: 978, dailyBudget: 5000, cpr: 171 },
-            { name: "별하랑", status: "ACTIVE", clicks: 99, spend: 26072, impressions: 9831, dailyBudget: 5000, cpr: 263 },
-            { name: "EM 게시되지 않은 수정 사항", status: "ACTIVE", clicks: 16, spend: 3086, impressions: 1382, dailyBudget: 5000, cpr: 193 },
-            { name: "MBC로 반송 MODE수정", status: "ACTIVE", clicks: 10, spend: 3419, impressions: 1372, dailyBudget: 5000, cpr: 342 }
-          ];
-        } else if (start === "2026-07-12" && end === "2026-07-18") {
-          campaign = { clicks: 311, impressions: 34412, spend: 69984 };
-          adsList = [
-            { name: "별하랑", status: "ACTIVE", clicks: 311, spend: 69984, impressions: 34412, dailyBudget: 10000, cpr: 225 }
-          ];
-        }
+        let adsList = [];
 
         try {
           const res = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
@@ -12210,10 +12156,7 @@
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
         // Fallbacks
-        let terms = [
-          { term: "부산 상가 인테리어", type: "PHRASE", clicks: Math.round(1.5 * days), impressions: Math.round(1.5 * 40 * days), avgCpc: 2100 },
-          { term: "학원 인테리어 전문 업체", type: "EXACT", clicks: Math.round(1.3 * days), impressions: Math.round(1.3 * 40 * days), avgCpc: 1850 }
-        ];
+        let terms = [];
 
         try {
           const res = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
@@ -12679,22 +12622,8 @@
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 
         // Fallbacks
-        let stats = { clicks: Math.round(57.14 * days), impressions: Math.round(29667 * days), spend: Math.round(8713.57 * days), cpr: 152 };
-        let campaigns = [
-          { name: "네이티브 1241009", clicks: Math.round(57.14 * days), impressions: Math.round(29667 * days), ctr: 0.19, cpc: 152, spend: Math.round(8713.57 * days) }
-        ];
-
-        if (start === "2026-07-06" && end === "2026-07-12") {
-          stats = { clicks: 400, impressions: 207667, spend: 60995, cpr: 152 };
-          campaigns = [
-            { name: "네이티브 1241009", clicks: 400, impressions: 207667, ctr: 0.19, cpc: 152, spend: 60995 }
-          ];
-        } else if (start === "2026-07-12" && end === "2026-07-18") {
-          stats = { clicks: 400, impressions: 207667, spend: 60995, cpr: 152 };
-          campaigns = [
-            { name: "네이티브 1241009", clicks: 400, impressions: 207667, ctr: 0.19, cpc: 152, spend: 60995 }
-          ];
-        }
+        let stats = { clicks: 0, impressions: 0, spend: 0, cpr: 0 };
+        let campaigns = [];
 
         try {
           const res = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}&start=${start}&end=${end}`));
