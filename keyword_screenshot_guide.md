@@ -153,6 +153,8 @@
 
 ---
 
+---
+
 ## 6. 전체 소스 코드 레퍼런스 (Full Source Code Package)
 
 아래의 코드들을 각각 해당 파일명으로 저장하여 동일한 디렉토리에 배치하십시오.
@@ -2525,6 +2527,7 @@ async function syncAllAdsToCloudflare() {
   await syncMetaAdsToCloudflare().catch(err => console.error("[Meta Ads 동기화 에러]:", err.message));
   await syncGoogleSaToCloudflare().catch(err => console.error("[Google SA 동기화 에러]:", err.message));
   await syncGfaToCloudflare().catch(err => console.error("[GFA 동기화 에러]:", err.message));
+  await syncNaverSearchAdsToCloudflare().catch(err => console.error("[Naver SA 동기화 에러]:", err.message));
   console.log("[광고 통계 Cloudflare 동기화 완료]");
 }
 
@@ -2723,33 +2726,377 @@ async function syncGoogleSaToCloudflare() {
 }
 
 async function syncGfaToCloudflare() {
-  const kst = new Date(Date.now() + (9 * 60 * 60 * 1000));
-  const bulkHistory = {};
+  console.log("[Cloudflare Sync] GFA 통계 동기화 시작...");
+  const browserPath = getBrowserPath();
+  if (!browserPath) throw new Error("시스템에서 Chrome 또는 Edge 브라우저를 찾을 수 없습니다.");
 
-  // GFA는 실제 연동된 API가 없으므로 지침에 따라 모두 0과 빈 배열로 초기화합니다.
-  for (let i = 0; i < 30; i++) {
-    const dObj = new Date(kst.getTime() - (i * 24 * 60 * 60 * 1000));
-    const dateStr = dObj.toISOString().split("T")[0];
-    
-    bulkHistory[dateStr] = {
-      clicks: 0,
-      impressions: 0,
-      spend: 0,
-      cpr: 0,
-      activeCampaigns: []
-    };
-  }
-
-  const cfRes = await fetch('https://springmoons.pages.dev/api/gfa-ads', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ bulkHistory })
+  const userDataDir = path.join(__dirname, 'chrome_naver_session');
+  
+  const browser = await puppeteer.launch({
+    executablePath: browserPath,
+    headless: "new",
+    userDataDir: userDataDir,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
-  if (cfRes.ok) {
-    console.log(`[Cloudflare Sync] GFA 30일 데이터 KV 저장 성공 (0으로 초기화).`);
-  } else {
-    throw new Error(`Cloudflare KV HTTP ${cfRes.status}`);
+
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setViewport({ width: 1280, height: 800 });
+
+    console.log("[Cloudflare Sync] GFA 대시보드 접속 중...");
+    await page.goto("https://ads.naver.com/manage/ad-accounts/225690/dashboard", { waitUntil: 'networkidle2', timeout: 60000 });
+
+    // 로그인 페이지로 튕겼는지 체크
+    if (page.url().includes('nidlogin.login')) {
+      throw new Error("네이버 로그인 세션이 유효하지 않습니다. 스마트플레이스 메뉴에서 로그인 세션을 활성화해 주세요.");
+    }
+
+    const kst = new Date(Date.now() + (9 * 60 * 60 * 1000));
+    const end = kst.toISOString().split("T")[0];
+    const startObj = new Date(kst.getTime() - (30 * 24 * 60 * 60 * 1000));
+    const start = startObj.toISOString().split("T")[0];
+
+    console.log(`[Cloudflare Sync] GFA API 호출 중: ${start} ~ ${end}`);
+    const data = await page.evaluate(async (startDate, endDate) => {
+      const csrfToken = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='))?.split('=')[1];
+      
+      const reportsRes = await fetch('https://ads.naver.com/apis/dashboard/v1/adAccounts/225690/reports/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': decodeURIComponent(csrfToken)
+        },
+        body: JSON.stringify({ startDate, endDate })
+      });
+      const reports = await reportsRes.json();
+
+      const campaignsRes = await fetch('https://ads.naver.com/apis/dashboard/v1/adAccounts/225690/campaigns/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': decodeURIComponent(csrfToken)
+        },
+        body: JSON.stringify({ startDate, endDate, pageNumber: 1, pageSize: 50 })
+      });
+      const campaigns = await campaignsRes.json();
+
+      return { reports, campaigns };
+    }, start, end);
+
+    await browser.close();
+
+    const bulkHistory = {};
+    if (data.reports && data.reports.results) {
+      for (const day of data.reports.results) {
+        const dateStr = day.segments.day; // "YYYY-MM-DD"
+        const clicks = day.metrics.clicks || 0;
+        const impressions = day.metrics.impressions || 0;
+        const spend = Math.round((day.metrics.grossCostMicros || 0) / 1000000);
+        const cpr = clicks > 0 ? Math.round(spend / clicks) : 0;
+
+        bulkHistory[dateStr] = {
+          clicks,
+          impressions,
+          spend,
+          cpr,
+          activeCampaigns: []
+        };
+      }
+    }
+
+    if (data.campaigns && data.campaigns.items) {
+      const active = data.campaigns.items
+        .filter(item => item.campaign && item.campaign.status === "ENABLED")
+        .map(item => {
+          const c = item.campaign;
+          const m = item.metrics || {};
+          const clicks = m.clicks || 0;
+          const spend = Math.round((m.grossCostMicros || 0) / 1000000);
+          return {
+            id: c.campaignId,
+            name: c.name,
+            status: c.status,
+            clicks: clicks,
+            impressions: m.impressions || 0,
+            spend: spend,
+            ctr: m.ctr || 0,
+            cpc: clicks > 0 ? Math.round(spend / clicks) : 0
+          };
+        });
+
+      for (const dateStr in bulkHistory) {
+        bulkHistory[dateStr].activeCampaigns = active;
+      }
+    }
+
+    const cfRes = await fetch('https://springmoons.pages.dev/api/gfa-ads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bulkHistory })
+    });
+    if (cfRes.ok) {
+      console.log(`[Cloudflare Sync] GFA 30일 실시간 데이터 KV 저장 성공.`);
+    } else {
+      console.error(`[Cloudflare Sync] GFA KV 저장 실패 (상태: ${cfRes.status})`);
+    }
+
+  } catch (err) {
+    await browser.close();
+    console.error(`[Cloudflare Sync] GFA 동기화 실패:`, err.message);
   }
+}
+async function syncNaverSearchAdsToCloudflare() {
+  console.log("[Cloudflare Sync] Naver Search Ads 통계 동기화 시작...");
+  const accessLicense = "01000000003e8862c48a1f7ac679c6588c585e0dd35f9c064485960e8f6ff92b22c77c5e6b";
+  const secretKey = "AQAAAAA+iGLEih96xnnGWIxYXg3TOQOrVq+wj1qrlppE2vLU7A==";
+  const customerId = "1610516";
+
+  try {
+    // 1. Fetch existing stats history from Cloudflare KV
+    const kvHistoryRes = await fetch('https://springmoons.pages.dev/api/naver-sa?raw=true').catch(() => null);
+    let cacheData = { history: {} };
+    if (kvHistoryRes && kvHistoryRes.ok) {
+      try {
+        cacheData = await kvHistoryRes.json();
+      } catch (_) {}
+    }
+
+    const campaignMap = await fetchNaverCampaigns(accessLicense, secretKey, customerId);
+
+    const kst = new Date(Date.now() + (9 * 60 * 60 * 1000));
+    const bulkHistory = {};
+    let callsCount = 0;
+
+    // Check last 30 days
+    for (let i = 1; i <= 30; i++) {
+      const dObj = new Date(kst.getTime() - (i * 24 * 60 * 60 * 1000));
+      const yyyy = dObj.getFullYear();
+      const mm = String(dObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dObj.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`; // YYYY-MM-DD
+      const apiDateStr = `${yyyy}${mm}${dd}`;  // YYYYMMDD
+
+      // If already in history with non-zero clicks/spend, we skip to optimize
+      if (cacheData.history && cacheData.history[dateStr]) {
+        const pc = cacheData.history[dateStr].pc || {};
+        const mobile = cacheData.history[dateStr].mobile || {};
+        const place = cacheData.history[dateStr].place || {};
+        if ((pc.clicks || 0) > 0 || (mobile.clicks || 0) > 0 || (place.clicks || 0) > 0) {
+          continue;
+        }
+      }
+
+      // Limit concurrent calls to 5 per run to avoid rate limits
+      if (callsCount >= 5) {
+        break;
+      }
+
+      try {
+        console.log(`[Cloudflare Sync] Naver Search Ads ${dateStr} 통계 요청 중...`);
+        const rows = await fetchNaverReportForDate(apiDateStr, accessLicense, secretKey, customerId);
+        const dayStats = processNaverReportRows(rows, campaignMap);
+        bulkHistory[dateStr] = dayStats;
+        callsCount++;
+      } catch (dayErr) {
+        console.error(`[Cloudflare Sync] Naver Search Ads ${dateStr} 실패:`, dayErr.message);
+      }
+    }
+
+    if (Object.keys(bulkHistory).length > 0) {
+      const cfRes = await fetch('https://springmoons.pages.dev/api/naver-sa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bulkHistory })
+      });
+      if (cfRes.ok) {
+        console.log(`[Cloudflare Sync] Naver Search Ads ${Object.keys(bulkHistory).length}일치 데이터 KV 저장 완료.`);
+      } else {
+        console.error(`[Cloudflare Sync] Naver Search Ads KV 저장 실패 (상태: ${cfRes.status})`);
+      }
+    } else {
+      console.log(`[Cloudflare Sync] Naver Search Ads 최신 데이터가 이미 동기화되어 있습니다.`);
+    }
+  } catch (err) {
+    console.error(`[Cloudflare Sync] Naver Search Ads 동기화 실패:`, err.message);
+  }
+}
+
+async function fetchNaverCampaigns(accessLicense, secretKey, customerId) {
+  const timestamp = Date.now().toString();
+  const method = "GET";
+  const path = "/ncc/campaigns";
+  const message = `${timestamp}.${method}.${path}`;
+
+  const hmac = crypto.createHmac('sha256', secretKey);
+  hmac.update(message);
+  const signature = hmac.digest('base64');
+
+  const headers = {
+    "X-Timestamp": timestamp,
+    "X-API-KEY": accessLicense,
+    "X-CUSTOMER": customerId,
+    "X-Signature": signature,
+    "Accept": "application/json"
+  };
+
+  const res = await fetch(`https://api.searchad.naver.com${path}`, { headers });
+  if (!res.ok) throw new Error("Failed to fetch campaigns list");
+  const campaigns = await res.json();
+  const campaignMap = {};
+  for (const c of campaigns) {
+    campaignMap[c.nccCampaignId] = { name: c.name, type: c.campaignTp };
+  }
+  return campaignMap;
+}
+
+async function fetchNaverReportForDate(dateStr, accessLicense, secretKey, customerId) {
+  const timestamp = Date.now().toString();
+  const method = "POST";
+  const path = "/stat-reports";
+  const message = `${timestamp}.${method}.${path}`;
+
+  const hmac = crypto.createHmac('sha256', secretKey);
+  hmac.update(message);
+  const signature = hmac.digest('base64');
+
+  const headers = {
+    "X-Timestamp": timestamp,
+    "X-API-KEY": accessLicense,
+    "X-CUSTOMER": customerId,
+    "X-Signature": signature,
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  };
+
+  const res = await fetch(`https://api.searchad.naver.com${path}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      statDt: dateStr,
+      reportTp: "AD"
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Naver report creation failed: ${res.status} - ${errText}`);
+  }
+
+  const job = await res.json();
+  const jobId = job.reportJobId || job.id;
+  if (!jobId) {
+    throw new Error(`No reportJobId returned.`);
+  }
+
+  let downloadUrl = "";
+  for (let attempt = 0; attempt < 25; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const pTimestamp = Date.now().toString();
+    const pMethod = "GET";
+    const pPath = `/stat-reports/${jobId}`;
+    const pMessage = `${pTimestamp}.${pMethod}.${pPath}`;
+
+    const pHmac = crypto.createHmac('sha256', secretKey);
+    pHmac.update(pMessage);
+    const pSignature = pHmac.digest('base64');
+
+    const pHeaders = {
+      "X-Timestamp": pTimestamp,
+      "X-API-KEY": accessLicense,
+      "X-CUSTOMER": customerId,
+      "X-Signature": pSignature,
+      "Accept": "application/json"
+    };
+
+    const statusRes = await fetch(`https://api.searchad.naver.com${pPath}`, { headers: pHeaders });
+    if (!statusRes.ok) continue;
+
+    const statusJob = await statusRes.json();
+    const status = statusJob.status;
+
+    if (status === "BUILT") {
+      downloadUrl = statusJob.downloadUrl;
+      break;
+    } else if (status === "FAIL" || status === "NONE") {
+      return [];
+    }
+  }
+
+  if (!downloadUrl) {
+    throw new Error("Naver report build timed out.");
+  }
+
+  const dlTimestamp = Date.now().toString();
+  const dlMethod = "GET";
+  const dlPath = "/report-download";
+  const dlMessage = `${dlTimestamp}.${dlMethod}.${dlPath}`;
+
+  const dlHmac = crypto.createHmac('sha256', secretKey);
+  dlHmac.update(dlMessage);
+  const dlSignature = dlHmac.digest('base64');
+
+  const dlHeaders = {
+    "X-Timestamp": dlTimestamp,
+    "X-API-KEY": accessLicense,
+    "X-CUSTOMER": customerId,
+    "X-Signature": dlSignature,
+    "Accept": "application/json"
+  };
+
+  const dlRes = await fetch(downloadUrl, { headers: dlHeaders });
+  if (!dlRes.ok) {
+    throw new Error(`Naver report download failed: ${dlRes.status}`);
+  }
+
+  const text = await dlRes.text();
+  const lines = text.split('\n');
+  const rows = [];
+  for (const line of lines) {
+    if (line.trim()) {
+      rows.push(line.split('\t'));
+    }
+  }
+  return rows;
+}
+
+function processNaverReportRows(rows, campaignMap) {
+  const stats = {
+    pc: { clicks: 0, spend: 0, impressions: 0 },
+    mobile: { clicks: 0, spend: 0, impressions: 0 },
+    place: { clicks: 0, spend: 0, impressions: 0 }
+  };
+
+  for (const r of rows) {
+    if (r.length < 12) continue;
+    const c_id = r[2];
+    const device = r[8]; // "P" or "M"
+    const imp = parseInt(r[9], 10) || 0;
+    const clicks = parseInt(r[10], 10) || 0;
+    const cost = Math.round(parseFloat(r[11]) || 0);
+
+    const c_meta = campaignMap[c_id];
+    const c_type = c_meta ? c_meta.type : "";
+
+    if (c_type === "PLACE") {
+      stats.place.clicks += clicks;
+      stats.place.spend += cost;
+      stats.place.impressions += imp;
+    } else if (c_type === "WEB_SITE") {
+      if (device === "P") {
+        stats.pc.clicks += clicks;
+        stats.pc.spend += cost;
+        stats.pc.impressions += imp;
+      } else {
+        stats.mobile.clicks += clicks;
+        stats.mobile.spend += cost;
+        stats.mobile.impressions += imp;
+      }
+    }
+  }
+
+  return stats;
 }
 
 const PORT = 3888;

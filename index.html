@@ -11569,10 +11569,15 @@
 
         let googleTerms = [];
 
+        let naverClicks = 0, naverSpend = 0, naverImps = 0;
+        let pcClicks = 0, pcSpend = 0, pcImps = 0;
+        let placeAdClicks = 0, placeAdSpend = 0, placeAdImps = 0;
+
         try {
           let metaRes = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
           let googleRes = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
           let gfaRes = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
+          let naverSaRes = await fetch(`/api/naver-sa?startDate=${start}&endDate=${end}`).then(r => r.json()).catch(() => null);
 
           // Fallback to Cloudflare KV static API if local server failed
           if (!metaRes || !metaRes.campaignStats) {
@@ -11594,6 +11599,21 @@
           if (googleRes && googleRes.searchTerms && googleRes.searchTerms.length > 0) {
             googleTerms = googleRes.searchTerms;
           }
+
+          if (naverSaRes && naverSaRes.totals) {
+            const totals = naverSaRes.totals;
+            naverClicks = totals.mobile.clicks || 0;
+            naverSpend = totals.mobile.spend || 0;
+            naverImps = totals.mobile.impressions || 0;
+
+            pcClicks = totals.pc.clicks || 0;
+            pcSpend = totals.pc.spend || 0;
+            pcImps = totals.pc.impressions || 0;
+
+            placeAdClicks = totals.place.clicks || 0;
+            placeAdSpend = totals.place.spend || 0;
+            placeAdImps = totals.place.impressions || 0;
+          }
         } catch (_) {}
 
         metaClicks = metaStats.clicks || 0;
@@ -11605,15 +11625,11 @@
         gfaImps = gfaStats.impressions || 0;
 
         googleTerms.forEach(t => {
-          googleClicks += t.clicks || 0;
-          googleImps += t.impressions || 0;
+          googleClicks += (t.clicks || 0);
+          googleImps += (t.impressions || 0);
           googleSpend += ((t.clicks || 0) * (t.avgCpc || 0));
         });
         googleSpend = Math.round(googleSpend);
-
-        let naverClicks = 0, naverSpend = 0, naverImps = 0;
-        let pcClicks = 0, pcSpend = 0, pcImps = 0;
-        let placeAdClicks = 0, placeAdSpend = 0, placeAdImps = 0;
 
         const channels = [
           {
