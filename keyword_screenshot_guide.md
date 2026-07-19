@@ -155,6 +155,8 @@
 
 ---
 
+---
+
 ## 6. 전체 소스 코드 레퍼런스 (Full Source Code Package)
 
 아래의 코드들을 각각 해당 파일명으로 저장하여 동일한 디렉토리에 배치하십시오.
@@ -183,6 +185,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // 1. Auto-install required packages if missing
 try {
