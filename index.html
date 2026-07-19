@@ -11806,6 +11806,7 @@
           spend: 0
         };
         let adsList = [];
+        let dailyHistory = [];
 
         let loaded = false;
         try {
@@ -11816,6 +11817,7 @@
             if (data && data.campaignStats && data.success) {
               campaign = data.campaignStats;
               adsList = data.activeAds || [];
+              if (data.dailyHistory) dailyHistory = data.dailyHistory;
               loaded = true;
             }
           }
@@ -11830,6 +11832,7 @@
               if (data && data.campaignStats) {
                 campaign = data.campaignStats;
                 adsList = data.activeAds || [];
+                if (data.dailyHistory) dailyHistory = data.dailyHistory;
               }
             }
           } catch (_) {}
@@ -11874,19 +11877,18 @@
           cur.setUTCDate(cur.getUTCDate() + 1);
         }
 
-        const totalClicks = campaign.clicks || 0;
-        const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
         const trendData = [];
-        let sumClicksTrend = 0;
+        const dailyMap = {};
+        if (dailyHistory) {
+          dailyHistory.forEach(day => {
+            dailyMap[day.date] = day.clicks || 0;
+          });
+        }
+
         for (let i = 0; i < dateRangeList.length; i++) {
-          const ratio = baseRatios[i % baseRatios.length];
-          let daily = Math.round(totalClicks * ratio);
-          if (i === dateRangeList.length - 1) {
-            daily = totalClicks - sumClicksTrend;
-          }
-          if (daily < 0) daily = 0;
-          sumClicksTrend += daily;
-          trendData.push({ date: dateRangeList[i], clicks: daily });
+          const dateStr = dateRangeList[i];
+          const daily = dailyMap[dateStr] !== undefined ? dailyMap[dateStr] : 0;
+          trendData.push({ date: dateStr, clicks: daily });
         }
         drawChartSVG("meta-clicks-chart-container", trendData, "clicks", "#EA580C", "#F97316");
 
@@ -12201,6 +12203,7 @@
 
         // Fallbacks
         let terms = [];
+        let dailyHistory = [];
 
         let loaded = false;
         try {
@@ -12210,6 +12213,7 @@
             const data = await res.json();
             if (data && data.searchTerms && data.searchTerms.length > 0) {
               terms = data.searchTerms;
+              if (data.dailyHistory) dailyHistory = data.dailyHistory;
               loaded = true;
             }
           }
@@ -12223,6 +12227,7 @@
               const data = await res.json();
               if (data && data.searchTerms && data.searchTerms.length > 0) {
                 terms = data.searchTerms;
+                if (data.dailyHistory) dailyHistory = data.dailyHistory;
               }
             }
           } catch (_) {}
@@ -12284,19 +12289,18 @@
           cur.setUTCDate(cur.getUTCDate() + 1);
         }
 
-        const totalClicks = campaignClicks || 0;
-        const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
         const trendData = [];
-        let sumClicksTrend = 0;
+        const dailyMap = {};
+        if (dailyHistory) {
+          dailyHistory.forEach(day => {
+            dailyMap[day.date] = day.clicks || 0;
+          });
+        }
+
         for (let i = 0; i < dateRangeList.length; i++) {
-          const ratio = baseRatios[i % baseRatios.length];
-          let daily = Math.round(totalClicks * ratio);
-          if (i === dateRangeList.length - 1) {
-            daily = totalClicks - sumClicksTrend;
-          }
-          if (daily < 0) daily = 0;
-          sumClicksTrend += daily;
-          trendData.push({ date: dateRangeList[i], clicks: daily });
+          const dateStr = dateRangeList[i];
+          const daily = dailyMap[dateStr] !== undefined ? dailyMap[dateStr] : 0;
+          trendData.push({ date: dateStr, clicks: daily });
         }
         drawChartSVG("google-clicks-chart-container", trendData, "clicks", "#2563EB", "#3B82F6");
 
@@ -12684,6 +12688,7 @@
         // Fallbacks
         let stats = { clicks: 0, impressions: 0, spend: 0, cpr: 0 };
         let campaigns = [];
+        let dailyHistory = [];
 
         let loaded = false;
         try {
@@ -12694,6 +12699,7 @@
             if (data && data.success) {
               if (data.campaignStats) stats = data.campaignStats;
               if (data.activeCampaigns) campaigns = data.activeCampaigns;
+              if (data.dailyHistory) dailyHistory = data.dailyHistory;
               loaded = true;
             }
           }
@@ -12708,6 +12714,7 @@
               if (data && data.success) {
                 if (data.campaignStats) stats = data.campaignStats;
                 if (data.activeCampaigns) campaigns = data.activeCampaigns;
+                if (data.dailyHistory) dailyHistory = data.dailyHistory;
               }
             }
           } catch (_) {}
@@ -12746,19 +12753,18 @@
           cur.setUTCDate(cur.getUTCDate() + 1);
         }
 
-        const totalClicks = stats.clicks || 0;
-        const baseRatios = [0.12, 0.15, 0.16, 0.13, 0.14, 0.16, 0.14];
         const trendData = [];
-        let sumClicksTrend = 0;
+        const dailyMap = {};
+        if (dailyHistory) {
+          dailyHistory.forEach(day => {
+            dailyMap[day.date] = day.clicks || 0;
+          });
+        }
+
         for (let i = 0; i < dateRangeList.length; i++) {
-          const ratio = baseRatios[i % baseRatios.length];
-          let daily = Math.round(totalClicks * ratio);
-          if (i === dateRangeList.length - 1) {
-            daily = totalClicks - sumClicksTrend;
-          }
-          if (daily < 0) daily = 0;
-          sumClicksTrend += daily;
-          trendData.push({ date: dateRangeList[i], clicks: daily });
+          const dateStr = dateRangeList[i];
+          const daily = dailyMap[dateStr] !== undefined ? dailyMap[dateStr] : 0;
+          trendData.push({ date: dateStr, clicks: daily });
         }
         drawChartSVG("gfa-clicks-chart-container", trendData, "clicks", "#059669", "#10B981");
 

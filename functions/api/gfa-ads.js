@@ -32,6 +32,7 @@ export async function onRequestGet(context) {
   let spend = 0;
   const campaignAggregation = {};
 
+  const dailyHistory = [];
   const start = new Date(startDate + "T00:00:00Z");
   const end = new Date(endDate + "T00:00:00Z");
 
@@ -42,6 +43,13 @@ export async function onRequestGet(context) {
       clicks += dayStats.clicks || 0;
       impressions += dayStats.impressions || 0;
       spend += dayStats.spend || 0;
+
+      dailyHistory.push({
+        date: dateKey,
+        clicks: dayStats.clicks || 0,
+        impressions: dayStats.impressions || 0,
+        spend: dayStats.spend || 0
+      });
 
       const campaigns = dayStats.activeCampaigns || [];
       campaigns.forEach(c => {
@@ -62,6 +70,8 @@ export async function onRequestGet(context) {
     }
   }
 
+  dailyHistory.sort((a, b) => a.date.localeCompare(b.date));
+
   const activeCampaigns = Object.values(campaignAggregation).map(c => {
     c.ctr = c.impressions > 0 ? parseFloat(((c.clicks / c.impressions) * 100).toFixed(2)) : 0;
     c.cpc = c.clicks > 0 ? Math.round(c.spend / c.clicks) : 0;
@@ -73,6 +83,7 @@ export async function onRequestGet(context) {
   return new Response(JSON.stringify({
     success: true,
     campaignStats: { clicks, impressions, spend, cpr },
+    dailyHistory,
     activeCampaigns
   }), {
     headers: {

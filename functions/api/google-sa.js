@@ -28,6 +28,7 @@ export async function onRequestGet(context) {
 
   // Filter and aggregate search terms stats by date range
   const termAggregation = {};
+  const dailyHistory = [];
   const start = new Date(startDate + "T00:00:00Z");
   const end = new Date(endDate + "T00:00:00Z");
 
@@ -36,6 +37,10 @@ export async function onRequestGet(context) {
     if (curDate >= start && curDate <= end) {
       const dayStats = cacheData.history[dateKey] || {};
       const terms = dayStats.searchTerms || [];
+      let dayClicks = 0;
+      let dayImps = 0;
+      let daySpend = 0;
+
       terms.forEach(t => {
         const uniqueKey = `${t.term}_${t.type}`;
         if (!termAggregation[uniqueKey]) {
@@ -50,12 +55,29 @@ export async function onRequestGet(context) {
             keyword: t.keyword || t.term
           };
         }
-        termAggregation[uniqueKey].clicks += t.clicks || 0;
-        termAggregation[uniqueKey].impressions += t.impressions || 0;
-        termAggregation[uniqueKey].totalSpend += ((t.clicks || 0) * (t.avgCpc || 0));
+        const clicksVal = t.clicks || 0;
+        const impsVal = t.impressions || 0;
+        const spendVal = clicksVal * (t.avgCpc || 0);
+
+        termAggregation[uniqueKey].clicks += clicksVal;
+        termAggregation[uniqueKey].impressions += impsVal;
+        termAggregation[uniqueKey].totalSpend += spendVal;
+
+        dayClicks += clicksVal;
+        dayImps += impsVal;
+        daySpend += spendVal;
+      });
+
+      dailyHistory.push({
+        date: dateKey,
+        clicks: dayClicks,
+        impressions: dayImps,
+        spend: Math.round(daySpend)
       });
     }
   }
+
+  dailyHistory.sort((a, b) => a.date.localeCompare(b.date));
 
   const searchTerms = Object.values(termAggregation).map(t => {
     t.ctr = t.impressions > 0 ? parseFloat(((t.clicks / t.impressions) * 100).toFixed(2)) : 0;
@@ -66,7 +88,8 @@ export async function onRequestGet(context) {
 
   return new Response(JSON.stringify({
     success: true,
-    searchTerms
+    searchTerms,
+    dailyHistory
   }), {
     headers: {
       "Content-Type": "application/json",
