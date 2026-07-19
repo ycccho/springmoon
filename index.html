@@ -11574,20 +11574,21 @@
         let placeAdClicks = 0, placeAdSpend = 0, placeAdImps = 0;
 
         try {
-          let metaRes = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
-          let googleRes = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
-          let gfaRes = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}`)).then(r => r.json()).catch(() => null);
-          let naverSaRes = await fetch(`/api/naver-sa?startDate=${start}&endDate=${end}`).then(r => r.json()).catch(() => null);
+          const t = Date.now();
+          let metaRes = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&t=${t}`)).then(r => r.json()).catch(() => null);
+          let googleRes = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}&t=${t}`)).then(r => r.json()).catch(() => null);
+          let gfaRes = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}&t=${t}`)).then(r => r.json()).catch(() => null);
+          let naverSaRes = await fetch(`/api/naver-sa?startDate=${start}&endDate=${end}&t=${t}`).then(r => r.json()).catch(() => null);
 
           // Fallback to Cloudflare KV static API if local server failed
           if (!metaRes || !metaRes.campaignStats) {
-            metaRes = await fetch(`/api/meta-ads?startDate=${start}&endDate=${end}`).then(r => r.json()).catch(() => null);
+            metaRes = await fetch(`/api/meta-ads?startDate=${start}&endDate=${end}&t=${t}`).then(r => r.json()).catch(() => null);
           }
           if (!googleRes || !googleRes.searchTerms) {
-            googleRes = await fetch(`/api/google-sa?startDate=${start}&endDate=${end}`).then(r => r.json()).catch(() => null);
+            googleRes = await fetch(`/api/google-sa?startDate=${start}&endDate=${end}&t=${t}`).then(r => r.json()).catch(() => null);
           }
           if (!gfaRes || !gfaRes.campaignStats) {
-            gfaRes = await fetch(`/api/gfa-ads?startDate=${start}&endDate=${end}`).then(r => r.json()).catch(() => null);
+            gfaRes = await fetch(`/api/gfa-ads?startDate=${start}&endDate=${end}&t=${t}`).then(r => r.json()).catch(() => null);
           }
 
           if (metaRes && metaRes.campaignStats) {
@@ -11808,7 +11809,8 @@
 
         let loaded = false;
         try {
-          const res = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}`));
+          const t = Date.now();
+          const res = await fetch(getLocalServerUrl(`/api/meta-ads?startDate=${start}&endDate=${end}&t=${t}`));
           if (res.ok) {
             const data = await res.json();
             if (data && data.campaignStats && data.success) {
@@ -11821,7 +11823,8 @@
 
         if (!loaded) {
           try {
-            const res = await fetch(`/api/meta-ads?startDate=${start}&endDate=${end}`);
+            const t = Date.now();
+            const res = await fetch(`/api/meta-ads?startDate=${start}&endDate=${end}&t=${t}`);
             if (res.ok) {
               const data = await res.json();
               if (data && data.campaignStats) {
@@ -12201,7 +12204,8 @@
 
         let loaded = false;
         try {
-          const res = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}`));
+          const t = Date.now();
+          const res = await fetch(getLocalServerUrl(`/api/google-sa?startDate=${start}&endDate=${end}&t=${t}`));
           if (res.ok) {
             const data = await res.json();
             if (data && data.searchTerms && data.searchTerms.length > 0) {
@@ -12213,7 +12217,8 @@
 
         if (!loaded) {
           try {
-            const res = await fetch(`/api/google-sa?startDate=${start}&endDate=${end}`);
+            const t = Date.now();
+            const res = await fetch(`/api/google-sa?startDate=${start}&endDate=${end}&t=${t}`);
             if (res.ok) {
               const data = await res.json();
               if (data && data.searchTerms && data.searchTerms.length > 0) {
@@ -12682,7 +12687,8 @@
 
         let loaded = false;
         try {
-          const res = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}`));
+          const t = Date.now();
+          const res = await fetch(getLocalServerUrl(`/api/gfa-ads?startDate=${start}&endDate=${end}&t=${t}`));
           if (res.ok) {
             const data = await res.json();
             if (data && data.success) {
@@ -12695,7 +12701,8 @@
 
         if (!loaded) {
           try {
-            const res = await fetch(`/api/gfa-ads?startDate=${start}&endDate=${end}`);
+            const t = Date.now();
+            const res = await fetch(`/api/gfa-ads?startDate=${start}&endDate=${end}&t=${t}`);
             if (res.ok) {
               const data = await res.json();
               if (data && data.success) {
