@@ -161,8 +161,7 @@
       { id: "place-statistics", name: "3. 플레이스 통계", categoryId: "cat-stats", protected: true },
       { id: "meta-statistics", name: "4. 메타광고 통계", categoryId: "cat-stats", protected: true },
       { id: "google-sa-statistics", name: "5. 구글SA 통계", categoryId: "cat-stats", protected: true },
-      { id: "imweb-statistics", name: "6. 아임웹 통계", categoryId: "cat-stats", protected: true },
-      { id: "gfa-statistics", name: "7. gfa 통계", categoryId: "cat-stats", protected: true },
+      { id: "gfa-statistics", name: "6. gfa 통계", categoryId: "cat-stats", protected: true },
       { id: "omission-check", name: "1.블로그분석 누락판별", protected: true },
       { id: "keyword", name: "2.키워드조합", protected: true },
       { id: "keyword-search-count", name: "3.키워드별 조회수", protected: true },
@@ -514,12 +513,8 @@
         menus.push({ id: "google-sa-statistics", name: "5. 구글SA 통계", categoryId: "cat-stats", protected: true });
         changed = true;
       }
-      if (!menus.some(m => m.id === "imweb-statistics")) {
-        menus.push({ id: "imweb-statistics", name: "6. 아임웹 통계", categoryId: "cat-stats", protected: true });
-        changed = true;
-      }
       if (!menus.some(m => m.id === "gfa-statistics")) {
-        menus.push({ id: "gfa-statistics", name: "7. gfa 통계", categoryId: "cat-stats", protected: true });
+        menus.push({ id: "gfa-statistics", name: "6. gfa 통계", categoryId: "cat-stats", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "popular-posts-search")) {
@@ -1081,12 +1076,10 @@
         setupTotalStatistics();
         setupMetaStatistics();
         setupGoogleSAStatistics();
-        setupImwebStatistics();
         setupGfaStatistics();
         setupTotalStatistics();
         setupMetaStatistics();
         setupGoogleSAStatistics();
-        setupImwebStatistics();
         setupGfaStatistics();
       }, 100);
     }
@@ -1114,12 +1107,10 @@
       if (id === "total-statistics") return getTotalStatisticsHTML();
       if (id === "meta-statistics") return getMetaStatisticsHTML();
       if (id === "google-sa-statistics") return getGoogleSAStatisticsHTML();
-      if (id === "imweb-statistics") return getImwebStatisticsHTML();
       if (id === "gfa-statistics") return getGfaStatisticsHTML();
       if (id === "total-statistics") return getTotalStatisticsHTML();
       if (id === "meta-statistics") return getMetaStatisticsHTML();
       if (id === "google-sa-statistics") return getGoogleSAStatisticsHTML();
-      if (id === "imweb-statistics") return getImwebStatisticsHTML();
       if (id === "gfa-statistics") return getGfaStatisticsHTML();
       if (id === "about") {
         return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-lg">
@@ -4570,11 +4561,8 @@
       if (!cleanMenus.some(m => m.id === "google-sa-statistics")) {
         cleanMenus.push({ id: "google-sa-statistics", name: "5. 구글SA 통계", categoryId: "cat-stats", protected: true });
       }
-      if (!cleanMenus.some(m => m.id === "imweb-statistics")) {
-        cleanMenus.push({ id: "imweb-statistics", name: "6. 아임웹 통계", categoryId: "cat-stats", protected: true });
-      }
       if (!cleanMenus.some(m => m.id === "gfa-statistics")) {
-        cleanMenus.push({ id: "gfa-statistics", name: "7. gfa 통계", categoryId: "cat-stats", protected: true });
+        cleanMenus.push({ id: "gfa-statistics", name: "6. gfa 통계", categoryId: "cat-stats", protected: true });
       }
       return cleanMenus;
     }
@@ -9989,6 +9977,7 @@
     }
 
     function getImwebStatisticsHTML() {
+      return ``;
       return `
         <div class="max-w-6xl mx-auto space-y-6">
           <!-- Date Filter Header -->
@@ -10502,6 +10491,7 @@
     }
 
     function getImwebStatisticsHTML() {
+      return ``;
       return `
         <div class="max-w-6xl mx-auto space-y-6">
           <!-- Date Filter Header -->
@@ -12347,6 +12337,7 @@
     }
 
     function setupImwebStatistics() {
+      return;
       const startInput = document.getElementById("imweb-start-date");
       const endInput = document.getElementById("imweb-end-date");
       const applyBtn = document.getElementById("imweb-date-apply-btn");
@@ -12553,10 +12544,14 @@
             <div>
               <h2 class="text-xl font-black text-gray-855 dark-mode:text-white flex items-center gap-2">💚 네이버 GFA 성과형 광고 분석</h2>
               <p class="text-xs text-gray-555 font-medium mt-1">네이버 GFA 성과형 디스플레이 광고의 노출, 클릭 및 캠페인별 실적을 모니터링합니다.</p>
+              <p id="gfa-range-desc-lbl" class="text-xs text-orange-500 font-black mt-1.5"></p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <div class="flex items-center bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl">
-                <button class="gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm" data-period="last-7-days">지난 7일 (오늘 제외)</button>
+                <button class="gfa-period-btn px-4 py-1 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400 flex flex-col items-center justify-center text-center font-bold" data-period="last-7-days">
+                  <span>지난 7일 (오늘 제외)</span>
+                  <span class="text-[9px] font-normal opacity-80 pointer-events-none mt-0.5">${getLast7DaysExcludingTodayRangeText()}</span>
+                </button>
                 <button class="gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="this-month">이번달</button>
                 <button class="gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-month">지난달</button>
                 <button class="gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-bold text-gray-555 dark-mode:text-gray-400" data-period="last-3-months">최근3개월</button>
@@ -12629,10 +12624,29 @@
 
       let activePeriod = "last-7-days";
 
+      // Set initial styles
+      periodBtns.forEach(b => {
+        if (b.dataset.period === "last-7-days") {
+          b.className = "gfa-period-btn px-4 py-1 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm flex flex-col items-center justify-center text-center font-bold";
+        } else {
+          b.className = "gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-555 dark-mode:text-gray-400 flex flex-col items-center justify-center text-center font-bold";
+        }
+      });
+
       periodBtns.forEach(btn => {
         btn.addEventListener("click", () => {
-          periodBtns.forEach(b => b.className = "gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-555 dark-mode:text-gray-400");
-          btn.className = "gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm";
+          periodBtns.forEach(b => {
+            if (b.dataset.period === "last-7-days") {
+              b.className = "gfa-period-btn px-4 py-1 rounded-lg text-xs font-bold transition-all text-gray-555 dark-mode:text-gray-400 flex flex-col items-center justify-center text-center font-bold";
+            } else {
+              b.className = "gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-555 dark-mode:text-gray-400 flex flex-col items-center justify-center text-center font-bold";
+            }
+          });
+          if (btn.dataset.period === "last-7-days") {
+            btn.className = "gfa-period-btn px-4 py-1 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm flex flex-col items-center justify-center text-center font-bold";
+          } else {
+            btn.className = "gfa-period-btn px-4 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-white dark-mode:bg-gray-850 text-gray-855 dark-mode:text-white shadow-sm flex flex-col items-center justify-center text-center font-bold";
+          }
           activePeriod = btn.dataset.period;
           const customDateContainer = document.getElementById("gfa-custom-date-container");
           if (activePeriod === "custom") {
@@ -12682,6 +12696,14 @@
         const start = startInput.value;
         const end = endInput.value;
         if (!start || !end) return;
+
+        const descLbl = document.getElementById("gfa-range-desc-lbl");
+        if (descLbl) {
+          const s = new Date(start);
+          const e = new Date(end);
+          const rangeStr = `${s.getMonth() + 1}월 ${s.getDate()}일 ~ ${e.getMonth() + 1}월 ${e.getDate()}일`;
+          descLbl.textContent = `${rangeStr} GFA 통계입니다.`;
+        }
 
         const days = Math.max(1, Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000)) + 1);
 

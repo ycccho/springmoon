@@ -2069,26 +2069,6 @@ app.get('/api/google-sa', cors(), async (req, res) => {
   }
 });
 
-// Proxy endpoint for I'mWeb Site Stats
-app.get('/api/imweb', cors(), async (req, res) => {
-  loadConfig(); // Reload config dynamically
-  const imwebConf = globalConfig.imweb || {};
-  
-  const subscriptionExpiry = imwebConf.subscriptionExpiry || "2028-01-19";
-  const domainExpiry = imwebConf.domainExpiry || "2028-01-19";
-  const sslExpiry = imwebConf.sslExpiry || "2028-01-19";
-
-  // 아임웹 Open API는 방문자 통계 엔드포인트를 공식 제공하지 않음
-  // 만료일 정보만 config에서 읽어서 반환
-  res.json({
-    success: true,
-    subscriptionExpiry,
-    domainExpiry,
-    sslExpiry,
-    noVisitorApi: true
-  });
-});
-
 // OPTIONS preflight endpoint for client checks
 app.options('/api/screenshot', cors(), (req, res) => {
   res.sendStatus(200);
@@ -2107,69 +2087,78 @@ app.options('/api/place-statistics/scrape', cors(), (req, res) => {
 });
 app.options('/api/meta-ads', cors(), (req, res) => { res.sendStatus(200); });
 app.options('/api/google-sa', cors(), (req, res) => { res.sendStatus(200); });
-app.options('/api/imweb', cors(), (req, res) => { res.sendStatus(200); });
 app.options('/api/gfa-ads', cors(), (req, res) => { res.sendStatus(200); });
 
 // Proxy/Mock endpoint for Naver GFA Ads
 app.get('/api/gfa-ads', cors(), async (req, res) => {
   const startDate = req.query.startDate || req.query.start;
   const endDate = req.query.endDate || req.query.end;
-  let days = 7;
-  if (startDate && endDate) {
-    days = Math.max(1, Math.round((new Date(endDate) - new Date(startDate)) / (24 * 60 * 60 * 1000)) + 1);
+  if (!startDate || !endDate) {
+    return res.status(400).json({ error: "startDate and endDate parameters are required" });
   }
 
-  // Return realistic active GFA campaigns and stats (집행 중인 캠페인만 노출)
-  if (startDate === '2026-07-06' && endDate === '2026-07-12') {
-    return res.json({
-      success: true,
-      campaignStats: {
-        clicks: 400,
-        impressions: 207667,
-        spend: 60995,
-        cpr: 152,
-        results: 400,
-        reach: 180000
-      },
-      activeCampaigns: [
-        {
-          id: "gfa-c-001",
-          name: "네이티브 1241009",
-          status: "ACTIVE",
-          clicks: 400,
-          impressions: 207667,
-          spend: 60995,
-          ctr: 0.19,
-          cpc: 152
-        }
-      ]
+  const start = new Date(startDate + "T00:00:00Z");
+  const end = new Date(endDate + "T00:00:00Z");
+  const days = Math.max(1, Math.round((end - start) / (24 * 60 * 60 * 1000)) + 1);
+
+  const dailyHistory = [];
+  let cur = new Date(start);
+  while (cur <= end) {
+    const dateStr = cur.toISOString().split("T")[0];
+    let hash = 0;
+    for (let i = 0; i < dateStr.length; i++) {
+      hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const rand = Math.abs(Math.sin(hash)) * 30; // 0 to 30
+    const clicks = Math.round(45 + rand); // 45 to 75 clicks
+    const impressions = Math.round(clicks * (400 + (Math.abs(hash) % 200)));
+    const spend = clicks * 152; // avg cpc = 152
+
+    dailyHistory.push({
+      date: dateStr,
+      clicks,
+      impressions,
+      spend
     });
+    cur.setUTCDate(cur.getUTCDate() + 1);
   }
+
+  let totalClicks = 0;
+  let totalImps = 0;
+  let totalSpend = 0;
+  dailyHistory.forEach(day => {
+    totalClicks += day.clicks;
+    totalImps += day.impressions;
+    totalSpend += day.spend;
+  });
+  const cpr = totalClicks > 0 ? Math.round(totalSpend / totalClicks) : 152;
 
   res.json({
     success: true,
     campaignStats: {
-      clicks: Math.round(57.14 * days),
-      impressions: Math.round(29667 * days),
-      spend: Math.round(8713.57 * days),
-      cpr: 152,
-      results: Math.round(57.14 * days),
-      reach: Math.round(25000 * days)
+      clicks: totalClicks,
+      impressions: totalImps,
+      spend: totalSpend,
+      cpr: cpr,
+      results: totalClicks,
+      reach: Math.round(totalImps * 0.85)
     },
+    dailyHistory,
     activeCampaigns: [
       {
         id: "gfa-c-001",
         name: "네이티브 1241009",
         status: "ACTIVE",
-        clicks: Math.round(57.14 * days),
-        impressions: Math.round(29667 * days),
-        spend: Math.round(8713.57 * days),
-        ctr: 0.19,
-        cpc: 152
+        clicks: totalClicks,
+        impressions: totalImps,
+        spend: totalSpend,
+        ctr: totalImps > 0 ? parseFloat(((totalClicks / totalImps) * 100).toFixed(2)) : 0.19,
+        cpc: cpr
       }
     ]
   });
 });
+
 
 app.options('/api/meta-ad-library', cors(), (req, res) => { res.sendStatus(200); });
 
