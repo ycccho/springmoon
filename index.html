@@ -6306,7 +6306,7 @@
 
             <div id="bps-ocr-container" class="hidden">
               <label class="block text-xs font-bold text-orange-600 dark-mode:text-orange-400 mb-1.5">🎯 OCR 체크 단어 목록 (쉼표 구분)</label>
-              <input type="text" id="bps-ocr-keywords" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="예: 인디컴퍼니, inde.co.kr" value="인디컴퍼니, inde.co.kr">
+              <input type="text" id="bps-ocr-keywords" class="w-full px-3 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="예: 인디컴퍼니, inde.co.kr, busaninterior.kr" value="인디컴퍼니, inde.co.kr, busaninterior.kr">
             </div>
 
             <div class="flex gap-3 pt-2">
@@ -6418,7 +6418,7 @@
 
               <div>
                 <label class="block text-xs font-bold text-orange-600 dark-mode:text-orange-400 mb-1.5">🎯 OCR 체크 단어 입력 (선택사항, 쉼표 구분)</label>
-                <input type="text" id="screenshot-ocr-keywords" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-805 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="예시: 인디컴퍼니, inde.co.kr (입력하면 이미지에서 완벽히 일치하는 단어를 찾아 굵은 빨간 동그라미를 그립니다)">
+                <input type="text" id="screenshot-ocr-keywords" class="w-full px-4 py-2 border border-gray-300 dark-mode:border-gray-600 rounded-xl bg-white dark-mode:bg-gray-700 text-gray-805 dark-mode:text-gray-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="예시: 인디컴퍼니, inde.co.kr, busaninterior.kr (입력하면 이미지에서 완벽히 일치하는 단어를 찾아 굵은 빨간 동그라미를 그립니다)">
               </div>
 
               <div class="flex justify-between items-center pt-2">
@@ -6598,7 +6598,7 @@
 
             <div>
               <label class="block text-[11px] font-bold text-orange-600 dark-mode:text-orange-400 mb-1">🎯 OCR 체크 단어 (선택사항, 쉼표 구분)</label>
-              <input type="text" class="task-ocr-keywords w-full px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-805 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500" value="${ocrKeywords.join(', ')}" placeholder="예시: 인디컴퍼니, inde.co.kr">
+              <input type="text" class="task-ocr-keywords w-full px-3 py-1.5 border border-gray-300 dark-mode:border-gray-600 rounded-lg bg-white dark-mode:bg-gray-700 text-gray-805 dark-mode:text-gray-100 text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500" value="${ocrKeywords.join(', ')}" placeholder="예시: 인디컴퍼니, inde.co.kr, busaninterior.kr">
             </div>
           </div>
         `;
@@ -6670,7 +6670,7 @@
             time: "09:00",
             naverKeywords: [],
             googleKeywords: [],
-            ocrKeywords: [],
+            ocrKeywords: ["인디컴퍼니", "inde.co.kr", "busaninterior.kr"],
             saveFolder: "D:\\\\search-rank"
           });
         } else {
@@ -6689,7 +6689,7 @@
             time: "09:00",
             naverKeywords: [],
             googleKeywords: [],
-            ocrKeywords: [],
+            ocrKeywords: ["인디컴퍼니", "inde.co.kr", "busaninterior.kr"],
             saveFolder: "D:\\\\search-rank"
           });
         });
@@ -7567,7 +7567,7 @@
       // Restore values from localStorage
       if (blogInput) blogInput.value = localStorage.getItem("bps_blog_id") || "";
       if (folderInput) folderInput.value = localStorage.getItem("bps_save_folder") || "D:\\\\blog-post-screenshot";
-      if (ocrInput) ocrInput.value = localStorage.getItem("bps_ocr_keywords") || "인디컴퍼니, inde.co.kr";
+      if (ocrInput) ocrInput.value = localStorage.getItem("bps_ocr_keywords") || "인디컴퍼니, inde.co.kr, busaninterior.kr";
       
       const savedMode = localStorage.getItem("bps_mode") || "1";
       modeRadios.forEach(radio => {

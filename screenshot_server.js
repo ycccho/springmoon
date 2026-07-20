@@ -553,7 +553,7 @@ async function detectAndDrawRedCircles(browser, buffer, ocrKeywords, imageType =
       return buffer;
     }
 
-    const targetWords = (ocrKeywords && ocrKeywords.length > 0) ? ocrKeywords : ["인디컴퍼니", "inde.co.kr"];
+    const targetWords = (ocrKeywords && ocrKeywords.length > 0) ? ocrKeywords : ["인디컴퍼니", "inde.co.kr", "busaninterior.kr"];
     const matchedBoxes = [];
 
     for (let i = 1; i < textAnnotations.length; i++) {
