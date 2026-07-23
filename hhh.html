@@ -1390,79 +1390,130 @@
       const file = e.target.files[0];
       if (!file) return;
 
+      const sizeMb = (file.size / 1024 / 1024).toFixed(1);
       statusContainer.innerHTML = `
         <div class="loader"></div>
-        <div>부산·울산·경남·경북 개인사업자 CSV 분석 및 영구 저장 중... (${file.name})</div>
+        <div id="loading-txt">대용량 CSV 파일 초속 스트리밍 분석 중... (${sizeMb}MB)</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;" id="loading-subtxt">브라우저 멈춤 없이 조각 단위 처리 중입니다...</div>
       `;
       statusContainer.style.display = "block";
       tableContainer.style.display = "none";
       summarySection.style.display = "none";
 
+      const chunkSize = 1024 * 1024 * 2; // 2MB chunk
+      let offset = 0;
+      let leftover = "";
+      
+      let countInd1 = 0, countInd2 = 0, countInd3 = 0, countInd4 = 0;
+      let totalInteriorFound = 0;
+      let results = [];
+
+      const interiorKeywords = ["인테리어", "내장", "실내", "의장", "도배", "장판", "타일", "조명", "싱크대", "리모델링", "건축내장", "목공", "방수", "도장"];
+      let headerRow = null;
+      let idxComp = 0, idxMaster = 1, idxAddr = 2, idxTel = 3, idxDate = 4, idxItem = 5;
+
       const reader = new FileReader();
+
+      function readNextChunk() {
+        const slice = file.slice(offset, offset + chunkSize);
+        reader.readAsText(slice, "EUC-KR");
+      }
+
       reader.onload = function(evt) {
-        const text = evt.target.result;
-        const rows = parseCSVText(text);
-        
-        if (rows.length === 0) {
-          alert("CSV 파일에서 읽을 수 있는 데이터 행을 찾지 못했습니다.");
-          statusContainer.style.display = "none";
-          return;
-        }
+        const text = leftover + evt.target.result;
+        const lines = text.split(/\r?\n/);
+        leftover = lines.pop() || "";
 
-        let countInd1 = 0;
-        let countInd2 = 0;
-        let countInd3 = 0;
-        let countInd4 = 0;
-
-        const interiorKeywords = ["인테리어", "내장", "실내", "의장", "도배", "장판", "타일", "조명", "싱크대", "리모델링", "건축내장", "목공", "방수", "도장"];
-
-        const filteredInteriorRows = rows.filter(r => {
-          const addr = r.ncrGsAddr || '';
-          const item = r.ncrItemName || '';
-          const name = r.ncrGsKname || '';
-
-          const matchRegion = target4Regions.some(reg => addr.includes(reg));
-          if (!matchRegion && rows.length > 50) return false;
-
-          const matchInterior = interiorKeywords.some(k => item.includes(k) || name.includes(k));
-          if (!matchInterior) return false;
-
-          if (item.includes("도배") || item.includes("장판") || item.includes("마감")) {
-            countInd2++;
-          } else if (item.includes("타일") || item.includes("욕실") || item.includes("수전")) {
-            countInd3++;
-          } else if (item.includes("조명") || item.includes("전기") || item.includes("목공")) {
-            countInd4++;
-          } else {
-            countInd1++;
+        lines.forEach((line) => {
+          if (!line.trim()) return;
+          const row = line.split(",").map(v => v.replace(/^["']|["']$/g, "").trim());
+          
+          if (!headerRow) {
+            headerRow = row;
+            const findIdx = (kw) => row.findIndex(h => kw.some(k => h.includes(k)));
+            idxComp = findIdx(["상호", "업체명", "사업자명", "점포명", "상호명"]);
+            idxMaster = findIdx(["대표자", "성명", "대표자명", "대표"]);
+            idxAddr = findIdx(["소재지", "주소", "도로명", "지번"]);
+            idxTel = findIdx(["전화번호", "연락처", "전화"]);
+            idxDate = findIdx(["등록일", "인허가일", "개업일", "일자"]);
+            idxItem = findIdx(["업종", "종목", "업태", "면허"]);
+            return;
           }
 
-          return true;
+          if (row.length < 2) return;
+
+          const compName = idxComp !== -1 && row[idxComp] ? row[idxComp] : row[0];
+          const masterName = idxMaster !== -1 && row[idxMaster] ? row[idxMaster] : '-';
+          const address = idxAddr !== -1 && row[idxAddr] ? row[idxAddr] : '-';
+          const phone = idxTel !== -1 && row[idxTel] ? row[idxTel] : '';
+          const regDate = idxDate !== -1 && row[idxDate] ? row[idxDate] : '';
+          const itemType = idxItem !== -1 && row[idxItem] ? row[idxItem] : '인테리어/내장';
+
+          const matchRegion = target4Regions.some(reg => address.includes(reg));
+          const matchInterior = interiorKeywords.some(k => itemType.includes(k) || compName.includes(k));
+
+          if (matchRegion && matchInterior) {
+            totalInteriorFound++;
+
+            if (itemType.includes("도배") || itemType.includes("장판") || itemType.includes("마감")) {
+              countInd2++;
+            } else if (itemType.includes("타일") || itemType.includes("욕실") || itemType.includes("수전")) {
+              countInd3++;
+            } else if (itemType.includes("조명") || itemType.includes("전기") || itemType.includes("목공")) {
+              countInd4++;
+            } else {
+              countInd1++;
+            }
+
+            if (results.length < 2500) {
+              results.push({
+                ncrGsKname: compName,
+                ncrGsMaster: masterName,
+                ncrGsAddr: address,
+                ncrOffTel: phone,
+                ncrGsRegdate: regDate,
+                ncrItemName: itemType
+              });
+            }
+          }
         });
 
-        loadedCompanies = filteredInteriorRows.length > 0 ? filteredInteriorRows : rows;
+        offset += chunkSize;
+        const progressPct = Math.min(100, Math.round((offset / file.size) * 100));
 
-        lastPersonalCount = loadedCompanies.length;
-        valPersonalCnt.textContent = lastPersonalCount.toLocaleString();
-
-        cntInd1.textContent = `${countInd1.toLocaleString()}건`;
-        cntInd2.textContent = `${countInd2.toLocaleString()}건`;
-        cntInd3.textContent = `${countInd3.toLocaleString()}건`;
-        cntInd4.textContent = `${countInd4.toLocaleString()}건`;
-
-        try {
-          localStorage.setItem(STORAGE_CSV_KEY, JSON.stringify(loadedCompanies));
-          localStorage.setItem(STORAGE_META_KEY, JSON.stringify({
-            countInd1, countInd2, countInd3, countInd4, licenseCount: lastLicenseCount
-          }));
-        } catch (storageErr) {
-          localStorage.setItem(STORAGE_CSV_KEY, JSON.stringify(loadedCompanies.slice(0, 3000)));
+        const loadingTxt = document.getElementById("loading-txt");
+        if (loadingTxt) {
+          loadingTxt.textContent = `CSV 분석 중... ${progressPct}% (${totalInteriorFound.toLocaleString()}건 발견)`;
         }
 
-        updateRatioDisplay();
-        renderFilteredList();
+        if (offset < file.size) {
+          setTimeout(readNextChunk, 5);
+        } else {
+          loadedCompanies = results;
+          lastPersonalCount = totalInteriorFound || results.length;
+          valPersonalCnt.textContent = lastPersonalCount.toLocaleString();
+
+          cntInd1.textContent = `${countInd1.toLocaleString()}건`;
+          cntInd2.textContent = `${countInd2.toLocaleString()}건`;
+          cntInd3.textContent = `${countInd3.toLocaleString()}건`;
+          cntInd4.textContent = `${countInd4.toLocaleString()}건`;
+
+          try {
+            localStorage.setItem(STORAGE_CSV_KEY, JSON.stringify(loadedCompanies.slice(0, 1500)));
+            localStorage.setItem(STORAGE_META_KEY, JSON.stringify({
+              countInd1, countInd2, countInd3, countInd4, totalPersonal: lastPersonalCount, licenseCount: lastLicenseCount
+            }));
+          } catch(e) {
+            console.warn("Storage quota limit reached, saved metadata count");
+          }
+
+          updateRatioDisplay();
+          renderFilteredList();
+          statusContainer.style.display = "none";
+        }
       };
-      reader.readAsText(file, "EUC-KR");
+
+      readNextChunk();
     }
 
     // Multi-select Dropdown Handlers
