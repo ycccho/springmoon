@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>전국 건설업체 및 실내건축면허 조회 시스템</title>
+  <title>전국 건설업체 및 실내건축면허/개인사업자 조회 시스템</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +37,7 @@
     }
 
     .container {
-      max-width: 1350px;
+      max-width: 1380px;
       margin: 0 auto;
     }
 
@@ -88,7 +88,7 @@
 
     @media (min-width: 768px) {
       .filter-grid {
-        grid-template-columns: 1.2fr 1.5fr 2fr 1fr;
+        grid-template-columns: 1.1fr 1.6fr 2fr 1fr;
         align-items: flex-end;
       }
     }
@@ -124,6 +124,78 @@
     .form-select:focus, .form-input:focus {
       border-color: var(--primary-color);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Multi-select custom dropdown */
+    .multi-select-container {
+      position: relative;
+    }
+
+    .multi-select-trigger {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      background-color: #0b0f19;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .multi-select-trigger:hover {
+      border-color: var(--primary-color);
+    }
+
+    .multi-select-dropdown {
+      position: absolute;
+      top: 108%;
+      left: 0;
+      width: 100%;
+      min-width: 260px;
+      background-color: #151c2c;
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      display: none;
+      padding: 0.5rem;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .multi-select-dropdown.open {
+      display: block;
+    }
+
+    .multi-select-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: background-color 0.15s ease;
+    }
+
+    .multi-select-item:hover {
+      background-color: #1e293b;
+    }
+
+    .multi-select-item input[type="checkbox"] {
+      width: 1.05rem;
+      height: 1.05rem;
+      accent-color: var(--primary-color);
+      cursor: pointer;
     }
 
     .date-row {
@@ -247,8 +319,28 @@
       color: white;
     }
 
+    .btn-import-csv {
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background-color: rgba(13, 148, 136, 0.15);
+      border: 1px solid rgba(13, 148, 136, 0.35);
+      color: var(--accent-color);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-import-csv:hover {
+      background-color: rgba(13, 148, 136, 0.25);
+    }
+
     .search-filter-wrapper {
-      max-width: 350px;
+      max-width: 320px;
       width: 100%;
     }
 
@@ -436,8 +528,8 @@
     
     <!-- Header -->
     <header>
-      <h1><span>국토교통부 전지역 건설업체 조회</span> 🔍</h1>
-      <p>전국의 모든 건설업체 및 실내건축면허 보유 업체를 공공데이터포털(KISCON)을 통해 실시간 조회합니다.</p>
+      <h1><span>전국 건설업체 & 개인사업자 통합 조회</span> 🔍</h1>
+      <p>전국의 면허 보유 건설업체 및 소상공인 개인사업자 데이터를 시·도순으로 실시간 조회합니다.</p>
     </header>
 
     <!-- Search filter panel -->
@@ -448,22 +540,50 @@
         <div class="form-group">
           <label for="area-select">등록 시·도</label>
           <select id="area-select" class="form-select">
-            <option value="">시·도 선택</option>
+            <option value="">전국 전체 (시·도 선택)</option>
           </select>
         </div>
 
-        <!-- 면허/업종 종류 선택 -->
+        <!-- 면허/업종 종류 복수 선택 -->
         <div class="form-group">
-          <label for="industry-select">면허·업종 분류 카테고리</label>
-          <select id="industry-select" class="form-select">
-            <option value="">전체 업종 (전체 보기)</option>
-            <option value="실내건축">실내건축공사업 (인테리어)</option>
-            <option value="건축공사">건축공사업 (종합건설)</option>
-            <option value="토목">토목공사업 / 토목건축공사업</option>
-            <option value="금속창호">금속창호·지붕건축물조립공사업</option>
-            <option value="도장">도장·습식·방수·석공사업</option>
-            <option value="조경">조경식재·가설공사업</option>
-          </select>
+          <label>면허·업종 분류 카테고리 (복수 선택 가능)</label>
+          <div class="multi-select-container" id="industry-multi-container">
+            <div class="multi-select-trigger" id="multi-select-trigger">
+              <span id="multi-select-label">전체 업종 (전체 선택됨)</span>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">▼</span>
+            </div>
+            <div class="multi-select-dropdown" id="multi-select-dropdown">
+              <label class="multi-select-item">
+                <input type="checkbox" id="chk-all" checked>
+                <span>전체 선택 (전체 보기)</span>
+              </label>
+              <hr style="border: none; border-top: 1px solid var(--border-color); margin: 0.3rem 0;">
+              <label class="multi-select-item">
+                <input type="checkbox" class="ind-chk" value="실내건축" checked>
+                <span>실내건축공사업 (인테리어)</span>
+              </label>
+              <label class="multi-select-item">
+                <input type="checkbox" class="ind-chk" value="건축공사" checked>
+                <span>건축공사업 (종합건설)</span>
+              </label>
+              <label class="multi-select-item">
+                <input type="checkbox" class="ind-chk" value="토목" checked>
+                <span>토목공사업 / 토목건축</span>
+              </label>
+              <label class="multi-select-item">
+                <input type="checkbox" class="ind-chk" value="금속창호" checked>
+                <span>금속창호·지붕건축물</span>
+              </label>
+              <label class="multi-select-item">
+                <input type="checkbox" class="ind-chk" value="도장" checked>
+                <span>도장·습식·방수·석공사</span>
+              </label>
+              <label class="multi-select-item">
+                <input type="checkbox" class="ind-chk" value="조경" checked>
+                <span>조경식재·가설공사</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- 공시 검색 기간 -->
@@ -479,7 +599,7 @@
 
         <!-- 조회 버튼 -->
         <button id="search-btn" class="btn-search">
-          <span>🔍 건설업체 전체 조회</span>
+          <span>🔍 건설업체 데이터 조회</span>
         </button>
 
       </div>
@@ -488,23 +608,29 @@
     <!-- Summary & Real-time Filter Bar -->
     <div class="summary-bar" style="display: none;" id="summary-section">
       <div class="summary-left">
-        <div class="stat-badge">전체 등록업체<span id="stat-total-cnt">0</span></div>
+        <div class="stat-badge">전체 목록<span id="stat-total-cnt">0</span></div>
         <div class="stat-badge">실내건축공사업<span id="stat-match-cnt">0</span></div>
         
         <div class="filter-type-group">
-          <button class="btn-filter-type active" id="btn-filter-all">전체 업체 보기</button>
+          <button class="btn-filter-type active" id="btn-filter-all">전체 보기</button>
           <button class="btn-filter-type" id="btn-filter-interior">실내건축만 보기</button>
         </div>
+
+        <!-- Local CSV File Import Button -->
+        <button class="btn-import-csv" id="btn-import-csv">
+          📁 개인사업자 CSV 파일 직접 불러오기
+        </button>
+        <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
       </div>
 
       <div class="search-filter-wrapper">
-        <input type="text" id="name-filter-input" class="form-input" placeholder="💡 업체명(상호) 실시간 검색...">
+        <input type="text" id="name-filter-input" class="form-input" placeholder="💡 업체명/소재지 실시간 검색...">
       </div>
     </div>
 
     <!-- Initial / Loading Status -->
     <div id="status-container" class="status-msg">
-      💡 등록 시·도를 선택하신 후 [건설업체 전체 조회] 버튼을 눌러주세요.
+      💡 등록 시·도를 선택하신 후 [건설업체 데이터 조회] 버튼을 누르시거나, 소장하고 계신 <b>개인사업자 CSV 파일</b>을 불러와 보세요.
     </div>
 
     <!-- Results Table Container -->
@@ -517,7 +643,7 @@
               <th>대표자</th>
               <th>등록일자</th>
               <th>연락처</th>
-              <th>소재지 주소</th>
+              <th>소재지 주소 (시·도순 정렬)</th>
               <th>관리</th>
             </tr>
           </thead>
@@ -531,12 +657,16 @@
   </div>
 
   <script>
-    // Region Select Data Mapping
+    // Region Select Data & Standard Korean Geographical Order
     const regionList = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종시", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
+
+    const regionRankOrder = [
+      "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원",
+      "충북", "충남", "전북", "전남", "경북", "경남", "제주"
+    ];
 
     // DOM Elements
     const areaSelect = document.getElementById("area-select");
-    const industrySelect = document.getElementById("industry-select");
     const searchBtn = document.getElementById("search-btn");
     const statusContainer = document.getElementById("status-container");
     const tableContainer = document.getElementById("table-container");
@@ -547,15 +677,19 @@
     const nameFilterInput = document.getElementById("name-filter-input");
     const btnFilterAll = document.getElementById("btn-filter-all");
     const btnFilterInterior = document.getElementById("btn-filter-interior");
+    const btnImportCsv = document.getElementById("btn-import-csv");
+    const csvFileInput = document.getElementById("csv-file-input");
 
-    let currentYearRange = 10; // Default 10 years
-    let loadedCompanies = []; // Full list fetched from proxy
-    let currentFilterType = "all"; // "all" or "interior"
+    // Multi-select elements
+    const multiTrigger = document.getElementById("multi-select-trigger");
+    const multiDropdown = document.getElementById("multi-select-dropdown");
+    const multiLabel = document.getElementById("multi-select-label");
+    const chkAll = document.getElementById("chk-all");
+    const indCheckboxes = document.querySelectorAll(".ind-chk");
 
-    // Industry Category Select Listener
-    industrySelect.addEventListener("change", () => {
-      renderFilteredList();
-    });
+    let currentYearRange = 10;
+    let loadedCompanies = [];
+    let currentFilterType = "all";
 
     // Initialize Province Dropdown
     regionList.forEach(prov => {
@@ -565,7 +699,51 @@
       areaSelect.appendChild(opt);
     });
 
-    // Handle Date Range Preset Buttons
+    // Multi-select Dropdown Event Handlers
+    multiTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      multiDropdown.classList.toggle("open");
+    });
+
+    document.addEventListener("click", () => {
+      multiDropdown.classList.remove("open");
+    });
+
+    multiDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    // Handle "Check All"
+    chkAll.addEventListener("change", function() {
+      indCheckboxes.forEach(chk => chk.checked = this.checked);
+      updateMultiSelectLabel();
+      renderFilteredList();
+    });
+
+    // Handle individual industry checkboxes
+    indCheckboxes.forEach(chk => {
+      chk.addEventListener("change", () => {
+        const allChecked = Array.from(indCheckboxes).every(c => c.checked);
+        chkAll.checked = allChecked;
+        updateMultiSelectLabel();
+        renderFilteredList();
+      });
+    });
+
+    function updateMultiSelectLabel() {
+      const checkedVals = Array.from(indCheckboxes).filter(c => c.checked).map(c => c.value);
+      if (checkedVals.length === indCheckboxes.length || chkAll.checked) {
+        multiLabel.textContent = "전체 업종 (전체 선택됨)";
+      } else if (checkedVals.length === 0) {
+        multiLabel.textContent = "선택된 업종 없음";
+      } else if (checkedVals.length === 1) {
+        multiLabel.textContent = `${checkedVals[0]} 포함 선택`;
+      } else {
+        multiLabel.textContent = `${checkedVals[0]} 외 ${checkedVals.length - 1}개 선택됨`;
+      }
+    }
+
+    // Preset Date Range Handler
     document.querySelectorAll(".btn-preset").forEach(btn => {
       btn.addEventListener("click", function() {
         document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
@@ -589,20 +767,81 @@
       renderFilteredList();
     });
 
-    // Fetch and search handler
+    // CSV Local File Importer
+    btnImportCsv.addEventListener("click", () => csvFileInput.click());
+    csvFileInput.addEventListener("change", handleCSVImport);
+
+    function handleCSVImport(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      statusContainer.innerHTML = `
+        <div class="loader"></div>
+        <div>개인사업자 CSV 파일 분석 중... (${file.name})</div>
+      `;
+      statusContainer.style.display = "block";
+      tableContainer.style.display = "none";
+      summarySection.style.display = "none";
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        const rows = parseCSVText(text);
+        
+        if (rows.length === 0) {
+          alert("CSV 파일에서 읽을 수 있는 데이터 행을 찾지 못했습니다.");
+          return;
+        }
+
+        loadedCompanies = rows;
+        renderFilteredList();
+      };
+      reader.readAsText(file, "EUC-KR");
+    }
+
+    // Universal CSV Parser
+    function parseCSVText(csvText) {
+      const lines = csvText.split(/\r?\n/).filter(line => line.trim().length > 0);
+      if (lines.length <= 1) return [];
+
+      const headers = lines[0].split(",").map(h => h.replace(/^["']|["']$/g, "").trim());
+      
+      // Auto-detect column indexes for company name, representative, address, phone, date, item
+      const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k)));
+
+      const idxComp = findIdx(["상호", "업체명", "사업자명", "점포명", "상호명"]);
+      const idxMaster = findIdx(["대표자", "성명", "대표자명", "대표"]);
+      const idxAddr = findIdx(["소재지", "주소", "도로명", "지번"]);
+      const idxTel = findIdx(["전화번호", "연락처", "전화"]);
+      const idxDate = findIdx(["등록일", "인허가일", "개업일", "일자"]);
+      const idxItem = findIdx(["업종", "종목", "업태", "면허"]);
+
+      const results = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(",").map(v => v.replace(/^["']|["']$/g, "").trim());
+        if (row.length < 2) continue;
+
+        results.push({
+          ncrGsKname: idxComp !== -1 ? row[idxComp] : row[0],
+          ncrGsMaster: idxMaster !== -1 ? row[idxMaster] : '-',
+          ncrGsAddr: idxAddr !== -1 ? row[idxAddr] : '-',
+          ncrOffTel: idxTel !== -1 ? row[idxTel] : '',
+          ncrGsRegdate: idxDate !== -1 ? row[idxDate] : '',
+          ncrItemName: idxItem !== -1 ? row[idxItem] : '개인사업자'
+        });
+      }
+      return results;
+    }
+
+    // Fetch and Search Handler
     searchBtn.addEventListener("click", performKisPreview);
 
     async function performKisPreview() {
       const area = areaSelect.value;
-      if (!area) {
-        alert("등록 시·도를 선택해 주세요.");
-        areaSelect.focus();
-        return;
-      }
 
       statusContainer.innerHTML = `
         <div class="loader"></div>
-        <div id="loading-txt">공공데이터포털(KISCON) 전체 목록을 수집 중입니다...</div>
+        <div id="loading-txt">공공데이터포털(KISCON) 데이터를 수집 중입니다...</div>
         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;" id="loading-subtxt">잠시만 기다려 주세요.</div>
       `;
       statusContainer.style.display = "block";
@@ -655,7 +894,6 @@
             throw new Error(parsed?.error || "요청이 실패하였습니다.");
           }
 
-          // Extract totalCount
           if (parsed.response && parsed.response.body && parsed.response.body.totalCount !== undefined) {
             totalCount = parseInt(parsed.response.body.totalCount) || 0;
           }
@@ -669,13 +907,12 @@
             loadingSubtxt.textContent = `총 ${totalCount.toLocaleString()}건 중 ${loadedCompanies.length.toLocaleString()}건 수집되었습니다.`;
           }
 
-          // If we fetched all items or received fewer items than requested, finish loop
           if (loadedCompanies.length >= totalCount || items.length < numOfRows) {
             break;
           }
 
           pageNo++;
-        } while (pageNo <= 10); // Safety limit 10 pages (10,000 items)
+        } while (pageNo <= 10);
 
         renderFilteredList();
 
@@ -691,7 +928,7 @@
       }
     }
 
-    // Helper to safely extract items array from parsed object
+    // Helper to safely extract items array
     function extractItemsFromParsed(parsed) {
       if (parsed.response && parsed.response.body && parsed.response.body.items) {
         const itemVal = parsed.response.body.items.item;
@@ -708,7 +945,7 @@
       return [];
     }
 
-    // Parse XML responses in case data.go.kr ignores _type=json
+    // Parse XML responses
     function parseXMLResponse(xmlText) {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, "text/xml");
@@ -735,25 +972,53 @@
           ncrGsRegdate: getVal("ncrGsRegdate") || getVal("rgsDt")
         });
       }
-
       return { items };
     }
 
-    // Dynamic filtering and table rendering
+    // Get Korean Geographical Rank
+    function getRegionRank(addrStr, areaStr) {
+      const text = (areaStr + " " + addrStr).trim();
+      for (let i = 0; i < regionRankOrder.length; i++) {
+        if (text.startsWith(regionRankOrder[i]) || text.includes(regionRankOrder[i])) {
+          return i;
+        }
+      }
+      return 999;
+    }
+
+    // Dynamic filtering, Regional Sorting by 시·도, and Table rendering
     function renderFilteredList() {
       const searchWord = nameFilterInput.value.trim().toLowerCase();
-      const selectedIndustry = industrySelect.value;
       
+      // Active industry selections
+      const checkedVals = Array.from(indCheckboxes).filter(c => c.checked).map(c => c.value);
+      const isAllIndustries = chkAll.checked || checkedVals.length === indCheckboxes.length;
+
       let filtered = loadedCompanies.filter(c => {
         const itemType = (c.ncrItemName || c.indutyNm || "");
         const compName = (c.ncrGsKname || c.bzentyNm || "");
-        
+        const address = (c.ncrGsAddr || c.adres || "");
+
         const isInterior = itemType.includes("실내건축");
-        const matchIndustry = !selectedIndustry || itemType.includes(selectedIndustry);
+        
+        // Multi-select industry match
+        const matchIndustry = isAllIndustries || checkedVals.some(v => itemType.includes(v));
         const matchType = (currentFilterType === "all") || isInterior;
-        const matchName = !searchWord || compName.toLowerCase().includes(searchWord);
+        const matchName = !searchWord || compName.toLowerCase().includes(searchWord) || address.toLowerCase().includes(searchWord);
         
         return matchIndustry && matchType && matchName;
+      });
+
+      // SORT BY REGION (시·도) & ADDRESS
+      filtered.sort((a, b) => {
+        const rankA = getRegionRank(a.ncrGsAddr || a.adres || '', a.ncrAreaName || '');
+        const rankB = getRegionRank(b.ncrGsAddr || b.adres || '', b.ncrAreaName || '');
+        if (rankA !== rankB) {
+          return rankA - rankB;
+        }
+        const addrA = a.ncrGsAddr || a.adres || '';
+        const addrB = b.ncrGsAddr || b.adres || '';
+        return addrA.localeCompare(addrB, 'ko');
       });
 
       const totalCnt = loadedCompanies.length;
@@ -765,7 +1030,7 @@
       if (filtered.length === 0) {
         statusContainer.innerHTML = `
           <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">🔍 일치하는 업체 없음</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted);">해당 조건에 해당하는 건설업체가 확인되지 않습니다.</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">해당 조건에 해당하는 건설업체/개인사업자가 확인되지 않습니다.</div>
         `;
         statusContainer.style.display = "block";
         tableContainer.style.display = "none";
@@ -785,7 +1050,7 @@
         const masterName = company.ncrGsMaster || company.reprsntativeNm || '-';
         const address = company.ncrGsAddr || company.adres || '-';
         const phone = company.ncrOffTel || company.telno || '';
-        const itemType = company.ncrItemName || company.indutyNm || '건설업';
+        const itemType = company.ncrItemName || company.indutyNm || '사업자';
 
         const isInterior = itemType.includes("실내건축");
 
@@ -822,7 +1087,7 @@
       });
     }
 
-    // Helper to escape quotes in attributes
+    // Helper to escape quotes
     function escapeQuotes(str) {
       return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
     }
