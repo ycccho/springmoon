@@ -7,12 +7,12 @@ export async function onRequestGet(context) {
   const pageNo = searchParams.get('pageNo') || '1';
   const numOfRows = searchParams.get('numOfRows') || '1000';
 
-  // Service key from screenshot
-  const serviceKey = "428c65196c3196dc546f4075499a7a32f3a83f649a539553a437c8a0b45f1649";
+  // Service key from user
+  const serviceKey = "428c65198c3f96ac546f4075499a7a92f3a83f649a539553a437c8e0b46f1649";
 
   try {
     const url = new URL('https://apis.data.go.kr/1613000/ConAdminInfoSvc1/GongsiReg');
-    url.searchParams.set('ServiceKey', decodeURIComponent(serviceKey));
+    url.searchParams.set('serviceKey', decodeURIComponent(serviceKey));
     url.searchParams.set('pageNo', pageNo);
     url.searchParams.set('numOfRows', numOfRows);
     if (sDate) url.searchParams.set('sDate', sDate);

@@ -623,17 +623,18 @@
     function renderFilteredList() {
       const searchWord = nameFilterInput.value.trim().toLowerCase();
       
-      // 1. Filter out only '실내건축공사업' companies
-      // KISCON indutyNm could contain "실내건축공사업"
+      // 1. Filter out only '실내건축' companies
       let filtered = loadedCompanies.filter(c => {
-        const isInterior = (c.indutyNm || "").includes("실내건축");
-        const matchName = !searchWord || (c.bzentyNm || "").toLowerCase().includes(searchWord);
+        const itemType = (c.ncrItemName || c.indutyNm || "");
+        const compName = (c.ncrGsKname || c.bzentyNm || "");
+        const isInterior = itemType.includes("실내건축");
+        const matchName = !searchWord || compName.toLowerCase().includes(searchWord);
         return isInterior && matchName;
       });
 
       // Update counters
       const totalCnt = loadedCompanies.length;
-      const matchCnt = loadedCompanies.filter(c => (c.indutyNm || "").includes("실내건축")).length;
+      const matchCnt = loadedCompanies.filter(c => (c.ncrItemName || c.indutyNm || "").includes("실내건축")).length;
       
       statTotalCnt.textContent = totalCnt;
       statMatchCnt.textContent = matchCnt;
@@ -659,26 +660,33 @@
         const card = document.createElement("div");
         card.className = "company-card";
 
+        const compName = company.ncrGsKname || company.bzentyNm || '상호 미제공';
+        const masterName = company.ncrGsMaster || company.reprsntativeNm || '-';
+        const address = company.ncrGsAddr || company.adres || '-';
+        const phone = company.ncrOffTel || company.telno || '';
+
         // Format Date
-        let regDate = company.rgsDt || "-";
-        if (regDate.length === 8) {
-          regDate = `${regDate.substring(0, 4)}-${regDate.substring(4, 6)}-${regDate.substring(6, 8)}`;
+        let regDateRaw = String(company.ncrGsRegdate || company.ncrGsDate || company.rgsDt || '');
+        let regDate = '-';
+        if (regDateRaw.length === 8) {
+          regDate = `${regDateRaw.substring(0, 4)}-${regDateRaw.substring(4, 6)}-${regDateRaw.substring(6, 8)}`;
+        } else if (regDateRaw) {
+          regDate = regDateRaw;
         }
 
-        // Clean Telephone
-        const phone = company.telno ? company.telno.trim() : "";
+        const cleanPhone = phone ? phone.trim() : "";
 
         card.innerHTML = `
           <div class="card-header">
             <div class="company-name">
-              <span>${company.bzentyNm || '상호 미제공'}</span>
+              <span>${compName}</span>
               <span class="license-badge">실내건축면허</span>
             </div>
           </div>
           <div class="card-body">
             <div class="info-item">
               <span class="info-label">👤 대표자</span>
-              <span class="info-value">${company.reprsntativeNm || '-'}</span>
+              <span class="info-value">${masterName}</span>
             </div>
             <div class="info-item">
               <span class="info-label">📅 등록일</span>
@@ -686,16 +694,16 @@
             </div>
             <div class="info-item">
               <span class="info-label">📞 연락처</span>
-              <span class="info-value">${phone || '미제공'}</span>
+              <span class="info-value">${cleanPhone || '미제공'}</span>
             </div>
             <div class="info-item">
               <span class="info-label">📍 소재지</span>
-              <span class="info-value">${company.adres || '-'}</span>
+              <span class="info-value">${address}</span>
             </div>
           </div>
           <div class="card-actions">
-            <button class="btn-card btn-card-copy" onclick="copyAddress(this, '${escapeQuotes(company.adres || '')}')">📍 주소 복사</button>
-            ${phone ? `<a href="tel:${phone}" class="btn-card btn-card-call">📞 전화하기</a>` : ''}
+            <button class="btn-card btn-card-copy" onclick="copyAddress(this, '${escapeQuotes(address)}')">📍 주소 복사</button>
+            ${cleanPhone ? `<a href="tel:${cleanPhone}" class="btn-card btn-card-call">📞 전화하기</a>` : ''}
           </div>
         `;
 
