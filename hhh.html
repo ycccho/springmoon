@@ -1150,7 +1150,7 @@
           <div class="form-group">
             <label for="area-select">등록 시·도</label>
             <select id="area-select" class="form-select">
-              <option value="">전국 전체 (시·도 선택)</option>
+              <option value="">전체 (부·울·경·경북)</option>
             </select>
           </div>
 
@@ -1267,7 +1267,7 @@
 
   <script>
     // Region Mapping & Korean Geographical Sorting Order
-    const regionList = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종시", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
+    const regionList = ["부산", "울산", "경남", "경북"];
     const regionRankOrder = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
 
     // PRE-PROCESSED EXACT DATA FOR THE 4 REGIONS (EXTRACTED FROM 268MB CSV FILES)
@@ -1461,52 +1461,68 @@
       const sDate = `${past.getFullYear()}${formatDigit(past.getMonth() + 1)}${formatDigit(past.getDate())}`;
 
       loadedCompanies = [];
-      let pageNo = 1;
-      const numOfRows = 1000;
-      let totalCount = 0;
+      const areasToQuery = area ? [area] : ["부산", "울산", "경남", "경북"];
 
       try {
-        do {
-          const url = `/api/kiscon?ncrAreaName=${encodeURIComponent(area)}&sDate=${sDate}&eDate=${eDate}&pageNo=${pageNo}&numOfRows=${numOfRows}`;
-          const res = await fetch(url);
-          
-          if (!res.ok) {
-            const errText = await res.text();
-            throw new Error(errText || `Server responded with ${res.status}`);
+        for (const targetArea of areasToQuery) {
+          const loadingTxt = document.getElementById("loading-txt");
+          if (loadingTxt) {
+            loadingTxt.textContent = `공공데이터포털(KISCON) [${targetArea}] 데이터를 수집 중입니다...`;
           }
 
-          const rawText = await res.text();
-          let parsed = null;
+          let pageNo = 1;
+          const numOfRows = 1000;
+          let totalCount = 0;
+          let loadedForArea = [];
 
-          if (rawText.trim().startsWith("<")) {
-            parsed = parseXMLResponse(rawText);
-          } else {
-            try {
-              parsed = JSON.parse(rawText);
-            } catch(e) {
-              throw new Error("JSON 파싱 에러");
+          do {
+            const url = `/api/kiscon?ncrAreaName=${encodeURIComponent(targetArea)}&sDate=${sDate}&eDate=${eDate}&pageNo=${pageNo}&numOfRows=${numOfRows}`;
+            const res = await fetch(url);
+            
+            if (!res.ok) {
+              const errText = await res.text();
+              throw new Error(errText || `Server responded with ${res.status}`);
             }
-          }
 
-          if (!parsed || parsed.error) {
-            throw new Error(parsed?.error || "요청이 실패하였습니다.");
-          }
+            const rawText = await res.text();
+            let parsed = null;
 
-          if (parsed.response && parsed.response.body && parsed.response.body.totalCount !== undefined) {
-            totalCount = parseInt(parsed.response.body.totalCount) || 0;
-          }
+            if (rawText.trim().startsWith("<")) {
+              parsed = parseXMLResponse(rawText);
+            } else {
+              try {
+                parsed = JSON.parse(rawText);
+              } catch(e) {
+                throw new Error("JSON 파싱 에러");
+              }
+            }
 
-          let items = extractItemsFromParsed(parsed);
-          if (items.length === 0) break;
+            if (!parsed || parsed.error) {
+              throw new Error(parsed?.error || "요청이 실패하였습니다.");
+            }
 
-          loadedCompanies = loadedCompanies.concat(items);
+            if (parsed.response && parsed.response.body && parsed.response.body.totalCount !== undefined) {
+              totalCount = parseInt(parsed.response.body.totalCount) || 0;
+            }
 
-          if (loadedCompanies.length >= totalCount || items.length < numOfRows) {
-            break;
-          }
+            let items = extractItemsFromParsed(parsed);
+            if (items.length === 0) break;
 
-          pageNo++;
-        } while (pageNo <= 10);
+            items.forEach(it => {
+              it.ncrAreaName = targetArea;
+            });
+
+            loadedForArea = loadedForArea.concat(items);
+
+            if (items.length < numOfRows || loadedForArea.length >= totalCount) {
+              break;
+            }
+
+            pageNo++;
+          } while (pageNo <= 10);
+
+          loadedCompanies = loadedCompanies.concat(loadedForArea);
+        }
 
         renderFilteredList();
 
