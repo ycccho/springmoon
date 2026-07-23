@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>실내건축공사업 면허 업체 조회 시스템</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;750;850&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #151c2c;
+      --border-color: #222d44;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary-color: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent-color: #0d9488;
+      --danger-color: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    header h1 span {
+      background: linear-gradient(135deg, #6366f1 0%, #0d9488 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Search & Filter Panel */
+    .filter-panel {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      .filter-grid {
+        grid-template-columns: 1.2fr 1.2fr 2fr 1fr;
+        align-items: flex-end;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-select, .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      background-color: #0b0f19;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-select:focus, .form-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Date Preset Drawer */
+    .date-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .btn-preset {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background-color: #1e293b;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.1s ease;
+    }
+
+    .btn-preset.active {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-preset:hover:not(.active) {
+      background-color: #334155;
+    }
+
+    /* Search Action Button */
+    .btn-search {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-search:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-search:active {
+      transform: translateY(0);
+    }
+
+    /* Summary Bar */
+    .summary-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      background-color: #151c2c;
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    @media (min-width: 768px) {
+      .summary-bar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .summary-stats {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .stat-badge {
+      background-color: #1e293b;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-badge span {
+      color: var(--accent-color);
+      font-weight: 800;
+      margin-left: 0.25rem;
+    }
+
+    /* Real-time search box */
+    .search-filter-wrapper {
+      max-width: 400px;
+      width: 100%;
+    }
+
+    /* Results section */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .results-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .company-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .company-card:hover {
+      transform: translateY(-3px);
+      border-color: #3b82f6;
+      box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.2);
+    }
+
+    .company-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background-color: var(--accent-color);
+    }
+
+    .card-header {
+      margin-bottom: 1rem;
+    }
+
+    .company-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .license-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--accent-color);
+      background-color: rgba(13, 148, 136, 0.12);
+      border: 1px solid rgba(13, 148, 136, 0.3);
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.375rem;
+      white-space: nowrap;
+    }
+
+    .card-body {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .info-item {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .info-label {
+      font-weight: 700;
+      color: var(--text-main);
+      width: 70px;
+      flex-shrink: 0;
+    }
+
+    .info-value {
+      word-break: break-all;
+    }
+
+    .card-actions {
+      border-top: 1px solid var(--border-color);
+      padding-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-card {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .btn-card-copy {
+      background-color: #1e293b;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-card-copy:hover {
+      background-color: #334155;
+    }
+
+    .btn-card-call {
+      background-color: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-card-call:hover {
+      background-color: rgba(99, 102, 241, 0.2);
+    }
+
+    /* Loader / Message boxes */
+    .status-msg {
+      text-align: center;
+      padding: 4rem 2rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .loader {
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <h1><span>국토교통부 실내건축면허 조회</span> 🔍</h1>
+      <p>정보공개포털 및 KISCON 공시 데이터를 통해 전국의 합법 실내건축면허 보유업체를 실시간 확인합니다.</p>
+    </header>
+
+    <!-- Search filter panel -->
+    <div class="filter-panel">
+      <div class="filter-grid">
+        
+        <!-- 시도 선택 -->
+        <div class="form-group">
+          <label for="area-select">등록 시·도</label>
+          <select id="area-select" class="form-select">
+            <option value="">시·도 선택</option>
+          </select>
+        </div>
+
+        <!-- 시군구 선택 -->
+        <div class="form-group">
+          <label for="detail-area-select">등록 시·군·구</label>
+          <select id="detail-area-select" class="form-select" disabled>
+            <option value="">시·군·구 선택</option>
+          </select>
+        </div>
+
+        <!-- 공시 검색 기간 -->
+        <div class="form-group">
+          <label>공시 기간 검색 범위</label>
+          <div class="date-row">
+            <button class="btn-preset active" data-years="10">최근 10년</button>
+            <button class="btn-preset" data-years="5">최근 5년</button>
+            <button class="btn-preset" data-years="3">최근 3년</button>
+            <button class="btn-preset" data-years="1">최근 1년</button>
+          </div>
+        </div>
+
+        <!-- 조회 버튼 -->
+        <button id="search-btn" class="btn-search">
+          <span>🔍 실내건축면허 조회</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Summary & Real-time Filter Bar -->
+    <div class="summary-bar" style="display: none;" id="summary-section">
+      <div class="summary-stats">
+        <div class="stat-badge">검색된 업체 층<span id="stat-total-cnt">0</span></div>
+        <div class="stat-badge">실내건축공업 매칭<span id="stat-match-cnt">0</span></div>
+      </div>
+      <div class="search-filter-wrapper">
+        <input type="text" id="name-filter-input" class="form-input" placeholder="💡 목록 내 업체명(상호) 실시간 검색...">
+      </div>
+    </div>
+
+    <!-- Results section -->
+    <div id="status-container" class="status-msg">
+      💡 지역(시도 및 시군구)을 선택하신 후 [실내건축면허 조회] 버튼을 눌러주세요.
+    </div>
+
+    <div class="results-grid" id="results-grid" style="display: none;">
+      <!-- Cards dynamically generated -->
+    </div>
+
+  </div>
+
+  <script>
+    // Region Select Data Mapping
+    const regionData = {
+      "서울": ["강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", "금천구", "노원구", "도봉구", "동대문구", "동작구", "마포구", "서대문구", "서초구", "성동구", "성북구", "송파구", "양천구", "영등포구", "용산구", "은평구", "종로구", "중구", "중랑구"],
+      "부산": ["강서구", "금정구", "기장군", "남구", "동구", "동래구", "부산진구", "북구", "사상구", "사하구", "서구", "수영구", "연제구", "영도구", "중구", "해운대구"],
+      "대구": ["군위군", "남구", "달서구", "달성군", "동구", "북구", "서구", "수성구", "중구"],
+      "인천": ["강화군", "계양구", "남동구", "동구", "미추홀구", "부평구", "서구", "연수구", "옹진구", "중구"],
+      "광주": ["광산구", "남구", "동구", "북구", "서구"],
+      "대전": ["대덕구", "동구", "서구", "유성구", "중구"],
+      "울산": ["남구", "동구", "북구", "울주군", "중구"],
+      "세종시": ["세종특별자치시"],
+      "경기": ["가평군", "고양시 덕양구", "고양시 일산동구", "고양시 일산서구", "과천시", "광명시", "광주시", "구리시", "군포시", "김포시", "남양주시", "동두천시", "부천시", "성남시 분당구", "성남시 수정구", "성남시 중원구", "수원시 권선구", "수원시 영통구", "수원시 장안구", "수원시 팔달구", "시흥시", "안산시 단원구", "안산시 상록구", "안성시", "안양시 동안구", "안양시 만안구", "양주시", "양평군", "여주시", "연천군", "오산시", "용인시 기흥구", "용인시 처인구", "용인시 수지구", "의왕시", "의정부시", "이천시", "파주시", "평택시", "포천시", "하남시", "화성시"],
+      "강원": ["강릉시", "고성군", "동해시", "삼척시", "속초시", "양구군", "양양군", "영월군", "원주시", "인제군", "정선군", "철원군", "춘천시", "태백시", "평창군", "홍천군", "화천군", "횡성군"],
+      "충북": ["괴산군", "단양군", "보은군", "영동군", "옥천군", "음성군", "제천시", "증평군", "진천군", "청주시 상당구", "청주시 서원구", "청주시 흥덕구", "청주시 청원구", "충주시"],
+      "충남": ["계룡시", "공주시", "금산군", "논산시", "당진시", "부여군", "서산시", "서천군", "아산시", "예산군", "천안시 동남구", "천안시 서북구", "청양군", "태안군", "홍성군"],
+      "전북": ["고창군", "군산시", "김제시", "남원시", "무주군", "부안군", "순창군", "완주군", "익산시", "임실군", "장수군", "전주시 덕진구", "전주시 완산구", "정읍시", "진안군"],
+      "전남": ["강진군", "고흥군", "곡성군", "광양시", "구례군", "나주시", "담양군", "목포시", "무안군", "보성군", "순천시", "신안군", "여수시", "영광군", "영암군", "완도군", "장성군", "장흥군", "진도군", "함평군", "해남군", "화순군"],
+      "경북": ["경산시", "경주시", "고령군", "구미시", "군위군", "김천시", "문경시", "봉화군", "상주시", "성주군", "안동시", "영덕군", "영양군", "영주시", "영천시", "예천군", "울릉군", "울진군", "의성군", "청도군", "청송군", "칠곡군", "포항시 남구", "포항시 북구"],
+      "경남": ["거제시", "거창군", "고성군", "김해시", "남해군", "밀양시", "사천시", "산청군", "양산시", "의령군", "진주시", "창녕군", "창원시 마산합포구", "창원시 마산회원구", "창원시 성산구", "창원시 의창구", "창원시 진해구", "통영시", "하동군", "함안군", "함양군", "합천군"],
+      "제주": ["서귀포시", "제주시"]
+    };
+
+    // DOM Elements
+    const areaSelect = document.getElementById("area-select");
+    const detailAreaSelect = document.getElementById("detail-area-select");
+    const searchBtn = document.getElementById("search-btn");
+    const statusContainer = document.getElementById("status-container");
+    const resultsGrid = document.getElementById("results-grid");
+    const summarySection = document.getElementById("summary-section");
+    const statTotalCnt = document.getElementById("stat-total-cnt");
+    const statMatchCnt = document.getElementById("stat-match-cnt");
+    const nameFilterInput = document.getElementById("name-filter-input");
+
+    let currentYearRange = 10; // Default 10 years
+    let loadedCompanies = []; // Full list fetched from proxy
+
+    // Initialize Province Dropdown
+    Object.keys(regionData).forEach(prov => {
+      const opt = document.createElement("option");
+      opt.value = prov;
+      opt.textContent = prov;
+      areaSelect.appendChild(opt);
+    });
+
+    // Handle Province Selection Change
+    areaSelect.addEventListener("change", function() {
+      const val = this.value;
+      detailAreaSelect.innerHTML = '<option value="">시·군·구 선택</option>';
+      
+      if (!val) {
+        detailAreaSelect.disabled = true;
+        return;
+      }
+
+      detailAreaSelect.disabled = false;
+      const districts = regionData[val];
+      districts.forEach(dist => {
+        const opt = document.createElement("option");
+        opt.value = dist;
+        opt.textContent = dist;
+        detailAreaSelect.appendChild(opt);
+      });
+    });
+
+    // Handle Date Range Preset Buttons
+    document.querySelectorAll(".btn-preset").forEach(btn => {
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+        currentYearRange = parseInt(this.dataset.years);
+      });
+    });
+
+    // Fetch and search handler
+    searchBtn.addEventListener("click", performKisPreview);
+
+    async function performKisPreview() {
+      const area = areaSelect.value;
+      const detailArea = detailAreaSelect.value;
+
+      if (!area) {
+        alert("등록 시·도를 선택해 주세요.");
+        areaSelect.focus();
+        return;
+      }
+
+      // Show loader status
+      statusContainer.innerHTML = `
+        <div class="loader"></div>
+        <div>공공데이터포털(KISCON) 실시간 정보를 불러오는 중입니다...</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">처음 조회 시 인증 대기로 인해 15초 이상 지연될 수 있습니다.</div>
+      `;
+      statusContainer.style.display = "block";
+      resultsGrid.style.display = "none";
+      summarySection.style.display = "none";
+
+      // Date ranges
+      const today = new Date();
+      const formatDigit = (n) => String(n).padStart(2, '0');
+      const eDate = `${today.getFullYear()}${formatDigit(today.getMonth() + 1)}${formatDigit(today.getDate())}`;
+      
+      const past = new Date();
+      past.setFullYear(today.getFullYear() - currentYearRange);
+      const sDate = `${past.getFullYear()}${formatDigit(past.getMonth() + 1)}${formatDigit(past.getDate())}`;
+
+      try {
+        const url = `/api/kiscon?ncrAreaName=${encodeURIComponent(area)}&ncrAreaDetailName=${encodeURIComponent(detailArea)}&sDate=${sDate}&eDate=${eDate}&numOfRows=1000`;
+        const res = await fetch(url);
+        
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText || `Server responded with ${res.status}`);
+        }
+
+        const rawText = await res.text();
+        let parsed = null;
+
+        // Parse XML or JSON
+        if (rawText.trim().startsWith("<")) {
+          parsed = parseXMLResponse(rawText);
+        } else {
+          try {
+            parsed = JSON.parse(rawText);
+          } catch(e) {
+            throw new Error("JSON 파싱 에러 및 비정상 응답 수신");
+          }
+        }
+
+        if (!parsed || parsed.error) {
+          throw new Error(parsed?.error || "요청이 실패하였습니다.");
+        }
+
+        // Handle normal items extraction
+        let items = [];
+        if (parsed.response && parsed.response.body && parsed.response.body.items) {
+          const itemVal = parsed.response.body.items.item;
+          if (Array.isArray(itemVal)) {
+            items = itemVal;
+          } else if (itemVal && typeof itemVal === 'object') {
+            items = [itemVal];
+          }
+        } else if (Array.isArray(parsed.items)) {
+          items = parsed.items;
+        } else if (parsed.items && typeof parsed.items === 'object') {
+          items = [parsed.items];
+        }
+
+        loadedCompanies = items;
+
+        renderFilteredList();
+
+      } catch (err) {
+        console.error(err);
+        statusContainer.innerHTML = `
+          <div style="color: var(--danger-color); font-size: 1.5rem; margin-bottom: 1rem;">❌ 조회 실패</div>
+          <div style="font-size: 0.95rem; font-weight: 600;">공공데이터포털 또는 건설업등록 서비스 대기 중입니다.</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.8rem; word-break: break-all;">
+            에러내용: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    // Parse XML responses in case data.go.kr ignores _type=json
+    function parseXMLResponse(xmlText) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+      
+      // Check for portal error codes
+      const errorMsgNode = xmlDoc.getElementsByTagName("errMsg")[0] || xmlDoc.getElementsByTagName("message")[0];
+      const returnAuthError = xmlDoc.getElementsByTagName("returnAuthMsg")[0];
+      if (errorMsgNode || returnAuthError) {
+        return { error: errorMsgNode?.textContent || returnAuthError?.textContent || "인증 키가 등록되지 않았거나 사용할 수 없습니다." };
+      }
+
+      const items = [];
+      const itemNodes = xmlDoc.getElementsByTagName("item");
+      
+      for (let i = 0; i < itemNodes.length; i++) {
+        const itemNode = itemNodes[i];
+        const getVal = (tag) => itemNode.getElementsByTagName(tag)[0]?.textContent || '';
+        
+        items.push({
+          bzentyNm: getVal("bzentyNm"),
+          reprsntativeNm: getVal("reprsntativeNm"),
+          indutyNm: getVal("indutyNm"),
+          adres: getVal("adres"),
+          telno: getVal("telno"),
+          rgsDt: getVal("rgsDt")
+        });
+      }
+
+      return { items };
+    }
+
+    // Dynamic filtering and rendering
+    function renderFilteredList() {
+      const searchWord = nameFilterInput.value.trim().toLowerCase();
+      
+      // 1. Filter out only '실내건축공사업' companies
+      // KISCON indutyNm could contain "실내건축공사업"
+      let filtered = loadedCompanies.filter(c => {
+        const isInterior = (c.indutyNm || "").includes("실내건축");
+        const matchName = !searchWord || (c.bzentyNm || "").toLowerCase().includes(searchWord);
+        return isInterior && matchName;
+      });
+
+      // Update counters
+      const totalCnt = loadedCompanies.length;
+      const matchCnt = loadedCompanies.filter(c => (c.indutyNm || "").includes("실내건축")).length;
+      
+      statTotalCnt.textContent = totalCnt;
+      statMatchCnt.textContent = matchCnt;
+
+      // Draw list
+      if (filtered.length === 0) {
+        statusContainer.innerHTML = `
+          <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">🔍 일치하는 업체 없음</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">해당 지역 및 공시기간 범위 내에 실내건축면허 업체가 확인되지 않습니다.</div>
+        `;
+        statusContainer.style.display = "block";
+        resultsGrid.style.display = "none";
+        summarySection.style.display = totalCnt > 0 ? "flex" : "none";
+        return;
+      }
+
+      statusContainer.style.display = "none";
+      resultsGrid.style.display = "grid";
+      summarySection.style.display = "flex";
+
+      resultsGrid.innerHTML = "";
+      filtered.forEach(company => {
+        const card = document.createElement("div");
+        card.className = "company-card";
+
+        // Format Date
+        let regDate = company.rgsDt || "-";
+        if (regDate.length === 8) {
+          regDate = `${regDate.substring(0, 4)}-${regDate.substring(4, 6)}-${regDate.substring(6, 8)}`;
+        }
+
+        // Clean Telephone
+        const phone = company.telno ? company.telno.trim() : "";
+
+        card.innerHTML = `
+          <div class="card-header">
+            <div class="company-name">
+              <span>${company.bzentyNm || '상호 미제공'}</span>
+              <span class="license-badge">실내건축면허</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="info-item">
+              <span class="info-label">👤 대표자</span>
+              <span class="info-value">${company.reprsntativeNm || '-'}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">📅 등록일</span>
+              <span class="info-value">${regDate}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">📞 연락처</span>
+              <span class="info-value">${phone || '미제공'}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">📍 소재지</span>
+              <span class="info-value">${company.adres || '-'}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-card btn-card-copy" onclick="copyAddress(this, '${escapeQuotes(company.adres || '')}')">📍 주소 복사</button>
+            ${phone ? `<a href="tel:${phone}" class="btn-card btn-card-call">📞 전화하기</a>` : ''}
+          </div>
+        `;
+
+        resultsGrid.appendChild(card);
+      });
+    }
+
+    // Helper to escape quotes in attributes
+    function escapeQuotes(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    // Clipboard copy
+    window.copyAddress = function(btn, addr) {
+      if (!addr) {
+        alert("복사할 주소 정보가 없습니다.");
+        return;
+      }
+      navigator.clipboard.writeText(addr).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = "✅ 복사 완료!";
+        setTimeout(() => {
+          btn.textContent = originalText;
+        }, 1500);
+      }).catch(err => {
+        alert("주소 복사 실패: " + err);
+      });
+    }
+
+    // Real-time filter input listener
+    nameFilterInput.addEventListener("input", renderFilteredList);
+
+  </script>
+</body>
+</html>
