@@ -1591,6 +1591,11 @@
       });
 
       filtered.sort((a, b) => {
+        const dateA = String(a.ncrGsRegdate || a.ncrGsDate || a.rgsDt || '');
+        const dateB = String(b.ncrGsRegdate || b.ncrGsDate || b.rgsDt || '');
+        if (dateA !== dateB) {
+          return dateB.localeCompare(dateA); // Descending (latest date first)
+        }
         const rankA = getRegionRank(a.ncrGsAddr || a.adres || '', a.ncrAreaName || '');
         const rankB = getRegionRank(b.ncrGsAddr || b.adres || '', b.ncrAreaName || '');
         if (rankA !== rankB) {
