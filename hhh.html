@@ -88,7 +88,7 @@
 
     @media (min-width: 768px) {
       .filter-grid {
-        grid-template-columns: 1.5fr 2fr 1fr;
+        grid-template-columns: 1.2fr 1.5fr 2fr 1fr;
         align-items: flex-end;
       }
     }
@@ -452,6 +452,20 @@
           </select>
         </div>
 
+        <!-- 면허/업종 종류 선택 -->
+        <div class="form-group">
+          <label for="industry-select">면허·업종 분류 카테고리</label>
+          <select id="industry-select" class="form-select">
+            <option value="">전체 업종 (전체 보기)</option>
+            <option value="실내건축">실내건축공사업 (인테리어)</option>
+            <option value="건축공사">건축공사업 (종합건설)</option>
+            <option value="토목">토목공사업 / 토목건축공사업</option>
+            <option value="금속창호">금속창호·지붕건축물조립공사업</option>
+            <option value="도장">도장·습식·방수·석공사업</option>
+            <option value="조경">조경식재·가설공사업</option>
+          </select>
+        </div>
+
         <!-- 공시 검색 기간 -->
         <div class="form-group">
           <label>공시 기간 검색 범위</label>
@@ -522,6 +536,7 @@
 
     // DOM Elements
     const areaSelect = document.getElementById("area-select");
+    const industrySelect = document.getElementById("industry-select");
     const searchBtn = document.getElementById("search-btn");
     const statusContainer = document.getElementById("status-container");
     const tableContainer = document.getElementById("table-container");
@@ -536,6 +551,11 @@
     let currentYearRange = 10; // Default 10 years
     let loadedCompanies = []; // Full list fetched from proxy
     let currentFilterType = "all"; // "all" or "interior"
+
+    // Industry Category Select Listener
+    industrySelect.addEventListener("change", () => {
+      renderFilteredList();
+    });
 
     // Initialize Province Dropdown
     regionList.forEach(prov => {
@@ -722,16 +742,18 @@
     // Dynamic filtering and table rendering
     function renderFilteredList() {
       const searchWord = nameFilterInput.value.trim().toLowerCase();
+      const selectedIndustry = industrySelect.value;
       
       let filtered = loadedCompanies.filter(c => {
         const itemType = (c.ncrItemName || c.indutyNm || "");
         const compName = (c.ncrGsKname || c.bzentyNm || "");
         
         const isInterior = itemType.includes("실내건축");
+        const matchIndustry = !selectedIndustry || itemType.includes(selectedIndustry);
         const matchType = (currentFilterType === "all") || isInterior;
         const matchName = !searchWord || compName.toLowerCase().includes(searchWord);
         
-        return matchType && matchName;
+        return matchIndustry && matchType && matchName;
       });
 
       const totalCnt = loadedCompanies.length;
