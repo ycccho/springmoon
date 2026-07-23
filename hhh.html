@@ -1076,6 +1076,172 @@
 
   </main>
 
+  <!-- CLEAN WHITE REPORT SECTION -->
+  <div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+    <section class="report-section">
+      
+      <div class="report-header-banner">
+        <div class="report-title">
+          <span>📊 부산·울산·경남·경북 인테리어 개인사업자 vs 면허 비율 분석</span>
+        </div>
+        <div class="report-meta-info">
+          <span class="meta-badge">📌 데이터 원천: 소상공인시장진흥공단 2026.03 DB</span>
+          <span class="meta-badge meta-date">📅 수집일자: 2026년 7월 15일</span>
+        </div>
+      </div>
+
+      <!-- REGION FILTER BUTTONS FOR PERSONAL DATA -->
+      <div class="region-filter-bar">
+        <span class="region-filter-label">📍 조회 지역 선택:</span>
+        <button class="btn-region active" data-region="all">전체 (부·울·경·경북)</button>
+        <button class="btn-region" data-region="부산">부산</button>
+        <button class="btn-region" data-region="울산">울산</button>
+        <button class="btn-region" data-region="경남">경남</button>
+        <button class="btn-region" data-region="경북">경북</button>
+      </div>
+
+      <!-- Ratio Analytics Grid -->
+      <div class="analytics-grid">
+        <div class="analytic-card">
+          <div class="card-label">🏠 개인사업자 인테리어 등록 건수</div>
+          <div class="card-value" id="val-personal-cnt">11,015<span class="unit">건</span></div>
+          <div class="card-sub" id="val-personal-sub">부·울·경·경북 4개 지역 합계</div>
+        </div>
+
+        <div class="analytic-card">
+          <div class="card-label">📜 실내건축면허 보유 사업자 (KISCON)</div>
+          <div class="card-value" id="val-license-cnt">12,176<span class="unit">건</span></div>
+          <div class="card-sub" id="val-license-sub">국토교통부 공시 실내건축면허 등록업체</div>
+        </div>
+
+        <div class="analytic-card hero-ratio-card">
+          <div class="card-label">🔥 개인사업자 대비 면허 보유 비율</div>
+          <div class="hero-ratio-value" id="val-ratio-pct">110.5<span class="hero-unit">%</span></div>
+          <div class="hero-ratio-sub" id="val-ratio-desc">개인사업자 100개 당 면허업체 110개 꼴</div>
+        </div>
+      </div>
+
+      <!-- Breakdown by Industry -->
+      <div class="industry-breakdown-panel">
+        <div class="breakdown-title">🏷️ <span id="selected-region-name">4개 지역 전체</span> 인테리어 업종별 개인사업자 등록 현황</div>
+        <div class="breakdown-grid">
+          <div class="breakdown-card">
+            <span class="breakdown-name">실내인테리어 / 리모델링</span>
+            <span class="breakdown-cnt" id="cnt-ind-1">10,533건</span>
+          </div>
+          <div class="breakdown-card">
+            <span class="breakdown-name">도배 / 장판 / 마감공사</span>
+            <span class="breakdown-cnt" id="cnt-ind-2">1,259건</span>
+          </div>
+          <div class="breakdown-card">
+            <span class="breakdown-name">타일 / 욕실 / 수전설비</span>
+            <span class="breakdown-cnt" id="cnt-ind-3">0건</span>
+          </div>
+          <div class="breakdown-card">
+            <span class="breakdown-name">조명 / 전기 / 기타 내장공사</span>
+            <span class="breakdown-cnt" id="cnt-ind-4">1,223건</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- KISCON Search filter panel -->
+      <div class="filter-panel">
+        <div class="filter-grid">
+          <div class="form-group">
+            <label for="area-select">등록 시·도</label>
+            <select id="area-select" class="form-select">
+              <option value="">전국 전체 (시·도 선택)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>면허·업종 분류 카테고리 (복수 선택 가능)</label>
+            <div class="multi-select-container" id="industry-multi-container">
+              <div class="multi-select-trigger" id="multi-select-trigger">
+                <span id="multi-select-label">전체 업종 (전체 선택됨)</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">▼</span>
+              </div>
+              <div class="multi-select-dropdown" id="multi-select-dropdown">
+                <label class="multi-select-item">
+                  <input type="checkbox" id="chk-all" checked>
+                  <span>전체 선택 (전체 보기)</span>
+                </label>
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 0.3rem 0;">
+                <label class="multi-select-item">
+                  <input type="checkbox" class="ind-chk" value="실내건축" checked>
+                  <span>실내건축공사업 (인테리어)</span>
+                </label>
+                <label class="multi-select-item">
+                  <input type="checkbox" class="ind-chk" value="건축공사" checked>
+                  <span>건축공사업 (종합건설)</span>
+                </label>
+                <label class="multi-select-item">
+                  <input type="checkbox" class="ind-chk" value="토목" checked>
+                  <span>토목공사업 / 토목건축</span>
+                </label>
+                <label class="multi-select-item">
+                  <input type="checkbox" class="ind-chk" value="금속창호" checked>
+                  <span>금속창호·지붕건축물</span>
+                </label>
+                <label class="multi-select-item">
+                  <input type="checkbox" class="ind-chk" value="도장" checked>
+                  <span>도장·습식·방수·석공사</span>
+                </label>
+                <label class="multi-select-item">
+                  <input type="checkbox" class="ind-chk" value="조경" checked>
+                  <span>조경식재·가설공사</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>공시 기간 검색 범위</label>
+            <div class="date-row">
+              <button class="btn-preset active" data-years="10">최근 10년</button>
+              <button class="btn-preset" data-years="5">최근 5년</button>
+              <button class="btn-preset" data-years="3">최근 3년</button>
+              <button class="btn-preset" data-years="1">최근 1년</button>
+            </div>
+          </div>
+
+          <button id="search-btn" class="btn-search">
+            <span>🔍 KISCON 데이터 조회</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="summary-bar" style="display: none;" id="summary-section">
+        <div style="display: flex; gap: 0.6rem; align-items: center;">
+          <div class="stat-badge" style="background-color: #ffffff; padding: 0.3rem 0.6rem; border-radius: 0.4rem; border: 1px solid var(--border-color);">전체 목록 <span id="stat-total-cnt" style="color: var(--brand-primary); font-weight: 800;">0</span></div>
+          <div class="stat-badge" style="background-color: #ffffff; padding: 0.3rem 0.6rem; border-radius: 0.4rem; border: 1px solid var(--border-color);">실내건축공사업 <span id="stat-match-cnt" style="color: var(--brand-primary); font-weight: 800;">0</span></div>
+        </div>
+        <input type="text" id="name-filter-input" class="form-input" style="max-width: 280px;" placeholder="💡 실시간 검색...">
+      </div>
+
+      <div id="status-container" style="display: none; text-align: center; padding: 2rem;"></div>
+
+      <div class="table-container" id="table-container" style="display: none;">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>업체명 (상호명)</th>
+                <th>대표자</th>
+                <th>등록일자</th>
+                <th>연락처</th>
+                <th>소재지 주소 (시·도순 정렬)</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
   <!-- 6. Sticky Bottom Floating Banner -->
   <div class="sticky-cta-bar">
     <div class="cta-inner">
@@ -1089,178 +1255,13 @@
     </div>
   </div>
 
-  <!-- 7. Main Footer (Clean Minimal Analysis Tools) -->
+  <!-- 7. Main Footer (Clean Minimal Footer) -->
   <footer class="main-footer">
     <div class="container">
-      
       <div class="footer-credits">
         <p><strong>세이프티홈</strong> | 사업자등록번호: 123-45-67890 | 주소: 서울특별시 강남구 테헤란로 123 세이프티타워</p>
         <p style="margin-top: 0.3rem;">Copyright © Safety Home. All rights reserved.</p>
       </div>
-
-      <!-- CLEAN WHITE REPORT SECTION -->
-      <section class="report-section">
-        
-        <div class="report-header-banner">
-          <div class="report-title">
-            <span>📊 부산·울산·경남·경북 인테리어 개인사업자 vs 면허 비율 분석</span>
-          </div>
-          <div class="report-meta-info">
-            <span class="meta-badge">📌 데이터 원천: 소상공인시장진흥공단 2026.03 DB</span>
-            <span class="meta-badge meta-date">📅 수집일자: 2026년 7월 15일</span>
-          </div>
-        </div>
-
-        <!-- REGION FILTER BUTTONS FOR PERSONAL DATA -->
-        <div class="region-filter-bar">
-          <span class="region-filter-label">📍 조회 지역 선택:</span>
-          <button class="btn-region active" data-region="all">전체 (부·울·경·경북)</button>
-          <button class="btn-region" data-region="부산">부산</button>
-          <button class="btn-region" data-region="울산">울산</button>
-          <button class="btn-region" data-region="경남">경남</button>
-          <button class="btn-region" data-region="경북">경북</button>
-        </div>
-
-        <!-- Ratio Analytics Grid -->
-        <div class="analytics-grid">
-          <div class="analytic-card">
-            <div class="card-label">🏠 개인사업자 인테리어 등록 건수</div>
-            <div class="card-value" id="val-personal-cnt">11,015<span class="unit">건</span></div>
-            <div class="card-sub" id="val-personal-sub">부·울·경·경북 4개 지역 합계</div>
-          </div>
-
-          <div class="analytic-card">
-            <div class="card-label">📜 실내건축면허 보유 사업자 (KISCON)</div>
-            <div class="card-value" id="val-license-cnt">12,176<span class="unit">건</span></div>
-            <div class="card-sub" id="val-license-sub">국토교통부 공시 실내건축면허 등록업체</div>
-          </div>
-
-          <div class="analytic-card hero-ratio-card">
-            <div class="card-label">🔥 개인사업자 대비 면허 보유 비율</div>
-            <div class="hero-ratio-value" id="val-ratio-pct">110.5<span class="hero-unit">%</span></div>
-            <div class="hero-ratio-sub" id="val-ratio-desc">개인사업자 100개 당 면허업체 110개 꼴</div>
-          </div>
-        </div>
-
-        <!-- Breakdown by Industry -->
-        <div class="industry-breakdown-panel">
-          <div class="breakdown-title">🏷️ <span id="selected-region-name">4개 지역 전체</span> 인테리어 업종별 개인사업자 등록 현황</div>
-          <div class="breakdown-grid">
-            <div class="breakdown-card">
-              <span class="breakdown-name">실내인테리어 / 리모델링</span>
-              <span class="breakdown-cnt" id="cnt-ind-1">10,533건</span>
-            </div>
-            <div class="breakdown-card">
-              <span class="breakdown-name">도배 / 장판 / 마감공사</span>
-              <span class="breakdown-cnt" id="cnt-ind-2">1,259건</span>
-            </div>
-            <div class="breakdown-card">
-              <span class="breakdown-name">타일 / 욕실 / 수전설비</span>
-              <span class="breakdown-cnt" id="cnt-ind-3">0건</span>
-            </div>
-            <div class="breakdown-card">
-              <span class="breakdown-name">조명 / 전기 / 기타 내장공사</span>
-              <span class="breakdown-cnt" id="cnt-ind-4">1,223건</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- KISCON Search filter panel -->
-        <div class="filter-panel">
-          <div class="filter-grid">
-            <div class="form-group">
-              <label for="area-select">등록 시·도</label>
-              <select id="area-select" class="form-select">
-                <option value="">전국 전체 (시·도 선택)</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>면허·업종 분류 카테고리 (복수 선택 가능)</label>
-              <div class="multi-select-container" id="industry-multi-container">
-                <div class="multi-select-trigger" id="multi-select-trigger">
-                  <span id="multi-select-label">전체 업종 (전체 선택됨)</span>
-                  <span style="font-size: 0.7rem; color: var(--text-muted);">▼</span>
-                </div>
-                <div class="multi-select-dropdown" id="multi-select-dropdown">
-                  <label class="multi-select-item">
-                    <input type="checkbox" id="chk-all" checked>
-                    <span>전체 선택 (전체 보기)</span>
-                  </label>
-                  <hr style="border: none; border-top: 1px solid var(--border-color); margin: 0.3rem 0;">
-                  <label class="multi-select-item">
-                    <input type="checkbox" class="ind-chk" value="실내건축" checked>
-                    <span>실내건축공사업 (인테리어)</span>
-                  </label>
-                  <label class="multi-select-item">
-                    <input type="checkbox" class="ind-chk" value="건축공사" checked>
-                    <span>건축공사업 (종합건설)</span>
-                  </label>
-                  <label class="multi-select-item">
-                    <input type="checkbox" class="ind-chk" value="토목" checked>
-                    <span>토목공사업 / 토목건축</span>
-                  </label>
-                  <label class="multi-select-item">
-                    <input type="checkbox" class="ind-chk" value="금속창호" checked>
-                    <span>금속창호·지붕건축물</span>
-                  </label>
-                  <label class="multi-select-item">
-                    <input type="checkbox" class="ind-chk" value="도장" checked>
-                    <span>도장·습식·방수·석공사</span>
-                  </label>
-                  <label class="multi-select-item">
-                    <input type="checkbox" class="ind-chk" value="조경" checked>
-                    <span>조경식재·가설공사</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>공시 기간 검색 범위</label>
-              <div class="date-row">
-                <button class="btn-preset active" data-years="10">최근 10년</button>
-                <button class="btn-preset" data-years="5">최근 5년</button>
-                <button class="btn-preset" data-years="3">최근 3년</button>
-                <button class="btn-preset" data-years="1">최근 1년</button>
-              </div>
-            </div>
-
-            <button id="search-btn" class="btn-search">
-              <span>🔍 KISCON 데이터 조회</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="summary-bar" style="display: none;" id="summary-section">
-          <div style="display: flex; gap: 0.6rem; align-items: center;">
-            <div class="stat-badge" style="background-color: #ffffff; padding: 0.3rem 0.6rem; border-radius: 0.4rem; border: 1px solid var(--border-color);">전체 목록 <span id="stat-total-cnt" style="color: var(--brand-primary); font-weight: 800;">0</span></div>
-            <div class="stat-badge" style="background-color: #ffffff; padding: 0.3rem 0.6rem; border-radius: 0.4rem; border: 1px solid var(--border-color);">실내건축공사업 <span id="stat-match-cnt" style="color: var(--brand-primary); font-weight: 800;">0</span></div>
-          </div>
-          <input type="text" id="name-filter-input" class="form-input" style="max-width: 280px;" placeholder="💡 실시간 검색...">
-        </div>
-
-        <div id="status-container" style="display: none; text-align: center; padding: 2rem;"></div>
-
-        <div class="table-container" id="table-container" style="display: none;">
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>업체명 (상호명)</th>
-                  <th>대표자</th>
-                  <th>등록일자</th>
-                  <th>연락처</th>
-                  <th>소재지 주소 (시·도순 정렬)</th>
-                  <th>관리</th>
-                </tr>
-              </thead>
-              <tbody id="table-body"></tbody>
-            </table>
-          </div>
-        </div>
-
-      </section>
     </div>
   </footer>
 
