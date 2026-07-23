@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>실내건축공사업 면허 업체 조회 시스템</title>
+  <title>전국 건설업체 및 실내건축면허 조회 시스템</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;750;850&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   
   <style>
     :root {
@@ -37,13 +37,13 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1350px;
       margin: 0 auto;
     }
 
     header {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
 
     header h1 {
@@ -70,14 +70,14 @@
       font-weight: 500;
     }
 
-    /* Search & Filter Panel */
+    /* Search Filter Panel */
     .filter-panel {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 1.25rem;
-      padding: 1.75rem;
+      padding: 1.5rem;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .filter-grid {
@@ -126,7 +126,6 @@
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
 
-    /* Date Preset Drawer */
     .date-row {
       display: flex;
       gap: 0.5rem;
@@ -134,8 +133,8 @@
     }
 
     .btn-preset {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.75rem;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.8rem;
       font-weight: 700;
       background-color: #1e293b;
       border: 1px solid var(--border-color);
@@ -154,12 +153,11 @@
       background-color: #334155;
     }
 
-    /* Search Action Button */
     .btn-search {
       width: 100%;
       padding: 0.75rem 1rem;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
       color: white;
@@ -179,20 +177,16 @@
       box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
     }
 
-    .btn-search:active {
-      transform: translateY(0);
-    }
-
     /* Summary Bar */
     .summary-bar {
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       background-color: #151c2c;
       border: 1px solid var(--border-color);
       border-radius: 1rem;
-      padding: 1rem 1.5rem;
+      padding: 1rem 1.25rem;
       font-size: 0.9rem;
       font-weight: 600;
     }
@@ -205,172 +199,210 @@
       }
     }
 
-    .summary-stats {
+    .summary-left {
       display: flex;
-      gap: 1.5rem;
+      gap: 0.75rem;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .stat-badge {
       background-color: #1e293b;
-      padding: 0.25rem 0.75rem;
+      padding: 0.3rem 0.75rem;
       border-radius: 0.5rem;
       border: 1px solid var(--border-color);
+      font-size: 0.85rem;
     }
 
     .stat-badge span {
       color: var(--accent-color);
       font-weight: 800;
-      margin-left: 0.25rem;
+      margin-left: 0.3rem;
     }
 
-    /* Real-time search box */
+    .filter-type-group {
+      display: flex;
+      gap: 0.35rem;
+      background-color: #0b0f19;
+      padding: 0.2rem;
+      border-radius: 0.6rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-filter-type {
+      padding: 0.3rem 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 0.45rem;
+      cursor: pointer;
+      border: none;
+      background-color: transparent;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .btn-filter-type.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
     .search-filter-wrapper {
-      max-width: 400px;
+      max-width: 350px;
       width: 100%;
     }
 
-    /* Results section */
-    .results-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.25rem;
-    }
-
-    @media (min-width: 768px) {
-      .results-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .results-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    .company-card {
+    /* Table Layout */
+    .table-container {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 1.25rem;
-      padding: 1.5rem;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
       overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
-    .company-card:hover {
-      transform: translateY(-3px);
-      border-color: #3b82f6;
-      box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.2);
+    .table-scroll {
+      overflow-x: auto;
+      max-height: 70vh;
     }
 
-    .company-card::before {
-      content: '';
-      position: absolute;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    thead {
+      position: sticky;
       top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background-color: var(--accent-color);
+      background-color: #0f172a;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
     }
 
-    .card-header {
-      margin-bottom: 1rem;
-    }
-
-    .company-name {
-      font-size: 1.15rem;
+    th {
+      padding: 1rem 1.25rem;
       font-weight: 800;
-      color: white;
-      margin-bottom: 0.4rem;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid rgba(34, 45, 68, 0.6);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    tbody tr {
+      transition: background-color 0.15s ease;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(30, 41, 59, 0.6);
+    }
+
+    .td-company {
+      font-weight: 800;
+      color: #ffffff;
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
-    .license-badge {
+    .badge-item {
       font-size: 0.68rem;
       font-weight: 800;
-      color: var(--accent-color);
-      background-color: rgba(13, 148, 136, 0.12);
-      border: 1px solid rgba(13, 148, 136, 0.3);
       padding: 0.15rem 0.45rem;
       border-radius: 0.375rem;
       white-space: nowrap;
     }
 
-    .card-body {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      margin-bottom: 1.25rem;
+    .badge-interior {
+      color: var(--accent-color);
+      background-color: rgba(13, 148, 136, 0.15);
+      border: 1px solid rgba(13, 148, 136, 0.3);
     }
 
-    .info-item {
-      display: flex;
-      gap: 0.5rem;
+    .badge-general {
+      color: #94a3b8;
+      background-color: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.2);
     }
 
-    .info-label {
+    .td-master {
       font-weight: 700;
-      color: var(--text-main);
-      width: 70px;
-      flex-shrink: 0;
+      color: #e2e8f0;
+      white-space: nowrap;
     }
 
-    .info-value {
+    .td-date {
+      color: var(--text-muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .td-tel {
+      white-space: nowrap;
+      font-weight: 700;
+      color: #818cf8;
+    }
+
+    .td-addr {
+      color: #cbd5e1;
+      font-size: 0.83rem;
+      max-width: 320px;
       word-break: break-all;
     }
 
-    .card-actions {
-      border-top: 1px solid var(--border-color);
-      padding-top: 1rem;
+    .action-btns {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
+      white-space: nowrap;
     }
 
-    .btn-card {
-      flex: 1;
-      padding: 0.5rem;
-      font-size: 0.78rem;
+    .btn-tb {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      border-radius: 0.5rem;
+      border-radius: 0.4rem;
       cursor: pointer;
-      text-align: center;
+      border: none;
       transition: all 0.15s ease;
       font-family: inherit;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
     }
 
-    .btn-card-copy {
+    .btn-tb-copy {
       background-color: #1e293b;
       border: 1px solid var(--border-color);
       color: var(--text-main);
     }
 
-    .btn-card-copy:hover {
+    .btn-tb-copy:hover {
       background-color: #334155;
     }
 
-    .btn-card-call {
-      background-color: rgba(99, 102, 241, 0.12);
+    .btn-tb-call {
+      background-color: rgba(99, 102, 241, 0.15);
       border: 1px solid rgba(99, 102, 241, 0.3);
       color: #818cf8;
-      text-decoration: none;
-      display: inline-block;
     }
 
-    .btn-card-call:hover {
-      background-color: rgba(99, 102, 241, 0.2);
+    .btn-tb-call:hover {
+      background-color: rgba(99, 102, 241, 0.25);
     }
 
-    /* Loader / Message boxes */
+    /* Loader / Message Box */
     .status-msg {
       text-align: center;
       padding: 4rem 2rem;
@@ -404,8 +436,8 @@
     
     <!-- Header -->
     <header>
-      <h1><span>국토교통부 실내건축면허 조회</span> 🔍</h1>
-      <p>정보공개포털 및 KISCON 공시 데이터를 통해 전국의 합법 실내건축면허 보유업체를 실시간 확인합니다.</p>
+      <h1><span>국토교통부 전지역 건설업체 조회</span> 🔍</h1>
+      <p>전국의 모든 건설업체 및 실내건축면허 보유 업체를 공공데이터포털(KISCON)을 통해 실시간 조회합니다.</p>
     </header>
 
     <!-- Search filter panel -->
@@ -420,8 +452,6 @@
           </select>
         </div>
 
-
-
         <!-- 공시 검색 기간 -->
         <div class="form-group">
           <label>공시 기간 검색 범위</label>
@@ -435,7 +465,7 @@
 
         <!-- 조회 버튼 -->
         <button id="search-btn" class="btn-search">
-          <span>🔍 실내건축면허 조회</span>
+          <span>🔍 건설업체 전체 조회</span>
         </button>
 
       </div>
@@ -443,22 +473,45 @@
 
     <!-- Summary & Real-time Filter Bar -->
     <div class="summary-bar" style="display: none;" id="summary-section">
-      <div class="summary-stats">
-        <div class="stat-badge">검색된 업체 층<span id="stat-total-cnt">0</span></div>
-        <div class="stat-badge">실내건축공업 매칭<span id="stat-match-cnt">0</span></div>
+      <div class="summary-left">
+        <div class="stat-badge">전체 등록업체<span id="stat-total-cnt">0</span></div>
+        <div class="stat-badge">실내건축공사업<span id="stat-match-cnt">0</span></div>
+        
+        <div class="filter-type-group">
+          <button class="btn-filter-type active" id="btn-filter-all">전체 업체 보기</button>
+          <button class="btn-filter-type" id="btn-filter-interior">실내건축만 보기</button>
+        </div>
       </div>
+
       <div class="search-filter-wrapper">
-        <input type="text" id="name-filter-input" class="form-input" placeholder="💡 목록 내 업체명(상호) 실시간 검색...">
+        <input type="text" id="name-filter-input" class="form-input" placeholder="💡 업체명(상호) 실시간 검색...">
       </div>
     </div>
 
-    <!-- Results section -->
+    <!-- Initial / Loading Status -->
     <div id="status-container" class="status-msg">
-      💡 지역(시도 및 시군구)을 선택하신 후 [실내건축면허 조회] 버튼을 눌러주세요.
+      💡 등록 시·도를 선택하신 후 [건설업체 전체 조회] 버튼을 눌러주세요.
     </div>
 
-    <div class="results-grid" id="results-grid" style="display: none;">
-      <!-- Cards dynamically generated -->
+    <!-- Results Table Container -->
+    <div class="table-container" id="table-container" style="display: none;">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>업체명 (상호명)</th>
+              <th>대표자</th>
+              <th>등록일자</th>
+              <th>연락처</th>
+              <th>소재지 주소</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Table rows generated dynamically -->
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </div>
@@ -471,14 +524,18 @@
     const areaSelect = document.getElementById("area-select");
     const searchBtn = document.getElementById("search-btn");
     const statusContainer = document.getElementById("status-container");
-    const resultsGrid = document.getElementById("results-grid");
+    const tableContainer = document.getElementById("table-container");
+    const tableBody = document.getElementById("table-body");
     const summarySection = document.getElementById("summary-section");
     const statTotalCnt = document.getElementById("stat-total-cnt");
     const statMatchCnt = document.getElementById("stat-match-cnt");
     const nameFilterInput = document.getElementById("name-filter-input");
+    const btnFilterAll = document.getElementById("btn-filter-all");
+    const btnFilterInterior = document.getElementById("btn-filter-interior");
 
     let currentYearRange = 10; // Default 10 years
     let loadedCompanies = []; // Full list fetched from proxy
+    let currentFilterType = "all"; // "all" or "interior"
 
     // Initialize Province Dropdown
     regionList.forEach(prov => {
@@ -497,30 +554,41 @@
       });
     });
 
+    // Filter Type Buttons (All vs Interior Only)
+    btnFilterAll.addEventListener("click", () => {
+      btnFilterAll.classList.add("active");
+      btnFilterInterior.classList.remove("active");
+      currentFilterType = "all";
+      renderFilteredList();
+    });
+
+    btnFilterInterior.addEventListener("click", () => {
+      btnFilterInterior.classList.add("active");
+      btnFilterAll.classList.remove("active");
+      currentFilterType = "interior";
+      renderFilteredList();
+    });
+
     // Fetch and search handler
     searchBtn.addEventListener("click", performKisPreview);
 
     async function performKisPreview() {
       const area = areaSelect.value;
-      const detailArea = "";
-
       if (!area) {
         alert("등록 시·도를 선택해 주세요.");
         areaSelect.focus();
         return;
       }
 
-      // Show loader status
       statusContainer.innerHTML = `
         <div class="loader"></div>
-        <div>공공데이터포털(KISCON) 실시간 정보를 불러오는 중입니다...</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">처음 조회 시 인증 대기로 인해 15초 이상 지연될 수 있습니다.</div>
+        <div id="loading-txt">공공데이터포털(KISCON) 전체 목록을 수집 중입니다...</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;" id="loading-subtxt">잠시만 기다려 주세요.</div>
       `;
       statusContainer.style.display = "block";
-      resultsGrid.style.display = "none";
+      tableContainer.style.display = "none";
       summarySection.style.display = "none";
 
-      // Date ranges
       const today = new Date();
       const formatDigit = (n) => String(n).padStart(2, '0');
       const eDate = `${today.getFullYear()}${formatDigit(today.getMonth() + 1)}${formatDigit(today.getDate())}`;
@@ -529,49 +597,65 @@
       past.setFullYear(today.getFullYear() - currentYearRange);
       const sDate = `${past.getFullYear()}${formatDigit(past.getMonth() + 1)}${formatDigit(past.getDate())}`;
 
+      loadedCompanies = [];
+      let pageNo = 1;
+      const numOfRows = 1000;
+      let totalCount = 0;
+
       try {
-        const url = `/api/kiscon?ncrAreaName=${encodeURIComponent(area)}&ncrAreaDetailName=${encodeURIComponent(detailArea)}&sDate=${sDate}&eDate=${eDate}&numOfRows=1000`;
-        const res = await fetch(url);
-        
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(errText || `Server responded with ${res.status}`);
-        }
-
-        const rawText = await res.text();
-        let parsed = null;
-
-        // Parse XML or JSON
-        if (rawText.trim().startsWith("<")) {
-          parsed = parseXMLResponse(rawText);
-        } else {
-          try {
-            parsed = JSON.parse(rawText);
-          } catch(e) {
-            throw new Error("JSON 파싱 에러 및 비정상 응답 수신");
+        do {
+          const loadingTxt = document.getElementById("loading-txt");
+          const loadingSubtxt = document.getElementById("loading-subtxt");
+          if (loadingTxt) {
+            loadingTxt.textContent = `공공데이터 수집 중... (${loadedCompanies.length.toLocaleString()}건 완료)`;
           }
-        }
 
-        if (!parsed || parsed.error) {
-          throw new Error(parsed?.error || "요청이 실패하였습니다.");
-        }
-
-        // Handle normal items extraction
-        let items = [];
-        if (parsed.response && parsed.response.body && parsed.response.body.items) {
-          const itemVal = parsed.response.body.items.item;
-          if (Array.isArray(itemVal)) {
-            items = itemVal;
-          } else if (itemVal && typeof itemVal === 'object') {
-            items = [itemVal];
+          const url = `/api/kiscon?ncrAreaName=${encodeURIComponent(area)}&sDate=${sDate}&eDate=${eDate}&pageNo=${pageNo}&numOfRows=${numOfRows}`;
+          const res = await fetch(url);
+          
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(errText || `Server responded with ${res.status}`);
           }
-        } else if (Array.isArray(parsed.items)) {
-          items = parsed.items;
-        } else if (parsed.items && typeof parsed.items === 'object') {
-          items = [parsed.items];
-        }
 
-        loadedCompanies = items;
+          const rawText = await res.text();
+          let parsed = null;
+
+          if (rawText.trim().startsWith("<")) {
+            parsed = parseXMLResponse(rawText);
+          } else {
+            try {
+              parsed = JSON.parse(rawText);
+            } catch(e) {
+              throw new Error("JSON 파싱 에러 및 비정상 응답 수신");
+            }
+          }
+
+          if (!parsed || parsed.error) {
+            throw new Error(parsed?.error || "요청이 실패하였습니다.");
+          }
+
+          // Extract totalCount
+          if (parsed.response && parsed.response.body && parsed.response.body.totalCount !== undefined) {
+            totalCount = parseInt(parsed.response.body.totalCount) || 0;
+          }
+
+          let items = extractItemsFromParsed(parsed);
+          if (items.length === 0) break;
+
+          loadedCompanies = loadedCompanies.concat(items);
+
+          if (loadingSubtxt && totalCount > 0) {
+            loadingSubtxt.textContent = `총 ${totalCount.toLocaleString()}건 중 ${loadedCompanies.length.toLocaleString()}건 수집되었습니다.`;
+          }
+
+          // If we fetched all items or received fewer items than requested, finish loop
+          if (loadedCompanies.length >= totalCount || items.length < numOfRows) {
+            break;
+          }
+
+          pageNo++;
+        } while (pageNo <= 10); // Safety limit 10 pages (10,000 items)
 
         renderFilteredList();
 
@@ -579,7 +663,7 @@
         console.error(err);
         statusContainer.innerHTML = `
           <div style="color: var(--danger-color); font-size: 1.5rem; margin-bottom: 1rem;">❌ 조회 실패</div>
-          <div style="font-size: 0.95rem; font-weight: 600;">공공데이터포털 또는 건설업등록 서비스 대기 중입니다.</div>
+          <div style="font-size: 0.95rem; font-weight: 600;">공공데이터포털 정보를 불러오는 도중 오류가 발생했습니다.</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.8rem; word-break: break-all;">
             에러내용: ${err.message}
           </div>
@@ -587,12 +671,28 @@
       }
     }
 
+    // Helper to safely extract items array from parsed object
+    function extractItemsFromParsed(parsed) {
+      if (parsed.response && parsed.response.body && parsed.response.body.items) {
+        const itemVal = parsed.response.body.items.item;
+        if (Array.isArray(itemVal)) {
+          return itemVal;
+        } else if (itemVal && typeof itemVal === 'object') {
+          return [itemVal];
+        }
+      } else if (Array.isArray(parsed.items)) {
+        return parsed.items;
+      } else if (parsed.items && typeof parsed.items === 'object') {
+        return [parsed.items];
+      }
+      return [];
+    }
+
     // Parse XML responses in case data.go.kr ignores _type=json
     function parseXMLResponse(xmlText) {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, "text/xml");
       
-      // Check for portal error codes
       const errorMsgNode = xmlDoc.getElementsByTagName("errMsg")[0] || xmlDoc.getElementsByTagName("message")[0];
       const returnAuthError = xmlDoc.getElementsByTagName("returnAuthMsg")[0];
       if (errorMsgNode || returnAuthError) {
@@ -607,65 +707,66 @@
         const getVal = (tag) => itemNode.getElementsByTagName(tag)[0]?.textContent || '';
         
         items.push({
-          bzentyNm: getVal("bzentyNm"),
-          reprsntativeNm: getVal("reprsntativeNm"),
-          indutyNm: getVal("indutyNm"),
-          adres: getVal("adres"),
-          telno: getVal("telno"),
-          rgsDt: getVal("rgsDt")
+          ncrGsKname: getVal("ncrGsKname") || getVal("bzentyNm"),
+          ncrGsMaster: getVal("ncrGsMaster") || getVal("reprsntativeNm"),
+          ncrItemName: getVal("ncrItemName") || getVal("indutyNm"),
+          ncrGsAddr: getVal("ncrGsAddr") || getVal("adres"),
+          ncrOffTel: getVal("ncrOffTel") || getVal("telno"),
+          ncrGsRegdate: getVal("ncrGsRegdate") || getVal("rgsDt")
         });
       }
 
       return { items };
     }
 
-    // Dynamic filtering and rendering
+    // Dynamic filtering and table rendering
     function renderFilteredList() {
       const searchWord = nameFilterInput.value.trim().toLowerCase();
       
-      // 1. Filter out only '실내건축' companies
       let filtered = loadedCompanies.filter(c => {
         const itemType = (c.ncrItemName || c.indutyNm || "");
         const compName = (c.ncrGsKname || c.bzentyNm || "");
+        
         const isInterior = itemType.includes("실내건축");
+        const matchType = (currentFilterType === "all") || isInterior;
         const matchName = !searchWord || compName.toLowerCase().includes(searchWord);
-        return isInterior && matchName;
+        
+        return matchType && matchName;
       });
 
-      // Update counters
       const totalCnt = loadedCompanies.length;
-      const matchCnt = loadedCompanies.filter(c => (c.ncrItemName || c.indutyNm || "").includes("실내건축")).length;
+      const interiorCnt = loadedCompanies.filter(c => (c.ncrItemName || c.indutyNm || "").includes("실내건축")).length;
       
-      statTotalCnt.textContent = totalCnt;
-      statMatchCnt.textContent = matchCnt;
+      statTotalCnt.textContent = totalCnt.toLocaleString();
+      statMatchCnt.textContent = interiorCnt.toLocaleString();
 
-      // Draw list
       if (filtered.length === 0) {
         statusContainer.innerHTML = `
           <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">🔍 일치하는 업체 없음</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted);">해당 지역 및 공시기간 범위 내에 실내건축면허 업체가 확인되지 않습니다.</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">해당 조건에 해당하는 건설업체가 확인되지 않습니다.</div>
         `;
         statusContainer.style.display = "block";
-        resultsGrid.style.display = "none";
+        tableContainer.style.display = "none";
         summarySection.style.display = totalCnt > 0 ? "flex" : "none";
         return;
       }
 
       statusContainer.style.display = "none";
-      resultsGrid.style.display = "grid";
+      tableContainer.style.display = "block";
       summarySection.style.display = "flex";
 
-      resultsGrid.innerHTML = "";
-      filtered.forEach(company => {
-        const card = document.createElement("div");
-        card.className = "company-card";
+      tableBody.innerHTML = "";
+      filtered.forEach((company) => {
+        const tr = document.createElement("tr");
 
         const compName = company.ncrGsKname || company.bzentyNm || '상호 미제공';
         const masterName = company.ncrGsMaster || company.reprsntativeNm || '-';
         const address = company.ncrGsAddr || company.adres || '-';
         const phone = company.ncrOffTel || company.telno || '';
+        const itemType = company.ncrItemName || company.indutyNm || '건설업';
 
-        // Format Date
+        const isInterior = itemType.includes("실내건축");
+
         let regDateRaw = String(company.ncrGsRegdate || company.ncrGsDate || company.rgsDt || '');
         let regDate = '-';
         if (regDateRaw.length === 8) {
@@ -676,38 +777,26 @@
 
         const cleanPhone = phone ? phone.trim() : "";
 
-        card.innerHTML = `
-          <div class="card-header">
-            <div class="company-name">
+        tr.innerHTML = `
+          <td>
+            <div class="td-company">
               <span>${compName}</span>
-              <span class="license-badge">실내건축면허</span>
+              <span class="badge-item ${isInterior ? 'badge-interior' : 'badge-general'}">${itemType}</span>
             </div>
-          </div>
-          <div class="card-body">
-            <div class="info-item">
-              <span class="info-label">👤 대표자</span>
-              <span class="info-value">${masterName}</span>
+          </td>
+          <td><span class="td-master">${masterName}</span></td>
+          <td><span class="td-date">${regDate}</span></td>
+          <td><span class="td-tel">${cleanPhone || '-'}</span></td>
+          <td><div class="td-addr">${address}</div></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-tb btn-tb-copy" onclick="copyAddress(this, '${escapeQuotes(address)}')">📍 주소 복사</button>
+              ${cleanPhone ? `<a href="tel:${cleanPhone}" class="btn-tb btn-tb-call">📞 전화하기</a>` : ''}
             </div>
-            <div class="info-item">
-              <span class="info-label">📅 등록일</span>
-              <span class="info-value">${regDate}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">📞 연락처</span>
-              <span class="info-value">${cleanPhone || '미제공'}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">📍 소재지</span>
-              <span class="info-value">${address}</span>
-            </div>
-          </div>
-          <div class="card-actions">
-            <button class="btn-card btn-card-copy" onclick="copyAddress(this, '${escapeQuotes(address)}')">📍 주소 복사</button>
-            ${cleanPhone ? `<a href="tel:${cleanPhone}" class="btn-card btn-card-call">📞 전화하기</a>` : ''}
-          </div>
+          </td>
         `;
 
-        resultsGrid.appendChild(card);
+        tableBody.appendChild(tr);
       });
     }
 
