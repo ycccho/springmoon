@@ -1085,7 +1085,7 @@
           <span>📊 부산·울산·경남·경북 인테리어 개인사업자 vs 면허 비율 분석</span>
         </div>
         <div class="report-meta-info">
-          <span class="meta-badge">📌 데이터 원천: 소상공인시장진흥공단 2026.03 DB</span>
+          <span class="meta-badge">📌 비교 기준 기간: 2022년 8월 ~ 2026년 3월 (동일 등록 기간 비교)</span>
           <span class="meta-badge meta-date">📅 수집일자: 2026년 7월 15일</span>
         </div>
       </div>
@@ -1110,14 +1110,14 @@
 
         <div class="analytic-card">
           <div class="card-label">📜 실내건축면허 보유 사업자 (KISCON)</div>
-          <div class="card-value" id="val-license-cnt">12,176<span class="unit">건</span></div>
+          <div class="card-value" id="val-license-cnt">7,312<span class="unit">건</span></div>
           <div class="card-sub" id="val-license-sub">국토교통부 공시 실내건축면허 등록업체</div>
         </div>
 
         <div class="analytic-card hero-ratio-card">
           <div class="card-label">🔥 개인사업자 대비 면허 보유 비율</div>
-          <div class="hero-ratio-value" id="val-ratio-pct">110.5<span class="hero-unit">%</span></div>
-          <div class="hero-ratio-sub" id="val-ratio-desc">개인사업자 100개 당 면허업체 110개 꼴</div>
+          <div class="hero-ratio-value" id="val-ratio-pct">66.4<span class="hero-unit">%</span></div>
+          <div class="hero-ratio-sub" id="val-ratio-desc">개인사업자 100개 당 면허업체 66개 꼴</div>
         </div>
       </div>
 
@@ -1272,11 +1272,11 @@
 
     // PRE-PROCESSED EXACT DATA FOR THE 4 REGIONS (EXTRACTED FROM 268MB CSV FILES)
     const db4Regions = {
-      '부산': { total: 3684, license: 4866, ind1: 3041, ind2: 336, ind3: 0, ind4: 307 },
-      '울산': { total: 1070, license: 1120, ind1: 848, ind2: 119, ind3: 0, ind4: 103 },
-      '경남': { total: 3483, license: 3250, ind1: 2678, ind2: 421, ind3: 0, ind4: 384 },
-      '경북': { total: 2778, license: 2940, ind1: 1966, ind2: 383, ind3: 0, ind4: 429 },
-      'all':  { total: 11015, license: 12176, ind1: 8533, ind2: 1259, ind3: 0, ind4: 1223 }
+      '부산': { total: 3684, license: 1533, ind1: 3041, ind2: 336, ind3: 0, ind4: 307 },
+      '울산': { total: 1070, license: 802, ind1: 848, ind2: 119, ind3: 0, ind4: 103 },
+      '경남': { total: 3483, license: 2280, ind1: 2678, ind2: 421, ind3: 0, ind4: 384 },
+      '경북': { total: 2778, license: 2697, ind1: 1966, ind2: 383, ind3: 0, ind4: 429 },
+      'all':  { total: 11015, license: 7312, ind1: 8533, ind2: 1259, ind3: 0, ind4: 1223 }
     };
 
     // DOM Elements
