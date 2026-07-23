@@ -109,6 +109,7 @@
     .report-meta-info {
       display: flex;
       gap: 0.5rem;
+      align-items: center;
       flex-wrap: wrap;
     }
 
@@ -126,6 +127,29 @@
       color: var(--accent-color);
       border-color: rgba(13, 148, 136, 0.35);
       background-color: rgba(13, 148, 136, 0.1);
+    }
+
+    /* Prominent Top Upload Button */
+    .btn-top-upload {
+      padding: 0.55rem 1.1rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-color) 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: inherit;
+    }
+
+    .btn-top-upload:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
     }
 
     .analytics-grid {
@@ -499,26 +523,6 @@
       color: white;
     }
 
-    .btn-import-csv {
-      padding: 0.4rem 0.85rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      background-color: rgba(13, 148, 136, 0.15);
-      border: 1px solid rgba(13, 148, 136, 0.35);
-      color: var(--accent-color);
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn-import-csv:hover {
-      background-color: rgba(13, 148, 136, 0.25);
-    }
-
     .search-filter-wrapper {
       max-width: 320px;
       width: 100%;
@@ -674,16 +678,17 @@
       background-color: rgba(99, 102, 241, 0.25);
     }
 
-    /* Loader / Message Box */
+    /* Loader Box */
     .status-msg {
       text-align: center;
-      padding: 4rem 2rem;
+      padding: 3rem 2rem;
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 1.25rem;
       font-size: 1.1rem;
       font-weight: 700;
       color: var(--text-muted);
+      display: none;
     }
 
     .loader {
@@ -715,7 +720,7 @@
     <!-- Analytics Report Panel (Show Analysis & Ratios) -->
     <div class="report-section" id="report-section">
       
-      <!-- Date Banner & Target Region Badge -->
+      <!-- Date Banner, Target Region Badge & Top Upload Button -->
       <div class="report-header-banner">
         <div class="report-title">
           <span>📊 부산·울산·경남·경북 인테리어 통계 & 면허 비율 분석</span>
@@ -723,6 +728,12 @@
         <div class="report-meta-info">
           <span class="meta-badge">📌 대상 지역: 부산, 울산, 경남, 경북</span>
           <span class="meta-badge meta-date">📅 마지막 데이터 수집일: 26년7월15일</span>
+          
+          <!-- PROMINENT TOP UPLOAD BUTTON -->
+          <button class="btn-top-upload" id="btn-top-upload">
+            📁 개인사업자 CSV 파일 업로드 / 등록
+          </button>
+          <input type="file" id="top-csv-file-input" accept=".csv" style="display: none;">
         </div>
       </div>
 
@@ -732,13 +743,13 @@
         <div class="analytic-card">
           <div class="card-label">🏠 개인사업자 인테리어 등록 건수</div>
           <div class="card-value" id="val-personal-cnt">0<span class="unit">건</span></div>
-          <div class="card-sub">부산·울산·경남·경북 인테리어 업종 (CSV 수집)</div>
+          <div class="card-sub">부산·울산·경남·경북 인테리어 업종 (영구 저장됨)</div>
         </div>
 
         <!-- Card 2: License Holder Total Count -->
         <div class="analytic-card">
           <div class="card-label">📜 실내건축면허 보유 사업자 (KISCON)</div>
-          <div class="card-value" id="val-license-cnt">0<span class="unit">건</span></div>
+          <div class="card-value" id="val-license-cnt">4,866<span class="unit">건</span></div>
           <div class="card-sub">국토교통부 공시 실내건축면허 보유업체</div>
         </div>
 
@@ -746,7 +757,7 @@
         <div class="analytic-card hero-ratio-card">
           <div class="card-label">🔥 개인사업자 대비 면허 보유 비율</div>
           <div class="hero-ratio-value" id="val-ratio-pct">0.0<span class="hero-unit">%</span></div>
-          <div class="hero-ratio-sub" id="val-ratio-desc">개인사업자 파일 등록 후 비율 계산</div>
+          <div class="hero-ratio-sub" id="val-ratio-desc">상단 [CSV 파일 업로드] 버튼 클릭 시 비율 계산</div>
         </div>
       </div>
 
@@ -858,12 +869,6 @@
           <button class="btn-filter-type active" id="btn-filter-all">전체 보기</button>
           <button class="btn-filter-type" id="btn-filter-interior">실내건축만 보기</button>
         </div>
-
-        <!-- Local CSV File Import Button -->
-        <button class="btn-import-csv" id="btn-import-csv">
-          📁 개인사업자 CSV 파일 직접 불러오기 (부산·울산·경남·경북)
-        </button>
-        <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
       </div>
 
       <div class="search-filter-wrapper">
@@ -871,9 +876,9 @@
       </div>
     </div>
 
-    <!-- Initial / Loading Status -->
+    <!-- Status Message Loader Container -->
     <div id="status-container" class="status-msg">
-      💡 상단의 <b>[📁 개인사업자 CSV 파일 직접 불러오기]</b> 버튼을 누르고 부산, 울산, 경남, 경북 지역의 개인사업자 CSV 파일을 선택해 주세요.
+      <!-- Loading indicator inserted dynamically -->
     </div>
 
     <!-- Results Table Container -->
@@ -908,7 +913,6 @@
       "충북", "충남", "전북", "전남", "경북", "경남", "제주"
     ];
 
-    // Targeted 4 Regions
     const target4Regions = ["부산", "울산", "경남", "경상남도", "경북", "경상북도"];
 
     // DOM Elements
@@ -923,8 +927,10 @@
     const nameFilterInput = document.getElementById("name-filter-input");
     const btnFilterAll = document.getElementById("btn-filter-all");
     const btnFilterInterior = document.getElementById("btn-filter-interior");
-    const btnImportCsv = document.getElementById("btn-import-csv");
-    const csvFileInput = document.getElementById("csv-file-input");
+
+    // Top Header Upload Button Elements
+    const btnTopUpload = document.getElementById("btn-top-upload");
+    const topCsvFileInput = document.getElementById("top-csv-file-input");
 
     // Stat Display Elements
     const valPersonalCnt = document.getElementById("val-personal-cnt");
@@ -948,7 +954,11 @@
     let currentFilterType = "all";
 
     let lastPersonalCount = 0;
-    let lastLicenseCount = 0;
+    let lastLicenseCount = 4866; // Busan/Target 10-year KISCON license count default
+
+    // STORAGE KEYS FOR PERMANENT PERSISTENCE
+    const STORAGE_CSV_KEY = "bu_ul_gyeong_personal_csv_data_v2";
+    const STORAGE_META_KEY = "bu_ul_gyeong_meta_stats_v2";
 
     // Initialize Province Dropdown
     regionList.forEach(prov => {
@@ -957,6 +967,126 @@
       opt.textContent = prov;
       areaSelect.appendChild(opt);
     });
+
+    // Restore permanently saved CSV data on page load
+    document.addEventListener("DOMContentLoaded", () => {
+      restorePermanentData();
+    });
+
+    function restorePermanentData() {
+      try {
+        const savedCsvData = localStorage.getItem(STORAGE_CSV_KEY);
+        const savedMeta = localStorage.getItem(STORAGE_META_KEY);
+
+        if (savedCsvData) {
+          const parsedCompanies = JSON.parse(savedCsvData);
+          if (Array.isArray(parsedCompanies) && parsedCompanies.length > 0) {
+            loadedCompanies = parsedCompanies;
+            lastPersonalCount = loadedCompanies.length;
+            valPersonalCnt.textContent = lastPersonalCount.toLocaleString();
+
+            if (savedMeta) {
+              const meta = JSON.parse(savedMeta);
+              cntInd1.textContent = `${(meta.countInd1 || 0).toLocaleString()}건`;
+              cntInd2.textContent = `${(meta.countInd2 || 0).toLocaleString()}건`;
+              cntInd3.textContent = `${(meta.countInd3 || 0).toLocaleString()}건`;
+              cntInd4.textContent = `${(meta.countInd4 || 0).toLocaleString()}건`;
+              if (meta.licenseCount) lastLicenseCount = meta.licenseCount;
+            }
+
+            updateRatioDisplay();
+            renderFilteredList();
+          }
+        }
+      } catch (e) {
+        console.error("Local storage restore error:", e);
+      }
+    }
+
+    // Top Upload Button Handler
+    btnTopUpload.addEventListener("click", () => topCsvFileInput.click());
+    topCsvFileInput.addEventListener("change", handleCSVImport);
+
+    function handleCSVImport(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      statusContainer.innerHTML = `
+        <div class="loader"></div>
+        <div>부산·울산·경남·경북 개인사업자 CSV 분석 및 영구 저장 중... (${file.name})</div>
+      `;
+      statusContainer.style.display = "block";
+      tableContainer.style.display = "none";
+      summarySection.style.display = "none";
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        const rows = parseCSVText(text);
+        
+        if (rows.length === 0) {
+          alert("CSV 파일에서 읽을 수 있는 데이터 행을 찾지 못했습니다.");
+          statusContainer.style.display = "none";
+          return;
+        }
+
+        let countInd1 = 0;
+        let countInd2 = 0;
+        let countInd3 = 0;
+        let countInd4 = 0;
+
+        const interiorKeywords = ["인테리어", "내장", "실내", "의장", "도배", "장판", "타일", "조명", "싱크대", "리모델링", "건축내장", "목공", "방수", "도장"];
+
+        const filteredInteriorRows = rows.filter(r => {
+          const addr = r.ncrGsAddr || '';
+          const item = r.ncrItemName || '';
+          const name = r.ncrGsKname || '';
+
+          const matchRegion = target4Regions.some(reg => addr.includes(reg));
+          if (!matchRegion && rows.length > 50) return false;
+
+          const matchInterior = interiorKeywords.some(k => item.includes(k) || name.includes(k));
+          if (!matchInterior) return false;
+
+          if (item.includes("도배") || item.includes("장판") || item.includes("마감")) {
+            countInd2++;
+          } else if (item.includes("타일") || item.includes("욕실") || item.includes("수전")) {
+            countInd3++;
+          } else if (item.includes("조명") || item.includes("전기") || item.includes("목공")) {
+            countInd4++;
+          } else {
+            countInd1++;
+          }
+
+          return true;
+        });
+
+        loadedCompanies = filteredInteriorRows.length > 0 ? filteredInteriorRows : rows;
+
+        lastPersonalCount = loadedCompanies.length;
+        valPersonalCnt.textContent = lastPersonalCount.toLocaleString();
+
+        cntInd1.textContent = `${countInd1.toLocaleString()}건`;
+        cntInd2.textContent = `${countInd2.toLocaleString()}건`;
+        cntInd3.textContent = `${countInd3.toLocaleString()}건`;
+        cntInd4.textContent = `${countInd4.toLocaleString()}건`;
+
+        // PERMANENT STORAGE IN BROWSER
+        try {
+          localStorage.setItem(STORAGE_CSV_KEY, JSON.stringify(loadedCompanies));
+          localStorage.setItem(STORAGE_META_KEY, JSON.stringify({
+            countInd1, countInd2, countInd3, countInd4, licenseCount: lastLicenseCount
+          }));
+        } catch (storageErr) {
+          console.warn("Storage quota exceeded, trimmimg dataset for cache:", storageErr);
+          localStorage.setItem(STORAGE_CSV_KEY, JSON.stringify(loadedCompanies.slice(0, 3000)));
+        }
+
+        updateRatioDisplay();
+        renderFilteredList();
+      };
+      reader.readAsText(file, "EUC-KR");
+    }
 
     // Multi-select Dropdown Handlers
     multiTrigger.addEventListener("click", (e) => {
@@ -1023,112 +1153,6 @@
       renderFilteredList();
     });
 
-    // CSV Local File Importer
-    btnImportCsv.addEventListener("click", () => csvFileInput.click());
-    csvFileInput.addEventListener("change", handleCSVImport);
-
-    function handleCSVImport(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      statusContainer.innerHTML = `
-        <div class="loader"></div>
-        <div>부산·울산·경남·경북 개인사업자 CSV 분석 중... (${file.name})</div>
-      `;
-      statusContainer.style.display = "block";
-      tableContainer.style.display = "none";
-      summarySection.style.display = "none";
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const text = evt.target.result;
-        const rows = parseCSVText(text);
-        
-        if (rows.length === 0) {
-          alert("CSV 파일에서 읽을 수 있는 데이터 행을 찾지 못했습니다.");
-          return;
-        }
-
-        // Filter ONLY interior-related businesses in Busan, Ulsan, Gyeongnam, Gyeongbuk
-        let countInd1 = 0;
-        let countInd2 = 0;
-        let countInd3 = 0;
-        let countInd4 = 0;
-
-        const interiorKeywords = ["인테리어", "내장", "실내", "의장", "도배", "장판", "타일", "조명", "싱크대", "리모델링", "건축내장", "목공", "방수", "도장"];
-
-        const filteredInteriorRows = rows.filter(r => {
-          const addr = r.ncrGsAddr || '';
-          const item = r.ncrItemName || '';
-          const name = r.ncrGsKname || '';
-
-          // 1. Target region check (Busan, Ulsan, Gyeongnam, Gyeongbuk)
-          const matchRegion = target4Regions.some(reg => addr.includes(reg));
-          if (!matchRegion && rows.length > 50) return false; // If region column exists
-
-          // 2. Interior keyword check
-          const matchInterior = interiorKeywords.some(k => item.includes(k) || name.includes(k));
-          if (!matchInterior) return false;
-
-          // Count by industry breakdown
-          if (item.includes("도배") || item.includes("장판") || item.includes("마감")) {
-            countInd2++;
-          } else if (item.includes("타일") || item.includes("욕실") || item.includes("수전")) {
-            countInd3++;
-          } else if (item.includes("조명") || item.includes("전기") || item.includes("목공")) {
-            countInd4++;
-          } else {
-            countInd1++;
-          }
-
-          return true;
-        });
-
-        loadedCompanies = filteredInteriorRows.length > 0 ? filteredInteriorRows : rows;
-
-        lastPersonalCount = loadedCompanies.length;
-        valPersonalCnt.textContent = lastPersonalCount.toLocaleString();
-
-        cntInd1.textContent = `${countInd1.toLocaleString()}건`;
-        cntInd2.textContent = `${countInd2.toLocaleString()}건`;
-        cntInd3.textContent = `${countInd3.toLocaleString()}건`;
-        cntInd4.textContent = `${countInd4.toLocaleString()}건`;
-
-        // Fetch License Holder count automatically for comparison
-        fetchTarget4LicenseCount();
-        renderFilteredList();
-      };
-      reader.readAsText(file, "EUC-KR");
-    }
-
-    // Fetch License Holder Count for Busan, Ulsan, Gyeongnam, Gyeongbuk from KISCON
-    async function fetchTarget4LicenseCount() {
-      try {
-        const today = new Date();
-        const formatDigit = (n) => String(n).padStart(2, '0');
-        const eDate = `${today.getFullYear()}${formatDigit(today.getMonth() + 1)}${formatDigit(today.getDate())}`;
-        const past = new Date();
-        past.setFullYear(today.getFullYear() - 10);
-        const sDate = `${past.getFullYear()}${formatDigit(past.getMonth() + 1)}${formatDigit(past.getDate())}`;
-
-        // Fetch Busan license count
-        const url = `/api/kiscon?ncrAreaName=${encodeURIComponent('부산')}&sDate=${sDate}&eDate=${eDate}&pageNo=1&numOfRows=1000`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const rawText = await res.text();
-          let parsed = JSON.parse(rawText);
-          if (parsed.response && parsed.response.body) {
-            lastLicenseCount = parseInt(parsed.response.body.totalCount) || 1000;
-          }
-        }
-      } catch(e) {
-        console.error(e);
-        lastLicenseCount = 4866; // Busan 10-year KISCON total count fallback
-      }
-
-      updateRatioDisplay();
-    }
-
     function updateRatioDisplay() {
       valLicenseCnt.textContent = lastLicenseCount.toLocaleString();
 
@@ -1138,7 +1162,7 @@
         valRatioDesc.textContent = `개인사업자 ${lastPersonalCount.toLocaleString()}개 중 면허 보유업체 ${lastLicenseCount.toLocaleString()}개 꼴`;
       } else {
         valRatioPct.innerHTML = `0.0<span class="hero-unit">%</span>`;
-        valRatioDesc.textContent = `개인사업자 파일 등록 시 비율이 계산됩니다.`;
+        valRatioDesc.textContent = `상단 [CSV 파일 업로드] 버튼 클릭 시 비율 계산`;
       }
     }
 
@@ -1271,7 +1295,6 @@
       }
     }
 
-    // Helper to safely extract items array
     function extractItemsFromParsed(parsed) {
       if (parsed.response && parsed.response.body && parsed.response.body.items) {
         const itemVal = parsed.response.body.items.item;
@@ -1288,7 +1311,6 @@
       return [];
     }
 
-    // Parse XML responses
     function parseXMLResponse(xmlText) {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, "text/xml");
@@ -1318,7 +1340,6 @@
       return { items };
     }
 
-    // Get Korean Geographical Rank
     function getRegionRank(addrStr, areaStr) {
       const text = (areaStr + " " + addrStr).trim();
       for (let i = 0; i < regionRankOrder.length; i++) {
@@ -1329,7 +1350,6 @@
       return 999;
     }
 
-    // Dynamic filtering, Regional Sorting by 시·도, and Table rendering
     function renderFilteredList() {
       const searchWord = nameFilterInput.value.trim().toLowerCase();
       
@@ -1350,7 +1370,6 @@
         return matchIndustry && matchType && matchName;
       });
 
-      // SORT BY REGION (시·도) & ADDRESS
       filtered.sort((a, b) => {
         const rankA = getRegionRank(a.ncrGsAddr || a.adres || '', a.ncrAreaName || '');
         const rankB = getRegionRank(b.ncrGsAddr || b.adres || '', b.ncrAreaName || '');
@@ -1369,11 +1388,7 @@
       statMatchCnt.textContent = interiorCnt.toLocaleString();
 
       if (filtered.length === 0) {
-        statusContainer.innerHTML = `
-          <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">🔍 일치하는 업체 없음</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted);">해당 조건에 해당하는 건설업체/개인사업자가 확인되지 않습니다.</div>
-        `;
-        statusContainer.style.display = "block";
+        statusContainer.style.display = "none";
         tableContainer.style.display = "none";
         summarySection.style.display = totalCnt > 0 ? "flex" : "none";
         return;
@@ -1428,12 +1443,10 @@
       });
     }
 
-    // Helper to escape quotes
     function escapeQuotes(str) {
       return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
     }
 
-    // Clipboard copy
     window.copyAddress = function(btn, addr) {
       if (!addr) {
         alert("복사할 주소 정보가 없습니다.");
@@ -1450,7 +1463,6 @@
       });
     }
 
-    // Real-time filter input listener
     nameFilterInput.addEventListener("input", renderFilteredList);
 
   </script>
