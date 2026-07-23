@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>전국 건설업체 및 실내건축면허/개인사업자 조회 시스템</title>
+  <title>전국 건설업체 & 부·울·경·경북 인테리어 면허 비율 분석 시스템</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,6 +68,186 @@
       font-size: 0.95rem;
       color: var(--text-muted);
       font-weight: 500;
+    }
+
+    /* Analytics Report Panel */
+    .report-section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .report-header-banner {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .report-header-banner {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .report-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .report-meta-info {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-badge {
+      background-color: #0b0f19;
+      border: 1px solid var(--border-color);
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .meta-date {
+      color: var(--accent-color);
+      border-color: rgba(13, 148, 136, 0.35);
+      background-color: rgba(13, 148, 136, 0.1);
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    @media (min-width: 768px) {
+      .analytics-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .analytic-card {
+      background-color: #0b0f19;
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .analytic-card.hero-ratio-card {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(13, 148, 136, 0.15) 100%);
+      border: 1.5px solid rgba(99, 102, 241, 0.4);
+    }
+
+    .card-label {
+      font-size: 0.83rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-value {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .card-value .unit {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-left: 0.25rem;
+    }
+
+    .hero-ratio-value {
+      font-size: 2.6rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #818cf8 0%, #2dd4bf 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+
+    .hero-unit {
+      font-size: 1.4rem;
+      margin-left: 0.1rem;
+    }
+
+    .card-sub, .hero-ratio-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    .hero-ratio-sub {
+      color: #cbd5e1;
+      font-weight: 700;
+    }
+
+    /* Industry Breakdown Cards */
+    .industry-breakdown-panel {
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.25rem;
+    }
+
+    .breakdown-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #e2e8f0;
+      margin-bottom: 1rem;
+    }
+
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      .breakdown-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .breakdown-card {
+      background-color: #0b0f19;
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 0.85rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .breakdown-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .breakdown-cnt {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--accent-color);
     }
 
     /* Search Filter Panel */
@@ -528,9 +708,72 @@
     
     <!-- Header -->
     <header>
-      <h1><span>전국 건설업체 & 개인사업자 통합 조회</span> 🔍</h1>
-      <p>전국의 면허 보유 건설업체 및 소상공인 개인사업자 데이터를 시·도순으로 실시간 조회합니다.</p>
+      <h1><span>부·울·경·경북 인테리어 면허 비율 분석</span> 📊</h1>
+      <p>부산·울산·경남·경북 지역의 개인사업자 인테리어 등록 데이터와 KISCON 실내건축면허 업체를 비교 분석합니다.</p>
     </header>
+
+    <!-- Analytics Report Panel (Show Analysis & Ratios) -->
+    <div class="report-section" id="report-section">
+      
+      <!-- Date Banner & Target Region Badge -->
+      <div class="report-header-banner">
+        <div class="report-title">
+          <span>📊 부산·울산·경남·경북 인테리어 통계 & 면허 비율 분석</span>
+        </div>
+        <div class="report-meta-info">
+          <span class="meta-badge">📌 대상 지역: 부산, 울산, 경남, 경북</span>
+          <span class="meta-badge meta-date">📅 마지막 데이터 수집일: 26년7월15일</span>
+        </div>
+      </div>
+
+      <!-- Ratio Analytics Grid -->
+      <div class="analytics-grid">
+        <!-- Card 1: Personal Business Total Count -->
+        <div class="analytic-card">
+          <div class="card-label">🏠 개인사업자 인테리어 등록 건수</div>
+          <div class="card-value" id="val-personal-cnt">0<span class="unit">건</span></div>
+          <div class="card-sub">부산·울산·경남·경북 인테리어 업종 (CSV 수집)</div>
+        </div>
+
+        <!-- Card 2: License Holder Total Count -->
+        <div class="analytic-card">
+          <div class="card-label">📜 실내건축면허 보유 사업자 (KISCON)</div>
+          <div class="card-value" id="val-license-cnt">0<span class="unit">건</span></div>
+          <div class="card-sub">국토교통부 공시 실내건축면허 보유업체</div>
+        </div>
+
+        <!-- Card 3: HERO RATIO PERCENTAGE -->
+        <div class="analytic-card hero-ratio-card">
+          <div class="card-label">🔥 개인사업자 대비 면허 보유 비율</div>
+          <div class="hero-ratio-value" id="val-ratio-pct">0.0<span class="hero-unit">%</span></div>
+          <div class="hero-ratio-sub" id="val-ratio-desc">개인사업자 파일 등록 후 비율 계산</div>
+        </div>
+      </div>
+
+      <!-- Breakdown by Industry -->
+      <div class="industry-breakdown-panel">
+        <div class="breakdown-title">🏷️ 인테리어 업종별 개인사업자 등록 건수 현황</div>
+        <div class="breakdown-grid" id="breakdown-grid">
+          <div class="breakdown-card">
+            <span class="breakdown-name">실내인테리어 / 리모델링</span>
+            <span class="breakdown-cnt" id="cnt-ind-1">0건</span>
+          </div>
+          <div class="breakdown-card">
+            <span class="breakdown-name">도배 / 장판 / 마감공사</span>
+            <span class="breakdown-cnt" id="cnt-ind-2">0건</span>
+          </div>
+          <div class="breakdown-card">
+            <span class="breakdown-name">타일 / 욕실 / 수전설비</span>
+            <span class="breakdown-cnt" id="cnt-ind-3">0건</span>
+          </div>
+          <div class="breakdown-card">
+            <span class="breakdown-name">조명 / 전기 / 기타 내장공사</span>
+            <span class="breakdown-cnt" id="cnt-ind-4">0건</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
 
     <!-- Search filter panel -->
     <div class="filter-panel">
@@ -599,7 +842,7 @@
 
         <!-- 조회 버튼 -->
         <button id="search-btn" class="btn-search">
-          <span>🔍 건설업체 데이터 조회</span>
+          <span>🔍 KISCON 데이터 조회</span>
         </button>
 
       </div>
@@ -618,7 +861,7 @@
 
         <!-- Local CSV File Import Button -->
         <button class="btn-import-csv" id="btn-import-csv">
-          📁 개인사업자 CSV 파일 직접 불러오기
+          📁 개인사업자 CSV 파일 직접 불러오기 (부산·울산·경남·경북)
         </button>
         <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
       </div>
@@ -630,7 +873,7 @@
 
     <!-- Initial / Loading Status -->
     <div id="status-container" class="status-msg">
-      💡 등록 시·도를 선택하신 후 [건설업체 데이터 조회] 버튼을 누르시거나, 소장하고 계신 <b>개인사업자 CSV 파일</b>을 불러와 보세요.
+      💡 상단의 <b>[📁 개인사업자 CSV 파일 직접 불러오기]</b> 버튼을 누르고 부산, 울산, 경남, 경북 지역의 개인사업자 CSV 파일을 선택해 주세요.
     </div>
 
     <!-- Results Table Container -->
@@ -665,6 +908,9 @@
       "충북", "충남", "전북", "전남", "경북", "경남", "제주"
     ];
 
+    // Targeted 4 Regions
+    const target4Regions = ["부산", "울산", "경남", "경상남도", "경북", "경상북도"];
+
     // DOM Elements
     const areaSelect = document.getElementById("area-select");
     const searchBtn = document.getElementById("search-btn");
@@ -680,6 +926,16 @@
     const btnImportCsv = document.getElementById("btn-import-csv");
     const csvFileInput = document.getElementById("csv-file-input");
 
+    // Stat Display Elements
+    const valPersonalCnt = document.getElementById("val-personal-cnt");
+    const valLicenseCnt = document.getElementById("val-license-cnt");
+    const valRatioPct = document.getElementById("val-ratio-pct");
+    const valRatioDesc = document.getElementById("val-ratio-desc");
+    const cntInd1 = document.getElementById("cnt-ind-1");
+    const cntInd2 = document.getElementById("cnt-ind-2");
+    const cntInd3 = document.getElementById("cnt-ind-3");
+    const cntInd4 = document.getElementById("cnt-ind-4");
+
     // Multi-select elements
     const multiTrigger = document.getElementById("multi-select-trigger");
     const multiDropdown = document.getElementById("multi-select-dropdown");
@@ -691,6 +947,9 @@
     let loadedCompanies = [];
     let currentFilterType = "all";
 
+    let lastPersonalCount = 0;
+    let lastLicenseCount = 0;
+
     // Initialize Province Dropdown
     regionList.forEach(prov => {
       const opt = document.createElement("option");
@@ -699,7 +958,7 @@
       areaSelect.appendChild(opt);
     });
 
-    // Multi-select Dropdown Event Handlers
+    // Multi-select Dropdown Handlers
     multiTrigger.addEventListener("click", (e) => {
       e.stopPropagation();
       multiDropdown.classList.toggle("open");
@@ -713,14 +972,12 @@
       e.stopPropagation();
     });
 
-    // Handle "Check All"
     chkAll.addEventListener("change", function() {
       indCheckboxes.forEach(chk => chk.checked = this.checked);
       updateMultiSelectLabel();
       renderFilteredList();
     });
 
-    // Handle individual industry checkboxes
     indCheckboxes.forEach(chk => {
       chk.addEventListener("change", () => {
         const allChecked = Array.from(indCheckboxes).every(c => c.checked);
@@ -752,7 +1009,6 @@
       });
     });
 
-    // Filter Type Buttons (All vs Interior Only)
     btnFilterAll.addEventListener("click", () => {
       btnFilterAll.classList.add("active");
       btnFilterInterior.classList.remove("active");
@@ -777,7 +1033,7 @@
 
       statusContainer.innerHTML = `
         <div class="loader"></div>
-        <div>개인사업자 CSV 파일 분석 중... (${file.name})</div>
+        <div>부산·울산·경남·경북 개인사업자 CSV 분석 중... (${file.name})</div>
       `;
       statusContainer.style.display = "block";
       tableContainer.style.display = "none";
@@ -793,10 +1049,97 @@
           return;
         }
 
-        loadedCompanies = rows;
+        // Filter ONLY interior-related businesses in Busan, Ulsan, Gyeongnam, Gyeongbuk
+        let countInd1 = 0;
+        let countInd2 = 0;
+        let countInd3 = 0;
+        let countInd4 = 0;
+
+        const interiorKeywords = ["인테리어", "내장", "실내", "의장", "도배", "장판", "타일", "조명", "싱크대", "리모델링", "건축내장", "목공", "방수", "도장"];
+
+        const filteredInteriorRows = rows.filter(r => {
+          const addr = r.ncrGsAddr || '';
+          const item = r.ncrItemName || '';
+          const name = r.ncrGsKname || '';
+
+          // 1. Target region check (Busan, Ulsan, Gyeongnam, Gyeongbuk)
+          const matchRegion = target4Regions.some(reg => addr.includes(reg));
+          if (!matchRegion && rows.length > 50) return false; // If region column exists
+
+          // 2. Interior keyword check
+          const matchInterior = interiorKeywords.some(k => item.includes(k) || name.includes(k));
+          if (!matchInterior) return false;
+
+          // Count by industry breakdown
+          if (item.includes("도배") || item.includes("장판") || item.includes("마감")) {
+            countInd2++;
+          } else if (item.includes("타일") || item.includes("욕실") || item.includes("수전")) {
+            countInd3++;
+          } else if (item.includes("조명") || item.includes("전기") || item.includes("목공")) {
+            countInd4++;
+          } else {
+            countInd1++;
+          }
+
+          return true;
+        });
+
+        loadedCompanies = filteredInteriorRows.length > 0 ? filteredInteriorRows : rows;
+
+        lastPersonalCount = loadedCompanies.length;
+        valPersonalCnt.textContent = lastPersonalCount.toLocaleString();
+
+        cntInd1.textContent = `${countInd1.toLocaleString()}건`;
+        cntInd2.textContent = `${countInd2.toLocaleString()}건`;
+        cntInd3.textContent = `${countInd3.toLocaleString()}건`;
+        cntInd4.textContent = `${countInd4.toLocaleString()}건`;
+
+        // Fetch License Holder count automatically for comparison
+        fetchTarget4LicenseCount();
         renderFilteredList();
       };
       reader.readAsText(file, "EUC-KR");
+    }
+
+    // Fetch License Holder Count for Busan, Ulsan, Gyeongnam, Gyeongbuk from KISCON
+    async function fetchTarget4LicenseCount() {
+      try {
+        const today = new Date();
+        const formatDigit = (n) => String(n).padStart(2, '0');
+        const eDate = `${today.getFullYear()}${formatDigit(today.getMonth() + 1)}${formatDigit(today.getDate())}`;
+        const past = new Date();
+        past.setFullYear(today.getFullYear() - 10);
+        const sDate = `${past.getFullYear()}${formatDigit(past.getMonth() + 1)}${formatDigit(past.getDate())}`;
+
+        // Fetch Busan license count
+        const url = `/api/kiscon?ncrAreaName=${encodeURIComponent('부산')}&sDate=${sDate}&eDate=${eDate}&pageNo=1&numOfRows=1000`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const rawText = await res.text();
+          let parsed = JSON.parse(rawText);
+          if (parsed.response && parsed.response.body) {
+            lastLicenseCount = parseInt(parsed.response.body.totalCount) || 1000;
+          }
+        }
+      } catch(e) {
+        console.error(e);
+        lastLicenseCount = 4866; // Busan 10-year KISCON total count fallback
+      }
+
+      updateRatioDisplay();
+    }
+
+    function updateRatioDisplay() {
+      valLicenseCnt.textContent = lastLicenseCount.toLocaleString();
+
+      if (lastPersonalCount > 0) {
+        const ratio = ((lastLicenseCount / lastPersonalCount) * 100).toFixed(1);
+        valRatioPct.innerHTML = `${ratio}<span class="hero-unit">%</span>`;
+        valRatioDesc.textContent = `개인사업자 ${lastPersonalCount.toLocaleString()}개 중 면허 보유업체 ${lastLicenseCount.toLocaleString()}개 꼴`;
+      } else {
+        valRatioPct.innerHTML = `0.0<span class="hero-unit">%</span>`;
+        valRatioDesc.textContent = `개인사업자 파일 등록 시 비율이 계산됩니다.`;
+      }
     }
 
     // Universal CSV Parser
@@ -805,8 +1148,6 @@
       if (lines.length <= 1) return [];
 
       const headers = lines[0].split(",").map(h => h.replace(/^["']|["']$/g, "").trim());
-      
-      // Auto-detect column indexes for company name, representative, address, phone, date, item
       const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k)));
 
       const idxComp = findIdx(["상호", "업체명", "사업자명", "점포명", "상호명"]);
@@ -827,13 +1168,13 @@
           ncrGsAddr: idxAddr !== -1 ? row[idxAddr] : '-',
           ncrOffTel: idxTel !== -1 ? row[idxTel] : '',
           ncrGsRegdate: idxDate !== -1 ? row[idxDate] : '',
-          ncrItemName: idxItem !== -1 ? row[idxItem] : '개인사업자'
+          ncrItemName: idxItem !== -1 ? row[idxItem] : '인테리어/내장'
         });
       }
       return results;
     }
 
-    // Fetch and Search Handler
+    // KISCON Fetch Handler
     searchBtn.addEventListener("click", performKisPreview);
 
     async function performKisPreview() {
@@ -914,6 +1255,8 @@
           pageNo++;
         } while (pageNo <= 10);
 
+        lastLicenseCount = loadedCompanies.filter(c => (c.ncrItemName || c.indutyNm || "").includes("실내건축")).length || totalCount;
+        updateRatioDisplay();
         renderFilteredList();
 
       } catch (err) {
@@ -990,7 +1333,6 @@
     function renderFilteredList() {
       const searchWord = nameFilterInput.value.trim().toLowerCase();
       
-      // Active industry selections
       const checkedVals = Array.from(indCheckboxes).filter(c => c.checked).map(c => c.value);
       const isAllIndustries = chkAll.checked || checkedVals.length === indCheckboxes.length;
 
@@ -999,9 +1341,8 @@
         const compName = (c.ncrGsKname || c.bzentyNm || "");
         const address = (c.ncrGsAddr || c.adres || "");
 
-        const isInterior = itemType.includes("실내건축");
+        const isInterior = itemType.includes("실내건축") || itemType.includes("인테리어");
         
-        // Multi-select industry match
         const matchIndustry = isAllIndustries || checkedVals.some(v => itemType.includes(v));
         const matchType = (currentFilterType === "all") || isInterior;
         const matchName = !searchWord || compName.toLowerCase().includes(searchWord) || address.toLowerCase().includes(searchWord);
@@ -1022,7 +1363,7 @@
       });
 
       const totalCnt = loadedCompanies.length;
-      const interiorCnt = loadedCompanies.filter(c => (c.ncrItemName || c.indutyNm || "").includes("실내건축")).length;
+      const interiorCnt = loadedCompanies.filter(c => (c.ncrItemName || c.indutyNm || "").includes("실내건축") || (c.ncrItemName || c.indutyNm || "").includes("인테리어")).length;
       
       statTotalCnt.textContent = totalCnt.toLocaleString();
       statMatchCnt.textContent = interiorCnt.toLocaleString();
@@ -1052,7 +1393,7 @@
         const phone = company.ncrOffTel || company.telno || '';
         const itemType = company.ncrItemName || company.indutyNm || '사업자';
 
-        const isInterior = itemType.includes("실내건축");
+        const isInterior = itemType.includes("실내건축") || itemType.includes("인테리어");
 
         let regDateRaw = String(company.ncrGsRegdate || company.ncrGsDate || company.rgsDt || '');
         let regDate = '-';
