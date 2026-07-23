@@ -688,7 +688,7 @@
 
     @media (min-width: 768px) {
       .filter-grid {
-        grid-template-columns: 1.1fr 1.6fr 2fr 1fr;
+        grid-template-columns: 1fr 1.3fr 1.2fr 1.5fr 1fr;
         align-items: flex-end;
       }
     }
@@ -891,6 +891,12 @@
       color: var(--text-muted);
       background-color: #f1f5f9;
       border: 1px solid var(--border-color);
+    }
+
+    .badge-closed {
+      color: #ef4444;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
     }
   </style>
 </head>
@@ -1208,6 +1214,15 @@
           </div>
 
           <div class="form-group">
+            <label for="status-select">공시 구분 (신규/폐업)</label>
+            <select id="status-select" class="form-select">
+              <option value="all">전체 공시 (신규+폐업)</option>
+              <option value="신규" selected>신규 등록 공시</option>
+              <option value="철회">폐업/등록말소 공시</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label>면허·업종 분류 카테고리 (복수 선택 가능)</label>
             <div class="multi-select-container" id="industry-multi-container">
               <div class="multi-select-trigger" id="multi-select-trigger">
@@ -1334,6 +1349,7 @@
 
     // DOM Elements
     const areaSelect = document.getElementById("area-select");
+    const statusSelect = document.getElementById("status-select");
     const searchBtn = document.getElementById("search-btn");
     const statusContainer = document.getElementById("status-container");
     const tableContainer = document.getElementById("table-container");
@@ -1439,6 +1455,8 @@
       opt.textContent = prov;
       areaSelect.appendChild(opt);
     });
+
+    statusSelect.addEventListener("change", renderFilteredList);
 
     // Multi-select Dropdown Handlers
     multiTrigger.addEventListener("click", (e) => {
@@ -1624,7 +1642,9 @@
           ncrItemName: getVal("ncrItemName") || getVal("indutyNm"),
           ncrGsAddr: getVal("ncrGsAddr") || getVal("adres"),
           ncrOffTel: getVal("ncrOffTel") || getVal("telno"),
-          ncrGsRegdate: getVal("ncrGsRegdate") || getVal("rgsDt")
+          ncrGsRegdate: getVal("ncrGsRegdate") || getVal("rgsDt"),
+          ncrGsFlag: getVal("ncrGsFlag"),
+          ncrGsReason: getVal("ncrGsReason")
         });
       }
       return { items };
@@ -1646,17 +1666,23 @@
       const checkedVals = Array.from(indCheckboxes).filter(c => c.checked).map(c => c.value);
       const isAllIndustries = chkAll.checked || checkedVals.length === indCheckboxes.length;
 
+      const statusVal = statusSelect.value;
+
       let filtered = loadedCompanies.filter(c => {
         const itemType = (c.ncrItemName || c.indutyNm || "");
         const compName = (c.ncrGsKname || c.bzentyNm || "");
         const address = (c.ncrGsAddr || c.adres || "");
+        const flag = c.ncrGsFlag || '';
 
         const isInterior = itemType.includes("실내건축") || itemType.includes("인테리어");
         
         const matchIndustry = isAllIndustries || checkedVals.some(v => itemType.includes(v));
         const matchName = !searchWord || compName.toLowerCase().includes(searchWord) || address.toLowerCase().includes(searchWord);
+        const matchStatus = statusVal === 'all' || 
+                            (statusVal === '신규' && (flag === '신규' || flag === '')) || 
+                            (statusVal === '철회' && flag === '철회');
         
-        return matchIndustry && matchName;
+        return matchIndustry && matchName && matchStatus;
       });
 
       filtered.sort((a, b) => {
@@ -1701,6 +1727,7 @@
         const address = company.ncrGsAddr || company.adres || '-';
         const phone = company.ncrOffTel || company.telno || '';
         const itemType = company.ncrItemName || company.indutyNm || '사업자';
+        const isClosed = company.ncrGsFlag === '철회';
 
         const isInterior = itemType.includes("실내건축") || itemType.includes("인테리어");
 
@@ -1714,17 +1741,33 @@
 
         const cleanPhone = phone ? phone.trim() : "";
 
+        const nameStyle = isClosed ? 'style="text-decoration: line-through; color: var(--text-muted);"' : '';
+        let badgeHtml = '';
+        if (isClosed) {
+          badgeHtml = `<span class="badge-item badge-closed">폐업/등록말소</span>`;
+        } else {
+          badgeHtml = `<span class="badge-item ${isInterior ? 'badge-interior' : 'badge-general'}">${itemType}</span>`;
+        }
+
+        let closureReasonHtml = '';
+        if (isClosed && company.ncrGsReason && company.ncrGsReason !== '-' && company.ncrGsReason !== '해당사항 없음') {
+          closureReasonHtml = `<div style="font-size: 0.72rem; color: #ef4444; margin-top: 0.2rem;">⚠️ 사유: ${company.ncrGsReason}</div>`;
+        }
+
         tr.innerHTML = `
           <td>
             <div class="td-company">
-              <span>${compName}</span>
-              <span class="badge-item ${isInterior ? 'badge-interior' : 'badge-general'}">${itemType}</span>
+              <span ${nameStyle}>${compName}</span>
+              ${badgeHtml}
             </div>
           </td>
           <td><span style="font-weight: 700; color: var(--text-primary);">${masterName}</span></td>
           <td><span style="color: var(--text-muted); font-weight: 600;">${regDate}</span></td>
           <td><span style="font-weight: 700; color: var(--brand-primary);">${cleanPhone || '-'}</span></td>
-          <td><div style="color: var(--text-secondary); font-size: 0.82rem; max-width: 300px; word-break: break-all;">${address}</div></td>
+          <td>
+            <div style="color: var(--text-secondary); font-size: 0.82rem; max-width: 300px; word-break: break-all;">${address}</div>
+            ${closureReasonHtml}
+          </td>
           <td>
             <div style="display: flex; gap: 0.3rem;">
               <button class="btn-preset" style="padding: 0.25rem 0.5rem; font-size: 0.72rem;" onclick="copyAddress(this, '${escapeQuotes(address)}')">📍 복사</button>
