@@ -1218,7 +1218,7 @@
                   </p>
                   <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">
                     <strong class="text-gray-850 dark-mode:text-white block mb-0.5">• webP변환</strong>
-                    = 업로드용 JPG/PNG 이미지를 WebP 초경량 파일로 일괄 변환하며, 유사 이미지 스캔 방어용 1px 미세 크롭 자동 수행.
+                    = 업로드용 JPG/PNG 이미지를 WebP/JPG 파일로 일괄 변환하며, 1px 미세 크롭, 좌우반전, EXIF/사진 히스토리 완전 삭제 및 20MB 제한 방어 자동 수행.
                   </p>
                 </div>
               </div>
@@ -1346,7 +1346,7 @@
         </div>
 
         <!-- 4번 기능 -->
-        <div class="mb-8">
+        <div class="mb-12">
           <div class="flex items-center gap-3 mb-4">
             <span class="bg-pink-600 text-white text-sm font-bold px-3 py-1 rounded-full">4번 기능</span>
             <h2 class="text-2xl font-bold text-gray-800">네이버 블로그용 + 좌우반전 <span class="text-lg font-medium text-gray-500">(원본 해상도 보존 + 좌우 대칭 회전)</span></h2>
@@ -1366,6 +1366,29 @@
             <h3 class="text-xl font-bold text-pink-800 mb-2">블로그용(좌우반전) 사진 일괄 업로드</h3>
             <p class="text-sm text-pink-600 font-medium mb-1">방향 상관없이 드래그 (해상도 원본 유지 + 좌우반전)</p>
             <input type="file" id="file-blog-flip" multiple accept=".jpg, .jpeg, .png" class="hidden">
+          </div>
+        </div>
+
+        <!-- 5번 기능 -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="bg-amber-600 text-white text-sm font-bold px-3 py-1 rounded-full">5번 기능</span>
+            <h2 class="text-2xl font-bold text-gray-800">사진 히스토리 삭제 + 1px 크롭 + JPG 변환 <span class="text-lg font-medium text-gray-500">(메타데이터 완전 제거 / 20MB 제한 방어)</span></h2>
+          </div>
+          <div class="bg-amber-50 p-5 rounded-xl border border-amber-200 mb-6">
+            <ul class="text-sm text-amber-900 list-disc list-inside space-y-1">
+              <li><span class="font-bold text-amber-950">사진 히스토리 / EXIF 메타데이터 전면 삭제:</span> 사진 속 위치 정보(GPS), 촬영 시간, 편집 이력 등 메타데이터를 100% 삭제하고 재인코딩합니다.</li>
+              <li><span class="font-bold text-amber-950">가장자리 1px 크롭:</span> 상하좌우 1픽셀을 미세하게 잘라내어 AI 스캔 기반 중복 이미지 판정을 방어합니다.</li>
+              <li><span class="font-bold text-amber-950">JPG 포맷 변환 & 20MB 제한 방어:</span> .png 및 .jpg 파일을 고화질 .jpg로 변환하며, 변환 용량이 20MB 이상일 경우 <span class="font-bold">19.9MB 이하로 자동 최적화</span>합니다.</li>
+            </ul>
+          </div>
+          <div id="drop-zone-jpg" class="border-2 border-dashed border-amber-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-amber-50 group bg-white">
+            <div class="text-amber-400 mb-4 group-hover:text-amber-500 transition-colors flex justify-center gap-2">
+              <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+            </div>
+            <h3 class="text-xl font-bold text-amber-800 mb-2">JPG 변환 및 히스토리 삭제용 사진 일괄 업로드</h3>
+            <p class="text-sm text-amber-600 font-medium mb-1">.png, .jpg 파일 드래그 (히스토리 삭제 + 1px 크롭 + JPG 변환)</p>
+            <input type="file" id="file-jpg" multiple accept=".jpg, .jpeg, .png" class="hidden">
           </div>
         </div>
 
@@ -2256,6 +2279,90 @@
         });
     }
 
+    // [5번 기능] 사진 히스토리 삭제 + 1px 크롭 + JPG 변환 (20MB 제한 방어)
+    function processJpgCleared(file, quality = 0.95, flip = false) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            
+            img.onload = async () => {
+                const originalWidth = img.width;
+                const originalHeight = img.height;
+                
+                // 1px 크롭 설정
+                let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
+                if (originalWidth > 2 && originalHeight > 2) {
+                    cropX = 1; 
+                    cropY = 1;
+                    cropW = originalWidth - 2; 
+                    cropH = originalHeight - 2;
+                }
+
+                const orientation = (cropW > cropH) ? 'landscape' : 'portrait';
+                const MAX_SAFE_SIZE = 19.9 * 1024 * 1024; // 19.9MB
+
+                const generateBlobAtScale = (scaleRatio, q) => {
+                    return new Promise((res) => {
+                        const targetW = Math.round(cropW * scaleRatio);
+                        const targetH = Math.round(cropH * scaleRatio);
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = targetW;
+                        canvas.height = targetH;
+                        const ctx = canvas.getContext('2d');
+
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, targetW, targetH);
+
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        
+                        if (flip) {
+                            ctx.translate(targetW, 0);
+                            ctx.scale(-1, 1);
+                        }
+                        
+                        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
+                        
+                        canvas.toBlob((blob) => {
+                            res({ blob: blob, width: targetW, height: targetH });
+                        }, 'image/jpeg', q);
+                    });
+                };
+
+                try {
+                    let currentScale = 1.0;
+                    let currentQuality = quality;
+                    let resultData = await generateBlobAtScale(currentScale, currentQuality);
+
+                    while (resultData.blob.size > MAX_SAFE_SIZE && currentQuality > 0.5) {
+                        currentQuality -= 0.05;
+                        resultData = await generateBlobAtScale(currentScale, currentQuality);
+                    }
+                    while (resultData.blob.size > MAX_SAFE_SIZE && currentScale > 0.1) {
+                        currentScale -= 0.05;
+                        resultData = await generateBlobAtScale(currentScale, currentQuality);
+                    }
+
+                    URL.revokeObjectURL(objectUrl);
+                    resolve({ 
+                        blob: resultData.blob, 
+                        width: resultData.width, 
+                        height: resultData.height, 
+                        originalWidth: originalWidth, 
+                        originalHeight: originalHeight,
+                        orientation: orientation
+                    });
+                } catch (error) {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(error);
+                }
+            };
+            img.onerror = (e) => { URL.revokeObjectURL(objectUrl); reject(e); };
+            img.src = objectUrl;
+        });
+    }
+
     function setupWebP() {
       const dropHq = document.getElementById('drop-zone-hq');
       const fileHq = document.getElementById('file-hq');
@@ -2265,8 +2372,10 @@
       const fileHqFlip = document.getElementById('file-hq-flip');
       const dropBlogFlip = document.getElementById('drop-zone-blog-flip');
       const fileBlogFlip = document.getElementById('file-blog-flip');
+      const dropJpg = document.getElementById('drop-zone-jpg');
+      const fileJpg = document.getElementById('file-jpg');
 
-      if (!dropHq || !fileHq || !dropBlog || !fileBlog || !dropHqFlip || !fileHqFlip || !dropBlogFlip || !fileBlogFlip) return;
+      if (!dropHq || !fileHq || !dropBlog || !fileBlog || !dropHqFlip || !fileHqFlip || !dropBlogFlip || !fileBlogFlip || !dropJpg || !fileJpg) return;
 
       const progressContainer = document.getElementById('progress-container');
       const progressBar = document.getElementById('progress-bar');
@@ -2299,6 +2408,7 @@
       bindEvents(dropBlog, fileBlog, 'blog', 'drag-over-blog');
       bindEvents(dropHqFlip, fileHqFlip, 'hq-flip', 'drag-over-hq-flip');
       bindEvents(dropBlogFlip, fileBlogFlip, 'blog-flip', 'drag-over-blog-flip');
+      bindEvents(dropJpg, fileJpg, 'jpg', 'drag-over-jpg');
 
       clearBtn.addEventListener('click', () => {
           convertedFiles = [];
@@ -2308,6 +2418,7 @@
           fileBlog.value = '';
           fileHqFlip.value = '';
           fileBlogFlip.value = '';
+          fileJpg.value = '';
       });
 
       // ZIP 다운로드
@@ -2319,8 +2430,9 @@
           
           convertedFiles.forEach((file, index) => {
               let name = file.newName;
+              const ext = name.substring(name.lastIndexOf('.'));
               if (fileNames.has(name)) {
-                  name = name.replace('.webp', `-${index}.webp`);
+                  name = name.replace(ext, `-${index}${ext}`);
               }
               fileNames.add(name);
               zip.file(name, file.blob);
@@ -2366,6 +2478,8 @@
               progressStatusText.textContent = `[블로그용] 1px 크롭 및 WEBP 변환 진행 중...`;
           } else if (mode === 'blog-flip') {
               progressStatusText.textContent = `[블로그용+좌우반전] 1px 크롭, WEBP 변환 및 좌우반전 진행 중...`;
+          } else if (mode === 'jpg') {
+              progressStatusText.textContent = `[히스토리삭제+JPG] 1px 크롭, 히스토리 삭제 및 JPG 변환 진행 중...`;
           }
           
           const total = imageFiles.length;
@@ -2386,6 +2500,8 @@
                       resultData = await processWebpBlogOriginal(file, 1.0, false);
                   } else if (mode === 'blog-flip') {
                       resultData = await processWebpBlogOriginal(file, 1.0, true);
+                  } else if (mode === 'jpg') {
+                      resultData = await processJpgCleared(file, 0.95, false);
                   }
                   
                   const isLandscape = resultData.orientation === 'landscape';
@@ -2404,6 +2520,9 @@
                   } else if (mode === 'blog-flip') {
                       badgeText = isLandscape ? '블로그 가로 (반전+크롭)' : '블로그 세로 (반전+크롭)';
                       badgeClass = isLandscape ? 'bg-pink-100 text-pink-800' : 'bg-rose-100 text-rose-800';
+                  } else if (mode === 'jpg') {
+                      badgeText = isLandscape ? 'JPG 가로 (히스토리삭제)' : 'JPG 세로 (히스토리삭제)';
+                      badgeClass = isLandscape ? 'bg-amber-100 text-amber-800' : 'bg-yellow-100 text-yellow-800';
                   }
 
                   let baseName = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase()
@@ -2415,8 +2534,10 @@
                   else if (mode === 'hq-flip') suffix = '-home-flipped';
                   else if (mode === 'blog') suffix = '-blog';
                   else if (mode === 'blog-flip') suffix = '-blog-flipped';
+                  else if (mode === 'jpg') suffix = '-jpg-cleared';
 
-                  const newName = baseName + suffix + '.webp';
+                  const ext = (mode === 'jpg') ? '.jpg' : '.webp';
+                  const newName = baseName + suffix + ext;
                   
                   const result = {
                       badgeText: badgeText,
@@ -2446,6 +2567,7 @@
               fileBlog.value = '';
               fileHqFlip.value = '';
               fileBlogFlip.value = '';
+              fileJpg.value = '';
           }, 500);
       }
 
