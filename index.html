@@ -462,20 +462,37 @@
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "omission-check", name: "네이버블로그", protected: true });
         changed = true;
       }
-      // Ensure new menus exist
-      if (!menus.some(m => m.id === "interior-intro")) {
+      // Ensure interior category menus exist and have correct categoryId
+      let interiorMenu = menus.find(m => m.id === "interior-intro");
+      if (!interiorMenu) {
         const idx = menus.findIndex(m => m.id === "omission-check");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "interior-intro", name: "인테리어", categoryId: "cat-interior", protected: true });
+        interiorMenu = { id: "interior-intro", name: "인테리어", categoryId: "cat-interior", protected: true };
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, interiorMenu);
+        changed = true;
+      } else if (interiorMenu.categoryId !== "cat-interior") {
+        interiorMenu.categoryId = "cat-interior";
         changed = true;
       }
-      if (!menus.some(m => m.id === "cad-conversion")) {
+
+      let cadMenu = menus.find(m => m.id === "cad-conversion");
+      if (!cadMenu) {
         const idx = menus.findIndex(m => m.id === "interior-intro");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "9.배치도면 캐드변환", categoryId: "cat-interior", protected: true });
+        cadMenu = { id: "cad-conversion", name: "9.배치도면 캐드변환", categoryId: "cat-interior", protected: true };
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, cadMenu);
+        changed = true;
+      } else if (cadMenu.categoryId !== "cat-interior") {
+        cadMenu.categoryId = "cat-interior";
         changed = true;
       }
-      if (!menus.some(m => m.id === "vtracer-test")) {
+
+      let vtracerMenu = menus.find(m => m.id === "vtracer-test");
+      if (!vtracerMenu) {
         const idx = menus.findIndex(m => m.id === "cad-conversion");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "vtracer-test", name: "10. vtracer 캐드 변환 (테스트)", categoryId: "cat-interior", protected: true });
+        changed = true;
+      } else if (vtracerMenu.categoryId !== "cat-interior" || vtracerMenu.name !== "10. vtracer 캐드 변환 (테스트)") {
+        vtracerMenu.categoryId = "cat-interior";
+        vtracerMenu.name = "10. vtracer 캐드 변환 (테스트)";
         changed = true;
       }
       if (!menus.some(m => m.id === "homepage-seo")) {
