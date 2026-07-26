@@ -469,7 +469,7 @@
       }
       if (!menus.some(m => m.id === "cad-conversion")) {
         const idx = menus.findIndex(m => m.id === "interior-intro");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "스케치도면 캐드변환", categoryId: "cat-interior", protected: true });
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "9.배치도면 캐드변환", categoryId: "cat-interior", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "homepage-seo")) {
@@ -1243,7 +1243,7 @@
                   </p>
                   <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">
                     <strong class="text-gray-850 dark-mode:text-white block mb-0.5">• 9.배치도면 캐드변환</strong>
-                    = 현장 스케치나 평면 도면 배치 이미지를 CAD 데이터 파일로 정교화 변환해주는 AI 가이드 제공.
+                    = JPG 또는 PDF 확장자의 CAD 배치도 및 평면도 도면을 AI OCR과 벡터 선 인식으로 CAD 데이터 파일(DXF)로 변환.
                   </p>
                   <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">
                     <strong class="text-gray-850 dark-mode:text-white block mb-0.5">• 9.데일리보고서 작성</strong>
@@ -5086,22 +5086,22 @@
     function getInteriorIntroHTML() {
       return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-6">
         <h2 class="text-3xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📁 인테리어 도구 소개 및 워크플로우</h2>
-        <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">현장 작업 효율을 극대화하기 위해 제공되는 인테리어 설계 전용 보조 도구 모음입니다. 현장 실측 스케치를 정밀한 CAD 도면으로 신속하게 다듬고 변환할 수 있습니다.</p>
+        <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">현장 작업 효율을 극대화하기 위해 제공되는 인테리어 설계 전용 보조 도구 모음입니다. JPG/PDF 배치 도면을 정밀한 CAD 도면(DXF)으로 신속하게 다듬고 변환할 수 있습니다.</p>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
-            <div class="text-2xl">📸 1단계: 실측 및 촬영</div>
-            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">현장 드로잉 업로드</h4>
-            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">실측 후 종이에 작성한 수치 도면을 카메라로 반듯하게 촬영하여 드래그 앤 드롭으로 업로드합니다.</p>
+            <div class="text-2xl">📸 1단계: 도면 파일 업로드</div>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">JPG / PDF 도면 업로드</h4>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">CAD로 작성된 배치도 및 평면도 도면(JPG, PNG, PDF)을 드래그 앤 드롭으로 업로드합니다.</p>
           </div>
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
             <div class="text-2xl">🔍 2단계: 수치 및 선 검토</div>
-            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">AI OCR 문자 검출</h4>
-            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">Google Cloud Vision AI가 이미지 속의 숫자를 감지해 좌표와 오버레이를 만듭니다. 누락된 치수나 깨진 선을 캔버스에서 더블 클릭/드래그하여 수정하세요.</p>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">AI OCR & 벡터 선 추출</h4>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">Google Cloud Vision AI로 수치 치수를 인식하고 캔버스에서 벡터 선과 도면 요소를 감지하여 편집합니다.</p>
           </div>
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
             <div class="text-2xl">📥 3단계: CAD DXF 내보내기</div>
-            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">즉시 사용가능한 도면</h4>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">즉시 사용가능한 CAD 파일</h4>
             <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">내보내기 클릭 시 좌표 보정된 선 정보와 텍스트 레이어가 포함된 DXF 파일을 제공하여 AutoCAD에서 즉시 편집이 가능합니다.</p>
           </div>
         </div>
@@ -5115,15 +5115,15 @@
     function getCadConversionHTML() {
       return `<div class="max-w-6xl mx-auto space-y-6">
         <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📐 스케치도면 캐드변환 (AI OCR & DXF)</h2>
-          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">종이에 그려서 촬영한 스케치 이미지를 업로드하세요. 선을 선명하게 다듬고 비전 API로 감지된 수치 치수를 수정한 뒤 AutoCAD(DXF) 파일로 저장합니다.</p>
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📐 배치도면 캐드변환 (AI OCR & DXF)</h2>
+          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">JPG, PNG, PDF 등의 파일 형식으로 된 CAD 배치도/평면도 도면을 업로드하세요. AI OCR과 도면 선 인식 기술로 수치와 벡터 라인을 추출하여 AutoCAD(DXF) 파일로 변환합니다.</p>
           
           <!-- Upload Area -->
           <div id="cad-dropzone" class="border-2 border-dashed border-gray-300 dark-mode:border-gray-655 hover:border-orange-500 dark-mode:hover:border-orange-400 rounded-xl p-8 text-center cursor-pointer transition-colors bg-gray-50 dark-mode:bg-gray-900/50">
             <div class="text-4xl mb-2">📐</div>
-            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 스케치 도면 이미지 드래그 또는 클릭하여 업로드</p>
-            <p class="text-xs text-gray-400 mt-1 font-semibold">지원 포맷: PNG, JPG, JPEG (최대 10MB)</p>
-            <input type="file" id="cad-file-input" class="hidden" accept="image/*">
+            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 JPG, PNG, PDF 도면 파일 드래그 또는 클릭하여 업로드</p>
+            <p class="text-xs text-gray-400 mt-1 font-semibold">지원 포맷: JPG, JPEG, PNG, PDF (최대 20MB)</p>
+            <input type="file" id="cad-file-input" class="hidden" accept="image/*,.pdf,application/pdf">
           </div>
         </div>
 
@@ -5149,10 +5149,10 @@
             
             <div class="text-[10px] text-gray-400 font-semibold leading-relaxed">
               ※ **사용 방법**<br>
-              - **[🔍 AI OCR 감지]** 버튼을 누르면 현재 보정된 흑백 이미지 상태로 텍스트/치수를 다시 분석하여 검출합니다.<br>
-              - **[🤖 자동 선 감지]** 버튼을 누르면 흑백 필터 상태에 따라 이미지 속 벽면과 도면 선을 비율 왜곡 없이 자동으로 추출합니다.<br>
+              - **[🔍 AI OCR 감지]** 버튼을 누르면 도면 이미지 속 텍스트 및 수치 치수를 AI로 분석하여 감지합니다.<br>
+              - **[🤖 자동 선 감지]** 버튼을 누르면 흑백 필터 및 임계값에 따라 도면 속 외곽선과 벽면 선을 벡터 라인으로 추출합니다.<br>
               - 캔버스에서 마우스를 드래그하여 **직선 선 세그먼트**를 직접 추가하거나 지울 수 있습니다.<br>
-              - 비전 API로 검출된 텍스트 박스를 **클릭**하면 오른쪽 사이드바에서 치수 값을 수정할 수 있습니다.
+              - OCR로 검출된 텍스트 박스를 **클릭**하면 오른쪽 사이드바에서 치수 값을 수정할 수 있습니다.
             </div>
           </div>
 
@@ -5227,50 +5227,121 @@
         e.preventDefault();
         dropzone.classList.remove("border-orange-500", "bg-opacity-10");
         const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith("image/")) {
-          processImageFile(file);
+        if (file) {
+          processCadFile(file);
         }
       });
       fileInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
-        if (file) processImageFile(file);
+        if (file) processCadFile(file);
       });
+
+      function processCadFile(file) {
+        if (!file) return;
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+        const isImg = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp)$/i.test(file.name);
+
+        if (isPdf) {
+          processPdfFile(file);
+        } else if (isImg) {
+          processImageFile(file);
+        } else {
+          alert("지원하지 않는 파일 형식입니다. JPG, PNG 또는 PDF 도면 파일을 선택해주세요.");
+        }
+      }
+
+      function processPdfFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const typedarray = new Uint8Array(evt.target.result);
+          const loadPdf = () => {
+            if (window.pdfjsLib) {
+              pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+              pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                pdf.getPage(1).then(page => {
+                  const scale = 2.0;
+                  const viewport = page.getViewport({ scale: scale });
+                  const tempCanvas = document.createElement("canvas");
+                  const tempCtx = tempCanvas.getContext("2d");
+                  tempCanvas.width = viewport.width;
+                  tempCanvas.height = viewport.height;
+
+                  const renderContext = {
+                    canvasContext: tempCtx,
+                    viewport: viewport
+                  };
+                  page.render(renderContext).promise.then(() => {
+                    const dataUrl = tempCanvas.toDataURL("image/png");
+                    const img = new Image();
+                    img.onload = function() {
+                      setupCanvasWithImage(img, dataUrl.split(",")[1]);
+                    };
+                    img.src = dataUrl;
+                  });
+                });
+              }).catch(err => {
+                console.error("PDF Load Error:", err);
+                alert("PDF 도면 파일을 처리하는 도중 오류가 발생했습니다.");
+              });
+            } else {
+              alert("PDF 라이브러리를 불러오지 못했습니다. 네트워크 상태를 확인해주세요.");
+            }
+          };
+
+          if (!window.pdfjsLib) {
+            const script = document.createElement("script");
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+            script.onload = loadPdf;
+            script.onerror = () => alert("PDF 라이브러리 로드에 실패했습니다.");
+            document.head.appendChild(script);
+          } else {
+            loadPdf();
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
 
       function processImageFile(file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
           const img = new Image();
           img.onload = function() {
-            originalImage = img;
-            
-            // Set canvas size (keep Aspect Ratio, limit max width to 800)
-            const maxW = 800;
-            let w = img.width;
-            let h = img.height;
-            if (w > maxW) {
-              h = Math.round((maxW * h) / w);
-              w = maxW;
-            }
-            canvas.width = w;
-            canvas.height = h;
-
-            userLines = [];
-            ocrTexts = [];
-            workspace.classList.remove("hidden");
-            
-            // Apply initial binarization filter
-            applyBinarization();
-            
-            // Run auto line detection immediately on upload!
-            detectLines();
-            
-            // Request vision OCR
             const base64Str = evt.target.result.split(",")[1];
-            fetchOcrData(base64Str);
+            setupCanvasWithImage(img, base64Str);
           };
           img.src = evt.target.result;
         };
         reader.readAsDataURL(file);
+      }
+
+      function setupCanvasWithImage(img, base64Str) {
+        originalImage = img;
+        
+        // Set canvas size (keep Aspect Ratio, limit max width to 800)
+        const maxW = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxW) {
+          h = Math.round((maxW * h) / w);
+          w = maxW;
+        }
+        canvas.width = w;
+        canvas.height = h;
+
+        userLines = [];
+        ocrTexts = [];
+        workspace.classList.remove("hidden");
+        
+        // Apply initial binarization filter
+        applyBinarization();
+        
+        // Run auto line detection immediately on upload!
+        detectLines();
+        
+        // Request vision OCR
+        if (base64Str) {
+          fetchOcrData(base64Str);
+        }
       }
 
       // Perform binarization filter on canvas

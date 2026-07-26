@@ -3747,7 +3747,7 @@ app.listen(PORT, () => {
       }
       if (!menus.some(m => m.id === "cad-conversion")) {
         const idx = menus.findIndex(m => m.id === "interior-intro");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "스케치도면 캐드변환", categoryId: "cat-interior", protected: true });
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "9.배치도면 캐드변환", categoryId: "cat-interior", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "homepage-seo")) {
@@ -4529,7 +4529,7 @@ app.listen(PORT, () => {
                   </p>
                   <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">
                     <strong class="text-gray-850 dark-mode:text-white block mb-0.5">• 9.배치도면 캐드변환</strong>
-                    = 현장 스케치나 평면 도면 배치 이미지를 CAD 데이터 파일로 정교화 변환해주는 AI 가이드 제공.
+                    = JPG 또는 PDF 확장자의 CAD 배치도 및 평면도 도면을 AI OCR과 벡터 선 인식으로 CAD 데이터 파일(DXF)로 변환.
                   </p>
                   <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">
                     <strong class="text-gray-850 dark-mode:text-white block mb-0.5">• 9.데일리보고서 작성</strong>
@@ -8138,15 +8138,15 @@ app.listen(PORT, () => {
     function getCadConversionHTML() {
       return `<div class="max-w-6xl mx-auto space-y-6">
         <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📐 스케치도면 캐드변환 (AI OCR & DXF)</h2>
-          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">종이에 그려서 촬영한 스케치 이미지를 업로드하세요. 선을 선명하게 다듬고 비전 API로 감지된 수치 치수를 수정한 뒤 AutoCAD(DXF) 파일로 저장합니다.</p>
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📐 배치도면 캐드변환 (AI OCR & DXF)</h2>
+          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">JPG, PNG, PDF 등의 파일 형식으로 된 CAD 배치도/평면도 도면을 업로드하세요. AI OCR과 도면 선 인식 기술로 수치와 벡터 라인을 추출하여 AutoCAD(DXF) 파일로 변환합니다.</p>
           
           <!-- Upload Area -->
           <div id="cad-dropzone" class="border-2 border-dashed border-gray-300 dark-mode:border-gray-655 hover:border-orange-500 dark-mode:hover:border-orange-400 rounded-xl p-8 text-center cursor-pointer transition-colors bg-gray-50 dark-mode:bg-gray-900/50">
             <div class="text-4xl mb-2">📐</div>
-            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 스케치 도면 이미지 드래그 또는 클릭하여 업로드</p>
-            <p class="text-xs text-gray-400 mt-1 font-semibold">지원 포맷: PNG, JPG, JPEG (최대 10MB)</p>
-            <input type="file" id="cad-file-input" class="hidden" accept="image/*">
+            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 JPG, PNG, PDF 도면 파일 드래그 또는 클릭하여 업로드</p>
+            <p class="text-xs text-gray-400 mt-1 font-semibold">지원 포맷: JPG, JPEG, PNG, PDF (최대 20MB)</p>
+            <input type="file" id="cad-file-input" class="hidden" accept="image/*,.pdf,application/pdf">
           </div>
         </div>
 
