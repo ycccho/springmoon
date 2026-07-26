@@ -5501,14 +5501,13 @@
         const otsuVal = getOtsuThreshold(grayData, totalPixels);
         const lineThreshold = Math.min(otsuVal + 20, 230);
 
-        // Binary matrix: 1 = Line, 0 = Background
         const bin = new Uint8Array(totalPixels);
         for (let i = 0; i < totalPixels; i++) {
           bin[i] = grayData[i] < lineThreshold ? 1 : 0;
         }
 
         const rawLines = [];
-        const minLen = Math.max(Math.round(w * 0.015), 18); // Dynamic length threshold
+        const minLen = Math.max(Math.round(w * 0.015), 18);
 
         // 1. Straight Horizontal Line Run Scan
         for (let y = 0; y < h; y++) {
@@ -5556,7 +5555,34 @@
           }
         }
 
-        // 3. Merge parallel thick wall stroke lines (eliminates wavy jaggies!)
+        // 3. vtracer-style Contour Path Loop Tracing for Angled & Diagonal Lines
+        const visited = new Uint8Array(totalPixels);
+        for (let y = 1; y < h - 1; y += 2) {
+          for (let x = 1; x < w - 1; x += 2) {
+            const idx = y * w + x;
+            if (bin[idx] === 1 && !visited[idx]) {
+              const path = traceContourLoop(x, y, w, h, bin, visited);
+              if (path.length >= 8) {
+                const simplified = ramerDouglasPeucker(path, 2.0);
+                for (let i = 0; i < simplified.length - 1; i++) {
+                  let p1 = simplified[i];
+                  let p2 = simplified[i + 1];
+                  const dx = p2.x - p1.x;
+                  const dy = p2.y - p1.y;
+                  if (Math.hypot(dx, dy) >= 12) {
+                    const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
+                    // Only add if not purely horizontal or vertical (already captured by scans)
+                    if (angle > 12 && angle < 78 || angle > 102 && angle < 168) {
+                      rawLines.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, type: 'A' });
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // 4. Merge parallel thick wall stroke lines (eliminates wavy jaggies!)
         const thicknessTol = Math.max(Math.round(w * 0.003), 4);
         const mergedH = [];
         const hLines = rawLines.filter(l => l.type === 'H').sort((a, b) => a.y1 - b.y1 || a.x1 - b.x1);
@@ -5601,9 +5627,44 @@
         let finalLines = [];
         mergedH.forEach(l => finalLines.push({ x1: l.x1, y1: l.y, x2: l.x2, y2: l.y }));
         mergedV.forEach(l => finalLines.push({ x1: l.x, y1: l.y1, x2: l.x, y2: l.y2 }));
+        rawLines.filter(l => l.type === 'A').forEach(l => finalLines.push({ x1: l.x1, y1: l.y1, x2: l.x2, y2: l.y2 }));
 
         userLines = finalLines;
         renderCanvas();
+      }
+
+      function traceContourLoop(startX, startY, w, h, bin, visited) {
+        const path = [{ x: startX, y: startY }];
+        visited[startY * w + startX] = 1;
+        let cx = startX;
+        let cy = startY;
+        let tracing = true;
+
+        const dirs = [
+          { dx: 1, dy: 0 }, { dx: 1, dy: 1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 1 },
+          { dx: -1, dy: 0 }, { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 }
+        ];
+
+        while (tracing) {
+          let found = false;
+          for (let i = 0; i < dirs.length; i++) {
+            const nx = cx + dirs[i].dx;
+            const ny = cy + dirs[i].dy;
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              const nIdx = ny * w + nx;
+              if (bin[nIdx] === 1 && !visited[nIdx]) {
+                visited[nIdx] = 1;
+                cx = nx;
+                cy = ny;
+                path.push({ x: cx, y: cy });
+                found = true;
+                break;
+              }
+            }
+          }
+          if (!found) tracing = false;
+        }
+        return path;
       }
 
       // Auto detect button listener
