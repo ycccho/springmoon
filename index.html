@@ -477,6 +477,13 @@
         const idx = menus.findIndex(m => m.id === "interior-intro");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "배치도면 캐드변환", categoryId: "cat-interior", protected: true });
         changed = true;
+      } else {
+        const cadItem = menus.find(m => m.id === "cad-conversion" || (m.name && m.name.includes("캐드")));
+        if (cadItem) {
+          if (cadItem.id !== "cad-conversion") { cadItem.id = "cad-conversion"; changed = true; }
+          if (cadItem.name !== "배치도면 캐드변환" && cadItem.name !== "9.배치도면 캐드변환") { cadItem.name = "배치도면 캐드변환"; changed = true; }
+          if (cadItem.categoryId !== "cat-interior") { cadItem.categoryId = "cat-interior"; changed = true; }
+        }
       }
       if (!menus.some(m => m.id === "homepage-seo")) {
         const idx = menus.findIndex(m => m.id === "cad-conversion");
@@ -1100,7 +1107,7 @@
       if (id === "powercontent") return getPowerContentHTML();
       if (id === "omission-check") return getOmissionCheckHTML();
       if (id === "interior-intro") return getInteriorIntroHTML();
-      if (id === "cad-conversion") return getCadConversionHTML();
+      if (id === "cad-conversion" || (id && id.includes("cad")) || (name && name.includes("캐드"))) return getCadConversionHTML();
       if (id === "homepage-seo") return getHomepageSeoHTML();
       if (id === "backlink-check") return getBacklinkCheckHTML();
       if (id === "keyword-screenshot") return getKeywordScreenshotHTML();
@@ -5092,23 +5099,23 @@
     function getInteriorIntroHTML() {
       return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-6">
         <h2 class="text-3xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📁 인테리어 도구 소개 및 워크플로우</h2>
-        <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">현장 작업 효율을 극대화하기 위해 제공되는 인테리어 설계 전용 보조 도구 모음입니다. 건물 층별 평면도/배치도 PDF 도면을 AutoCAD에서 즉시 편집 가능한 DXF 도면으로 신속하게 변환합니다.</p>
+        <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">현장 작업 효율을 극대화하기 위해 제공되는 인테리어 설계 전용 보조 도구 모음입니다. PDF(.pdf) 또는 이미지(.jpg, .png) 도면을 AutoCAD에서 즉시 편집 가능한 DXF 도면으로 신속하게 변환합니다.</p>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
-            <div class="text-2xl">📑 1단계: PDF 도면 업로드</div>
-            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">건물 배치도 PDF 업로드</h4>
-            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">건물 층별 평면도/배치도 PDF 파일(예: 건물 3층 도면) 또는 도면 이미지를 드래그 앤 드롭으로 업로드합니다.</p>
+            <div class="text-2xl">📑 1단계: PDF/이미지 업로드</div>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">도면 파일 업로드</h4>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">변환할 PDF 도면 파일(.pdf) 또는 이미지 도면(.jpg, .png)을 드래그 앤 드롭으로 업로드합니다.</p>
           </div>
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
             <div class="text-2xl">🔍 2단계: 선 & 치수 분석</div>
             <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">벡터 선 & 수치 추출</h4>
-            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">PDF 속 CAD 벡터 선 좌표와 수치 치수를 자동 추출합니다. 캔버스에서 필요한 벽체 선 추가/삭제 편집을 할 수 있습니다.</p>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">도면 속 CAD 선 좌표와 수치 치수를 자동 추출합니다. 캔버스에서 필요한 선 추가/삭제 편집을 할 수 있습니다.</p>
           </div>
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
             <div class="text-2xl">📥 3단계: CAD DXF 내보내기</div>
             <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">AutoCAD에서 즉시 편집</h4>
-            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">트레이싱(따라 그리기)할 필요 없이 AutoCAD, ZWCAD에서 즉시 도면 선과 치수로 바로 편집할 수 있는 DXF 파일로 다운로드합니다.</p>
+            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">따라 그릴 필요 없이 AutoCAD, ZWCAD에서 즉시 도면 선과 치수로 바로 편집할 수 있는 DXF 파일로 다운로드합니다.</p>
           </div>
         </div>
       </div>`;
@@ -5124,14 +5131,14 @@
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
             <div>
               <h2 class="text-2xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📐 배치도면 캐드변환 (PDF / 이미지 → DXF CAD)</h2>
-              <p class="text-sm text-gray-550 dark-mode:text-gray-400 mt-1 font-medium">건물 층별 평면도 및 배치도 PDF 도면을 AutoCAD에서 즉시 편집 가능한 DXF 도면 파일로 변환합니다. 일일이 따라 그릴(트레이싱) 필요 없이 선 레이어와 치수를 그대로 추출하여 CAD에서 바로 편집하세요.</p>
+              <p class="text-sm text-gray-550 dark-mode:text-gray-400 mt-1 font-medium">PDF(.pdf) 도면이나 이미지(.jpg, .png) 도면을 업로드하면 AutoCAD에서 즉시 편집 가능한 DXF 캐드 파일로 변환합니다. 도면을 캐드에서 일일이 따라 그릴(트레이싱) 필요 없이 선 레이어와 수치 치수를 추출하여 CAD에서 바로 편집하세요.</p>
             </div>
           </div>
           
           <!-- Upload Area -->
           <div id="cad-dropzone" class="border-2 border-dashed border-gray-300 dark-mode:border-gray-655 hover:border-orange-500 dark-mode:hover:border-orange-400 rounded-xl p-8 text-center cursor-pointer transition-colors bg-gray-50 dark-mode:bg-gray-900/50">
             <div class="text-4xl mb-2">📑</div>
-            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 건물 배치도 PDF 도면 (예: 건물 3층 도면 PDF) 또는 이미지 업로드</p>
+            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 PDF 도면 파일(.pdf) 또는 이미지 도면(.jpg, .png) 드래그 또는 클릭하여 업로드</p>
             <p class="text-xs text-gray-400 mt-1 font-semibold">지원 포맷: PDF (.pdf), PNG, JPG, JPEG (최대 50MB)</p>
             <input type="file" id="cad-file-input" class="hidden" accept=".pdf,image/*">
           </div>
@@ -5161,10 +5168,10 @@
             </div>
             
             <div class="text-[11px] text-gray-500 dark-mode:text-gray-400 font-semibold leading-relaxed bg-gray-50 dark-mode:bg-gray-900/40 p-3 rounded-lg border border-gray-200 dark-mode:border-gray-800">
-              💡 **PDF 배치도면 사용 팁**<br>
-              - **[📄 PDF 층별 선택]**: 다중 페이지 PDF 도면의 경우 상단 드롭다운에서 원하는 층(예: 3층 배치도)을 선택하세요.<br>
-              - **[🔍 벡터 & 수치 자동추출]**: CAD로 작성된 PDF의 경우 선 좌표와 수치 치수가 원본 비율 그대로 추출됩니다.<br>
-              - **[✏️ 캔버스 편집]**: 마우스 드래그로 벽체 선 세그먼트를 추가/삭제하거나 수치 텍스트를 클릭하여 수정할 수 있습니다.<br>
+              💡 **도면 캐드변환 사용 방법**<br>
+              - **[📄 PDF 페이지 선택]**: 다중 페이지 PDF인 경우 상단 드롭다운에서 변환할 페이지를 선택하세요.<br>
+              - **[🔍 벡터 & 수치 자동추출]**: PDF/이미지 도면의 선 좌표와 수치 치수가 원본 비율 그대로 추출됩니다.<br>
+              - **[✏️ 캔버스 편집]**: 마우스 드래그로 선 세그먼트를 추가/삭제하거나 수치 텍스트를 클릭하여 수정할 수 있습니다.<br>
               - **[📥 AutoCAD 다운로드]**: 변환 완료 후 하단 버튼을 클릭하면 `.DXF` 도면 파일로 다운로드되어 AutoCAD에서 바로 편집 가능합니다.
             </div>
           </div>
@@ -5273,7 +5280,7 @@
             for (let i = 1; i <= pdfDoc.numPages; i++) {
               const opt = document.createElement("option");
               opt.value = i;
-              opt.textContent = `📄 ${i}페이지 (${i}층 도면)`;
+              opt.textContent = `📄 ${i}페이지`;
               pageSelect.appendChild(opt);
             }
             pageSelect.classList.remove("hidden");
