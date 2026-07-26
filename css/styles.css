@@ -11041,3 +11041,130 @@ span.wpcf7-not-valid-tip {
   font-weight: 400;
   line-height: 1.7;
 }
+
+
+/* Unscoped Portfolio Detail Specs & Points Styling for perfect rendering */
+.portfolio_detail_specs_row {
+  display: flex !important;
+  column-gap: 4rem !important;
+  align-items: center !important;
+  max-width: 100% !important;
+  margin-top: 2rem !important;
+  margin-bottom: 3rem !important;
+}
+
+@media screen and (max-width: 960px) {
+  .portfolio_detail_specs_row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    row-gap: 3.2rem !important;
+    column-gap: 0 !important;
+  }
+}
+
+.portfolio_detail_specs {
+  display: grid !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  column-gap: 2rem !important;
+  row-gap: 2.6rem !important;
+  margin: 0 !important;
+}
+
+@media screen and (max-width: 960px) {
+  .portfolio_detail_specs {
+    flex: none !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    column-gap: 1.6rem !important;
+    row-gap: 1.8rem !important;
+  }
+}
+
+.portfolio_detail_spec {
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+.portfolio_detail_spec dt {
+  margin: 0 0 0.45rem !important;
+  color: #888888 !important;
+  font-weight: 400 !important;
+  font-size: 1.4rem !important;
+  line-height: 1.35 !important;
+}
+
+@media screen and (max-width: 960px) {
+  .portfolio_detail_spec dt {
+    font-size: 1.2rem !important;
+  }
+}
+
+.portfolio_detail_spec dd {
+  margin: 0 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  font-size: 1.8rem !important;
+  line-height: 1.38 !important;
+}
+
+@media screen and (max-width: 960px) {
+  .portfolio_detail_spec dd {
+    font-size: 1.6rem !important;
+  }
+}
+
+.portfolio_detail_points {
+  background-color: #f05e21 !important;
+  color: #ffffff !important;
+  border-radius: 1.2rem !important;
+  padding: 2rem 3rem !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 46rem !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+@media screen and (max-width: 960px) {
+  .portfolio_detail_points {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 2.4rem 2rem !important;
+    border-radius: 1rem !important;
+  }
+}
+
+.portfolio_detail_points_title {
+  margin: 0 0 1.5rem !important;
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.02em !important;
+  color: #ffffff !important;
+}
+
+.portfolio_detail_points_title::before,
+.portfolio_detail_points_title::after {
+  content: "" !important;
+}
+
+.portfolio_detail_points_list {
+  margin: 0 !important;
+  padding-left: 2rem !important;
+  list-style-type: decimal !important;
+  font-size: 1.6rem !important;
+  font-weight: 400 !important;
+  line-height: 1.74 !important;
+  color: #ffffff !important;
+}
+
+.portfolio_detail_points_list li {
+  white-space: pre-line !important;
+  list-style-type: decimal !important;
+}
+
+.portfolio_detail_points_list li + li {
+  margin-top: 1rem !important;
+}
