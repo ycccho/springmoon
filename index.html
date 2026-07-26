@@ -5357,42 +5357,27 @@
         ocrTexts = [];
         workspace.classList.remove("hidden");
         
-        // Apply initial binarization filter (display clean drawing without auto scribbles)
-        applyBinarization();
+        // Render crisp original image on canvas (no destructive line thresholding!)
+        renderCanvas();
         
-        // Request vision OCR
+        // Auto-run OCR and CAD line extraction on upload!
         if (base64Str) {
-          fetchOcrData(base64Str);
+          fetchOcrData(base64Str).then(() => {
+            detectLines();
+          });
+        } else {
+          detectLines();
         }
       }
 
-      // Perform binarization filter on canvas
-      function applyBinarization() {
+      // Render crisp original drawing and CAD overlays on canvas
+      function renderCanvas() {
         if (!originalImage) return;
         
-        // Draw original scaled image
+        // Draw original scaled image in 100% full original fidelity
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         
-        // Extract pixel data
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imgData.data;
-        const threshold = parseInt(thresholdSlider.value, 10);
-        
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i];
-          const g = data[i+1];
-          const b = data[i+2];
-          // Grayscale luminance
-          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-          // Apply threshold
-          const val = gray >= threshold ? 255 : 0;
-          data[i] = val;
-          data[i+1] = val;
-          data[i+2] = val;
-        }
-        ctx.putImageData(imgData, 0, 0);
-
-        // Draw overlays (user custom lines & OCR textboxes)
+        // Draw overlays (detected CAD lines & OCR number boxes)
         drawOverlays();
       }
 
@@ -5441,105 +5426,6 @@
         thresholdVal.textContent = e.target.value;
         applyBinarization();
       });
-
-      // Helper for perpendicular distance from point to line (for RDP algorithm)
-      function getPerpendicularDistance(pt, lineStart, lineEnd) {
-        const dx = lineEnd.x - lineStart.x;
-        const dy = lineEnd.y - lineStart.y;
-        if (dx === 0 && dy === 0) {
-          return Math.hypot(pt.x - lineStart.x, pt.y - lineStart.y);
-        }
-        const num = Math.abs(dy * pt.x - dx * pt.y + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x);
-        const den = Math.hypot(dx, dy);
-        return num / den;
-      }
-
-      // Ramer-Douglas-Peucker path simplification
-      function ramerDouglasPeucker(points, epsilon) {
-        if (points.length <= 2) return points;
-        let maxDistance = 0;
-        let index = 0;
-        const end = points.length - 1;
-        for (let i = 1; i < end; i++) {
-          const dist = getPerpendicularDistance(points[i], points[0], points[end]);
-          if (dist > maxDistance) {
-            maxDistance = dist;
-            index = i;
-          }
-        }
-        if (maxDistance > epsilon) {
-          const results1 = ramerDouglasPeucker(points.slice(0, index + 1), epsilon);
-          const results2 = ramerDouglasPeucker(points.slice(index), epsilon);
-          return results1.slice(0, results1.length - 1).concat(results2);
-        } else {
-          return [points[0], points[end]];
-        }
-      }
-
-      // 8-connected neighbor line path tracer
-      function tracePath(startX, startY, w, h, data, visited, threshold) {
-        const path = [{ x: startX, y: startY }];
-        visited[startY * w + startX] = 1;
-        let cx = startX;
-        let cy = startY;
-        let tracing = true;
-
-        function isBlackAndUnvisited(x, y) {
-          if (x < 0 || x >= w || y < 0 || y >= h) return false;
-          if (visited[y * w + x]) return false;
-          const idx = (y * w + x) * 4;
-          const gray = 0.299 * data[idx] + 0.587 * data[idx+1] + 0.114 * data[idx+2];
-          return gray < threshold;
-        }
-
-        while (tracing) {
-          let foundNext = false;
-          const dirs = [
-            { dx: 1, dy: 0 }, { dx: 1, dy: 1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 1 },
-            { dx: -1, dy: 0 }, { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 }
-          ];
-          for (let i = 0; i < dirs.length; i++) {
-            const nx = cx + dirs[i].dx;
-            const ny = cy + dirs[i].dy;
-            if (isBlackAndUnvisited(nx, ny)) {
-              cx = nx;
-              cy = ny;
-              path.push({ x: cx, y: cy });
-              visited[cy * w + cx] = 1;
-              foundNext = true;
-              break;
-            }
-          }
-          // Jump small 2px gaps (noise/sketch gaps)
-          if (!foundNext) {
-            const outerDirs = [
-              { dx: 2, dy: 0 }, { dx: 2, dy: 1 }, { dx: 2, dy: 2 }, { dx: 1, dy: 2 },
-              { dx: 0, dy: 2 }, { dx: -1, dy: 2 }, { dx: -2, dy: 2 }, { dx: -2, dy: 1 },
-              { dx: -2, dy: 0 }, { dx: -2, dy: -1 }, { dx: -2, dy: -2 }, { dx: -1, dy: -2 },
-              { dx: 0, dy: -2 }, { dx: 1, dy: -2 }, { dx: 2, dy: -2 }, { dx: 2, dy: -1 }
-            ];
-            for (let i = 0; i < outerDirs.length; i++) {
-              const nx = cx + outerDirs[i].dx;
-              const ny = cy + outerDirs[i].dy;
-              if (isBlackAndUnvisited(nx, ny)) {
-                const mx = Math.round((cx + nx) / 2);
-                const my = Math.round((cy + ny) / 2);
-                visited[my * w + mx] = 1;
-                cx = nx;
-                cy = ny;
-                path.push({ x: cx, y: cy });
-                visited[cy * w + cx] = 1;
-                foundNext = true;
-                break;
-              }
-            }
-          }
-          if (!foundNext) {
-            tracing = false;
-          }
-        }
-        return path;
-      }
 
       // High-Precision Projection-Scan CAD Line Extraction Algorithm
       function detectLines() {
@@ -5680,7 +5566,7 @@
         }
 
         userLines = finalLines;
-        applyBinarization();
+        renderCanvas();
       }
 
       // Sidebar Controls
@@ -5701,7 +5587,7 @@
       if (clearLinesBtn) {
         clearLinesBtn.addEventListener("click", () => {
           userLines = [];
-          applyBinarization();
+          renderCanvas();
         });
       }
 
@@ -5828,7 +5714,7 @@
 
           ocrTexts = wordsList;
           renderTextList();
-          applyBinarization();
+          renderCanvas();
 
         } catch (e) {
           textListContainer.innerHTML = `<div class="text-center text-red-500 py-12 font-semibold">OCR 수집 실패: ${e.message}</div>`;
@@ -5852,7 +5738,7 @@
           `;
           row.querySelector("input").addEventListener("input", (e) => {
             ocrTexts[idx].text = e.target.value.trim();
-            applyBinarization();
+            renderCanvas();
           });
           textListContainer.appendChild(row);
         });
