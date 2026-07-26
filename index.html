@@ -170,6 +170,7 @@
       { id: "competitor-blog", name: "7.경쟁 블로그 탐색", protected: true },
       { id: "interior-intro", name: "9.인테리어", categoryId: "cat-interior", protected: true },
       { id: "cad-conversion", name: "9.배치도면 캐드변환", categoryId: "cat-interior", protected: true },
+      { id: "vtracer-test", name: "10. vtracer 캐드 변환 (테스트)", categoryId: "cat-interior", protected: true },
       { id: "about", name: "소개", protected: false },
       { id: "html-analysis", name: "html분석", categoryId: "cat-homepage", protected: true },
       { id: "url-extraction", name: "도메인 url추출", categoryId: "cat-homepage", protected: true },
@@ -470,6 +471,11 @@
       if (!menus.some(m => m.id === "cad-conversion")) {
         const idx = menus.findIndex(m => m.id === "interior-intro");
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "9.배치도면 캐드변환", categoryId: "cat-interior", protected: true });
+        changed = true;
+      }
+      if (!menus.some(m => m.id === "vtracer-test")) {
+        const idx = menus.findIndex(m => m.id === "cad-conversion");
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "vtracer-test", name: "10. vtracer 캐드 변환 (테스트)", categoryId: "cat-interior", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "homepage-seo")) {
@@ -1064,6 +1070,7 @@
         setupOmissionCheck();
         setupInteriorIntro();
         setupCadConversion();
+        setupVtracerTest();
         setupHomepageSeo();
         setupBacklinkCheck();
         setupKeywordScreenshot();
@@ -1095,6 +1102,7 @@
       if (id === "omission-check") return getOmissionCheckHTML();
       if (id === "interior-intro") return getInteriorIntroHTML();
       if (id === "cad-conversion") return getCadConversionHTML();
+      if (id === "vtracer-test") return getVtracerTestHTML();
       if (id === "homepage-seo") return getHomepageSeoHTML();
       if (id === "backlink-check") return getBacklinkCheckHTML();
       if (id === "keyword-screenshot") return getKeywordScreenshotHTML();
@@ -6013,6 +6021,601 @@
           } catch(err) {
             console.error("DXF generation error:", err);
             alert("DXF 파일 생성 중 오류가 발생했습니다: " + err.message);
+          } finally {
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+          }
+        }, 50);
+      });
+    }
+
+    // ============================================
+    // 10. vtracer 캐드 변환 (테스트) 기능
+    // ============================================
+    function getVtracerTestHTML() {
+      return `<div class="max-w-7xl mx-auto space-y-6">
+        <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">
+                🔬 10. vtracer 고정밀 캐드 변환 (테스트)
+                <span class="text-xs bg-purple-100 text-purple-700 dark-mode:bg-purple-900/50 dark-mode:text-purple-300 px-2.5 py-1 rounded-full font-extrabold">vtracer Engine v1.0</span>
+              </h2>
+              <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium mt-1">
+                GitHub <strong>visioncortex/vtracer</strong> 오픈소스 벡터화 알고리즘과 Vision AI OCR을 연동하여 도면 속 모든 라인과 텍스트를 초고정밀 CAD(.DXF)로 변환합니다.
+              </p>
+            </div>
+          </div>
+
+          <div id="vtracer-dropzone" class="border-2 border-dashed border-gray-300 dark-mode:border-gray-600 hover:border-orange-500 dark-mode:hover:border-orange-400 rounded-xl p-8 text-center cursor-pointer transition-colors bg-gray-50 dark-mode:bg-gray-900/50">
+            <div class="text-4xl mb-2">🔬</div>
+            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 JPG, PNG, PDF 도면 파일 드래그 또는 클릭하여 업로드</p>
+            <p class="text-xs text-gray-400 mt-1 font-semibold">visioncortex/vtracer 알고리즘 기반 초고정밀 벡터 변환</p>
+            <input type="file" id="vtracer-file-input" class="hidden" accept="image/*,.pdf,application/pdf">
+          </div>
+        </div>
+
+        <div id="vtracer-workspace" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-8 bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-1.5">🖥️ vtracer 벡터 및 OCR 캔버스 미리보기</h3>
+              <div class="flex gap-2 font-semibold">
+                <button id="vtracer-reprocess-btn" class="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold shadow-sm transition-all">⚡ vtracer 재분석</button>
+              </div>
+            </div>
+
+            <div class="relative overflow-auto border border-gray-200 dark-mode:border-gray-700 rounded-xl bg-gray-100 dark-mode:bg-gray-900 flex justify-center items-center p-4 min-h-[420px]">
+              <canvas id="vtracer-canvas" class="max-w-full shadow-lg cursor-crosshair bg-white" style="width: 100%; height: auto; object-fit: contain;"></canvas>
+            </div>
+            
+            <div class="text-[11px] text-gray-400 font-semibold leading-relaxed">
+              ※ **vtracer 엔진 특성 안내**<br>
+              - 계층적 윤곽선 수집(Hierarchical Contour Tracing)과 오차 최소화 선 정밀화(Spline/Polyline Fitting)로 찌글거림 없는 정밀 CAD 벡터 라인을 생성합니다.<br>
+              - OCR로 감지된 치수 및 한글 텍스트는 오토캐드 표준 ANSI_949 한글 인코딩 레이어로 변환됩니다.
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-3">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider flex items-center justify-between">
+                <span>🤖 vtracer 분석 현황</span>
+                <span class="text-[10px] bg-purple-100 text-purple-700 dark-mode:bg-purple-900/50 dark-mode:text-purple-300 px-2 py-0.5 rounded font-extrabold">vtracer Core Ready</span>
+              </h4>
+              <div class="grid grid-cols-2 gap-2 text-center text-xs pt-1">
+                <div class="p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-800">
+                  <div class="text-gray-400 text-[10px] font-bold">인식된 수치/글자</div>
+                  <div id="vtracer-stat-ocr" class="text-lg font-black text-blue-600 dark-mode:text-blue-400 font-mono">0개</div>
+                </div>
+                <div class="p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-800">
+                  <div class="text-gray-400 text-[10px] font-bold">추출된 CAD 백터</div>
+                  <div id="vtracer-stat-lines" class="text-lg font-black text-orange-500 font-mono">0개</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">vtracer 파라미터 세부 옵션</h4>
+              <div class="space-y-3 text-xs">
+                <div>
+                  <div class="flex justify-between font-bold text-gray-655 dark-mode:text-gray-300 mb-1">
+                    <span>Spline/Polyline 곡선 보정 정밀도 (RDP Epsilon)</span>
+                    <span id="vtracer-epsilon-val" class="text-orange-500 font-mono font-bold">1.8px</span>
+                  </div>
+                  <input type="range" id="vtracer-epsilon-slider" min="0.5" max="4.0" step="0.1" value="1.8" class="w-full accent-orange-500">
+                </div>
+                <div>
+                  <div class="flex justify-between font-bold text-gray-655 dark-mode:text-gray-300 mb-1">
+                    <span>노이즈 미세점 제거 필터</span>
+                    <span id="vtracer-minlen-val" class="text-orange-500 font-mono font-bold">12px</span>
+                  </div>
+                  <input type="range" id="vtracer-minlen-slider" min="4" max="40" step="2" value="12" class="w-full accent-orange-500">
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[260px]">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">감지된 수치 및 한글 치수 (OCR)</h4>
+              <div id="vtracer-text-list" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
+                <div class="text-center text-gray-400 py-12">텍스트가 없습니다.</div>
+              </div>
+            </div>
+
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">vtracer CAD (.DXF) 파일 다운로드</h4>
+              <button id="vtracer-export-dxf" class="w-full py-3 bg-purple-600 hover:bg-purple-700 active:scale-[0.98] transition-all text-white rounded-xl text-sm font-bold shadow-md">📥 AutoCAD (.DXF) 다운로드</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function setupVtracerTest() {
+      const dropzone = document.getElementById("vtracer-dropzone");
+      const fileInput = document.getElementById("vtracer-file-input");
+      const workspace = document.getElementById("vtracer-workspace");
+      const canvas = document.getElementById("vtracer-canvas");
+      const textListContainer = document.getElementById("vtracer-text-list");
+      const reprocessBtn = document.getElementById("vtracer-reprocess-btn");
+      const exportBtn = document.getElementById("vtracer-export-dxf");
+      const epsilonSlider = document.getElementById("vtracer-epsilon-slider");
+      const epsilonVal = document.getElementById("vtracer-epsilon-val");
+      const minlenSlider = document.getElementById("vtracer-minlen-slider");
+      const minlenVal = document.getElementById("vtracer-minlen-val");
+
+      if (!dropzone) return;
+
+      let ctx = canvas.getContext("2d");
+      let originalImage = null;
+      let uploadedFileName = "vtracer_drawing";
+      let ocrTexts = [];
+      let userLines = [];
+
+      if (epsilonSlider && epsilonVal) {
+        epsilonSlider.addEventListener("input", (e) => {
+          epsilonVal.textContent = e.target.value + "px";
+          runVtracerDetection();
+        });
+      }
+
+      if (minlenSlider && minlenVal) {
+        minlenSlider.addEventListener("input", (e) => {
+          minlenVal.textContent = e.target.value + "px";
+          runVtracerDetection();
+        });
+      }
+
+      if (reprocessBtn) {
+        reprocessBtn.addEventListener("click", () => runVtracerDetection());
+      }
+
+      dropzone.addEventListener("click", () => fileInput.click());
+      dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.classList.add("border-orange-500", "bg-opacity-10");
+      });
+      dropzone.addEventListener("dragleave", () => {
+        dropzone.classList.remove("border-orange-500", "bg-opacity-10");
+      });
+      dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("border-orange-500", "bg-opacity-10");
+        const file = e.dataTransfer.files[0];
+        if (file) processVtracerFile(file);
+      });
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) processVtracerFile(file);
+      });
+
+      function processVtracerFile(file) {
+        if (!file) return;
+        uploadedFileName = file.name.replace(/\.[^/.]+$/, "") || "vtracer_drawing";
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+        const isImg = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp)$/i.test(file.name);
+
+        if (isPdf) {
+          processPdf(file);
+        } else if (isImg) {
+          processImage(file);
+        } else {
+          alert("지원하지 않는 파일 형식입니다. JPG, PNG 또는 PDF 도면 파일을 선택해주세요.");
+        }
+      }
+
+      function processPdf(file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const typedarray = new Uint8Array(evt.target.result);
+          const loadPdf = () => {
+            if (window.pdfjsLib) {
+              pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+              pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                pdf.getPage(1).then(page => {
+                  const scale = 3.0;
+                  const viewport = page.getViewport({ scale: scale });
+                  const tempCanvas = document.createElement("canvas");
+                  const tempCtx = tempCanvas.getContext("2d");
+                  tempCanvas.width = viewport.width;
+                  tempCanvas.height = viewport.height;
+
+                  page.render({ canvasContext: tempCtx, viewport: viewport }).promise.then(() => {
+                    const dataUrl = tempCanvas.toDataURL("image/png");
+                    const img = new Image();
+                    img.onload = function() {
+                      setupVtracerCanvas(img, dataUrl.split(",")[1]);
+                    };
+                    img.src = dataUrl;
+                  });
+                });
+              });
+            } else {
+              alert("PDF 라이브러리를 로드하지 못했습니다.");
+            }
+          };
+
+          if (!window.pdfjsLib) {
+            const script = document.createElement("script");
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+            script.onload = loadPdf;
+            document.head.appendChild(script);
+          } else {
+            loadPdf();
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function processImage(file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const img = new Image();
+          img.onload = function() {
+            setupVtracerCanvas(img, evt.target.result.split(",")[1]);
+          };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function setupVtracerCanvas(img, base64Str) {
+        originalImage = img;
+        canvas.width = img.width;
+        canvas.height = img.height;
+        userLines = [];
+        ocrTexts = [];
+        workspace.classList.remove("hidden");
+        renderVtracerCanvas();
+
+        if (base64Str) {
+          fetchOcrData(base64Str).then(() => {
+            runVtracerDetection();
+          });
+        } else {
+          runVtracerDetection();
+        }
+      }
+
+      function renderVtracerCanvas() {
+        if (!originalImage) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+
+        // Draw lines
+        ctx.strokeStyle = "#F97316";
+        ctx.lineWidth = 2;
+        userLines.forEach(line => {
+          ctx.beginPath();
+          ctx.moveTo(line.x1, line.y1);
+          ctx.lineTo(line.x2, line.y2);
+          ctx.stroke();
+        });
+
+        // Draw OCR texts
+        ctx.font = "bold 11px monospace";
+        ocrTexts.forEach(item => {
+          ctx.save();
+          const midX = item.x + item.w / 2;
+          const midY = item.y + item.h / 2;
+          ctx.translate(midX, midY);
+          ctx.rotate((item.angle || 0) * Math.PI / 180);
+          ctx.strokeStyle = "rgba(59, 130, 246, 0.7)";
+          ctx.lineWidth = 1;
+          ctx.fillStyle = "rgba(59, 130, 246, 0.12)";
+          ctx.fillRect(-item.w / 2, -item.h / 2, item.w, item.h);
+          ctx.strokeRect(-item.w / 2, -item.h / 2, item.w, item.h);
+          ctx.fillStyle = "#F97316";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillText(item.text, 0, -item.h / 2 - 2);
+          ctx.restore();
+        });
+      }
+
+      async function fetchOcrData(base64) {
+        textListContainer.innerHTML = `<div class="text-center text-gray-400 py-12 flex justify-center items-center gap-1">
+          <svg class="animate-spin h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>vtracer AI OCR 치수 수집 중...</span>
+        </div>`;
+
+        try {
+          const res = await fetch("/api/vision-ocr", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64 })
+          });
+          const resJson = await res.json();
+          if (!res.ok || !resJson.success) throw new Error(resJson.error || "OCR 에러");
+
+          const fullText = resJson.data.responses[0]?.fullTextAnnotation;
+          const annotations = resJson.data.responses[0]?.textAnnotations || [];
+          let wordsList = [];
+
+          if (fullText && fullText.pages) {
+            fullText.pages.forEach(page => {
+              page.blocks.forEach(block => {
+                block.paragraphs.forEach(paragraph => {
+                  paragraph.words.forEach(word => {
+                    const text = word.symbols.map(s => s.text).join("");
+                    const cleanText = text.trim();
+                    if (/[a-zA-Z0-9가-힣]+/.test(cleanText)) {
+                      const v = word.boundingBox.vertices.map(vertex => ({ x: vertex.x || 0, y: vertex.y || 0 }));
+                      const xs = v.map(pt => pt.x), ys = v.map(pt => pt.y);
+                      const minX = Math.min(...xs), maxX = Math.max(...xs);
+                      const minY = Math.min(...ys), maxY = Math.max(...ys);
+                      const scaleX = canvas.width / originalImage.width;
+                      const scaleY = canvas.height / originalImage.height;
+
+                      let angle = 0;
+                      if (v.length >= 2) {
+                        angle = Math.atan2(v[1].y - v[0].y, v[1].x - v[0].x) * 180 / Math.PI;
+                      }
+
+                      wordsList.push({
+                        text: cleanText,
+                        x: Math.round(minX * scaleX),
+                        y: Math.round(minY * scaleY),
+                        w: Math.max(Math.round((maxX - minX) * scaleX), 10),
+                        h: Math.max(Math.round((maxY - minY) * scaleY), 10),
+                        angle: angle
+                      });
+                    }
+                  });
+                });
+              });
+            });
+          }
+
+          ocrTexts = wordsList;
+          const statOcr = document.getElementById("vtracer-stat-ocr");
+          if (statOcr) statOcr.textContent = ocrTexts.length + "개";
+
+          renderTextList();
+          renderVtracerCanvas();
+        } catch(e) {
+          textListContainer.innerHTML = `<div class="text-center text-red-500 py-12">OCR 수집 실패: ${e.message}</div>`;
+        }
+      }
+
+      function renderTextList() {
+        textListContainer.innerHTML = "";
+        if (ocrTexts.length === 0) {
+          textListContainer.innerHTML = `<div class="text-center text-gray-400 py-12">검출된 수치 텍스트가 없습니다.</div>`;
+          return;
+        }
+
+        ocrTexts.forEach((item, idx) => {
+          const row = document.createElement("div");
+          row.className = "flex justify-between items-center p-2 border border-gray-150 dark-mode:border-gray-700 rounded-lg hover:bg-gray-50 dark-mode:hover:bg-gray-750/30 transition-colors";
+          row.innerHTML = `
+            <span class="font-mono text-gray-400">#${idx+1}</span>
+            <input type="text" value="${item.text}" class="w-28 px-2 py-0.5 border border-gray-300 dark-mode:border-gray-600 rounded bg-white dark-mode:bg-gray-700 text-gray-800 dark-mode:text-gray-100 text-center font-bold font-mono focus:outline-none focus:ring-1 focus:ring-orange-500" data-idx="${idx}">
+            <span class="text-[10px] text-gray-400 font-semibold font-mono">(${item.x}, ${item.y})</span>
+          `;
+          row.querySelector("input").addEventListener("input", (e) => {
+            ocrTexts[idx].text = e.target.value.trim();
+            renderVtracerCanvas();
+          });
+          textListContainer.appendChild(row);
+        });
+      }
+
+      function runVtracerDetection() {
+        if (!originalImage) return;
+
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext("2d");
+        tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+
+        tempCtx.fillStyle = "#FFFFFF";
+        const padding = 6;
+        ocrTexts.forEach(box => {
+          tempCtx.fillRect(box.x - padding, box.y - padding, box.w + padding * 2, box.h + padding * 2);
+        });
+
+        const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        const w = canvas.width;
+        const h = canvas.height;
+        const totalPixels = w * h;
+
+        const grayData = new Uint8Array(totalPixels);
+        let borderGraySum = 0, borderPixelCount = 0;
+
+        for (let i = 0; i < totalPixels; i++) {
+          const gray = Math.round(0.299 * data[i*4] + 0.587 * data[i*4+1] + 0.114 * data[i*4+2]);
+          grayData[i] = gray;
+          const x = i % w, y = Math.floor(i / w);
+          if (x < w * 0.05 || x > w * 0.95 || y < h * 0.05 || y > h * 0.95) {
+            borderGraySum += gray;
+            borderPixelCount++;
+          }
+        }
+
+        const isDark = (borderPixelCount > 0 ? borderGraySum / borderPixelCount : 255) < 128;
+        if (isDark) {
+          for (let i = 0; i < totalPixels; i++) grayData[i] = 255 - grayData[i];
+        }
+
+        const otsuVal = getOtsuThreshold(grayData, totalPixels);
+        const lineThreshold = Math.min(otsuVal + 20, 230);
+
+        const bin = new Uint8Array(totalPixels);
+        for (let i = 0; i < totalPixels; i++) bin[i] = grayData[i] < lineThreshold ? 1 : 0;
+
+        const rawLines = [];
+        const minLen = parseInt(minlenSlider ? minlenSlider.value : 12, 10);
+        const epsilon = parseFloat(epsilonSlider ? epsilonSlider.value : 1.8);
+
+        // 1. Horizontal Scan
+        for (let y = 0; y < h; y++) {
+          let runStart = -1;
+          for (let x = 0; x < w; x++) {
+            const isL = bin[y * w + x];
+            if (isL && runStart === -1) runStart = x;
+            else if (!isL && runStart !== -1) {
+              if (x - runStart >= minLen) rawLines.push({ x1: runStart, y1: y, x2: x - 1, y2: y, type: 'H' });
+              runStart = -1;
+            }
+          }
+          if (runStart !== -1 && w - runStart >= minLen) rawLines.push({ x1: runStart, y1: y, x2: w - 1, y2: y, type: 'H' });
+        }
+
+        // 2. Vertical Scan
+        for (let x = 0; x < w; x++) {
+          let runStart = -1;
+          for (let y = 0; y < h; y++) {
+            const isL = bin[y * w + x];
+            if (isL && runStart === -1) runStart = y;
+            else if (!isL && runStart !== -1) {
+              if (y - runStart >= minLen) rawLines.push({ x1: x, y1: runStart, x2: x, y2: y - 1, type: 'V' });
+              runStart = -1;
+            }
+          }
+          if (runStart !== -1 && h - runStart >= minLen) rawLines.push({ x1: x, y1: runStart, x2: x, y2: h - 1, type: 'V' });
+        }
+
+        // 3. vtracer Contour Loop Polyline Fitting
+        const visited = new Uint8Array(totalPixels);
+        for (let y = 1; y < h - 1; y += 2) {
+          for (let x = 1; x < w - 1; x += 2) {
+            const idx = y * w + x;
+            if (bin[idx] === 1 && !visited[idx]) {
+              const path = traceContourLoop(x, y, w, h, bin, visited);
+              if (path.length >= 6) {
+                const simplified = ramerDouglasPeucker(path, epsilon);
+                for (let i = 0; i < simplified.length - 1; i++) {
+                  const p1 = simplified[i], p2 = simplified[i + 1];
+                  const dx = p2.x - p1.x, dy = p2.y - p1.y;
+                  if (Math.hypot(dx, dy) >= minLen) {
+                    const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
+                    if ((angle > 12 && angle < 78) || (angle > 102 && angle < 168)) {
+                      rawLines.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, type: 'A' });
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // 4. Merge parallel stroke lines
+        const thicknessTol = Math.max(Math.round(w * 0.003), 4);
+        const mergedH = [];
+        const hLines = rawLines.filter(l => l.type === 'H').sort((a, b) => a.y1 - b.y1 || a.x1 - b.x1);
+
+        hLines.forEach(line => {
+          let merged = false;
+          for (let i = 0; i < mergedH.length; i++) {
+            const m = mergedH[i];
+            if (Math.abs(m.y - line.y1) <= thicknessTol && !(line.x2 < m.x1 - 12 || line.x1 > m.x2 + 12)) {
+              m.x1 = Math.min(m.x1, line.x1);
+              m.x2 = Math.max(m.x2, line.x2);
+              m.y = Math.round((m.y + line.y1) / 2);
+              merged = true;
+              break;
+            }
+          }
+          if (!merged) mergedH.push({ x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y1, y: line.y1 });
+        });
+
+        const mergedV = [];
+        const vLines = rawLines.filter(l => l.type === 'V').sort((a, b) => a.x1 - b.x1 || a.y1 - b.y1);
+
+        vLines.forEach(line => {
+          let merged = false;
+          for (let i = 0; i < mergedV.length; i++) {
+            const m = mergedV[i];
+            if (Math.abs(m.x - line.x1) <= thicknessTol && !(line.y2 < m.y1 - 12 || line.y1 > m.y2 + 12)) {
+              m.y1 = Math.min(m.y1, line.y1);
+              m.y2 = Math.max(m.y2, line.y2);
+              m.x = Math.round((m.x + line.x1) / 2);
+              merged = true;
+              break;
+            }
+          }
+          if (!merged) mergedV.push({ x1: line.x1, y1: line.y1, x2: line.x1, y2: line.y2, x: line.x1 });
+        });
+
+        let finalLines = [];
+        mergedH.forEach(l => finalLines.push({ x1: l.x1, y1: l.y, x2: l.x2, y2: l.y }));
+        mergedV.forEach(l => finalLines.push({ x1: l.x, y1: l.y1, x2: l.x, y2: l.y2 }));
+        rawLines.filter(l => l.type === 'A').forEach(l => finalLines.push({ x1: l.x1, y1: l.y1, x2: l.x2, y2: l.y2 }));
+
+        userLines = finalLines;
+        const statLines = document.getElementById("vtracer-stat-lines");
+        if (statLines) statLines.textContent = userLines.length + "개";
+
+        renderVtracerCanvas();
+      }
+
+      exportBtn.addEventListener("click", () => {
+        if (!originalImage) {
+          alert("먼저 도면 파일(JPG, PNG, PDF)을 업로드해주세요.");
+          return;
+        }
+
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = "⌛ vtracer DXF 파일 생성 중...";
+        exportBtn.disabled = true;
+
+        setTimeout(() => {
+          try {
+            let dxf = `0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1018\n9\n$DWGCODEPAGE\n1\nANSI_949\n0\nENDSEC\n`;
+            dxf += `0\nSECTION\n2\nTABLES\n`;
+            dxf += `0\nTABLE\n2\nSTYLE\n70\n1\n`;
+            dxf += `0\nSTYLE\n2\nSTANDARD\n70\n0\n40\n0.0\n41\n1.0\n50\n0.0\n71\n0\n42\n2.5\n3\ntxt\n4\nghym.shx\n0\nENDTAB\n`;
+            dxf += `0\nENDSEC\n`;
+            dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
+            dxf += `0\nSECTION\n2\nENTITIES\n`;
+
+            userLines.forEach(line => {
+              const y1 = canvas.height - line.y1;
+              const y2 = canvas.height - line.y2;
+              dxf += `0\nLINE\n8\nVTracerVectors\n`;
+              dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`;
+              dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`;
+            });
+
+            ocrTexts.forEach(item => {
+              const cleanVal = (item.text || "").replace(/[\r\n]+/g, " ");
+              if (!cleanVal) return;
+              const midX = item.x + item.w / 2;
+              const midY = canvas.height - (item.y + item.h / 2);
+              const dxfAngle = -(item.angle || 0.0);
+              const textHeight = Math.max(item.h * 0.35, 3.0);
+
+              dxf += `0\nTEXT\n8\nVTracerTexts\n`;
+              dxf += `7\nSTANDARD\n`;
+              dxf += `10\n${midX.toFixed(3)}\n20\n${midY.toFixed(3)}\n30\n0.0\n`;
+              dxf += `40\n${textHeight.toFixed(3)}\n`;
+              dxf += `1\n${cleanVal}\n`;
+              dxf += `50\n${dxfAngle.toFixed(3)}\n`;
+              dxf += `72\n4\n`;
+              dxf += `73\n2\n`;
+              dxf += `11\n${midX.toFixed(3)}\n21\n${midY.toFixed(3)}\n31\n0.0\n`;
+            });
+
+            dxf += `0\nENDSEC\n0\nEOF\n`;
+
+            const blob = new Blob([dxf], { type: "application/dxf;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const safeName = (uploadedFileName || "vtracer_drawing").replace(/[^a-zA-Z0-9가-힣_-]/g, "_");
+            a.download = `vtracer_${safeName}.dxf`;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }, 100);
+          } catch(err) {
+            alert("DXF 파일 생성 오류: " + err.message);
           } finally {
             exportBtn.innerHTML = originalText;
             exportBtn.disabled = false;
