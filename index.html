@@ -5158,20 +5158,45 @@
 
           <!-- Configuration and Exporter sidebar -->
           <div class="lg:col-span-4 space-y-6">
-            <!-- Image Filters -->
+            <!-- CAD Line Extraction Settings -->
             <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
-              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">이진화 필터 세정</h4>
-              <div class="space-y-2">
-                <div class="flex justify-between text-xs font-bold text-gray-655 dark-mode:text-gray-355">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider flex items-center justify-between">
+                <span>📐 CAD 도면 선 추출 설정</span>
+                <span id="cad-pdf-badge" class="hidden text-[10px] bg-blue-100 text-blue-700 dark-mode:bg-blue-900/50 dark-mode:text-blue-300 px-2 py-0.5 rounded font-extrabold">✨ 벡터 PDF</span>
+              </h4>
+
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-gray-655 dark-mode:text-gray-355 mb-1">선 추출 범위 모드</label>
+                  <select id="cad-extract-mode" class="w-full text-xs p-2 bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-lg font-bold text-gray-800 dark-mode:text-gray-200">
+                    <option value="walls">🧱 주요 구조체/벽체선만 (추천)</option>
+                    <option value="all">📐 전체 도면 라인 (격자/치수 포함)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-bold text-gray-655 dark-mode:text-gray-355 mb-1">
+                    <span>최소 선 길이 필터 (노이즈 제거)</span>
+                    <span id="cad-minlen-val">60px</span>
+                  </div>
+                  <input type="range" id="cad-minlen-slider" min="20" max="200" value="60" class="w-full accent-orange-500">
+                </div>
+
+                <div class="flex justify-between text-xs font-bold text-gray-655 dark-mode:text-gray-355 pt-1">
                   <span>흑백 경계 임계값</span>
                   <span id="cad-threshold-val">128</span>
                 </div>
                 <input type="range" id="cad-threshold-slider" min="0" max="255" value="128" class="w-full accent-orange-500">
+
+                <div class="pt-2 flex gap-2">
+                  <button id="cad-auto-detect-btn-side" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all text-white rounded-xl text-xs font-bold shadow-sm">🤖 캐드 선 추출 실행</button>
+                  <button id="cad-clear-lines-btn" class="px-3 py-2 bg-gray-100 dark-mode:bg-gray-700 hover:bg-gray-200 text-gray-700 dark-mode:text-gray-300 rounded-xl text-xs font-bold transition-all">🧹 선 초기화</button>
+                </div>
               </div>
             </div>
 
             <!-- Detected values list -->
-            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[300px]">
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[280px]">
               <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">수치 치수 목록 (OCR)</h4>
               <div id="cad-text-list" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
                 <div class="text-center text-gray-400 py-12">텍스트가 없습니다.</div>
@@ -5332,11 +5357,8 @@
         ocrTexts = [];
         workspace.classList.remove("hidden");
         
-        // Apply initial binarization filter
+        // Apply initial binarization filter (display clean drawing without auto scribbles)
         applyBinarization();
-        
-        // Run auto line detection immediately on upload!
-        detectLines();
         
         // Request vision OCR
         if (base64Str) {
@@ -5519,18 +5541,17 @@
         return path;
       }
 
-      // Automatic Raster-to-Vector Line detection
+      // High-Precision Projection-Scan CAD Line Extraction Algorithm
       function detectLines() {
         if (!originalImage) return;
 
-        // Draw image clean onto temporary canvas to get raw thresholded pixels
         const tempCanvas = document.createElement("canvas");
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
         const tempCtx = tempCanvas.getContext("2d");
         tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         
-        // Draw white rectangles over all OCR text boxes to mask them out from line detection!
+        // Mask OCR text boxes to prevent text/numbers from becoming line noise
         tempCtx.fillStyle = "#FFFFFF";
         const padding = 6;
         ocrTexts.forEach(box => {
@@ -5542,173 +5563,146 @@
         const w = canvas.width;
         const h = canvas.height;
         const threshold = parseInt(thresholdSlider.value, 10);
+        const minLenSlider = document.getElementById("cad-minlen-slider");
+        const minLen = parseInt(minLenSlider ? minLenSlider.value : 60, 10);
+        const modeSelect = document.getElementById("cad-extract-mode");
+        const mode = modeSelect ? modeSelect.value : "walls";
 
-        const visited = new Uint8Array(w * h);
-        const detectedLines = [];
-
-        function isBlack(x, y) {
-          if (x < 0 || x >= w || y < 0 || y >= h) return false;
-          const idx = (y * w + x) * 4;
-          const gray = 0.299 * data[idx] + 0.587 * data[idx+1] + 0.114 * data[idx+2];
-          return gray < threshold;
+        const bin = new Uint8Array(w * h);
+        for (let i = 0; i < data.length; i += 4) {
+          const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+          bin[i / 4] = gray < threshold ? 1 : 0;
         }
 
-        // Trace paths across the grid
-        for (let y = 0; y < h; y += 3) {
-          for (let x = 0; x < w; x += 3) {
-            if (isBlack(x, y) && !visited[y * w + x]) {
-              const path = tracePath(x, y, w, h, data, visited, threshold);
-              
-              // Only keep paths with a minimum length (ignores small strokes like digits)
-              if (path.length >= 35) {
-                // Simplify path using Ramer-Douglas-Peucker algorithm
-                const simplified = ramerDouglasPeucker(path, 3.5);
-                
-                // Convert simplified path vertices into line segments
-                for (let i = 0; i < simplified.length - 1; i++) {
-                  detectedLines.push({
-                    x1: simplified[i].x,
-                    y1: simplified[i].y,
-                    x2: simplified[i+1].x,
-                    y2: simplified[i+1].y
-                  });
-                }
+        const rawLines = [];
+
+        // 1. Horizontal Line Scan
+        for (let y = 0; y < h; y++) {
+          let runStart = -1;
+          for (let x = 0; x < w; x++) {
+            const isB = bin[y * w + x];
+            if (isB && runStart === -1) {
+              runStart = x;
+            } else if (!isB && runStart !== -1) {
+              const len = x - runStart;
+              if (len >= minLen) {
+                rawLines.push({ x1: runStart, y1: y, x2: x - 1, y2: y, type: 'H' });
               }
+              runStart = -1;
+            }
+          }
+          if (runStart !== -1) {
+            const len = w - runStart;
+            if (len >= minLen) {
+              rawLines.push({ x1: runStart, y1: y, x2: w - 1, y2: y, type: 'H' });
             }
           }
         }
 
-        // 1. Separate and straighten lines (adaptive angle snapping)
-        const straightenedLines = detectedLines.map(line => {
-          let x1 = line.x1;
-          let y1 = line.y1;
-          let x2 = line.x2;
-          let y2 = line.y2;
-
-          const dx = x2 - x1;
-          const dy = y2 - y1;
-          const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI); // Range: [0, 180]
-
-          const isH = (angle < 12 || angle > 168);
-          const isV = (Math.abs(angle - 90) < 12);
-
-          if (isH) {
-            const avgY = (y1 + y2) / 2;
-            y1 = avgY;
-            y2 = avgY; // Force perfectly horizontal
-          } else if (isV) {
-            const avgX = (x1 + x2) / 2;
-            x1 = avgX;
-            x2 = avgX; // Force perfectly vertical
-          }
-
-          return { x1, y1, x2, y2, isHorizontal: isH, isVertical: isV };
-        });
-
-        // 2. Snap close endpoints of horizontal & vertical lines to form exact corners
-        const tolerance = 15;
-        const close = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y) <= tolerance;
-
-        // Separate the groups
-        const horizontal = straightenedLines.filter(l => l.isHorizontal);
-        const vertical = straightenedLines.filter(l => l.isVertical);
-        const other = straightenedLines.filter(l => !l.isHorizontal && !l.isVertical);
-
-        // Snap H <-> V intersections (e.g. wall corners)
-        horizontal.forEach(hLine => {
-          vertical.forEach(vLine => {
-            const hStart = { x: hLine.x1, y: hLine.y1 };
-            const hEnd = { x: hLine.x2, y: hLine.y2 };
-            const vStart = { x: vLine.x1, y: vLine.y1 };
-            const vEnd = { x: vLine.x2, y: vLine.y2 };
-
-            if (close(hStart, vStart)) {
-              hLine.x1 = vLine.x1;
-              vLine.y1 = hLine.y1;
-            } else if (close(hStart, vEnd)) {
-              hLine.x1 = vLine.x1;
-              vLine.y2 = hLine.y1;
-            } else if (close(hEnd, vStart)) {
-              hLine.x2 = vLine.x1;
-              vLine.y1 = hLine.y2;
-            } else if (close(hEnd, vEnd)) {
-              hLine.x2 = vLine.x1;
-              vLine.y2 = hLine.y2;
+        // 2. Vertical Line Scan
+        for (let x = 0; x < w; x++) {
+          let runStart = -1;
+          for (let y = 0; y < h; y++) {
+            const isB = bin[y * w + x];
+            if (isB && runStart === -1) {
+              runStart = y;
+            } else if (!isB && runStart !== -1) {
+              const len = y - runStart;
+              if (len >= minLen) {
+                rawLines.push({ x1: x, y1: runStart, x2: x, y2: y - 1, type: 'V' });
+              }
+              runStart = -1;
             }
-          });
-        });
-
-        // Snap H <-> H end-to-end
-        for (let i = 0; i < horizontal.length; i++) {
-          for (let j = i + 1; j < horizontal.length; j++) {
-            const h1 = horizontal[i];
-            const h2 = horizontal[j];
-            if (Math.hypot(h1.x2 - h2.x1, h1.y2 - h2.y1) <= tolerance) {
-              const avgY = (h1.y2 + h2.y1) / 2;
-              h1.y1 = h1.y2 = avgY;
-              h2.y1 = h2.y2 = avgY;
-              h1.x2 = h2.x1 = (h1.x2 + h2.x1) / 2;
-            } else if (Math.hypot(h1.x1 - h2.x2, h1.y1 - h2.y2) <= tolerance) {
-              const avgY = (h1.y1 + h2.y2) / 2;
-              h1.y1 = h1.y2 = avgY;
-              h2.y1 = h2.y2 = avgY;
-              h1.x1 = h2.x2 = (h1.x1 + h2.x2) / 2;
+          }
+          if (runStart !== -1) {
+            const len = h - runStart;
+            if (len >= minLen) {
+              rawLines.push({ x1: x, y1: runStart, x2: x, y2: h - 1, type: 'V' });
             }
           }
         }
 
-        // Snap V <-> V end-to-end
-        for (let i = 0; i < vertical.length; i++) {
-          for (let j = i + 1; j < vertical.length; j++) {
-            const v1 = vertical[i];
-            const v2 = vertical[j];
-            if (Math.hypot(v1.x2 - v2.x1, v1.y2 - v2.y1) <= tolerance) {
-              const avgX = (v1.x2 + v2.x1) / 2;
-              v1.x1 = v1.x2 = avgX;
-              v2.x1 = v2.x2 = avgX;
-              v1.y2 = v2.y1 = (v1.y2 + v2.y1) / 2;
-            } else if (Math.hypot(v1.x1 - v2.x2, v1.y1 - v2.y2) <= tolerance) {
-              const avgX = (v1.x1 + v2.x2) / 2;
-              v1.x1 = v1.x2 = avgX;
-              v2.x1 = v2.x2 = avgX;
-              v1.y1 = v2.y2 = (v1.y1 + v2.y2) / 2;
-            }
-          }
-        }
-
-        const snappedLines = [...horizontal, ...vertical, ...other];
-
-        // Filter out zero-length lines and isolated short lines (which are usually noise or digit strokes)
-        const validLines = snappedLines.filter(line => {
-          return !(line.x1 === line.x2 && line.y1 === line.y2);
-        });
-
-        userLines = validLines.filter((l1, idx1) => {
-          // Keep if the line is long enough (meaning it is a real wall even if isolated)
-          const length = Math.hypot(l1.x2 - l1.x1, l1.y2 - l1.y1);
-          if (length >= 80) return true;
-
-          // Otherwise, check if it connects to at least one other line
-          let hasConnection = false;
-          const tol = 18; // connection distance threshold
-          for (let idx2 = 0; idx2 < validLines.length; idx2++) {
-            if (idx1 === idx2) continue;
-            const l2 = validLines[idx2];
-            
-            const d11 = Math.hypot(l1.x1 - l2.x1, l1.y1 - l2.y1);
-            const d12 = Math.hypot(l1.x1 - l2.x2, l1.y1 - l2.y2);
-            const d21 = Math.hypot(l1.x2 - l2.x1, l1.y2 - l2.y1);
-            const d22 = Math.hypot(l1.x2 - l2.x2, l1.y2 - l2.y2);
-
-            if (d11 <= tol || d12 <= tol || d21 <= tol || d22 <= tol) {
-              hasConnection = true;
+        // 3. Merge adjacent parallel lines (due to line thickness)
+        const mergedH = [];
+        const hLines = rawLines.filter(l => l.type === 'H').sort((a, b) => a.y1 - b.y1 || a.x1 - b.x1);
+        
+        hLines.forEach(line => {
+          let merged = false;
+          for (let i = 0; i < mergedH.length; i++) {
+            const m = mergedH[i];
+            if (Math.abs(m.y - line.y1) <= 3 && !(line.x2 < m.x1 - 8 || line.x1 > m.x2 + 8)) {
+              m.x1 = Math.min(m.x1, line.x1);
+              m.x2 = Math.max(m.x2, line.x2);
+              m.y = Math.round((m.y + line.y1) / 2);
+              merged = true;
               break;
             }
           }
-          return hasConnection;
+          if (!merged) {
+            mergedH.push({ x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y1, y: line.y1 });
+          }
         });
 
+        const mergedV = [];
+        const vLines = rawLines.filter(l => l.type === 'V').sort((a, b) => a.x1 - b.x1 || a.y1 - b.y1);
+
+        vLines.forEach(line => {
+          let merged = false;
+          for (let i = 0; i < mergedV.length; i++) {
+            const m = mergedV[i];
+            if (Math.abs(m.x - line.x1) <= 3 && !(line.y2 < m.y1 - 8 || line.y1 > m.y2 + 8)) {
+              m.y1 = Math.min(m.y1, line.y1);
+              m.y2 = Math.max(m.y2, line.y2);
+              m.x = Math.round((m.x + line.x1) / 2);
+              merged = true;
+              break;
+            }
+          }
+          if (!merged) {
+            mergedV.push({ x1: line.x1, y1: line.y1, x2: line.x1, y2: line.y2, x: line.x1 });
+          }
+        });
+
+        let finalLines = [];
+        mergedH.forEach(l => finalLines.push({ x1: l.x1, y1: l.y, x2: l.x2, y2: l.y }));
+        mergedV.forEach(l => finalLines.push({ x1: l.x, y1: l.y1, x2: l.x, y2: l.y2 }));
+
+        // Filter outer margin frame if 'walls' mode selected
+        if (mode === "walls") {
+          const borderMargin = 12;
+          finalLines = finalLines.filter(l => {
+            const isTopBorder = (l.y1 <= borderMargin && l.y2 <= borderMargin);
+            const isBottomBorder = (l.y1 >= h - borderMargin && l.y2 >= h - borderMargin);
+            const isLeftBorder = (l.x1 <= borderMargin && l.x2 <= borderMargin);
+            const isRightBorder = (l.x1 >= w - borderMargin && l.x2 >= w - borderMargin);
+            return !isTopBorder && !isBottomBorder && !isLeftBorder && !isRightBorder;
+          });
+        }
+
+        userLines = finalLines;
         applyBinarization();
+      }
+
+      // Sidebar Controls
+      const minLenSlider = document.getElementById("cad-minlen-slider");
+      const minLenVal = document.getElementById("cad-minlen-val");
+      if (minLenSlider && minLenVal) {
+        minLenSlider.addEventListener("input", (e) => {
+          minLenVal.textContent = e.target.value + "px";
+        });
+      }
+
+      const autoDetectBtnSide = document.getElementById("cad-auto-detect-btn-side");
+      if (autoDetectBtnSide) {
+        autoDetectBtnSide.addEventListener("click", detectLines);
+      }
+
+      const clearLinesBtn = document.getElementById("cad-clear-lines-btn");
+      if (clearLinesBtn) {
+        clearLinesBtn.addEventListener("click", () => {
+          userLines = [];
+          applyBinarization();
+        });
       }
 
       // Auto detect button listener
