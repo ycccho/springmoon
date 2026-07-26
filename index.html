@@ -4840,6 +4840,33 @@
       if (!Array.isArray(menus)) return [];
       let cleanMenus = menus.filter(m => m.id !== "stats" && m.id !== "marketing" && m.id !== "home" && m.name !== "1" && m.id !== "1");
       
+      if (!cleanMenus.some(m => m.id === "interior-intro")) {
+        const idx = cleanMenus.findIndex(m => m.id === "omission-check");
+        cleanMenus.splice(idx !== -1 ? idx + 1 : cleanMenus.length, 0, { id: "interior-intro", name: "인테리어", categoryId: "cat-interior", protected: true });
+      } else {
+        const m = cleanMenus.find(m => m.id === "interior-intro");
+        if (m) m.categoryId = "cat-interior";
+      }
+
+      if (!cleanMenus.some(m => m.id === "cad-conversion")) {
+        const idx = cleanMenus.findIndex(m => m.id === "interior-intro");
+        cleanMenus.splice(idx !== -1 ? idx + 1 : cleanMenus.length, 0, { id: "cad-conversion", name: "9.배치도면 캐드변환", categoryId: "cat-interior", protected: true });
+      } else {
+        const m = cleanMenus.find(m => m.id === "cad-conversion");
+        if (m) m.categoryId = "cat-interior";
+      }
+
+      if (!cleanMenus.some(m => m.id === "vtracer-test")) {
+        const idx = cleanMenus.findIndex(m => m.id === "cad-conversion");
+        cleanMenus.splice(idx !== -1 ? idx + 1 : cleanMenus.length, 0, { id: "vtracer-test", name: "10. vtracer 캐드 변환 (테스트)", categoryId: "cat-interior", protected: true });
+      } else {
+        const m = cleanMenus.find(m => m.id === "vtracer-test");
+        if (m) {
+          m.categoryId = "cat-interior";
+          m.name = "10. vtracer 캐드 변환 (테스트)";
+        }
+      }
+
       if (!cleanMenus.some(m => m.id === "popular-posts-search")) {
         cleanMenus.push({ id: "popular-posts-search", name: "9.인기글 찾기", protected: true });
       }
