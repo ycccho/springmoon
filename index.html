@@ -5158,26 +5158,20 @@
 
           <!-- Configuration and Exporter sidebar -->
           <div class="lg:col-span-4 space-y-6">
-            <!-- Summary Info -->
-            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-3">
-              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider flex items-center justify-between">
-                <span>🤖 AI 도면 고해상도 분석</span>
-                <span id="cad-status-badge" class="text-[10px] bg-green-100 text-green-700 dark-mode:bg-green-950/50 dark-mode:text-green-300 px-2 py-0.5 rounded font-extrabold">자동 추출 준비 완료</span>
-              </h4>
-              <div class="grid grid-cols-2 gap-2 text-center text-xs pt-1">
-                <div class="p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-800">
-                  <div class="text-gray-400 text-[10px] font-bold">감지된 수치/텍스트</div>
-                  <div id="cad-stat-count-text" class="text-lg font-black text-blue-600 dark-mode:text-blue-400 font-mono">0개</div>
+            <!-- Image Filters -->
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">이진화 필터 세정</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between text-xs font-bold text-gray-655 dark-mode:text-gray-355">
+                  <span>흑백 경계 임계값</span>
+                  <span id="cad-threshold-val">128</span>
                 </div>
-                <div class="p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-800">
-                  <div class="text-gray-400 text-[10px] font-bold">추출된 CAD 라인</div>
-                  <div id="cad-stat-count-line" class="text-lg font-black text-orange-500 font-mono">0개</div>
-                </div>
+                <input type="range" id="cad-threshold-slider" min="0" max="255" value="128" class="w-full accent-orange-500">
               </div>
             </div>
 
             <!-- Detected values list -->
-            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[320px]">
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[300px]">
               <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">수치 치수 목록 (OCR)</h4>
               <div id="cad-text-list" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
                 <div class="text-center text-gray-400 py-12">텍스트가 없습니다.</div>
@@ -5187,7 +5181,7 @@
             <!-- Exporter -->
             <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
               <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">파일 다운로드</h4>
-              <button id="cad-export-dxf" class="w-full py-3 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white rounded-xl text-sm font-bold shadow-md">📥 AutoCAD (.DXF) 다운로드</button>
+              <button id="cad-export-dxf" class="w-full py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white rounded-xl text-sm font-bold shadow-sm">📥 AutoCAD (.DXF) 다운로드</button>
             </div>
           </div>
         </div>
@@ -5244,7 +5238,6 @@
 
       function processCadFile(file) {
         if (!file) return;
-        uploadedFileName = file.name.replace(/\.[^/.]+$/, "") || "cad_drawing";
         const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
         const isImg = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp)$/i.test(file.name);
 
@@ -5266,8 +5259,7 @@
               pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
               pdfjsLib.getDocument(typedarray).promise.then(pdf => {
                 pdf.getPage(1).then(page => {
-                  // Render at 3.0x high resolution for maximum CAD precision
-                  const scale = 3.0;
+                  const scale = 2.0;
                   const viewport = page.getViewport({ scale: scale });
                   const tempCanvas = document.createElement("canvas");
                   const tempCtx = tempCanvas.getContext("2d");
@@ -5325,44 +5317,67 @@
       function setupCanvasWithImage(img, base64Str) {
         originalImage = img;
         
-        // Preserve 100% full uncompressed resolution for maximum OCR and CAD accuracy
-        canvas.width = img.width;
-        canvas.height = img.height;
+        // Set canvas size (keep Aspect Ratio, limit max width to 800)
+        const maxW = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxW) {
+          h = Math.round((maxW * h) / w);
+          w = maxW;
+        }
+        canvas.width = w;
+        canvas.height = h;
 
         userLines = [];
         ocrTexts = [];
         workspace.classList.remove("hidden");
         
-        // Render crisp original image on canvas
-        renderCanvas();
+        // Apply initial binarization filter
+        applyBinarization();
         
-        // Auto-run OCR and CAD line extraction at full resolution!
+        // Run auto line detection immediately on upload!
+        detectLines();
+        
+        // Request vision OCR
         if (base64Str) {
-          fetchOcrData(base64Str).then(() => {
-            detectLines();
-          });
-        } else {
-          detectLines();
+          fetchOcrData(base64Str);
         }
       }
 
-      // Render crisp original drawing and CAD overlays on canvas
-      function renderCanvas() {
+      // Perform binarization filter on canvas
+      function applyBinarization() {
         if (!originalImage) return;
         
-        // Draw original scaled image in 100% full original fidelity
+        // Draw original scaled image
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         
-        // Draw overlays (detected CAD lines & OCR number boxes)
+        // Extract pixel data
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        const threshold = parseInt(thresholdSlider.value, 10);
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i+1];
+          const b = data[i+2];
+          // Grayscale luminance
+          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          // Apply threshold
+          const val = gray >= threshold ? 255 : 0;
+          data[i] = val;
+          data[i+1] = val;
+          data[i+2] = val;
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        // Draw overlays (user custom lines & OCR textboxes)
         drawOverlays();
       }
 
       function drawOverlays() {
-        const scaleFactor = Math.max(canvas.width / 1000, 1.0);
-
         // Draw user drawn/detected lines
         ctx.strokeStyle = "#F97316";
-        ctx.lineWidth = Math.max(Math.round(2 * scaleFactor), 2);
+        ctx.lineWidth = 2;
         userLines.forEach(line => {
           ctx.beginPath();
           ctx.moveTo(line.x1, line.y1);
@@ -5371,8 +5386,7 @@
         });
 
         // Draw OCR text bounding boxes (with rotation support)
-        const fontSize = Math.max(Math.round(11 * scaleFactor), 11);
-        ctx.font = `bold ${fontSize}px monospace`;
+        ctx.font = "bold 10px monospace";
         
         ocrTexts.forEach(item => {
           ctx.save();
@@ -5384,9 +5398,9 @@
           ctx.rotate((item.angle || 0) * Math.PI / 180);
           
           // Draw rect centered
-          ctx.strokeStyle = "rgba(59, 130, 246, 0.8)";
-          ctx.lineWidth = Math.max(Math.round(1.5 * scaleFactor), 1);
-          ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
+          ctx.strokeStyle = "rgba(59, 130, 246, 0.6)";
+          ctx.lineWidth = 1;
+          ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
           ctx.fillRect(-item.w / 2, -item.h / 2, item.w, item.h);
           ctx.strokeRect(-item.w / 2, -item.h / 2, item.w, item.h);
           
@@ -5406,19 +5420,119 @@
         applyBinarization();
       });
 
-      // High-Precision Projection-Scan CAD Line Extraction Algorithm
+      // Helper for perpendicular distance from point to line (for RDP algorithm)
+      function getPerpendicularDistance(pt, lineStart, lineEnd) {
+        const dx = lineEnd.x - lineStart.x;
+        const dy = lineEnd.y - lineStart.y;
+        if (dx === 0 && dy === 0) {
+          return Math.hypot(pt.x - lineStart.x, pt.y - lineStart.y);
+        }
+        const num = Math.abs(dy * pt.x - dx * pt.y + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x);
+        const den = Math.hypot(dx, dy);
+        return num / den;
+      }
+
+      // Ramer-Douglas-Peucker path simplification
+      function ramerDouglasPeucker(points, epsilon) {
+        if (points.length <= 2) return points;
+        let maxDistance = 0;
+        let index = 0;
+        const end = points.length - 1;
+        for (let i = 1; i < end; i++) {
+          const dist = getPerpendicularDistance(points[i], points[0], points[end]);
+          if (dist > maxDistance) {
+            maxDistance = dist;
+            index = i;
+          }
+        }
+        if (maxDistance > epsilon) {
+          const results1 = ramerDouglasPeucker(points.slice(0, index + 1), epsilon);
+          const results2 = ramerDouglasPeucker(points.slice(index), epsilon);
+          return results1.slice(0, results1.length - 1).concat(results2);
+        } else {
+          return [points[0], points[end]];
+        }
+      }
+
+      // 8-connected neighbor line path tracer
+      function tracePath(startX, startY, w, h, data, visited, threshold) {
+        const path = [{ x: startX, y: startY }];
+        visited[startY * w + startX] = 1;
+        let cx = startX;
+        let cy = startY;
+        let tracing = true;
+
+        function isBlackAndUnvisited(x, y) {
+          if (x < 0 || x >= w || y < 0 || y >= h) return false;
+          if (visited[y * w + x]) return false;
+          const idx = (y * w + x) * 4;
+          const gray = 0.299 * data[idx] + 0.587 * data[idx+1] + 0.114 * data[idx+2];
+          return gray < threshold;
+        }
+
+        while (tracing) {
+          let foundNext = false;
+          const dirs = [
+            { dx: 1, dy: 0 }, { dx: 1, dy: 1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 1 },
+            { dx: -1, dy: 0 }, { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 }
+          ];
+          for (let i = 0; i < dirs.length; i++) {
+            const nx = cx + dirs[i].dx;
+            const ny = cy + dirs[i].dy;
+            if (isBlackAndUnvisited(nx, ny)) {
+              cx = nx;
+              cy = ny;
+              path.push({ x: cx, y: cy });
+              visited[cy * w + cx] = 1;
+              foundNext = true;
+              break;
+            }
+          }
+          // Jump small 2px gaps (noise/sketch gaps)
+          if (!foundNext) {
+            const outerDirs = [
+              { dx: 2, dy: 0 }, { dx: 2, dy: 1 }, { dx: 2, dy: 2 }, { dx: 1, dy: 2 },
+              { dx: 0, dy: 2 }, { dx: -1, dy: 2 }, { dx: -2, dy: 2 }, { dx: -2, dy: 1 },
+              { dx: -2, dy: 0 }, { dx: -2, dy: -1 }, { dx: -2, dy: -2 }, { dx: -1, dy: -2 },
+              { dx: 0, dy: -2 }, { dx: 1, dy: -2 }, { dx: 2, dy: -2 }, { dx: 2, dy: -1 }
+            ];
+            for (let i = 0; i < outerDirs.length; i++) {
+              const nx = cx + outerDirs[i].dx;
+              const ny = cy + outerDirs[i].dy;
+              if (isBlackAndUnvisited(nx, ny)) {
+                const mx = Math.round((cx + nx) / 2);
+                const my = Math.round((cy + ny) / 2);
+                visited[my * w + mx] = 1;
+                cx = nx;
+                cy = ny;
+                path.push({ x: cx, y: cy });
+                visited[cy * w + cx] = 1;
+                foundNext = true;
+                break;
+              }
+            }
+          }
+          if (!foundNext) {
+            tracing = false;
+          }
+        }
+        return path;
+      }
+
+      // Automatic Raster-to-Vector Line detection
       function detectLines() {
         if (!originalImage) return;
 
+        // Draw image clean onto temporary canvas to get raw thresholded pixels
         const tempCanvas = document.createElement("canvas");
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
         const tempCtx = tempCanvas.getContext("2d");
         tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         
-        // Mask OCR text boxes to prevent text/numbers from becoming line noise
+        // Draw white rectangles over all OCR text boxes to mask them out from line detection!
         tempCtx.fillStyle = "#FFFFFF";
-        const padding = Math.max(Math.round(canvas.width * 0.003), 4);
+        const padding = 6;
         ocrTexts.forEach(box => {
           tempCtx.fillRect(box.x - padding, box.y - padding, box.w + padding * 2, box.h + padding * 2);
         });
@@ -5427,138 +5541,174 @@
         const data = imgData.data;
         const w = canvas.width;
         const h = canvas.height;
-        const threshold = 180;
-        const minLen = Math.max(Math.round(w * 0.025), 35); // Scale min line length dynamically based on image resolution
+        const threshold = parseInt(thresholdSlider.value, 10);
 
-        const bin = new Uint8Array(w * h);
-        for (let i = 0; i < data.length; i += 4) {
-          const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-          bin[i / 4] = gray < threshold ? 1 : 0;
+        const visited = new Uint8Array(w * h);
+        const detectedLines = [];
+
+        function isBlack(x, y) {
+          if (x < 0 || x >= w || y < 0 || y >= h) return false;
+          const idx = (y * w + x) * 4;
+          const gray = 0.299 * data[idx] + 0.587 * data[idx+1] + 0.114 * data[idx+2];
+          return gray < threshold;
         }
 
-        const rawLines = [];
-
-        // 1. Horizontal Line Scan
-        for (let y = 0; y < h; y++) {
-          let runStart = -1;
-          for (let x = 0; x < w; x++) {
-            const isB = bin[y * w + x];
-            if (isB && runStart === -1) {
-              runStart = x;
-            } else if (!isB && runStart !== -1) {
-              const len = x - runStart;
-              if (len >= minLen) {
-                rawLines.push({ x1: runStart, y1: y, x2: x - 1, y2: y, type: 'H' });
+        // Trace paths across the grid
+        for (let y = 0; y < h; y += 3) {
+          for (let x = 0; x < w; x += 3) {
+            if (isBlack(x, y) && !visited[y * w + x]) {
+              const path = tracePath(x, y, w, h, data, visited, threshold);
+              
+              // Only keep paths with a minimum length (ignores small strokes like digits)
+              if (path.length >= 35) {
+                // Simplify path using Ramer-Douglas-Peucker algorithm
+                const simplified = ramerDouglasPeucker(path, 3.5);
+                
+                // Convert simplified path vertices into line segments
+                for (let i = 0; i < simplified.length - 1; i++) {
+                  detectedLines.push({
+                    x1: simplified[i].x,
+                    y1: simplified[i].y,
+                    x2: simplified[i+1].x,
+                    y2: simplified[i+1].y
+                  });
+                }
               }
-              runStart = -1;
-            }
-          }
-          if (runStart !== -1) {
-            const len = w - runStart;
-            if (len >= minLen) {
-              rawLines.push({ x1: runStart, y1: y, x2: w - 1, y2: y, type: 'H' });
             }
           }
         }
 
-        // 2. Vertical Line Scan
-        for (let x = 0; x < w; x++) {
-          let runStart = -1;
-          for (let y = 0; y < h; y++) {
-            const isB = bin[y * w + x];
-            if (isB && runStart === -1) {
-              runStart = y;
-            } else if (!isB && runStart !== -1) {
-              const len = y - runStart;
-              if (len >= minLen) {
-                rawLines.push({ x1: x, y1: runStart, x2: x, y2: y - 1, type: 'V' });
-              }
-              runStart = -1;
-            }
+        // 1. Separate and straighten lines (adaptive angle snapping)
+        const straightenedLines = detectedLines.map(line => {
+          let x1 = line.x1;
+          let y1 = line.y1;
+          let x2 = line.x2;
+          let y2 = line.y2;
+
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI); // Range: [0, 180]
+
+          const isH = (angle < 12 || angle > 168);
+          const isV = (Math.abs(angle - 90) < 12);
+
+          if (isH) {
+            const avgY = (y1 + y2) / 2;
+            y1 = avgY;
+            y2 = avgY; // Force perfectly horizontal
+          } else if (isV) {
+            const avgX = (x1 + x2) / 2;
+            x1 = avgX;
+            x2 = avgX; // Force perfectly vertical
           }
-          if (runStart !== -1) {
-            const len = h - runStart;
-            if (len >= minLen) {
-              rawLines.push({ x1: x, y1: runStart, x2: x, y2: h - 1, type: 'V' });
+
+          return { x1, y1, x2, y2, isHorizontal: isH, isVertical: isV };
+        });
+
+        // 2. Snap close endpoints of horizontal & vertical lines to form exact corners
+        const tolerance = 15;
+        const close = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y) <= tolerance;
+
+        // Separate the groups
+        const horizontal = straightenedLines.filter(l => l.isHorizontal);
+        const vertical = straightenedLines.filter(l => l.isVertical);
+        const other = straightenedLines.filter(l => !l.isHorizontal && !l.isVertical);
+
+        // Snap H <-> V intersections (e.g. wall corners)
+        horizontal.forEach(hLine => {
+          vertical.forEach(vLine => {
+            const hStart = { x: hLine.x1, y: hLine.y1 };
+            const hEnd = { x: hLine.x2, y: hLine.y2 };
+            const vStart = { x: vLine.x1, y: vLine.y1 };
+            const vEnd = { x: vLine.x2, y: vLine.y2 };
+
+            if (close(hStart, vStart)) {
+              hLine.x1 = vLine.x1;
+              vLine.y1 = hLine.y1;
+            } else if (close(hStart, vEnd)) {
+              hLine.x1 = vLine.x1;
+              vLine.y2 = hLine.y1;
+            } else if (close(hEnd, vStart)) {
+              hLine.x2 = vLine.x1;
+              vLine.y1 = hLine.y2;
+            } else if (close(hEnd, vEnd)) {
+              hLine.x2 = vLine.x1;
+              vLine.y2 = hLine.y2;
+            }
+          });
+        });
+
+        // Snap H <-> H end-to-end
+        for (let i = 0; i < horizontal.length; i++) {
+          for (let j = i + 1; j < horizontal.length; j++) {
+            const h1 = horizontal[i];
+            const h2 = horizontal[j];
+            if (Math.hypot(h1.x2 - h2.x1, h1.y2 - h2.y1) <= tolerance) {
+              const avgY = (h1.y2 + h2.y1) / 2;
+              h1.y1 = h1.y2 = avgY;
+              h2.y1 = h2.y2 = avgY;
+              h1.x2 = h2.x1 = (h1.x2 + h2.x1) / 2;
+            } else if (Math.hypot(h1.x1 - h2.x2, h1.y1 - h2.y2) <= tolerance) {
+              const avgY = (h1.y1 + h2.y2) / 2;
+              h1.y1 = h1.y2 = avgY;
+              h2.y1 = h2.y2 = avgY;
+              h1.x1 = h2.x2 = (h1.x1 + h2.x2) / 2;
             }
           }
         }
 
-        // 3. Merge adjacent parallel lines (due to line thickness)
-        const thicknessTol = Math.max(Math.round(w * 0.0025), 3);
-        const mergedH = [];
-        const hLines = rawLines.filter(l => l.type === 'H').sort((a, b) => a.y1 - b.y1 || a.x1 - b.x1);
-        
-        hLines.forEach(line => {
-          let merged = false;
-          for (let i = 0; i < mergedH.length; i++) {
-            const m = mergedH[i];
-            if (Math.abs(m.y - line.y1) <= thicknessTol && !(line.x2 < m.x1 - 10 || line.x1 > m.x2 + 10)) {
-              m.x1 = Math.min(m.x1, line.x1);
-              m.x2 = Math.max(m.x2, line.x2);
-              m.y = Math.round((m.y + line.y1) / 2);
-              merged = true;
+        // Snap V <-> V end-to-end
+        for (let i = 0; i < vertical.length; i++) {
+          for (let j = i + 1; j < vertical.length; j++) {
+            const v1 = vertical[i];
+            const v2 = vertical[j];
+            if (Math.hypot(v1.x2 - v2.x1, v1.y2 - v2.y1) <= tolerance) {
+              const avgX = (v1.x2 + v2.x1) / 2;
+              v1.x1 = v1.x2 = avgX;
+              v2.x1 = v2.x2 = avgX;
+              v1.y2 = v2.y1 = (v1.y2 + v2.y1) / 2;
+            } else if (Math.hypot(v1.x1 - v2.x2, v1.y1 - v2.y2) <= tolerance) {
+              const avgX = (v1.x1 + v2.x2) / 2;
+              v1.x1 = v1.x2 = avgX;
+              v2.x1 = v2.x2 = avgX;
+              v1.y1 = v2.y2 = (v1.y1 + v2.y2) / 2;
+            }
+          }
+        }
+
+        const snappedLines = [...horizontal, ...vertical, ...other];
+
+        // Filter out zero-length lines and isolated short lines (which are usually noise or digit strokes)
+        const validLines = snappedLines.filter(line => {
+          return !(line.x1 === line.x2 && line.y1 === line.y2);
+        });
+
+        userLines = validLines.filter((l1, idx1) => {
+          // Keep if the line is long enough (meaning it is a real wall even if isolated)
+          const length = Math.hypot(l1.x2 - l1.x1, l1.y2 - l1.y1);
+          if (length >= 80) return true;
+
+          // Otherwise, check if it connects to at least one other line
+          let hasConnection = false;
+          const tol = 18; // connection distance threshold
+          for (let idx2 = 0; idx2 < validLines.length; idx2++) {
+            if (idx1 === idx2) continue;
+            const l2 = validLines[idx2];
+            
+            const d11 = Math.hypot(l1.x1 - l2.x1, l1.y1 - l2.y1);
+            const d12 = Math.hypot(l1.x1 - l2.x2, l1.y1 - l2.y2);
+            const d21 = Math.hypot(l1.x2 - l2.x1, l1.y2 - l2.y1);
+            const d22 = Math.hypot(l1.x2 - l2.x2, l1.y2 - l2.y2);
+
+            if (d11 <= tol || d12 <= tol || d21 <= tol || d22 <= tol) {
+              hasConnection = true;
               break;
             }
           }
-          if (!merged) {
-            mergedH.push({ x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y1, y: line.y1 });
-          }
+          return hasConnection;
         });
 
-        const mergedV = [];
-        const vLines = rawLines.filter(l => l.type === 'V').sort((a, b) => a.x1 - b.x1 || a.y1 - b.y1);
-
-        vLines.forEach(line => {
-          let merged = false;
-          for (let i = 0; i < mergedV.length; i++) {
-            const m = mergedV[i];
-            if (Math.abs(m.x - line.x1) <= thicknessTol && !(line.y2 < m.y1 - 10 || line.y1 > m.y2 + 10)) {
-              m.y1 = Math.min(m.y1, line.y1);
-              m.y2 = Math.max(m.y2, line.y2);
-              m.x = Math.round((m.x + line.x1) / 2);
-              merged = true;
-              break;
-            }
-          }
-          if (!merged) {
-            mergedV.push({ x1: line.x1, y1: line.y1, x2: line.x1, y2: line.y2, x: line.x1 });
-          }
-        });
-
-        let finalLines = [];
-        mergedH.forEach(l => finalLines.push({ x1: l.x1, y1: l.y, x2: l.x2, y2: l.y }));
-        mergedV.forEach(l => finalLines.push({ x1: l.x, y1: l.y1, x2: l.x, y2: l.y2 }));
-
-        userLines = finalLines;
-        
-        // Update summary badges
-        const statLine = document.getElementById("cad-stat-count-line");
-        if (statLine) statLine.textContent = userLines.length + "개";
-
-        renderCanvas();
-      }
-
-      // Sidebar Controls
-      const minLenSlider = document.getElementById("cad-minlen-slider");
-      const minLenVal = document.getElementById("cad-minlen-val");
-      if (minLenSlider && minLenVal) {
-        minLenSlider.addEventListener("input", (e) => {
-          minLenVal.textContent = e.target.value + "px";
-        });
-      }
-
-      const autoDetectBtnSide = document.getElementById("cad-auto-detect-btn-side");
-      if (autoDetectBtnSide) {
-        autoDetectBtnSide.addEventListener("click", detectLines);
-      }
-
-      const clearLinesBtn = document.getElementById("cad-clear-lines-btn");
-      if (clearLinesBtn) {
-        clearLinesBtn.addEventListener("click", () => {
-          userLines = [];
-          renderCanvas();
-        });
+        applyBinarization();
       }
 
       // Auto detect button listener
@@ -5683,11 +5833,8 @@
           }
 
           ocrTexts = wordsList;
-          const statText = document.getElementById("cad-stat-count-text");
-          if (statText) statText.textContent = ocrTexts.length + "개";
-
           renderTextList();
-          renderCanvas();
+          applyBinarization();
 
         } catch (e) {
           textListContainer.innerHTML = `<div class="text-center text-red-500 py-12 font-semibold">OCR 수집 실패: ${e.message}</div>`;
@@ -5711,7 +5858,7 @@
           `;
           row.querySelector("input").addEventListener("input", (e) => {
             ocrTexts[idx].text = e.target.value.trim();
-            renderCanvas();
+            applyBinarization();
           });
           textListContainer.appendChild(row);
         });
@@ -5837,85 +5984,58 @@
 
       // DXF Exporter (Now exports both detected/drawn walls and rotated dimensions)
       exportBtn.addEventListener("click", () => {
-        if (!originalImage) return;
-
-      let uploadedFileName = "layout_drawing";
-
-      // DXF Exporter (Exports CAD vector lines and OCR text entities)
-      exportBtn.addEventListener("click", () => {
         if (!originalImage) {
           alert("먼저 도면 파일(JPG, PNG, PDF)을 업로드해주세요.");
           return;
         }
 
-        if (userLines.length === 0 && ocrTexts.length === 0) {
-          alert("추출된 CAD 라인이나 수치 텍스트가 없습니다. 도면을 다시 업로드해주시거나 잠시 후 다시 시도해 주세요.");
-          return;
-        }
+        // Create standard minimal DXF structure
+        let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nTABLES\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nENTITIES\n`;
 
-        const originalText = exportBtn.innerHTML;
-        exportBtn.innerHTML = "⌛ DXF 파일 생성 중...";
-        exportBtn.disabled = true;
+        // Export Lines (detected/drawn wall vectors)
+        userLines.forEach(line => {
+          const y1 = canvas.height - line.y1;
+          const y2 = canvas.height - line.y2;
+          
+          dxf += `0\nLINE\n8\nSketchLines\n`;
+          dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`; // Point 1
+          dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`; // Point 2
+        });
 
-        setTimeout(() => {
-          try {
-            let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
-            dxf += `0\nSECTION\n2\nTABLES\n0\nENDSEC\n`;
-            dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
-            dxf += `0\nSECTION\n2\nENTITIES\n`;
+        // Export Texts (correctly rotated and positioned at bounding box center)
+        ocrTexts.forEach(item => {
+          const midX = item.x + item.w / 2;
+          const midY = canvas.height - (item.y + item.h / 2); // Flip Y of the center point
+          const dxfAngle = -(item.angle || 0.0); // Invert screen Y rotation for Cartesian space
+          
+          // Scale down text height to look proportional (just like in the original sketch)
+          const textHeight = Math.max(item.h * 0.22, 2.8);
+          
+          dxf += `0\nTEXT\n8\nSketchDimensions\n`;
+          dxf += `10\n${midX.toFixed(3)}\n20\n${midY.toFixed(3)}\n30\n0.0\n`; // Location (base point)
+          dxf += `40\n${textHeight.toFixed(3)}\n`; // Dynamic text height
+          dxf += `1\n${item.text}\n`; // Text value
+          dxf += `50\n${dxfAngle.toFixed(3)}\n`; // Rotation angle in degrees
+          dxf += `72\n4\n`; // Middle-center horizontal alignment
+          dxf += `73\n2\n`; // Middle vertical alignment
+          dxf += `11\n${midX.toFixed(3)}\n21\n${midY.toFixed(3)}\n31\n0.0\n`; // Alignment point (required for MC)
+        });
 
-            // Export Lines (detected/drawn wall vectors)
-            userLines.forEach(line => {
-              const y1 = canvas.height - line.y1;
-              const y2 = canvas.height - line.y2;
-              
-              dxf += `0\nLINE\n8\nCadLines\n`;
-              dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`;
-              dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`;
-            });
+        dxf += `0\nENDSEC\n0\nEOF\n`;
 
-            // Export Texts (correctly rotated and positioned)
-            ocrTexts.forEach(item => {
-              const cleanVal = (item.text || "").replace(/[\r\n]+/g, " ");
-              if (!cleanVal) return;
-
-              const midX = item.x + item.w / 2;
-              const midY = canvas.height - (item.y + item.h / 2);
-              const dxfAngle = -(item.angle || 0.0);
-              const textHeight = Math.max(item.h * 0.35, 3.0);
-              
-              dxf += `0\nTEXT\n8\nCadDimensions\n`;
-              dxf += `10\n${midX.toFixed(3)}\n20\n${midY.toFixed(3)}\n30\n0.0\n`;
-              dxf += `40\n${textHeight.toFixed(3)}\n`;
-              dxf += `1\n${cleanVal}\n`;
-              dxf += `50\n${dxfAngle.toFixed(3)}\n`;
-              dxf += `72\n4\n`;
-              dxf += `73\n2\n`;
-              dxf += `11\n${midX.toFixed(3)}\n21\n${midY.toFixed(3)}\n31\n0.0\n`;
-            });
-
-            dxf += `0\nENDSEC\n0\nEOF\n`;
-
-            const blob = new Blob([dxf], { type: "application/dxf;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            const safeName = (uploadedFileName || "cad_drawing").replace(/[^a-zA-Z0-9가-힣_-]/g, "_");
-            a.download = `converted_${safeName}.dxf`;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-            }, 100);
-          } catch(err) {
-            console.error("DXF generation error:", err);
-            alert("DXF 파일 생성 중 오류가 발생했습니다: " + err.message);
-          } finally {
-            exportBtn.innerHTML = originalText;
-            exportBtn.disabled = false;
-          }
-        }, 50);
+        // Download Blob
+        const blob = new Blob([dxf], { type: "application/dxf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `converted_sketch.dxf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       });
     }
 
