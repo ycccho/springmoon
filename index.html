@@ -28,12 +28,6 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    if (window.pdfjsLib) {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
-  </script>
   <style>
     body.dark-mode { @apply bg-gray-900 text-white; }
     .menu-item { cursor: grab; }
@@ -473,16 +467,9 @@
         menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "interior-intro", name: "인테리어", categoryId: "cat-interior", protected: true });
         changed = true;
       }
-      menus.forEach(m => {
-        if (m.name && (m.name.includes("캐드") || m.name.includes("배치도면"))) {
-          if (m.id !== "cad-conversion") { m.id = "cad-conversion"; changed = true; }
-          if (m.categoryId !== "cat-interior") { m.categoryId = "cat-interior"; changed = true; }
-        }
-      });
-
       if (!menus.some(m => m.id === "cad-conversion")) {
         const idx = menus.findIndex(m => m.id === "interior-intro");
-        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "배치도면 캐드변환", categoryId: "cat-interior", protected: true });
+        menus.splice(idx !== -1 ? idx + 1 : menus.length, 0, { id: "cad-conversion", name: "스케치도면 캐드변환", categoryId: "cat-interior", protected: true });
         changed = true;
       }
       if (!menus.some(m => m.id === "homepage-seo")) {
@@ -927,40 +914,24 @@
       document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
       
       let panel = document.getElementById(menu.id);
-      if (!panel && (menu.id === "cad-conversion" || (menu.name && (menu.name.includes("캐드") || menu.name.includes("배치도면"))))) {
-        panel = document.getElementById("cad-conversion");
-      }
-
       if (!panel) {
-        // Create custom panel dynamically using getPanelHTML if content exists
+        // Create custom empty state panel for dynamic menus
         panel = document.createElement("div");
         panel.id = menu.id;
-        panel.className = "panel bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 min-h-[400px]";
-        
-        const customHtml = getPanelHTML(menu.id, menu.name);
-        if (customHtml) {
-          panel.innerHTML = customHtml;
-        } else {
-          panel.className += " flex flex-col items-center justify-center text-center";
-          panel.innerHTML = `
-            <div class="space-y-3">
-              <div class="text-gray-400 dark-mode:text-gray-600 text-5xl">📄</div>
-              <h3 class="text-lg font-black text-gray-855 dark-mode:text-white">${menu.name}</h3>
-              <p class="text-xs text-gray-400 font-medium">이 메뉴는 내용이 비어있는 메뉴입니다.</p>
-            </div>
-          `;
-        }
+        panel.className = "panel bg-white dark-mode:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark-mode:border-gray-700 min-h-[400px] flex flex-col items-center justify-center text-center";
+        panel.innerHTML = `
+          <div class="space-y-3">
+            <div class="text-gray-400 dark-mode:text-gray-600 text-5xl">📄</div>
+            <h3 class="text-lg font-black text-gray-855 dark-mode:text-white">${menu.name}</h3>
+            <p class="text-xs text-gray-400 font-medium">이 메뉴는 내용이 비어있는 메뉴입니다.</p>
+          </div>
+        `;
         const mainContent = document.getElementById("main-content");
         if (mainContent) {
           mainContent.appendChild(panel);
         }
       } else {
         panel.classList.remove("hidden");
-      }
-
-      // Initialize CAD scripts if cad-conversion menu is selected
-      if (menu.id === "cad-conversion" || (menu.name && (menu.name.includes("캐드") || menu.name.includes("배치도면")))) {
-        setTimeout(setupCadConversion, 50);
       }
 
       // Update active menu button styling in sidebar
@@ -1123,7 +1094,7 @@
       if (id === "powercontent") return getPowerContentHTML();
       if (id === "omission-check") return getOmissionCheckHTML();
       if (id === "interior-intro") return getInteriorIntroHTML();
-      if (id === "cad-conversion" || (id && id.includes("cad")) || (name && name.includes("캐드"))) return getCadConversionHTML();
+      if (id === "cad-conversion") return getCadConversionHTML();
       if (id === "homepage-seo") return getHomepageSeoHTML();
       if (id === "backlink-check") return getBacklinkCheckHTML();
       if (id === "keyword-screenshot") return getKeywordScreenshotHTML();
@@ -1272,7 +1243,7 @@
                   </p>
                   <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">
                     <strong class="text-gray-850 dark-mode:text-white block mb-0.5">• 9.배치도면 캐드변환</strong>
-                    = 건물 층별 평면도/배치도 PDF 및 도면 이미지를 AutoCAD에서 즉시 편집 가능한 DXF 도면으로 정밀 변환 (PDF 벡터 선 & 수치 치수 자동 추출).
+                    = 현장 스케치나 평면 도면 배치 이미지를 CAD 데이터 파일로 정교화 변환해주는 AI 가이드 제공.
                   </p>
                   <p class="text-xs text-gray-600 dark-mode:text-gray-300 leading-relaxed">
                     <strong class="text-gray-850 dark-mode:text-white block mb-0.5">• 9.데일리보고서 작성</strong>
@@ -5115,23 +5086,23 @@
     function getInteriorIntroHTML() {
       return `<div class="max-w-4xl mx-auto bg-white dark-mode:bg-gray-800 rounded-xl p-8 shadow-sm border border-gray-200 dark-mode:border-gray-700 space-y-6">
         <h2 class="text-3xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📁 인테리어 도구 소개 및 워크플로우</h2>
-        <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">현장 작업 효율을 극대화하기 위해 제공되는 인테리어 설계 전용 보조 도구 모음입니다. PDF(.pdf) 또는 이미지(.jpg, .png) 도면을 AutoCAD에서 즉시 편집 가능한 DXF 도면으로 신속하게 변환합니다.</p>
+        <p class="text-sm text-gray-550 dark-mode:text-gray-400 font-medium">현장 작업 효율을 극대화하기 위해 제공되는 인테리어 설계 전용 보조 도구 모음입니다. 현장 실측 스케치를 정밀한 CAD 도면으로 신속하게 다듬고 변환할 수 있습니다.</p>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
-            <div class="text-2xl">📑 1단계: PDF/이미지 업로드</div>
-            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">도면 파일 업로드</h4>
-            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">변환할 PDF 도면 파일(.pdf) 또는 이미지 도면(.jpg, .png)을 드래그 앤 드롭으로 업로드합니다.</p>
+            <div class="text-2xl">📸 1단계: 실측 및 촬영</div>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">현장 드로잉 업로드</h4>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">실측 후 종이에 작성한 수치 도면을 카메라로 반듯하게 촬영하여 드래그 앤 드롭으로 업로드합니다.</p>
           </div>
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
-            <div class="text-2xl">🔍 2단계: 선 & 치수 분석</div>
-            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">벡터 선 & 수치 추출</h4>
-            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">도면 속 CAD 선 좌표와 수치 치수를 자동 추출합니다. 캔버스에서 필요한 선 추가/삭제 편집을 할 수 있습니다.</p>
+            <div class="text-2xl">🔍 2단계: 수치 및 선 검토</div>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">AI OCR 문자 검출</h4>
+            <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">Google Cloud Vision AI가 이미지 속의 숫자를 감지해 좌표와 오버레이를 만듭니다. 누락된 치수나 깨진 선을 캔버스에서 더블 클릭/드래그하여 수정하세요.</p>
           </div>
           <div class="p-4 bg-orange-50 dark-mode:bg-orange-950/20 border border-orange-200 dark-mode:border-orange-900 rounded-xl space-y-2">
             <div class="text-2xl">📥 3단계: CAD DXF 내보내기</div>
-            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">AutoCAD에서 즉시 편집</h4>
-            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">따라 그릴 필요 없이 AutoCAD, ZWCAD에서 즉시 도면 선과 치수로 바로 편집할 수 있는 DXF 파일로 다운로드합니다.</p>
+            <h4 class="font-bold text-sm text-gray-800 dark-mode:text-gray-100">즉시 사용가능한 도면</h4>
+            <p class="text-xs text-gray-550 dark-mode:text-gray-400 font-medium">내보내기 클릭 시 좌표 보정된 선 정보와 텍스트 레이어가 포함된 DXF 파일을 제공하여 AutoCAD에서 즉시 편집이 가능합니다.</p>
           </div>
         </div>
       </div>`;
@@ -5144,19 +5115,15 @@
     function getCadConversionHTML() {
       return `<div class="max-w-6xl mx-auto space-y-6">
         <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-            <div>
-              <h2 class="text-2xl font-bold text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📐 배치도면 캐드변환 (PDF / 이미지 → DXF CAD)</h2>
-              <p class="text-sm text-gray-550 dark-mode:text-gray-400 mt-1 font-medium">PDF(.pdf) 도면이나 이미지(.jpg, .png) 도면을 업로드하면 AutoCAD에서 즉시 편집 가능한 DXF 캐드 파일로 변환합니다. 도면을 캐드에서 일일이 따라 그릴(트레이싱) 필요 없이 선 레이어와 수치 치수를 추출하여 CAD에서 바로 편집하세요.</p>
-            </div>
-          </div>
+          <h2 class="text-2xl font-bold mb-2 text-gray-800 dark-mode:text-gray-100 flex items-center gap-2">📐 스케치도면 캐드변환 (AI OCR & DXF)</h2>
+          <p class="text-sm text-gray-550 dark-mode:text-gray-400 mb-6 font-medium">종이에 그려서 촬영한 스케치 이미지를 업로드하세요. 선을 선명하게 다듬고 비전 API로 감지된 수치 치수를 수정한 뒤 AutoCAD(DXF) 파일로 저장합니다.</p>
           
           <!-- Upload Area -->
           <div id="cad-dropzone" class="border-2 border-dashed border-gray-300 dark-mode:border-gray-655 hover:border-orange-500 dark-mode:hover:border-orange-400 rounded-xl p-8 text-center cursor-pointer transition-colors bg-gray-50 dark-mode:bg-gray-900/50">
-            <div class="text-4xl mb-2">📑</div>
-            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 PDF 도면 파일(.pdf) 또는 이미지 도면(.jpg, .png) 드래그 또는 클릭하여 업로드</p>
-            <p class="text-xs text-gray-400 mt-1 font-semibold">지원 포맷: PDF (.pdf), PNG, JPG, JPEG (최대 50MB)</p>
-            <input type="file" id="cad-file-input" class="hidden" accept=".pdf,image/*">
+            <div class="text-4xl mb-2">📐</div>
+            <p class="text-sm font-bold text-gray-700 dark-mode:text-gray-200">여기에 스케치 도면 이미지 드래그 또는 클릭하여 업로드</p>
+            <p class="text-xs text-gray-400 mt-1 font-semibold">지원 포맷: PNG, JPG, JPEG (최대 10MB)</p>
+            <input type="file" id="cad-file-input" class="hidden" accept="image/*">
           </div>
         </div>
 
@@ -5164,12 +5131,9 @@
         <div id="cad-workspace" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Canvas area -->
           <div class="lg:col-span-8 bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
-            <div class="flex flex-wrap justify-between items-center gap-2">
-              <div class="flex items-center gap-2">
-                <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-1.5">🖥️ 도면 보정 및 캔버스 검토</h3>
-                <select id="cad-page-select" class="hidden px-2.5 py-1 bg-gray-100 dark-mode:bg-gray-700 border border-gray-300 dark-mode:border-gray-600 rounded text-xs font-bold text-gray-800 dark-mode:text-gray-100 focus:outline-none"></select>
-              </div>
-              <div class="flex flex-wrap gap-2 font-semibold">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-gray-800 dark-mode:text-gray-100 text-sm flex items-center gap-1.5">🖥️ 도면 보정 및 캔버스 검토</h3>
+              <div class="flex gap-2 font-semibold">
                 <button id="cad-ocr-btn" class="px-2.5 py-1 bg-green-655 hover:bg-green-600 dark-mode:bg-green-700 dark-mode:hover:bg-green-800 text-white rounded text-xs font-bold shadow-sm active:scale-[0.98] transition-all">🔍 AI OCR 감지</button>
                 <button id="cad-auto-detect-btn" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold shadow-sm active:scale-[0.98] transition-all">🤖 자동 선 감지</button>
                 <button id="cad-tool-line" class="px-2 py-1 bg-orange-500 text-white rounded text-xs font-bold shadow-sm">✏️ 선 그리기</button>
@@ -5183,12 +5147,12 @@
               <canvas id="cad-canvas" class="max-w-full shadow-lg cursor-crosshair bg-white"></canvas>
             </div>
             
-            <div class="text-[11px] text-gray-500 dark-mode:text-gray-400 font-semibold leading-relaxed bg-gray-50 dark-mode:bg-gray-900/40 p-3 rounded-lg border border-gray-200 dark-mode:border-gray-800">
-              💡 **도면 캐드변환 사용 방법**<br>
-              - **[📄 PDF 페이지 선택]**: 다중 페이지 PDF인 경우 상단 드롭다운에서 변환할 페이지를 선택하세요.<br>
-              - **[🔍 벡터 & 수치 자동추출]**: PDF/이미지 도면의 선 좌표와 수치 치수가 원본 비율 그대로 추출됩니다.<br>
-              - **[✏️ 캔버스 편집]**: 마우스 드래그로 선 세그먼트를 추가/삭제하거나 수치 텍스트를 클릭하여 수정할 수 있습니다.<br>
-              - **[📥 AutoCAD 다운로드]**: 변환 완료 후 하단 버튼을 클릭하면 `.DXF` 도면 파일로 다운로드되어 AutoCAD에서 바로 편집 가능합니다.
+            <div class="text-[10px] text-gray-400 font-semibold leading-relaxed">
+              ※ **사용 방법**<br>
+              - **[🔍 AI OCR 감지]** 버튼을 누르면 현재 보정된 흑백 이미지 상태로 텍스트/치수를 다시 분석하여 검출합니다.<br>
+              - **[🤖 자동 선 감지]** 버튼을 누르면 흑백 필터 상태에 따라 이미지 속 벽면과 도면 선을 비율 왜곡 없이 자동으로 추출합니다.<br>
+              - 캔버스에서 마우스를 드래그하여 **직선 선 세그먼트**를 직접 추가하거나 지울 수 있습니다.<br>
+              - 비전 API로 검출된 텍스트 박스를 **클릭**하면 오른쪽 사이드바에서 치수 값을 수정할 수 있습니다.
             </div>
           </div>
 
@@ -5208,7 +5172,7 @@
 
             <!-- Detected values list -->
             <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[300px]">
-              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">수치 치수 목록 (OCR/Vector)</h4>
+              <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">수치 치수 목록 (OCR)</h4>
               <div id="cad-text-list" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
                 <div class="text-center text-gray-400 py-12">텍스트가 없습니다.</div>
               </div>
@@ -5217,7 +5181,7 @@
             <!-- Exporter -->
             <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
               <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">파일 다운로드</h4>
-              <button id="cad-export-dxf" class="w-full py-2.5 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white rounded-xl text-sm font-bold shadow-sm">📥 AutoCAD (.DXF) 다운로드</button>
+              <button id="cad-export-dxf" class="w-full py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white rounded-xl text-sm font-bold shadow-sm">📥 AutoCAD (.DXF) 다운로드</button>
             </div>
           </div>
         </div>
@@ -5238,7 +5202,6 @@
       const toolErase = document.getElementById("cad-tool-erase");
       const clearBtn = document.getElementById("cad-clear-btn");
       const exportBtn = document.getElementById("cad-export-dxf");
-      const pageSelect = document.getElementById("cad-page-select");
 
       if (!dropzone) return;
 
@@ -5250,8 +5213,6 @@
       let isDrawing = false;
       let startX = 0;
       let startY = 0;
-      let pdfDoc = null;
-      let currentPdfFileName = "cad_drawing";
 
       // Dropzone events
       dropzone.addEventListener("click", () => fileInput.click());
@@ -5266,165 +5227,14 @@
         e.preventDefault();
         dropzone.classList.remove("border-orange-500", "bg-opacity-10");
         const file = e.dataTransfer.files[0];
-        if (file) handleUploadedCadFile(file);
+        if (file && file.type.startsWith("image/")) {
+          processImageFile(file);
+        }
       });
       fileInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
-        if (file) handleUploadedCadFile(file);
+        if (file) processImageFile(file);
       });
-
-      function handleUploadedCadFile(file) {
-        currentPdfFileName = file.name.substring(0, file.name.lastIndexOf('.')) || "cad_drawing";
-        if (file.name.toLowerCase().endsWith(".pdf") || file.type === "application/pdf") {
-          processPdfFile(file);
-        } else {
-          processImageFile(file);
-        }
-      }
-
-      async function processPdfFile(file) {
-        try {
-          if (!window.pdfjsLib) {
-            alert("PDF 처리 라이브러리를 로드 중입니다. 잠시 후 다시 시도해 주세요.");
-            return;
-          }
-          const arrayBuffer = await file.arrayBuffer();
-          pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          
-          if (pdfDoc.numPages > 1) {
-            pageSelect.innerHTML = "";
-            for (let i = 1; i <= pdfDoc.numPages; i++) {
-              const opt = document.createElement("option");
-              opt.value = i;
-              opt.textContent = `📄 ${i}페이지`;
-              pageSelect.appendChild(opt);
-            }
-            pageSelect.classList.remove("hidden");
-          } else {
-            pageSelect.classList.add("hidden");
-          }
-          
-          await renderPdfPage(1);
-        } catch (err) {
-          console.error("PDF 로드 에러:", err);
-          alert("PDF 도면 로드에 실패했습니다. 이미지 형식으로 변환 후 업로드해 주세요.");
-        }
-      }
-
-      async function renderPdfPage(pageNum) {
-        if (!pdfDoc) return;
-        const page = await pdfDoc.getPage(pageNum);
-        const viewport = page.getViewport({ scale: 2.0 });
-        
-        canvas.width = Math.round(viewport.width);
-        canvas.height = Math.round(viewport.height);
-        
-        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-        
-        const snapshot = new Image();
-        snapshot.onload = async function() {
-          originalImage = snapshot;
-          userLines = [];
-          ocrTexts = [];
-          workspace.classList.remove("hidden");
-
-          // 1. Extract Vector Lines from PDF Operators
-          try {
-            const opList = await page.getOperatorList();
-            const pdfLines = [];
-            let currentPt = null;
-
-            for (let i = 0; i < opList.fnArray.length; i++) {
-              const fn = opList.fnArray[i];
-              const args = opList.argsArray[i];
-              
-              if (fn === window.pdfjsLib.OPS.moveTo && args && args.length >= 2) {
-                const pt = viewport.convertToViewportPoint(args[0], args[1]);
-                currentPt = { x: pt[0], y: pt[1] };
-              } else if (fn === window.pdfjsLib.OPS.lineTo && args && args.length >= 2 && currentPt) {
-                const pt = viewport.convertToViewportPoint(args[0], args[1]);
-                pdfLines.push({ x1: currentPt.x, y1: currentPt.y, x2: pt[0], y2: pt[1] });
-                currentPt = { x: pt[0], y: pt[1] };
-              } else if (fn === window.pdfjsLib.OPS.constructPath && args && args[0] && args[1]) {
-                const ops = args[0];
-                const pts = args[1];
-                let ptIdx = 0;
-                let pathStart = null;
-                for (let j = 0; j < ops.length; j++) {
-                  const op = ops[j];
-                  if (op === window.pdfjsLib.OPS.moveTo && ptIdx + 1 < pts.length) {
-                    const pt = viewport.convertToViewportPoint(pts[ptIdx], pts[ptIdx+1]);
-                    currentPt = { x: pt[0], y: pt[1] };
-                    pathStart = currentPt;
-                    ptIdx += 2;
-                  } else if (op === window.pdfjsLib.OPS.lineTo && ptIdx + 1 < pts.length && currentPt) {
-                    const pt = viewport.convertToViewportPoint(pts[ptIdx], pts[ptIdx+1]);
-                    pdfLines.push({ x1: currentPt.x, y1: currentPt.y, x2: pt[0], y2: pt[1] });
-                    currentPt = { x: pt[0], y: pt[1] };
-                    ptIdx += 2;
-                  } else if (op === window.pdfjsLib.OPS.closePath && currentPt && pathStart) {
-                    pdfLines.push({ x1: currentPt.x, y1: currentPt.y, x2: pathStart.x, y2: pathStart.y });
-                    currentPt = pathStart;
-                  } else if (op === window.pdfjsLib.OPS.curveTo2 || op === window.pdfjsLib.OPS.curveTo3) {
-                    ptIdx += 4;
-                  } else if (op === window.pdfjsLib.OPS.curveTo) {
-                    ptIdx += 6;
-                  } else if (op === window.pdfjsLib.OPS.rectangle && ptIdx + 3 < pts.length) {
-                    const rx = pts[ptIdx], ry = pts[ptIdx+1], rw = pts[ptIdx+2], rh = pts[ptIdx+3];
-                    const p1 = viewport.convertToViewportPoint(rx, ry);
-                    const p2 = viewport.convertToViewportPoint(rx + rw, ry + rh);
-                    pdfLines.push({ x1: p1[0], y1: p1[1], x2: p2[0], y2: p1[1] });
-                    pdfLines.push({ x1: p2[0], y1: p1[1], x2: p2[0], y2: p2[1] });
-                    pdfLines.push({ x1: p2[0], y1: p2[1], x2: p1[0], y2: p2[1] });
-                    pdfLines.push({ x1: p1[0], y1: p2[1], x2: p1[0], y2: p1[1] });
-                    ptIdx += 4;
-                  }
-                }
-              }
-            }
-            if (pdfLines.length > 0) {
-              userLines = pdfLines;
-            }
-          } catch(e) {
-            console.warn("PDF vector line extraction notice:", e);
-          }
-
-          // 2. Extract Text & Position boxes from PDF
-          try {
-            const textContent = await page.getTextContent();
-            const pdfTexts = [];
-            textContent.items.forEach(item => {
-              const text = item.str.trim();
-              if (!text || !/[a-zA-Z0-9가-힣]+/.test(text)) return;
-              const tx = window.pdfjsLib.Util.transform(viewport.transform, item.transform);
-              const x = Math.round(tx[4]);
-              const y = Math.round(tx[5] - (item.height * viewport.scale));
-              const w = Math.max(Math.round(item.width * viewport.scale), 10);
-              const h = Math.max(Math.round(item.height * viewport.scale), 10);
-              pdfTexts.push({ text, x, y: canvas.height - y - h, w, h, angle: 0 });
-            });
-            if (pdfTexts.length > 0) {
-              ocrTexts = pdfTexts;
-            }
-          } catch(e) {
-            console.warn("PDF text extraction notice:", e);
-          }
-
-          if (userLines.length === 0) {
-            detectLines();
-          }
-
-          renderTextList();
-          applyBinarization();
-        };
-        snapshot.src = canvas.toDataURL();
-      }
-
-      if (pageSelect) {
-        pageSelect.addEventListener("change", (e) => {
-          renderPdfPage(parseInt(e.target.value, 10));
-        });
-      }
 
       function processImageFile(file) {
         const reader = new FileReader();
@@ -6116,7 +5926,7 @@
           const y1 = canvas.height - line.y1;
           const y2 = canvas.height - line.y2;
           
-          dxf += `0\nLINE\n8\nWALLS_LINES\n62\n7\n`;
+          dxf += `0\nLINE\n8\nSketchLines\n`;
           dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`; // Point 1
           dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`; // Point 2
         });
@@ -6127,9 +5937,10 @@
           const midY = canvas.height - (item.y + item.h / 2); // Flip Y of the center point
           const dxfAngle = -(item.angle || 0.0); // Invert screen Y rotation for Cartesian space
           
-          const textHeight = Math.max(item.h * 0.3, 3.5);
+          // Scale down text height to look proportional (just like in the original sketch)
+          const textHeight = Math.max(item.h * 0.22, 2.8);
           
-          dxf += `0\nTEXT\n8\nDIMENSIONS_TEXT\n62\n4\n`;
+          dxf += `0\nTEXT\n8\nSketchDimensions\n`;
           dxf += `10\n${midX.toFixed(3)}\n20\n${midY.toFixed(3)}\n30\n0.0\n`; // Location (base point)
           dxf += `40\n${textHeight.toFixed(3)}\n`; // Dynamic text height
           dxf += `1\n${item.text}\n`; // Text value
@@ -6146,7 +5957,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${currentPdfFileName}_배치도면_캐드변환.dxf`;
+        a.download = `converted_sketch.dxf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
