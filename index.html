@@ -5506,13 +5506,6 @@
         tempCanvas.height = canvas.height;
         const tempCtx = tempCanvas.getContext("2d");
         tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-        
-        // Mask OCR text boxes to avoid treating text/numbers as line segments
-        tempCtx.fillStyle = "#FFFFFF";
-        const padding = 6;
-        ocrTexts.forEach(box => {
-          tempCtx.fillRect(box.x - padding, box.y - padding, box.w + padding * 2, box.h + padding * 2);
-        });
 
         const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
@@ -6017,12 +6010,12 @@
             dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
             dxf += `0\nSECTION\n2\nENTITIES\n`;
 
-            // Export Lines (straight wall and structural vectors)
+            // Export Lines (straight wall and structural vectors with AutoCAD visible color 7)
             userLines.forEach(line => {
               const y1 = canvas.height - line.y1;
               const y2 = canvas.height - line.y2;
               
-              dxf += `0\nLINE\n8\nCadLines\n`;
+              dxf += `0\nLINE\n8\nCadLines\n62\n7\n`;
               dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`;
               dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`;
             });
@@ -6455,12 +6448,6 @@
         const tempCtx = tempCanvas.getContext("2d");
         tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
 
-        tempCtx.fillStyle = "#FFFFFF";
-        const padding = 6;
-        ocrTexts.forEach(box => {
-          tempCtx.fillRect(box.x - padding, box.y - padding, box.w + padding * 2, box.h + padding * 2);
-        });
-
         const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
         const w = canvas.width;
@@ -6620,7 +6607,7 @@
             userLines.forEach(line => {
               const y1 = canvas.height - line.y1;
               const y2 = canvas.height - line.y2;
-              dxf += `0\nLINE\n8\nVTracerVectors\n`;
+              dxf += `0\nLINE\n8\nVTracerVectors\n62\n7\n`;
               dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`;
               dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`;
             });
