@@ -824,7 +824,6 @@ body.main_intro_lock {
   }
 }
 .site-header #logo a {
-  text-shadow: 2px 2px 6px rgba(221, 88, 40, 0.7), 0 0 10px rgba(221, 88, 40, 0.55) !important;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -833,20 +832,39 @@ body.main_intro_lock {
   letter-spacing: 0.05em;
   line-height: 1;
   white-space: nowrap;
+  background: transparent !important;
+  background-color: transparent !important;
+  text-shadow: 2px 2px 4px #dd5828, -1px -1px 3px rgba(221, 88, 40, 0.6) !important;
 }
 @media screen and (min-width: 961px) {
   .site-header #logo a {
-  text-shadow: 2px 2px 6px rgba(221, 88, 40, 0.7), 0 0 10px rgba(221, 88, 40, 0.55) !important;
-    height: 3.8rem;
-    font-size: 2.4rem;
-  }
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: #141414;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  white-space: nowrap;
+  background: transparent !important;
+  background-color: transparent !important;
+  text-shadow: 2px 2px 4px #dd5828, -1px -1px 3px rgba(221, 88, 40, 0.6) !important;
+}
 }
 @media screen and (max-width: 960px) {
   .site-header #logo a {
-  text-shadow: 2px 2px 6px rgba(221, 88, 40, 0.7), 0 0 10px rgba(221, 88, 40, 0.55) !important;
-    height: 3rem;
-    font-size: 1.8rem;
-  }
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: #141414;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  white-space: nowrap;
+  background: transparent !important;
+  background-color: transparent !important;
+  text-shadow: 2px 2px 4px #dd5828, -1px -1px 3px rgba(221, 88, 40, 0.6) !important;
+}
 }
 .site-header .header-actions {
   margin-left: auto;
