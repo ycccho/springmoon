@@ -5244,6 +5244,7 @@
 
       function processCadFile(file) {
         if (!file) return;
+        uploadedFileName = file.name.replace(/\.[^/.]+$/, "") || "cad_drawing";
         const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
         const isImg = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp)$/i.test(file.name);
 
@@ -5838,53 +5839,83 @@
       exportBtn.addEventListener("click", () => {
         if (!originalImage) return;
 
-        // Create standard minimal DXF structure
-        let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
-        dxf += `0\nSECTION\n2\nTABLES\n0\nENDSEC\n`;
-        dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
-        dxf += `0\nSECTION\n2\nENTITIES\n`;
+      let uploadedFileName = "layout_drawing";
 
-        // Export Lines (detected/drawn wall vectors)
-        userLines.forEach(line => {
-          const y1 = canvas.height - line.y1;
-          const y2 = canvas.height - line.y2;
-          
-          dxf += `0\nLINE\n8\nSketchLines\n`;
-          dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`; // Point 1
-          dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`; // Point 2
-        });
+      // DXF Exporter (Exports CAD vector lines and OCR text entities)
+      exportBtn.addEventListener("click", () => {
+        if (!originalImage) {
+          alert("먼저 도면 파일(JPG, PNG, PDF)을 업로드해주세요.");
+          return;
+        }
 
-        // Export Texts (correctly rotated and positioned at bounding box center)
-        ocrTexts.forEach(item => {
-          const midX = item.x + item.w / 2;
-          const midY = canvas.height - (item.y + item.h / 2); // Flip Y of the center point
-          const dxfAngle = -(item.angle || 0.0); // Invert screen Y rotation for Cartesian space
-          
-          // Scale down text height to look proportional (just like in the original sketch)
-          const textHeight = Math.max(item.h * 0.22, 2.8);
-          
-          dxf += `0\nTEXT\n8\nSketchDimensions\n`;
-          dxf += `10\n${midX.toFixed(3)}\n20\n${midY.toFixed(3)}\n30\n0.0\n`; // Location (base point)
-          dxf += `40\n${textHeight.toFixed(3)}\n`; // Dynamic text height
-          dxf += `1\n${item.text}\n`; // Text value
-          dxf += `50\n${dxfAngle.toFixed(3)}\n`; // Rotation angle in degrees
-          dxf += `72\n4\n`; // Middle-center horizontal alignment
-          dxf += `73\n2\n`; // Middle vertical alignment
-          dxf += `11\n${midX.toFixed(3)}\n21\n${midY.toFixed(3)}\n31\n0.0\n`; // Alignment point (required for MC)
-        });
+        if (userLines.length === 0 && ocrTexts.length === 0) {
+          alert("추출된 CAD 라인이나 수치 텍스트가 없습니다. 도면을 다시 업로드해주시거나 잠시 후 다시 시도해 주세요.");
+          return;
+        }
 
-        dxf += `0\nENDSEC\n0\nEOF\n`;
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = "⌛ DXF 파일 생성 중...";
+        exportBtn.disabled = true;
 
-        // Download Blob
-        const blob = new Blob([dxf], { type: "application/dxf" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `converted_sketch.dxf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        setTimeout(() => {
+          try {
+            let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
+            dxf += `0\nSECTION\n2\nTABLES\n0\nENDSEC\n`;
+            dxf += `0\nSECTION\n2\nBLOCKS\n0\nENDSEC\n`;
+            dxf += `0\nSECTION\n2\nENTITIES\n`;
+
+            // Export Lines (detected/drawn wall vectors)
+            userLines.forEach(line => {
+              const y1 = canvas.height - line.y1;
+              const y2 = canvas.height - line.y2;
+              
+              dxf += `0\nLINE\n8\nCadLines\n`;
+              dxf += `10\n${line.x1.toFixed(3)}\n20\n${y1.toFixed(3)}\n30\n0.0\n`;
+              dxf += `11\n${line.x2.toFixed(3)}\n21\n${y2.toFixed(3)}\n31\n0.0\n`;
+            });
+
+            // Export Texts (correctly rotated and positioned)
+            ocrTexts.forEach(item => {
+              const cleanVal = (item.text || "").replace(/[\r\n]+/g, " ");
+              if (!cleanVal) return;
+
+              const midX = item.x + item.w / 2;
+              const midY = canvas.height - (item.y + item.h / 2);
+              const dxfAngle = -(item.angle || 0.0);
+              const textHeight = Math.max(item.h * 0.35, 3.0);
+              
+              dxf += `0\nTEXT\n8\nCadDimensions\n`;
+              dxf += `10\n${midX.toFixed(3)}\n20\n${midY.toFixed(3)}\n30\n0.0\n`;
+              dxf += `40\n${textHeight.toFixed(3)}\n`;
+              dxf += `1\n${cleanVal}\n`;
+              dxf += `50\n${dxfAngle.toFixed(3)}\n`;
+              dxf += `72\n4\n`;
+              dxf += `73\n2\n`;
+              dxf += `11\n${midX.toFixed(3)}\n21\n${midY.toFixed(3)}\n31\n0.0\n`;
+            });
+
+            dxf += `0\nENDSEC\n0\nEOF\n`;
+
+            const blob = new Blob([dxf], { type: "application/dxf;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const safeName = (uploadedFileName || "cad_drawing").replace(/[^a-zA-Z0-9가-힣_-]/g, "_");
+            a.download = `converted_${safeName}.dxf`;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }, 100);
+          } catch(err) {
+            console.error("DXF generation error:", err);
+            alert("DXF 파일 생성 중 오류가 발생했습니다: " + err.message);
+          } finally {
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+          }
+        }, 50);
       });
     }
 
