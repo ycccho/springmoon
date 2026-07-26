@@ -824,6 +824,7 @@ body.main_intro_lock {
   }
 }
 .site-header #logo a {
+  text-shadow: 2px 2px 6px rgba(221, 88, 40, 0.7), 0 0 10px rgba(221, 88, 40, 0.55) !important;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -835,12 +836,14 @@ body.main_intro_lock {
 }
 @media screen and (min-width: 961px) {
   .site-header #logo a {
+  text-shadow: 2px 2px 6px rgba(221, 88, 40, 0.7), 0 0 10px rgba(221, 88, 40, 0.55) !important;
     height: 3.8rem;
     font-size: 2.4rem;
   }
 }
 @media screen and (max-width: 960px) {
   .site-header #logo a {
+  text-shadow: 2px 2px 6px rgba(221, 88, 40, 0.7), 0 0 10px rgba(221, 88, 40, 0.55) !important;
     height: 3rem;
     font-size: 1.8rem;
   }
@@ -961,7 +964,7 @@ body.main_intro_lock {
 .site-footer {
   margin-top: auto;
   color: #c5c5c5;
-  background-color: #141414;
+  background-color: #000000 !important;
   display: flex;
   flex-direction: column;
   line-height: 170%;
@@ -1681,14 +1684,14 @@ body.main_intro_lock {
   font-size: 1.4rem;
   font-weight: 700;
   line-height: 140%;
-  background-color: #f05e21;
+  background-color: #000000 !important;
 }
 .site-quick ul li._03 a::before {
   background: url("../images/quick_icon_03.png") center center no-repeat;
 }
 @media screen and (min-width: 961px) {
   .site-quick ul li._04 a {
-    background-color: #f05e21;
+    background-color: #000000 !important;
   }
 }
 @media screen and (max-width: 960px) {
@@ -2143,7 +2146,8 @@ body.main_intro_lock {
 }
 .main_partner {
   color: #ffffff;
-  background: #f05e21;
+  background: #000000 !important;
+  background-color: #000000 !important;
 }
 .main_partner .common-title {
   font-weight: 400;
@@ -2346,7 +2350,7 @@ body.main_intro_lock {
   display: none;
 }
 .main_interview {
-  background-color: #f05e21;
+  background-color: #000000 !important;
 }
 @media screen and (min-width: 961px) {
   .main_interview {
@@ -8303,7 +8307,7 @@ span.wpcf7-not-valid-tip {
   left: 0;
   width: 0;
   height: 100%;
-  background-color: #f05e21;
+  background-color: #000000 !important;
   z-index: 0;
   transition: width 1.2s ease;
 }
@@ -10364,7 +10368,7 @@ span.wpcf7-not-valid-tip {
 }
 .page-portfolio-detail .portfolio_detail_points,
 .page-interior-detail .portfolio_detail_points {
-  background-color: #f05e21;
+  background-color: #000000 !important;
   color: #ffffff;
   border-radius: 1.2rem;
   padding: 2rem 3rem;
@@ -11116,7 +11120,7 @@ span.wpcf7-not-valid-tip {
 }
 
 .portfolio_detail_points {
-  background-color: #f05e21 !important;
+  background-color: #000000 !important !important;
   color: #ffffff !important;
   border-radius: 1.2rem !important;
   padding: 2rem 3rem !important;
