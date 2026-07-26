@@ -403,6 +403,70 @@ DOCTYPE html>
     </ul> -->
     <a href="#none" class="bt-go-top">위로</a>
   </aside>
+  <!-- 흐르는 파트너 로고 섹션 (푸터 바로 위, 검정색 배경) -->
+  <section class="logo-marquee-section" style="background-color: #000000; padding: 45px 0; overflow: hidden; position: relative; border-top: 1px solid #1f1f1f;">
+    <style>
+      @keyframes marquee-left {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      @keyframes marquee-right {
+        0% { transform: translateX(-50%); }
+        100% { transform: translateX(0); }
+      }
+      .logo-marquee-track img {
+        height: 38px;
+        width: auto;
+        filter: brightness(0) invert(1);
+        opacity: 0.85;
+        transition: opacity 0.3s ease, filter 0.3s ease;
+      }
+      .logo-marquee-track img:hover {
+        opacity: 1 !important;
+      }
+    </style>
+    <div style="width: 100%; overflow: hidden; position: relative;">
+      
+      <!-- 양끝 그라데이션 페이드 효과 -->
+      <div style="position: absolute; top: 0; left: 0; width: 80px; height: 100%; background: linear-gradient(to right, #000000, transparent); z-index: 2; pointer-events: none;"></div>
+      <div style="position: absolute; top: 0; right: 0; width: 80px; height: 100%; background: linear-gradient(to left, #000000, transparent); z-index: 2; pointer-events: none;"></div>
+
+      <!-- 1단 흐르는 트랙 (좌측 방향) -->
+      <div class="logo-marquee-track" style="display: flex; gap: 50px; margin-bottom: 22px; width: max-content; animation: marquee-left 40s linear infinite;">
+        <div style="display: flex; gap: 50px; align-items: center;">
+          <img src="https://indecompany2.mycafe24.com/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_01.png" alt="파트너사 로고" />
+          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_01.png" alt="파트너사 로고" />
+          <img src="https://indecompany2.mycafe24.com/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_02.png" alt="파트너사 로고" />
+          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_02.png" alt="파트너사 로고" />
+        </div>
+        <!-- 루프 반복을 위한 복사본 -->
+        <div style="display: flex; gap: 50px; align-items: center;">
+          <img src="https://indecompany2.mycafe24.com/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_01.png" alt="파트너사 로고" />
+          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_01.png" alt="파트너사 로고" />
+          <img src="https://indecompany2.mycafe24.com/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_02.png" alt="파트너사 로고" />
+          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_02.png" alt="파트너사 로고" />
+        </div>
+      </div>
+
+      <!-- 2단 흐르는 트랙 (우측 방향) -->
+      <div class="logo-marquee-track" style="display: flex; gap: 50px; width: max-content; animation: marquee-right 40s linear infinite;">
+        <div style="display: flex; gap: 50px; align-items: center;">
+          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_02.png" alt="파트너사 로고" />
+          <img src="https://indecompany2.mycafe24.com/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_02.png" alt="파트너사 로고" />
+          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_01.png" alt="파트너사 로고" />
+          <img src="https://indecompany2.mycafe24.com/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_01.png" alt="파트너사 로고" />
+        </div>
+        <!-- 루프 반복을 위한 복사본 -->
+        <div style="display: flex; gap: 50px; align-items: center;">
+          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_02.png" alt="파트너사 로고" />
+          <img src="https://indecompany2.mycafe24.com/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_02.png" alt="파트너사 로고" />
+          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_01.png" alt="파트너사 로고" />
+          <img src="https://indecompany2.mycafe24.com/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_01.png" alt="파트너사 로고" />
+        </div>
+      </div>
+
+    </div>
+  </section>
   <footer class="site-footer">
     <div class="common-inner">
       <h2 class="footer-logo">INDECOMPANY</h2>
