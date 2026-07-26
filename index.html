@@ -5158,45 +5158,26 @@
 
           <!-- Configuration and Exporter sidebar -->
           <div class="lg:col-span-4 space-y-6">
-            <!-- CAD Line Extraction Settings -->
-            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
+            <!-- Summary Info -->
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-3">
               <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider flex items-center justify-between">
-                <span>📐 CAD 도면 선 추출 설정</span>
-                <span id="cad-pdf-badge" class="hidden text-[10px] bg-blue-100 text-blue-700 dark-mode:bg-blue-900/50 dark-mode:text-blue-300 px-2 py-0.5 rounded font-extrabold">✨ 벡터 PDF</span>
+                <span>🤖 AI 도면 고해상도 분석</span>
+                <span id="cad-status-badge" class="text-[10px] bg-green-100 text-green-700 dark-mode:bg-green-950/50 dark-mode:text-green-300 px-2 py-0.5 rounded font-extrabold">자동 추출 준비 완료</span>
               </h4>
-
-              <div class="space-y-3">
-                <div>
-                  <label class="block text-xs font-bold text-gray-655 dark-mode:text-gray-355 mb-1">선 추출 범위 모드</label>
-                  <select id="cad-extract-mode" class="w-full text-xs p-2 bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-lg font-bold text-gray-800 dark-mode:text-gray-200">
-                    <option value="walls">🧱 주요 구조체/벽체선만 (추천)</option>
-                    <option value="all">📐 전체 도면 라인 (격자/치수 포함)</option>
-                  </select>
+              <div class="grid grid-cols-2 gap-2 text-center text-xs pt-1">
+                <div class="p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-800">
+                  <div class="text-gray-400 text-[10px] font-bold">감지된 수치/텍스트</div>
+                  <div id="cad-stat-count-text" class="text-lg font-black text-blue-600 dark-mode:text-blue-400 font-mono">0개</div>
                 </div>
-
-                <div>
-                  <div class="flex justify-between text-xs font-bold text-gray-655 dark-mode:text-gray-355 mb-1">
-                    <span>최소 선 길이 필터 (노이즈 제거)</span>
-                    <span id="cad-minlen-val">60px</span>
-                  </div>
-                  <input type="range" id="cad-minlen-slider" min="20" max="200" value="60" class="w-full accent-orange-500">
-                </div>
-
-                <div class="flex justify-between text-xs font-bold text-gray-655 dark-mode:text-gray-355 pt-1">
-                  <span>흑백 경계 임계값</span>
-                  <span id="cad-threshold-val">128</span>
-                </div>
-                <input type="range" id="cad-threshold-slider" min="0" max="255" value="128" class="w-full accent-orange-500">
-
-                <div class="pt-2 flex gap-2">
-                  <button id="cad-auto-detect-btn-side" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all text-white rounded-xl text-xs font-bold shadow-sm">🤖 캐드 선 추출 실행</button>
-                  <button id="cad-clear-lines-btn" class="px-3 py-2 bg-gray-100 dark-mode:bg-gray-700 hover:bg-gray-200 text-gray-700 dark-mode:text-gray-300 rounded-xl text-xs font-bold transition-all">🧹 선 초기화</button>
+                <div class="p-3 bg-gray-50 dark-mode:bg-gray-900 rounded-xl border border-gray-150 dark-mode:border-gray-800">
+                  <div class="text-gray-400 text-[10px] font-bold">추출된 CAD 라인</div>
+                  <div id="cad-stat-count-line" class="text-lg font-black text-orange-500 font-mono">0개</div>
                 </div>
               </div>
             </div>
 
             <!-- Detected values list -->
-            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[280px]">
+            <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4 flex flex-col h-[320px]">
               <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">수치 치수 목록 (OCR)</h4>
               <div id="cad-text-list" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
                 <div class="text-center text-gray-400 py-12">텍스트가 없습니다.</div>
@@ -5206,7 +5187,7 @@
             <!-- Exporter -->
             <div class="bg-white dark-mode:bg-gray-800 p-6 rounded-xl border border-gray-200 dark-mode:border-gray-700 shadow-sm space-y-4">
               <h4 class="font-bold text-gray-800 dark-mode:text-gray-100 text-xs uppercase tracking-wider">파일 다운로드</h4>
-              <button id="cad-export-dxf" class="w-full py-2 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white rounded-xl text-sm font-bold shadow-sm">📥 AutoCAD (.DXF) 다운로드</button>
+              <button id="cad-export-dxf" class="w-full py-3 bg-orange-500 hover:bg-orange-655 active:scale-[0.98] transition-all text-white rounded-xl text-sm font-bold shadow-md">📥 AutoCAD (.DXF) 다운로드</button>
             </div>
           </div>
         </div>
@@ -5284,7 +5265,8 @@
               pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
               pdfjsLib.getDocument(typedarray).promise.then(pdf => {
                 pdf.getPage(1).then(page => {
-                  const scale = 2.0;
+                  // Render at 3.0x high resolution for maximum CAD precision
+                  const scale = 3.0;
                   const viewport = page.getViewport({ scale: scale });
                   const tempCanvas = document.createElement("canvas");
                   const tempCtx = tempCanvas.getContext("2d");
@@ -5342,25 +5324,18 @@
       function setupCanvasWithImage(img, base64Str) {
         originalImage = img;
         
-        // Set canvas size (keep Aspect Ratio, limit max width to 800)
-        const maxW = 800;
-        let w = img.width;
-        let h = img.height;
-        if (w > maxW) {
-          h = Math.round((maxW * h) / w);
-          w = maxW;
-        }
-        canvas.width = w;
-        canvas.height = h;
+        // Preserve 100% full uncompressed resolution for maximum OCR and CAD accuracy
+        canvas.width = img.width;
+        canvas.height = img.height;
 
         userLines = [];
         ocrTexts = [];
         workspace.classList.remove("hidden");
         
-        // Render crisp original image on canvas (no destructive line thresholding!)
+        // Render crisp original image on canvas
         renderCanvas();
         
-        // Auto-run OCR and CAD line extraction on upload!
+        // Auto-run OCR and CAD line extraction at full resolution!
         if (base64Str) {
           fetchOcrData(base64Str).then(() => {
             detectLines();
@@ -5382,9 +5357,11 @@
       }
 
       function drawOverlays() {
+        const scaleFactor = Math.max(canvas.width / 1000, 1.0);
+
         // Draw user drawn/detected lines
         ctx.strokeStyle = "#F97316";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = Math.max(Math.round(2 * scaleFactor), 2);
         userLines.forEach(line => {
           ctx.beginPath();
           ctx.moveTo(line.x1, line.y1);
@@ -5393,7 +5370,8 @@
         });
 
         // Draw OCR text bounding boxes (with rotation support)
-        ctx.font = "bold 10px monospace";
+        const fontSize = Math.max(Math.round(11 * scaleFactor), 11);
+        ctx.font = `bold ${fontSize}px monospace`;
         
         ocrTexts.forEach(item => {
           ctx.save();
@@ -5405,9 +5383,9 @@
           ctx.rotate((item.angle || 0) * Math.PI / 180);
           
           // Draw rect centered
-          ctx.strokeStyle = "rgba(59, 130, 246, 0.6)";
-          ctx.lineWidth = 1;
-          ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+          ctx.strokeStyle = "rgba(59, 130, 246, 0.8)";
+          ctx.lineWidth = Math.max(Math.round(1.5 * scaleFactor), 1);
+          ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
           ctx.fillRect(-item.w / 2, -item.h / 2, item.w, item.h);
           ctx.strokeRect(-item.w / 2, -item.h / 2, item.w, item.h);
           
@@ -5439,7 +5417,7 @@
         
         // Mask OCR text boxes to prevent text/numbers from becoming line noise
         tempCtx.fillStyle = "#FFFFFF";
-        const padding = 6;
+        const padding = Math.max(Math.round(canvas.width * 0.003), 4);
         ocrTexts.forEach(box => {
           tempCtx.fillRect(box.x - padding, box.y - padding, box.w + padding * 2, box.h + padding * 2);
         });
@@ -5448,11 +5426,8 @@
         const data = imgData.data;
         const w = canvas.width;
         const h = canvas.height;
-        const threshold = parseInt(thresholdSlider.value, 10);
-        const minLenSlider = document.getElementById("cad-minlen-slider");
-        const minLen = parseInt(minLenSlider ? minLenSlider.value : 60, 10);
-        const modeSelect = document.getElementById("cad-extract-mode");
-        const mode = modeSelect ? modeSelect.value : "walls";
+        const threshold = 180;
+        const minLen = Math.max(Math.round(w * 0.025), 35); // Scale min line length dynamically based on image resolution
 
         const bin = new Uint8Array(w * h);
         for (let i = 0; i < data.length; i += 4) {
@@ -5509,6 +5484,7 @@
         }
 
         // 3. Merge adjacent parallel lines (due to line thickness)
+        const thicknessTol = Math.max(Math.round(w * 0.0025), 3);
         const mergedH = [];
         const hLines = rawLines.filter(l => l.type === 'H').sort((a, b) => a.y1 - b.y1 || a.x1 - b.x1);
         
@@ -5516,7 +5492,7 @@
           let merged = false;
           for (let i = 0; i < mergedH.length; i++) {
             const m = mergedH[i];
-            if (Math.abs(m.y - line.y1) <= 3 && !(line.x2 < m.x1 - 8 || line.x1 > m.x2 + 8)) {
+            if (Math.abs(m.y - line.y1) <= thicknessTol && !(line.x2 < m.x1 - 10 || line.x1 > m.x2 + 10)) {
               m.x1 = Math.min(m.x1, line.x1);
               m.x2 = Math.max(m.x2, line.x2);
               m.y = Math.round((m.y + line.y1) / 2);
@@ -5536,7 +5512,7 @@
           let merged = false;
           for (let i = 0; i < mergedV.length; i++) {
             const m = mergedV[i];
-            if (Math.abs(m.x - line.x1) <= 3 && !(line.y2 < m.y1 - 8 || line.y1 > m.y2 + 8)) {
+            if (Math.abs(m.x - line.x1) <= thicknessTol && !(line.y2 < m.y1 - 10 || line.y1 > m.y2 + 10)) {
               m.y1 = Math.min(m.y1, line.y1);
               m.y2 = Math.max(m.y2, line.y2);
               m.x = Math.round((m.x + line.x1) / 2);
@@ -5553,19 +5529,12 @@
         mergedH.forEach(l => finalLines.push({ x1: l.x1, y1: l.y, x2: l.x2, y2: l.y }));
         mergedV.forEach(l => finalLines.push({ x1: l.x, y1: l.y1, x2: l.x, y2: l.y2 }));
 
-        // Filter outer margin frame if 'walls' mode selected
-        if (mode === "walls") {
-          const borderMargin = 12;
-          finalLines = finalLines.filter(l => {
-            const isTopBorder = (l.y1 <= borderMargin && l.y2 <= borderMargin);
-            const isBottomBorder = (l.y1 >= h - borderMargin && l.y2 >= h - borderMargin);
-            const isLeftBorder = (l.x1 <= borderMargin && l.x2 <= borderMargin);
-            const isRightBorder = (l.x1 >= w - borderMargin && l.x2 >= w - borderMargin);
-            return !isTopBorder && !isBottomBorder && !isLeftBorder && !isRightBorder;
-          });
-        }
-
         userLines = finalLines;
+        
+        // Update summary badges
+        const statLine = document.getElementById("cad-stat-count-line");
+        if (statLine) statLine.textContent = userLines.length + "개";
+
         renderCanvas();
       }
 
@@ -5713,6 +5682,9 @@
           }
 
           ocrTexts = wordsList;
+          const statText = document.getElementById("cad-stat-count-text");
+          if (statText) statText.textContent = ocrTexts.length + "개";
+
           renderTextList();
           renderCanvas();
 
