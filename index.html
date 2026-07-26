@@ -5455,7 +5455,7 @@
         const tempCtx = tempCanvas.getContext("2d");
         tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
         
-        // Mask OCR text boxes to avoid treating text/numbers as lines
+        // Mask OCR text boxes to avoid treating text/numbers as line segments
         tempCtx.fillStyle = "#FFFFFF";
         const padding = 6;
         ocrTexts.forEach(box => {
@@ -5499,111 +5499,88 @@
 
         // Compute Otsu's optimal adaptive threshold for this specific drawing
         const otsuVal = getOtsuThreshold(grayData, totalPixels);
-        const lineThreshold = Math.min(otsuVal + 15, 220);
+        const lineThreshold = Math.min(otsuVal + 20, 230);
 
-        // Binary matrix: 1 = Line, 0 = Background
-        const bin = new Uint8Array(totalPixels);
-        for (let i = 0; i < totalPixels; i++) {
-          bin[i] = grayData[i] < lineThreshold ? 1 : 0;
-        }
+        const visited = new Uint8Array(totalPixels);
+        const allVectorLines = [];
 
-        const rawLines = [];
-        const minLen = Math.max(Math.round(w * 0.02), 25); // Minimum line length filter
+        // Full Contour Path Tracer for ALL shapes, rectangles, diagonal lines, and boundaries
+        for (let y = 0; y < h; y += 2) {
+          for (let x = 0; x < w; x += 2) {
+            const idx = y * w + x;
+            if (grayData[idx] < lineThreshold && !visited[idx]) {
+              const path = tracePath8(x, y, w, h, grayData, visited, lineThreshold);
+              
+              if (path.length >= 8) {
+                // Simplify path using Ramer-Douglas-Peucker (RDP) algorithm
+                const simplified = ramerDouglasPeucker(path, 1.8);
+                
+                for (let i = 0; i < simplified.length - 1; i++) {
+                  let p1 = simplified[i];
+                  let p2 = simplified[i + 1];
+                  
+                  const dx = p2.x - p1.x;
+                  const dy = p2.y - p1.y;
+                  const dist = Math.hypot(dx, dy);
+                  if (dist < 3) continue; // Skip micro noise
 
-        // 1. Horizontal Projection Scan
-        for (let y = 0; y < h; y++) {
-          let runStart = -1;
-          for (let x = 0; x < w; x++) {
-            const isL = bin[y * w + x];
-            if (isL && runStart === -1) {
-              runStart = x;
-            } else if (!isL && runStart !== -1) {
-              const len = x - runStart;
-              if (len >= minLen) {
-                rawLines.push({ x1: runStart, y1: y, x2: x - 1, y2: y, type: 'H' });
+                  const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
+                  let x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
+
+                  // Snap near-horizontal or near-vertical lines for crisp precision
+                  if (angle < 8 || angle > 172) {
+                    const avgY = (y1 + y2) / 2;
+                    y1 = avgY;
+                    y2 = avgY;
+                  } else if (Math.abs(angle - 90) < 8) {
+                    const avgX = (x1 + x2) / 2;
+                    x1 = avgX;
+                    x2 = avgX;
+                  }
+
+                  allVectorLines.push({ x1, y1, x2, y2 });
+                }
               }
-              runStart = -1;
-            }
-          }
-          if (runStart !== -1) {
-            const len = w - runStart;
-            if (len >= minLen) {
-              rawLines.push({ x1: runStart, y1: y, x2: w - 1, y2: y, type: 'H' });
             }
           }
         }
 
-        // 2. Vertical Projection Scan
-        for (let x = 0; x < w; x++) {
-          let runStart = -1;
-          for (let y = 0; y < h; y++) {
-            const isL = bin[y * w + x];
-            if (isL && runStart === -1) {
-              runStart = y;
-            } else if (!isL && runStart !== -1) {
-              const len = y - runStart;
-              if (len >= minLen) {
-                rawLines.push({ x1: x, y1: runStart, x2: x, y2: y - 1, type: 'V' });
-              }
-              runStart = -1;
-            }
-          }
-          if (runStart !== -1) {
-            const len = h - runStart;
-            if (len >= minLen) {
-              rawLines.push({ x1: x, y1: runStart, x2: x, y2: h - 1, type: 'V' });
-            }
-          }
-        }
-
-        // 3. Merge parallel thick wall strokes
-        const thicknessTol = Math.max(Math.round(w * 0.003), 4);
-        const mergedH = [];
-        const hLines = rawLines.filter(l => l.type === 'H').sort((a, b) => a.y1 - b.y1 || a.x1 - b.x1);
-        
-        hLines.forEach(line => {
-          let merged = false;
-          for (let i = 0; i < mergedH.length; i++) {
-            const m = mergedH[i];
-            if (Math.abs(m.y - line.y1) <= thicknessTol && !(line.x2 < m.x1 - 10 || line.x1 > m.x2 + 10)) {
-              m.x1 = Math.min(m.x1, line.x1);
-              m.x2 = Math.max(m.x2, line.x2);
-              m.y = Math.round((m.y + line.y1) / 2);
-              merged = true;
-              break;
-            }
-          }
-          if (!merged) {
-            mergedH.push({ x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y1, y: line.y1 });
-          }
-        });
-
-        const mergedV = [];
-        const vLines = rawLines.filter(l => l.type === 'V').sort((a, b) => a.x1 - b.x1 || a.y1 - b.y1);
-
-        vLines.forEach(line => {
-          let merged = false;
-          for (let i = 0; i < mergedV.length; i++) {
-            const m = mergedV[i];
-            if (Math.abs(m.x - line.x1) <= thicknessTol && !(line.y2 < m.y1 - 10 || line.y1 > m.y2 + 10)) {
-              m.y1 = Math.min(m.y1, line.y1);
-              m.y2 = Math.max(m.y2, line.y2);
-              m.x = Math.round((m.x + line.x1) / 2);
-              merged = true;
-              break;
-            }
-          }
-          if (!merged) {
-            mergedV.push({ x1: line.x1, y1: line.y1, x2: line.x1, y2: line.y2, x: line.x1 });
-          }
-        });
-
-        let finalLines = [];
-        mergedH.forEach(l => finalLines.push({ x1: l.x1, y1: l.y, x2: l.x2, y2: l.y }));
-        mergedV.forEach(l => finalLines.push({ x1: l.x, y1: l.y1, x2: l.x, y2: l.y2 }));
-
-        userLines = finalLines;
+        userLines = allVectorLines;
         renderCanvas();
+      }
+
+      function tracePath8(startX, startY, w, h, grayData, visited, threshold) {
+        const path = [{ x: startX, y: startY }];
+        visited[startY * w + startX] = 1;
+        let cx = startX;
+        let cy = startY;
+        let tracing = true;
+
+        const dirs = [
+          { dx: 1, dy: 0 }, { dx: 1, dy: 1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 1 },
+          { dx: -1, dy: 0 }, { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 }
+        ];
+
+        while (tracing) {
+          let foundNext = false;
+          for (let i = 0; i < dirs.length; i++) {
+            const nx = cx + dirs[i].dx;
+            const ny = cy + dirs[i].dy;
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              const nIdx = ny * w + nx;
+              if (!visited[nIdx] && grayData[nIdx] < threshold) {
+                visited[nIdx] = 1;
+                cx = nx;
+                cy = ny;
+                path.push({ x: cx, y: cy });
+                foundNext = true;
+                break;
+              }
+            }
+          }
+          if (!foundNext) tracing = false;
+        }
+        return path;
       }
 
       // Auto detect button listener
