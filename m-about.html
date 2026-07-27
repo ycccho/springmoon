@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>About Us | MOONWALK DESIGN 문워크디자인</title>
+  <meta name="description" content="문워크디자인 클론 및 실시간 커스텀 에디터 모드 제공 페이지">
+  
+  <!-- Pretendard & Google Fonts -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <style>
+    :root {
+      --font-main: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", sans-serif;
+      --bg-dark: #000000;
+      --bg-card: #141414;
+      --accent-orange: #dd5828;
+      --accent-hover: #f16735;
+      --text-white: #ffffff;
+      --text-muted: #999999;
+      --border-color: #222222;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* =========================================================
+       1. FLOATING EDITOR TOOLBAR (ADMIN MODE)
+       ========================================================= */
+    #admin_editor_bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999999;
+      background: rgba(15, 15, 15, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+      font-size: 14px;
+    }
+    .admin_logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      color: #ff5e00;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+    .admin_logo span {
+      background: #ff5e00;
+      color: #000;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .admin_controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .admin_btn {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .admin_btn:hover {
+      background: #333;
+      border-color: #666;
+    }
+    .admin_btn._primary {
+      background: #ff5e00;
+      border-color: #ff5e00;
+      color: #fff;
+    }
+    .admin_btn._primary:hover {
+      background: #e05300;
+    }
+    .admin_btn._danger {
+      background: #3a1515;
+      border-color: #662222;
+      color: #ff8888;
+    }
+    .admin_btn._danger:hover {
+      background: #501d1d;
+    }
+    .toggle_switch_wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+      background: #1a1a1a;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid #333;
+    }
+    .toggle_switch {
+      width: 40px;
+      height: 22px;
+      background: #444;
+      border-radius: 11px;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .toggle_switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    body.editor-active .toggle_switch {
+      background: #ff5e00;
+    }
+    body.editor-active .toggle_switch::after {
+      transform: translateX(18px);
+    }
+    
+    /* Active Editor Mode Visual Indicators */
+    body.editor-active {
+      padding-top: 54px; /* Space for toolbar */
+    }
+    body.editor-active [contenteditable="true"] {
+      outline: 1.5px dashed rgba(255, 94, 0, 0.7) !important;
+      outline-offset: 4px;
+      border-radius: 4px;
+      cursor: text !important;
+    }
+    body.editor-active [contenteditable="true"]:hover {
+      outline: 2px solid #ff5e00 !important;
+      background: rgba(255, 94, 0, 0.08);
+    }
+    body.editor-active [contenteditable="true"]:focus {
+      outline: 2px solid #00e5ff !important;
+      background: rgba(0, 229, 255, 0.12);
+    }
+
+    /* Section Editor Floating Controls */
+    .section_edit_panel {
+      display: none;
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 8px;
+      gap: 8px;
+      align-items: center;
+      backdrop-filter: blur(8px);
+    }
+    body.editor-active section {
+      position: relative;
+    }
+    body.editor-active section:hover .section_edit_panel {
+      display: flex;
+    }
+    .color_picker_btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .color_picker_btn input[type="color"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    /* Notification Toast */
+    #editor_toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 999999;
+      background: #ff5e00;
+      color: #fff;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    #editor_toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* =========================================================
+       2. MOONWALK CLONE SITE STYLES
+       ========================================================= */
+    .site-wrapper {
+      width: 100%;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Sticky Header */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      transition: top 0.3s ease;
+    }
+    body.editor-active .site-header {
+      top: 52px;
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      height: 70px;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo a {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+      font-family: 'Poppins', sans-serif;
+    }
+    .header-nav ul {
+      display: flex;
+      list-style: none;
+      gap: 36px;
+    }
+    .header-nav a {
+      font-size: 14px;
+      font-weight: 600;
+      color: #d0d0d0;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover {
+      color: #ff5e00;
+    }
+    .bt-header-contact {
+      background: #ff5e00;
+      color: #fff;
+      padding: 9px 22px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .bt-header-contact:hover {
+      background: #e05300;
+      transform: translateY(-2px);
+    }
+
+    /* Hero Visual Section */
+    .main_visual {
+      position: relative;
+      width: 100%;
+      height: 80vh;
+      min-height: 550px;
+      background: #000;
+      overflow: hidden;
+    }
+    .main_visual .swiper-slide {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .main_visual .img_area {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .main_visual .img_area img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.75);
+    }
+    
+    /* Text position styling with quick toggle support */
+    .main_visual .text_area {
+      position: absolute;
+      z-index: 10;
+      max-width: 700px;
+      padding: 0 40px;
+      transition: all 0.3s ease;
+    }
+    .main_visual .text_area.pos-top-left {
+      top: 18%;
+      left: 6%;
+      right: auto;
+      bottom: auto;
+      text-align: left;
+    }
+    .main_visual .text_area.pos-center {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .main_visual .text_area.pos-top-right {
+      top: 18%;
+      right: 6%;
+      left: auto;
+      bottom: auto;
+      text-align: right;
+    }
+
+    .main_visual .badge_sub {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      color: #ff5e00;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .main_visual h2.hero-title {
+      font-size: 2.75rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.3;
+      margin-bottom: 24px;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+      word-break: keep-all;
+    }
+    .main_visual .bt-solid {
+      display: inline-block;
+      padding: 13px 34px;
+      background: #ff5e00;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 15px;
+      border-radius: 50px;
+      box-shadow: 0 4px 20px rgba(255, 94, 0, 0.4);
+      transition: all 0.2s ease;
+    }
+    .main_visual .bt-solid:hover {
+      background: #e05300;
+      transform: translateY(-2px);
+    }
+
+    /* Swiper Navigation Buttons */
+    .swiper-button-next, .swiper-button-prev {
+      color: #fff !important;
+      background: rgba(0,0,0,0.4);
+      width: 50px !important;
+      height: 50px !important;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+    }
+    .swiper-button-next::after, .swiper-button-prev::after {
+      font-size: 20px !important;
+      font-weight: bold;
+    }
+
+    /* Section Common Styles */
+    .common-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 80px 30px;
+    }
+    .section-title-wrap {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      word-break: keep-all;
+    }
+
+    /* =========================================================
+       3. MOONWALK item_gallary CLONE GRID STYLING
+       ========================================================= */
+    .moonwalk_gallery_grid {
+      display: flex;
+      flex-wrap: wrap;
+      margin: -15px;
+      width: calc(100% + 30px);
+      box-sizing: border-box;
+      list-style: none;
+      padding: 0;
+    }
+    ._item.item_gallary {
+      position: relative;
+      padding: 15px;
+      width: 33.3333%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 960px) {
+      ._item.item_gallary {
+        width: 50%;
+      }
+    }
+    @media (max-width: 600px) {
+      ._item.item_gallary {
+        width: 100%;
+      }
+    }
+    ._item.item_gallary .item_container {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    ._item.item_gallary .img_wrap {
+      background-size: cover;
+      background-position: center;
+      min-height: 270px;
+      width: 100%;
+      position: relative;
+      transition: transform 0.4s ease, filter 0.4s ease;
+    }
+    ._item.item_gallary .item_container:hover .img_wrap {
+      transform: scale(1.04);
+    }
+    ._item.item_gallary .text_wrap {
+      display: block;
+      padding-top: 14px;
+      text-align: left;
+    }
+    ._item.item_gallary .text_wrap .title {
+      font-size: 16px;
+      color: #ffffff;
+      font-weight: 700;
+      line-height: 1.4;
+      margin: 0;
+    }
+    ._item.item_gallary .text_wrap .body {
+      display: block;
+      font-size: 12px;
+      color: #999999;
+      font-weight: 400;
+      margin-top: 4px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .slide_overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    ._item.item_gallary .item_container:hover .slide_overlay {
+      opacity: 1;
+    }
+
+    /* Insights Section Background Customizer Support */
+    .main_insights {
+      background-color: var(--accent-orange);
+      color: #ffffff;
+      transition: background-color 0.3s ease;
+    }
+    .main_insights .section-title,
+    .main_insights .text_wrap .title {
+      color: #ffffff !important;
+    }
+    .main_insights .section-subtitle,
+    .main_insights .text_wrap .body {
+      color: #ffdacb !important;
+    }
+
+    /* Lead Form Section */
+    .leadform-section {
+      background: #0a0a0a;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .leadform_box {
+      background: #141414;
+      padding: 40px;
+      border-radius: 16px;
+      border: 1px solid #282828;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .contact_grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 650px) {
+      .contact_grid { grid-template-columns: 1fr; }
+    }
+    .input_field {
+      width: 100%;
+      padding: 14px 18px;
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    .input_field:focus {
+      border-color: #ff5e00;
+    }
+    .submit_btn {
+      width: 100%;
+      padding: 16px;
+      background: #ff5e00;
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .submit_btn:hover { background: #e05300; }
+
+    /* Footer */
+    .site-footer {
+      background: #000;
+      padding: 60px 40px;
+      border-top: 1px solid #1c1c1c;
+      text-align: center;
+    }
+    .footer-logo {
+      font-size: 24px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 20px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .footer-info {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #888;
+      flex-wrap: wrap;
+    }
+    .footer-address {
+      font-size: 13px;
+      color: #666;
+      font-style: normal;
+    }
+
+    /* Floating Contact Button */
+    .floating-contact-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 99999;
+      background: #000000 !important;
+      color: #ffffff !important;
+      padding: 12px 26px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.2s ease;
+    }
+    .floating-contact-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      background: #1f1f1f !important;
+      border-color: #ff5e00;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================================================
+       ADMIN EDITOR TOOLBAR (실시간 관리 모드)
+       ========================================================= -->
+  <header id="admin_editor_bar">
+    <div class="admin_logo">
+      <span>LIVE EDITOR</span> MOONWALK CLONE &amp; CUSTOMIZER
+    </div>
+
+    <div class="admin_controls">
+      <!-- Editor Toggle -->
+      <label class="toggle_switch_wrap" title="에디터 모드를 켜면 텍스트를 직접 클릭해 수정하거나 스타일을 조절할 수 있습니다.">
+        <input type="checkbox" id="editor_toggle_checkbox" style="display:none;" onchange="toggleEditorMode(this.checked)">
+        <div class="toggle_switch"></div>
+        <span id="editor_status_txt">편집 모드: OFF</span>
+      </label>
+
+      <!-- Quick Actions -->
+      <button type="button" class="admin_btn" onclick="quickSetHeroPos('pos-top-left')" title="히어로 텍스트를 좌측 상단으로 이동">📍 히어로 좌측상단</button>
+      <button type="button" class="admin_btn" onclick="quickSetHeroPos('pos-center')" title="히어로 텍스트를 중앙으로 이동">📍 히어로 중앙</button>
+      
+      <!-- Save & Reset -->
+      <button type="button" class="admin_btn _primary" onclick="saveCustomPage()">💾 변경사항 저장</button>
+      <button type="button" class="admin_btn" onclick="exportHTML()">📤 HTML 다운로드</button>
+      <button type="button" class="admin_btn _danger" onclick="resetPageToOriginal()">🔄 원본 초기화</button>
+    </div>
+  </header>
+
+  <!-- Editor Toast Notification -->
+  <div id="editor_toast">변경사항이 성공적으로 저장되었습니다!</div>
+
+  <!-- =========================================================
+       MAIN SITE CONTENT (MOONWALK CLONE)
+       ========================================================= -->
+  <div class="site-wrapper">
+
+    <!-- Header Navigation -->
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="logo">
+          <a href="/m" data-editable="header-logo">MOONWALK DESIGN</a>
+        </div>
+        <nav class="header-nav">
+          <ul>
+            <li><a href="/m-service" data-editable="nav-1">Service</a></li>
+            <li><a href="/m-portfolio" data-editable="nav-2">Portfolio</a></li>
+            <li><a href="/m-news" data-editable="nav-3">News &amp; Insights</a></li>
+            <li><a href="/m-about" data-editable="nav-4">About</a></li>
+          </ul>
+        </nav>
+        <a href="#contact" class="bt-header-contact" data-editable="nav-contact">상담 신청</a>
+      </div>
+    </header>
+
+    <!-- Main Hero Visual Banner -->
+    <section class="main_visual" id="section_hero">
+
+      <!-- Section Editor Floating Controls -->
+      <div class="section_edit_panel">
+        <span style="font-size:12px; font-weight:bold; color:#ff5e00;">[히어로 설정]</span>
+        <label class="color_picker_btn" title="배경색 선택">
+          <input type="color" onchange="changeSectionBg('section_hero', this.value)">
+        </label>
+        <button type="button" class="admin_btn" style="padding:3px 8px; font-size:11px;" onclick="changeSlideImage(0)">🖼️ 배너1 이미지 교체</button>
+      </div>
+
+      <div class="swiper heroSwiper">
+        <div class="swiper-wrapper">
+
+          <!-- Slide 1 -->
+          <div class="swiper-slide">
+            <div class="text_area pos-top-left" id="hero_text_box">
+              <span class="badge_sub" data-editable="hero-badge-1">MOONWALK DESIGN &amp; BRANDING</span>
+              <h2 class="hero-title" data-editable="hero-title-1">공간의 시작과 완성,<br>인테리어와 브랜딩을<br>하나로 설계합니다</h2>
+              <a href="#portfolio" class="bt-solid" data-editable="hero-btn-1">자세히 보기</a>
+            </div>
+            <div class="img_area">
+              <img id="hero_img_0" src="https://cdn.imweb.me/thumbnail/20250304/67cbeb1e5807e.png" alt="Moonwalk Banner 1">
+            </div>
+          </div>
+
+          <!-- Slide 2 -->
+          <div class="swiper-slide">
+            <div class="text_area pos-top-left">
+              <span class="badge_sub" data-editable="hero-badge-2">PREMIUM SPACE SOLUTION</span>
+              <h2 class="hero-title" data-editable="hero-title-2">2017년부터 쌓아온<br>인테리어 · 브랜딩<br>전문 디자인 노하우</h2>
+              <a href="#portfolio" class="bt-solid" data-editable="hero-btn-2">포트폴리오 보기</a>
+            </div>
+            <div class="img_area">
+              <img id="hero_img_1" src="https://cdn.imweb.me/thumbnail/20250304/2692f93e46c37.png" alt="Moonwalk Banner 2">
+            </div>
+          </div>
+
+          <!-- Slide 3 -->
+          <div class="swiper-slide">
+            <div class="text_area pos-top-left">
+              <span class="badge_sub" data-editable="hero-badge-3">CREATIVE ARCHITECTURE</span>
+              <h2 class="hero-title" data-editable="hero-title-3">공간의 가치를 높이는<br>문워크디자인만의<br>맞춤형 프리미엄 솔루션</h2>
+              <a href="#contact" class="bt-solid" data-editable="hero-btn-3">무료 상담 신청</a>
+            </div>
+            <div class="img_area">
+              <img id="hero_img_2" src="https://cdn.imweb.me/thumbnail/20250304/9811f15eeae01.png" alt="Moonwalk Banner 3">
+            </div>
+          </div>
+
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+      </div>
+    </section>
+
+    <!-- Main Portfolio Section (9 items with moonwalk item_gallary structure) -->
+    <section class="main_portfolio" id="section_portfolio" style="background:#000000; padding: 60px 0;">
+
+      <!-- Section Editor Floating Controls -->
+      <div class="section_edit_panel">
+        <span style="font-size:12px; font-weight:bold; color:#ff5e00;">[포트폴리오 배경색]</span>
+        <button type="button" class="admin_btn" style="padding:3px 8px; font-size:11px;" onclick="changeSectionBg('section_portfolio', '#000000')">블랙</button>
+        <button type="button" class="admin_btn" style="padding:3px 8px; font-size:11px;" onclick="changeSectionBg('section_portfolio', '#141414')">다크그레이</button>
+        <label class="color_picker_btn" title="커스텀 배경색">
+          <input type="color" onchange="changeSectionBg('section_portfolio', this.value)">
+        </label>
+      </div>
+
+      <div class="common-inner">
+        <div class="section-title-wrap">
+          <h2 class="section-title" data-editable="port-section-title">병원마다 다른 진료 철학으로 완성하는 공간</h2>
+          <p class="section-subtitle" data-editable="port-section-sub">문워크디자인이 제안하는 최신 프리미엄 포트폴리오 프로젝트</p>
+        </div>
+
+        <!-- 9 Portfolio Items (Exact item_gallary clone) -->
+        <ul class="moonwalk_gallery_grid" id="portfolio_grid">
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20251103/2e53a3e79832c.jpg'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p1-title">GR코리아 오피스 &amp; 라운지</span>
+                  <span class="body" data-editable="p1-body">외국계 컨설팅 기업 오피스 &amp; 라운지 인테리어</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20251103/3b456b8f7a540.jpg'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p2-title">부산 스마트 내과·안과 100평대</span>
+                  <span class="body" data-editable="p2-body">공동개원 시공 사례 및 전문 진료 동선 설계</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" id="p3_img" style="background-image: url('https://cdn.imweb.me/thumbnail/20251103/62a3baf94b6dc.jpg'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p3-title">해운대 디저트 카페 브랜딩</span>
+                  <span class="body" data-editable="p3-body">감성 카페 공간 디자인 및 리모델링 사례</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20250304/67cbeb1e5807e.png'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p4-title">강남 프라이빗 피부과의원</span>
+                  <span class="body" data-editable="p4-body">80평형 뷰티 레이아웃 맞춤 공간 시공</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20250304/2692f93e46c37.png'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p5-title">센텀시티 전문 치과의원</span>
+                  <span class="body" data-editable="p5-body">120평 무균 수술실 &amp; X-ray 방어 동선</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20250304/9811f15eeae01.png'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p6-title">서면 경희한의원 탕전실</span>
+                  <span class="body" data-editable="p6-body">진료실 특화 조도 방음 및 힐링 공간</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20250304/bdd28b536ce7b.png'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p7-title">광안리 루미에르 오션뷰 스파</span>
+                  <span class="body" data-editable="p7-body">프리미엄 오션뷰 뷰티 살롱 공간 리모델링</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20250304/57d6f5110b019.png'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p8-title">마린시티 아이사랑소아과</span>
+                  <span class="body" data-editable="p8-body">아동 친화적 안전 마감재 &amp; 3D 동선</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20251103/2e53a3e79832c.jpg'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="p9-title">연산 바른정형외과의원</span>
+                  <span class="body" data-editable="p9-body">도수치료실 및 소음 차단 특화 설계</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+    </section>
+
+    <!-- Medical Space Insights Section (3 items with moonwalk item_gallary structure) -->
+    <section class="main_insights" id="section_insights" style="padding: 60px 0;">
+
+      <!-- Section Editor Floating Controls -->
+      <div class="section_edit_panel">
+        <span style="font-size:12px; font-weight:bold; color:#ffffff;">[인사이트 배경색]</span>
+        <button type="button" class="admin_btn" style="padding:3px 8px; font-size:11px;" onclick="changeSectionBg('section_insights', '#dd5828')">문워크 오렌지</button>
+        <button type="button" class="admin_btn" style="padding:3px 8px; font-size:11px;" onclick="changeSectionBg('section_insights', '#111111')">다크</button>
+        <label class="color_picker_btn" title="커스텀 배경색">
+          <input type="color" onchange="changeSectionBg('section_insights', this.value)">
+        </label>
+      </div>
+
+      <div class="common-inner">
+        <div class="section-title-wrap">
+          <h2 class="section-title" data-editable="insight-section-title">의료공간 인사이트 &amp; 개원 가이드</h2>
+          <p class="section-subtitle" data-editable="insight-section-sub">병원 관련 큐레이팅과 성공적인 개원을 위한 실전 인테리어 노하우 아티클을 확인해 보세요.</p>
+        </div>
+
+        <ul class="moonwalk_gallery_grid">
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20250304/67cbeb1e5807e.png'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="i1-title">치과 개원 시 필수 체크! 엑스선 방어 동선</span>
+                  <span class="body" data-editable="i1-body">진료 과목 특성을 반영한 방사선 차폐 공사 및 환자 이동 동선 최적화 전략</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20250304/2692f93e46c37.png'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="i2-title">환자 대기시간을 줄이는 3D 대기실 설계</span>
+                  <span class="body" data-editable="i2-body">쾌적한 혼잡도 관리를 돕는 대기석 분리 배치가 인테리어에 미치는 영향</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+          <li class="_item item_gallary">
+            <a class="item_container _item_container" href="javascript:;" onclick="changeCardImage(this)">
+              <div class="img_wrap _img_wrap" style="background-image: url('https://cdn.imweb.me/thumbnail/20250304/9811f15eeae01.png'); min-height: 270px;"></div>
+              <div class="text_wrap _text_wrap">
+                <p class="title">
+                  <span data-editable="i3-title">소방 방염 자재 규정과 개원 허가 심의</span>
+                  <span class="body" data-editable="i3-body">까다로운 소방 기준과 보건소 개원 인허가 실사를 한번에 통과하는 실전 팁</span>
+                </p>
+              </div>
+              <div class="slide_overlay"></div>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+    </section>
+
+    <!-- Lead Contact Section -->
+    <section class="leadform-section" id="contact">
+      <div class="common-inner">
+        <div class="section-title-wrap">
+          <h2 class="section-title" data-editable="contact-title">공간의 시작과 완성 문워크디자인</h2>
+          <p class="section-subtitle" data-editable="contact-sub">무료 현장 실측 및 맞춤형 인테리어 제안서를 받아보세요.</p>
+        </div>
+
+        <div class="leadform_box">
+          <form onsubmit="alert('상담 신청이 완료되었습니다.'); return false;">
+            <div class="contact_grid">
+              <input type="text" class="input_field" placeholder="개원예정 진료과목 / 업종" required>
+              <input type="tel" class="input_field" placeholder="연락처 (010-0000-0000)" required>
+              <input type="text" class="input_field" placeholder="공사 예정 지역" required>
+              <input type="number" class="input_field" placeholder="공사 면적 (평수)" required>
+            </div>
+            <button type="submit" class="submit_btn" data-editable="contact-submit-btn">무료 실측 및 맞춤 견적 신청하기</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="footer-logo" data-editable="footer-logo">MOONWALK DESIGN</div>
+      <ul class="footer-info">
+        <li>Tel. <b data-editable="footer-tel">02-336-1213</b></li>
+        <li>Email. <a href="mailto:hello@moonwalk.kr" data-editable="footer-email">hello@moonwalk.kr</a></li>
+        <li>Biz License. <span data-editable="footer-biz">516-88-02985</span></li>
+      </ul>
+      <address class="footer-address" data-editable="footer-addr">서울특별시 마포구 월드컵북로 76, AK빌딩 302호</address>
+    </footer>
+
+    <!-- Bottom Left Floating Contact Button -->
+    <a href="#contact" class="floating-contact-btn" data-editable="float-btn-txt">
+      <span>문의하기</span>
+    </a>
+
+  </div>
+
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <!-- Editor & Site Interactive Script -->
+  <script>
+    // 1. Swiper Hero Initialization
+    let heroSwiper;
+    document.addEventListener('DOMContentLoaded', function () {
+      heroSwiper = new Swiper('.heroSwiper', {
+        loop: true,
+        autoplay: {
+          delay: 3500,
+          disableOnInteraction: false,
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      });
+
+      // Load saved state from LocalStorage if exists
+      loadSavedCustomPage();
+    });
+
+    // 2. Editor Mode Toggle Function
+    function toggleEditorMode(enable) {
+      const body = document.body;
+      const statusTxt = document.getElementById('editor_status_txt');
+      const editables = document.querySelectorAll('[data-editable]');
+
+      if (enable) {
+        body.classList.add('editor-active');
+        statusTxt.textContent = "편집 모드: ON ✏️";
+        statusTxt.style.color = "#ff5e00";
+
+        editables.forEach(el => {
+          el.setAttribute('contenteditable', 'true');
+        });
+        showToast("편집 모드가 켜졌습니다. 텍스트를 클릭하여 바로 수정하세요!");
+      } else {
+        body.classList.remove('editor-active');
+        statusTxt.textContent = "편집 모드: OFF";
+        statusTxt.style.color = "#ffffff";
+
+        editables.forEach(el => {
+          el.removeAttribute('contenteditable');
+        });
+        showToast("편집 모드가 꺼졌습니다.");
+      }
+    }
+
+    // 3. Quick Set Hero Text Position
+    function quickSetHeroPos(posClass) {
+      const heroBoxes = document.querySelectorAll('#section_hero .text_area');
+      heroBoxes.forEach(box => {
+        box.className = 'text_area ' + posClass;
+      });
+      showToast("히어로 텍스트 위치가 '" + posClass + "' 로 적용되었습니다.");
+    }
+
+    // 4. Change Section Background Color
+    function changeSectionBg(sectionId, colorHex) {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.style.backgroundColor = colorHex;
+        showToast(sectionId + " 배경색이 " + colorHex + " 로 변경되었습니다.");
+      }
+    }
+
+    // 5. Change Card Image URL
+    function changeCardImage(anchorEl) {
+      if (!document.body.classList.contains('editor-active')) return;
+      const imgWrap = anchorEl.querySelector('.img_wrap');
+      if (!imgWrap) return;
+
+      const currentBg = imgWrap.style.backgroundImage.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
+      const newUrl = prompt("새로운 이미지 URL을 입력하세요:", currentBg);
+      if (newUrl && newUrl.trim() !== "") {
+        imgWrap.style.backgroundImage = `url('${newUrl.trim()}')`;
+        showToast("이미지가 교체되었습니다!");
+      }
+    }
+
+    // 6. Change Hero Slide Image URL
+    function changeSlideImage(slideIndex) {
+      const imgEl = document.getElementById('hero_img_' + slideIndex);
+      if (!imgEl) return;
+      const newUrl = prompt("슬라이드 #" + (slideIndex+1) + " 이미지 URL을 입력하세요:", imgEl.src);
+      if (newUrl && newUrl.trim() !== "") {
+        imgEl.src = newUrl.trim();
+        showToast("히어로 슬라이드 이미지가 교체되었습니다!");
+      }
+    }
+
+    // 7. Save Custom Page to LocalStorage
+    function saveCustomPage() {
+      const pageData = {};
+
+      // Save contenteditable text
+      document.querySelectorAll('[data-editable]').forEach(el => {
+        const key = el.getAttribute('data-editable');
+        pageData[key] = el.innerHTML;
+      });
+
+      // Save section background colors
+      pageData['hero_bg'] = document.getElementById('section_hero').style.backgroundColor || '#000000';
+      pageData['portfolio_bg'] = document.getElementById('section_portfolio').style.backgroundColor || '#000000';
+      pageData['insights_bg'] = document.getElementById('section_insights').style.backgroundColor || '#dd5828';
+
+      // Save hero position
+      const firstHeroBox = document.querySelector('#section_hero .text_area');
+      pageData['hero_pos_class'] = firstHeroBox ? firstHeroBox.className : 'text_area pos-top-left';
+
+      // Save images
+      const imagesData = [];
+      document.querySelectorAll('.img_wrap').forEach((el, idx) => {
+        imagesData.push({ idx: idx, bg: el.style.backgroundImage });
+      });
+      pageData['card_images'] = imagesData;
+
+      localStorage.setItem('moonwalk_custom_m_page', JSON.stringify(pageData));
+      showToast("💾 모든 변경사항이 저장되었습니다! 페이지 새로고침 후에도 유지됩니다.");
+    }
+
+    // 8. Load Saved Custom Page from LocalStorage
+    function loadSavedCustomPage() {
+      const savedStr = localStorage.getItem('moonwalk_custom_m_page');
+      if (!savedStr) return;
+
+      try {
+        const pageData = JSON.parse(savedStr);
+
+        // Restore text
+        document.querySelectorAll('[data-editable]').forEach(el => {
+          const key = el.getAttribute('data-editable');
+          if (pageData[key] !== undefined) {
+            el.innerHTML = pageData[key];
+          }
+        });
+
+        // Restore background colors
+        if (pageData['hero_bg']) document.getElementById('section_hero').style.backgroundColor = pageData['hero_bg'];
+        if (pageData['portfolio_bg']) document.getElementById('section_portfolio').style.backgroundColor = pageData['portfolio_bg'];
+        if (pageData['insights_bg']) document.getElementById('section_insights').style.backgroundColor = pageData['insights_bg'];
+
+        // Restore hero position
+        if (pageData['hero_pos_class']) {
+          document.querySelectorAll('#section_hero .text_area').forEach(box => {
+            box.className = pageData['hero_pos_class'];
+          });
+        }
+
+        // Restore images
+        if (pageData['card_images']) {
+          const cards = document.querySelectorAll('.img_wrap');
+          pageData['card_images'].forEach(item => {
+            if (cards[item.idx] && item.bg) {
+              cards[item.idx].style.backgroundImage = item.bg;
+            }
+          });
+        }
+      } catch (e) {
+        console.warn("Failed to restore custom page:", e);
+      }
+    }
+
+    // 9. Reset Page to Original State
+    function resetPageToOriginal() {
+      if (confirm("정말로 원본 상태로 초기화하시겠습니까? 저장했던 설정이 삭제됩니다.")) {
+        localStorage.removeItem('moonwalk_custom_m_page');
+        location.reload();
+      }
+    }
+
+    // 10. Export HTML File Download
+    function exportHTML() {
+      // Disable editor mode before export
+      toggleEditorMode(false);
+      document.getElementById('editor_toggle_checkbox').checked = false;
+
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'moonwalk_customized_page.html';
+      link.click();
+      showToast("📤 완성된 HTML 파일이 다운로드 되었습니다!");
+    }
+
+    // Helper Toast Display
+    function showToast(msg) {
+      const toast = document.getElementById('editor_toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3200);
+    }
+  </script>
+</body>
+</html>
