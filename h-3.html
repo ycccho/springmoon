@@ -1,4 +1,4 @@
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko-KR">
 <head>
   <meta charset="UTF-8" />
@@ -28,6 +28,42 @@ DOCTYPE html>
   <link rel="shortcut icon" href="https://indecompany2.mycafe24.com/images/favicon.ico" type="image/x-icon" />
   <link rel="apple-touch-icon" href="https://indecompany2.mycafe24.com/images/image_kakaotalk.png" />
   <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    /* Bottom-Left Floating Contact Button */
+    .floating-contact-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 99999;
+      background: #ff5e00;
+      color: #ffffff !important;
+      padding: 12px 22px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 8px 24px rgba(255, 94, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none !important;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+    .floating-contact-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 30px rgba(255, 94, 0, 0.5);
+      background: #e05300;
+    }
+    @media (max-width: 768px) {
+      .floating-contact-btn {
+        bottom: 16px;
+        left: 16px;
+        padding: 10px 16px;
+        font-size: 13px;
+        box-shadow: 0 6px 18px rgba(255, 94, 0, 0.4);
+      }
+    }
+  </style>
   <script defer src="https://indecompany2.mycafe24.com/js/vendor/jquery.min.js"></script>
   <script defer src="https://indecompany2.mycafe24.com/js/vendor/jquery-ui.min.js"></script>
   <script defer src="https://indecompany2.mycafe24.com/js/vendor/swiper-bundle.min.js"></script>
@@ -126,8 +162,10 @@ DOCTYPE html>
     </ul> -->
     <a href="#none" class="bt-go-top">위로</a>
   </aside>
-    <section class="main_partner" style="background-color: #000000 !important; background: #000000 !important; padding: 0;">
-    <div class="common-inner _full" style="padding-top: 40px; padding-bottom: 40px;">
+  <!-- Tight Marquee Partner Logo Section -->
+  <section class="main_partner" style="background-color: #000000 !important; background: #000000 !important; padding: 16px 0 !important;">
+    <div style="text-align: center; color: #9ca3af; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 8px;">TRUSTED BY LEADING BRANDS & PARTNERS</div>
+    <div class="common-inner _full" style="padding-top: 8px; padding-bottom: 8px;">
       <ul class="partner_list" style="margin-top: 0;">
         <li class="partner_item">
           <div class="partner_track _1">
@@ -138,6 +176,13 @@ DOCTYPE html>
       </ul>
     </div>
   </section>
+
+  <!-- Bottom-Left Floating Contact Button -->
+  <a href="/h-3" class="floating-contact-btn ga4__floating" aria-label="문의하기">
+    <span class="ico-chat">💬</span>
+    <span class="txt-chat">문의하기</span>
+  </a>
+
   <footer class="site-footer" style="background-color: #000000 !important; background: #000000 !important;">
     <div class="common-inner">
       <h2 class="footer-logo">INDECOMPANY</h2>
@@ -152,11 +197,6 @@ DOCTYPE html>
         <li><a href="https://indecompany2.mycafe24.com/privacy" class="ga4__footer">개인정보처리방침</a></li>
       </ul>
       <address>3F, 78, Gwajeong-ro, Yeonje-gu, Busan</address>
-      <!-- <nav class="footer-sns">
-        <ul>
-          <li><a href="https://www.linkedin.com/company/hyphen-design" target="_blank" class="ga4__footer"><img src="https://indecompany2.mycafe24.com/images/footer_sns_linkedin.png" alt="linkedin" /></a></li>
-        </ul>
-      </nav> -->
     </div>
   </footer>
 </main>

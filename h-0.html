@@ -90,6 +90,49 @@ var handl_utm = [];
   <link rel="stylesheet" href="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/css/common.css" />
   <link rel="stylesheet" href="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/css/product_v2.css" />
   <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .cert_hover_box:hover {
+      border-color: #ff5e00 !important;
+    }
+    .cert_hover_box:hover .hover_overlay {
+      opacity: 1 !important;
+    }
+
+    /* Bottom-Left Floating Contact Button */
+    .floating-contact-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 99999;
+      background: #ff5e00;
+      color: #ffffff !important;
+      padding: 12px 22px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 8px 24px rgba(255, 94, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none !important;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+    .floating-contact-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 30px rgba(255, 94, 0, 0.5);
+      background: #e05300;
+    }
+    @media (max-width: 768px) {
+      .floating-contact-btn {
+        bottom: 16px;
+        left: 16px;
+        padding: 10px 16px;
+        font-size: 13px;
+        box-shadow: 0 6px 18px rgba(255, 94, 0, 0.4);
+      }
+    }
+  </style>
 </head>
 <body class="wp-singular page-template page-template-page-product_v2 page-template-page-product_v2-php page page-id-1193 wp-theme-hyphen">
 <!-- Google Tag Manager (noscript) -->
@@ -126,8 +169,8 @@ var handl_utm = [];
   </a><div class="hyphen-container _reset product_v2 _highlights">
   <section class="highlights_intro">
     <div class="common-inner">
-      <div class="intro_header">
-        <div class="intro_box">
+      <div class="intro_header" style="margin-bottom: 2rem;">
+        <div class="intro_box" style="max-width: 100%;">
           <h2 class="common-title">
             <span>왜 일 잘하는 원장님들은</span> <br />
             인디컴퍼니를 선택했을까요?
@@ -136,43 +179,42 @@ var handl_utm = [];
             인디컴퍼니는 현장 실측을 통한 합리적인 상세견적 제공과 <br />
             철저한 현장관리와 A/S를 진행합니다.
           </p>
-          <div style="margin-top: 1.25rem;">
-            <a href="/h-3" class="bt-base_v2 ga4__cta_btn_link">상담하기</a>
+        </div>
+      </div>
+
+      <!-- ABOUT INDE & WORK PROCESS & Text Boxes (가로길이 합리적인견적 메뉴와 일치 & hover_overlay 적용) -->
+      <div class="about_inde_info_block" style="width: 100%; max-width: 100%; margin-top: 1.5rem; margin-bottom: 3rem; text-align: left; padding: 2.2rem; background-color: #141414; border-radius: 12px; color: #ffffff; border: 1px solid #282828; box-sizing: border-box;">
+        
+        <!-- ABOUT INDE -->
+        <div style="margin-bottom: 2rem;">
+          <h3 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin-bottom: 0.8rem; letter-spacing: 0.03em;">ABOUT INDE</h3>
+          <p style="font-size: 1.15rem; line-height: 1.75; color: #d1d5db; word-break: keep-all; margin: 0;">
+            (주)인디컴퍼니는 2017년부터 시작한 인테리어 · 브랜딩 전문 디자인 회사입니다. 모든 공간의 인테리어 디자인 뿐 아니라, 브랜드의 가치를 올려주는 브랜딩 디자인까지 완벽한 토탈 디자인 솔루션을 제안하고 있습니다.<br /><br />
+            인디컴퍼니만의 젊고 트렌디한 감각으로 모든 공간마다 각자의 이야기와 아름다움을 더해 드리겠습니다.
+          </p>
+        </div>
+
+        <!-- WORK PROCESS -->
+        <div style="margin-bottom: 2rem;">
+          <h3 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin-bottom: 0.8rem; letter-spacing: 0.03em;">WORK PROCESS</h3>
+          <p style="font-size: 1.15rem; line-height: 1.75; color: #d1d5db; word-break: keep-all; margin: 0;">
+            인디컴퍼니는 정확하지 않은 견적으로 혼란을 드리지 않고자, 온라인 견적 서비스는 진행하지 않습니다. 다만, 1평의 공간이라도 직접 실측하여 정확한 견적과 시공 범위를 안내해 드리고 있습니다.<br /><br />
+            인디컴퍼니의 무료실측 /견적 서비스를 통해 정확한 견적과 인테리어 컨설팅을 진행해 보세요.
+          </p>
+        </div>
+
+        <!-- 2 Rectangular Text Boxes with hover_overlay overlay structure -->
+        <div style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-top: 1.5rem; justify-content: center;">
+          <div class="cert_hover_box" style="position: relative; flex: 1; min-width: 140px; padding: 1.2rem 1rem; border: 2px solid #383838; background-color: #000000; border-radius: 8px; text-align: center; overflow: hidden; cursor: pointer; transition: border-color 0.3s ease;">
+            <div class="hover_overlay _hover_overlay" style="position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; background: rgba(255, 94, 0, 0.12); opacity: 0; transition: opacity 0.3s ease; pointer-events: none;"></div>
+            <span style="font-size: 1.3rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; position: relative; z-index: 2;">법인사업자</span>
           </div>
-
-          <!-- ABOUT INDE & WORK PROCESS & Text Boxes (상담하기 버튼 바로 하단) -->
-          <div class="about_inde_info_block" style="margin-top: 2.2rem; text-align: left; padding: 2.2rem; background-color: #141414; border-radius: 12px; color: #ffffff; border: 1px solid #282828;">
-            
-            <!-- ABOUT INDE -->
-            <div style="margin-bottom: 2rem;">
-              <h3 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin-bottom: 0.8rem; letter-spacing: 0.03em;">ABOUT INDE</h3>
-              <p style="font-size: 1.15rem; line-height: 1.75; color: #d1d5db; word-break: keep-all; margin: 0;">
-                (주)인디컴퍼니는 2017년부터 시작한 인테리어 · 브랜딩 전문 디자인 회사입니다. 모든 공간의 인테리어 디자인 뿐 아니라, 브랜드의 가치를 올려주는 브랜딩 디자인까지 완벽한 토탈 디자인 솔루션을 제안하고 있습니다.<br /><br />
-                인디컴퍼니만의 젊고 트렌디한 감각으로 모든 공간마다 각자의 이야기와 아름다움을 더해 드리겠습니다.
-              </p>
-            </div>
-
-            <!-- WORK PROCESS -->
-            <div style="margin-bottom: 2rem;">
-              <h3 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin-bottom: 0.8rem; letter-spacing: 0.03em;">WORK PROCESS</h3>
-              <p style="font-size: 1.15rem; line-height: 1.75; color: #d1d5db; word-break: keep-all; margin: 0;">
-                인디컴퍼니는 정확하지 않은 견적으로 혼란을 드리지 않고자, 온라인 견적 서비스는 진행하지 않습니다. 다만, 1평의 공간이라도 직접 실측하여 정확한 견적과 시공 범위를 안내해 드리고 있습니다.<br /><br />
-                인디컴퍼니의 무료실측 /견적 서비스를 통해 정확한 견적과 인테리어 컨설팅을 진행해 보세요.
-              </p>
-            </div>
-
-            <!-- 2 Rectangular Text Boxes -->
-            <div style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-top: 1.5rem;">
-              <div style="flex: 1; min-width: 140px; padding: 1.2rem 1rem; border: 2px solid #383838; background-color: #000000; border-radius: 8px; text-align: center;">
-                <span style="font-size: 1.3rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">법인사업자</span>
-              </div>
-              <div style="flex: 1; min-width: 140px; padding: 1.2rem 1rem; border: 2px solid #383838; background-color: #000000; border-radius: 8px; text-align: center;">
-                <span style="font-size: 1.3rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">실내건축면허</span>
-              </div>
-            </div>
-
+          <div class="cert_hover_box" style="position: relative; flex: 1; min-width: 140px; padding: 1.2rem 1rem; border: 2px solid #383838; background-color: #000000; border-radius: 8px; text-align: center; overflow: hidden; cursor: pointer; transition: border-color 0.3s ease;">
+            <div class="hover_overlay _hover_overlay" style="position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; background: rgba(255, 94, 0, 0.12); opacity: 0; transition: opacity 0.3s ease; pointer-events: none;"></div>
+            <span style="font-size: 1.3rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; position: relative; z-index: 2;">실내건축면허</span>
           </div>
         </div>
+
       </div>
 
       <div class="intro_tabs">
@@ -224,27 +266,6 @@ var handl_utm = [];
     </div>
   </section>
 
-  <section class="highlights_company _ani">
-    <h2 class="common-title _ani">
-      <span>스타트업부터 대기업까지 <br />
-      믿고 선택한</span> 인디컴퍼니
-    </h2>
-    <div class="company_list">
-      <div class="company_roll _left">
-        <div class="company_track">
-          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_01.png" alt="" />
-          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_01.png" alt="" />
-        </div>
-      </div>
-      <div class="company_roll _right">
-        <div class="company_track">
-          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_02.png" alt="" />
-          <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/product_v2/highlights/pc/company_logo_02.png" alt="" />
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="highlights_banner _ani">
     <div class="common-inner">
       <h3>
@@ -267,8 +288,11 @@ var handl_utm = [];
     </ul>
         <a href="#none" class="bt-go-top">위로</a>
   </aside>
-      <section class="main_partner" style="background-color: #000000 !important; background: #000000 !important; padding: 0;">
-    <div class="common-inner _full" style="padding-top: 40px; padding-bottom: 40px;">
+
+  <!-- Tight Marquee Partner Logo Section -->
+  <section class="main_partner" style="background-color: #000000 !important; background: #000000 !important; padding: 16px 0 !important;">
+    <div style="text-align: center; color: #9ca3af; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 8px;">TRUSTED BY LEADING BRANDS & PARTNERS</div>
+    <div class="common-inner _full" style="padding-top: 8px; padding-bottom: 8px;">
       <ul class="partner_list" style="margin-top: 0;">
         <li class="partner_item">
           <div class="partner_track _1">
@@ -279,6 +303,12 @@ var handl_utm = [];
       </ul>
     </div>
   </section>
+
+  <!-- Bottom-Left Floating Contact Button -->
+  <a href="/h-3" class="floating-contact-btn ga4__floating" aria-label="문의하기">
+    <span class="ico-chat">💬</span>
+    <span class="txt-chat">문의하기</span>
+  </a>
   <footer class="site-footer" style="background-color: #000000 !important; background: #000000 !important;">
     <div class="common-inner">
       <h2 class="footer-logo">INDECOMPANY</h2>
