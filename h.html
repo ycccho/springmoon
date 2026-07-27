@@ -29,60 +29,107 @@
   <link rel="apple-touch-icon" href="https://indecompany2.mycafe24.com/images/image_kakaotalk.png" />
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    /* Fix Main Visual transform lock so banner is IMMEDIATELY visible without scrolling */
+    /* Main Visual Banner (Immediately visible at 80vh height, background image visible on landing) */
     .main_visual {
       transform: translateY(0) !important;
-      height: auto !important;
-      position: relative;
+      height: 80vh !important;
+      min-height: 550px !important;
+      position: relative !important;
+      display: block !important;
     }
     .main_visual .main_swiper {
+      height: 100% !important;
       clip-path: none !important;
     }
+    .main_visual .img_area {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 1 !important;
+      overflow: hidden;
+    }
     .main_visual .text_area {
-      margin: 4rem auto 0 !important;
+      position: relative !important;
+      z-index: 10 !important;
+      margin: 6rem auto 0 !important;
+    }
+    .main_visual img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      transform: scale(1) !important;
+      opacity: 1 !important;
     }
 
     /* Main Portfolio Pure Black Theme & Tight Top/Bottom Padding (Matching Insights) */
     .main_portfolio {
       background-color: #000000 !important;
       color: #ffffff !important;
-      padding: 36px 0 !important;
+      padding: 45px 0 !important;
     }
     .main_portfolio .common-inner {
       padding-top: 0 !important;
       padding-bottom: 0 !important;
     }
     .main_portfolio .main_portfolio_head {
-      margin-bottom: 24px !important;
+      margin-bottom: 28px !important;
     }
     .main_portfolio .common-title,
     .main_portfolio .common-title b {
       color: #ffffff !important;
     }
 
-    /* 3x3 Responsive Grid Layout for Portfolio & Insights */
-    .portfolio_grid_3x3,
-    .insights_grid_3 {
+    /* Moonwalk.kr Style Grid Cards (3 Columns) for Portfolio & Insights */
+    .moonwalk_grid_3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      gap: 28px;
       width: 100%;
       list-style: none;
       padding: 0;
       margin: 0;
     }
     @media (max-width: 960px) {
-      .portfolio_grid_3x3,
-      .insights_grid_3 {
+      .moonwalk_grid_3 {
         grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
+        gap: 20px;
       }
     }
     @media (max-width: 600px) {
-      .portfolio_grid_3x3,
-      .insights_grid_3 {
+      .moonwalk_grid_3 {
         grid-template-columns: repeat(1, 1fr);
+        gap: 16px;
       }
+    }
+
+    /* Card Item Box */
+    .mw_card_item {
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .mw_card_item:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    }
+    .mw_card_fig {
+      margin: 0;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+    }
+    .mw_card_fig img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .mw_card_item:hover .mw_card_fig img {
+      transform: scale(1.05);
+    }
+    .mw_card_body {
+      padding: 20px;
     }
 
     /* Custom Slider Navigation Arrows */
@@ -123,7 +170,7 @@
       .main_visual .bt-visual-custom._next { right: 12px; }
     }
 
-    /* Bottom-Left Floating Contact Button (Black Background, NO Emoji, NO Pseudo-element) */
+    /* Bottom-Left Floating Contact Button (Black Background, NO Emoji) */
     .floating-contact-btn {
       position: fixed;
       bottom: 24px;
@@ -164,15 +211,6 @@
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
       }
     }
-
-    /* Card Hover Motion */
-    .portfolio_card_item {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .portfolio_card_item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-    }
   </style>
   <script defer src="https://indecompany2.mycafe24.com/js/vendor/jquery.min.js"></script>
   <script defer src="https://indecompany2.mycafe24.com/js/vendor/jquery-ui.min.js"></script>
@@ -207,7 +245,7 @@
 
   <div class="site-container _main">
 
-    <!-- Main Visual Banner (Immediately Visible, 3-second Auto Change, Navigation Buttons) -->
+    <!-- Main Visual Banner (Immediately Visible Banner with 3s Autoplay Slider) -->
     <section class="main_visual on">
       <button type="button" class="bt-visual-custom _prev" aria-label="이전 슬라이드">&lt;</button>
       <button type="button" class="bt-visual-custom _next" aria-label="다음 슬라이드">&gt;</button>
@@ -260,108 +298,108 @@
       </div>
     </section>
 
-    <!-- Main Portfolio (Pure Black Theme, 3x3 Grid, Tight Height) -->
+    <!-- Main Portfolio (Pure Black Theme, 3x3 Grid - 9 Items) -->
     <section class="main_portfolio" aria-labelledby="main_portfolio_title">
       <div class="common-inner">
-        <header class="main_portfolio_head" style="margin-bottom: 24px; text-align: center;">
+        <header class="main_portfolio_head" style="margin-bottom: 28px; text-align: center;">
           <h2 id="main_portfolio_title" class="common-title _ani"><b style="color: #ffffff;">병원마다 다른 진료 철학</b>으로 완성하는 공간</h2>
         </header>
         <div class="portfolio_content">
-          <ul class="portfolio_grid_3x3">
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+          <ul class="moonwalk_grid_3">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-1" ga4-text="portfolio_1" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" alt="부산 병원 인테리어 100평대 내과·안과 공동개원 시공 사례 및 동선 설계" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" alt="부산 병원 인테리어 100평대 내과·안과 공동개원 시공 사례 및 동선 설계" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">부산 병원 인테리어 100평대 내과·안과 공동개원 시공 사례 및 동선 설계</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">삼성스마트내과·안과</p>
                 </div>
               </a>
             </li>
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-2" ga4-text="portfolio_2" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/images/img_visual_02.jpg" alt="부산 상가 인테리어 해운대 디저트 카페 디자인 및 리모델링 사례" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/images/img_visual_02.jpg" alt="부산 상가 인테리어 해운대 디저트 카페 디자인 및 리모델링 사례" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">부산 상가 인테리어 해운대 디저트 카페 디자인 및 리모델링 사례</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">카페 멜로우 (Mellow Cafe)</p>
                 </div>
               </a>
             </li>
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-3" ga4-text="portfolio_3" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/images/img_visual_03.jpg" alt="부산 IT 테크 스타트업 사무실 인테리어 및 기업 브랜딩 시공 사례" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/images/img_visual_03.jpg" alt="부산 IT 테크 스타트업 사무실 인테리어 및 기업 브랜딩 시공 사례" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">부산 IT 테크 스타트업 사무실 인테리어 및 기업 브랜딩 시공 사례</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">센텀 소프트웨어 (Centum SW)</p>
                 </div>
               </a>
             </li>
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-1" ga4-text="portfolio_4" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/images/img_visual_01.jpg" alt="강남 80평형 프라이빗 피부과 &amp; 뷰티 레이아웃 공간 맞춤 시공" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/images/img_visual_01.jpg" alt="강남 80평형 프라이빗 피부과 &amp; 뷰티 레이아웃 공간 맞춤 시공" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">강남 80평형 프라이빗 피부과 &amp; 뷰티 레이아웃 공간 맞춤 시공</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">더샤인 피부과의원</p>
                 </div>
               </a>
             </li>
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-2" ga4-text="portfolio_5" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" alt="센텀시티 전문 치과 120평 무균 수술실 &amp; X-ray 방어 동선 설계" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" alt="센텀시티 전문 치과 120평 무균 수술실 &amp; X-ray 방어 동선 설계" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">센텀시티 전문 치과 120평 무균 수술실 &amp; X-ray 방어 동선 설계</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">스마트 치과의원</p>
                 </div>
               </a>
             </li>
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-3" ga4-text="portfolio_6" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/images/img_visual_02.jpg" alt="서면 대형 한의원 탕전실 및 진료실 특화 조도 방음 시공 사례" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/images/img_visual_02.jpg" alt="서면 대형 한의원 탕전실 및 진료실 특화 조도 방음 시공 사례" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">서면 대형 한의원 탕전실 및 진료실 특화 조도 방음 시공 사례</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">경희한의원</p>
                 </div>
               </a>
             </li>
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-1" ga4-text="portfolio_7" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/images/img_visual_03.jpg" alt="광안리 프리미엄 오션뷰 뷰티 살롱 &amp; 스파 공간 리모델링" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/images/img_visual_03.jpg" alt="광안리 프리미엄 오션뷰 뷰티 살롱 &amp; 스파 공간 리모델링" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">광안리 프리미엄 오션뷰 뷰티 살롱 &amp; 스파 공간 리모델링</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">루미에르 스파</p>
                 </div>
               </a>
             </li>
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-2" ga4-text="portfolio_8" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/images/img_visual_01.jpg" alt="마린시티 아동 청소년과 소아과 친환경 안전 마감재 시공" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/images/img_visual_01.jpg" alt="마린시티 아동 청소년과 소아과 친환경 안전 마감재 시공" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">마린시티 아동 청소년과 소아과 친환경 안전 마감재 시공</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">아이사랑소아과의원</p>
                 </div>
               </a>
             </li>
-            <li class="portfolio_card_item" style="background-color: #141414; border-radius: 12px; overflow: hidden; border: 1px solid #282828;">
+            <li class="mw_card_item" style="background-color: #141414; border: 1px solid #282828;">
               <a href="/h-1-3" ga4-text="portfolio_9" class="portfolio_link ga4__cta_btn_link" style="text-decoration: none; color: inherit; display: block;">
-                <div class="img_area" style="aspect-ratio: 16/10; overflow: hidden;">
-                  <img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" alt="연산동 정형외과 도수치료실 및 소음 차단 3D 맞춤 인테리어" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
-                </div>
-                <div class="text_area" style="padding: 20px;">
+                <figure class="mw_card_fig">
+                  <img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" alt="연산동 정형외과 도수치료실 및 소음 차단 3D 맞춤 인테리어" loading="lazy" />
+                </figure>
+                <div class="mw_card_body">
                   <h4 class="portfolio_title" style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">연산동 정형외과 도수치료실 및 소음 차단 3D 맞춤 인테리어</h4>
                   <p class="common-text" style="color: #a0a0a0; font-size: 0.9rem; margin: 0;">바른정형외과의원</p>
                 </div>
@@ -369,49 +407,49 @@
             </li>
           </ul>
         </div>
-        <div class="bt_group" style="margin-top: 24px; text-align: center;"><a href="/h-1" class="bt-base bt-solid ga4__cta_btn_link _ani">포트폴리오 더 보기</a></div>
+        <div class="bt_group" style="margin-top: 28px; text-align: center;"><a href="/h-1" class="bt-base bt-solid ga4__cta_btn_link _ani">포트폴리오 더 보기</a></div>
       </div>
     </section>
 
-    <!-- Medical Space Insights Section (#dd5828 Background, 3 Cards, Tight Height) -->
-    <section class="main_insights_cloned" style="position: relative; background-color: #dd5828; padding: 36px 0; color: #ffffff; width: 100%;">
+    <!-- Medical Space Insights Section (#dd5828 Background, 3 Cards, Matching Grid Size) -->
+    <section class="main_insights_cloned" style="position: relative; background-color: #dd5828; padding: 45px 0; color: #ffffff; width: 100%;">
       <div class="common-inner" style="position: relative; z-index: 2; flex-direction: column; padding-top: 0; padding-bottom: 0;">
-        <header class="portfolio_page_head" style="margin-bottom: 24px; text-align: center;">
+        <header class="portfolio_page_head" style="margin-bottom: 28px; text-align: center;">
           <h2 class="common-title" style="color: #ffffff; font-size: 2.2rem; font-weight: 800; margin-bottom: 8px;">의료공간 인사이트 &amp; 개원 가이드</h2>
           <p class="common-text" style="color: #ffeae2; font-size: 1.05rem; word-break: keep-all; margin: 0;">
             병원 관련 큐레이팅과 성공적인 개원을 위한 실전 인테리어 노하우, 최신 의료 공간 트렌드 아티클을 한눈에 확인해 보세요.
           </p>
         </header>
 
-        <ul class="insights_grid_3">
-          <li class="portfolio_card_item" style="background-color: #b83e14; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+        <ul class="moonwalk_grid_3">
+          <li class="mw_card_item" style="background-color: #b83e14; border: 1px solid rgba(255,255,255,0.2);">
             <a href="/h-2" style="text-decoration: none; color: inherit; display: block;">
-              <figure style="margin: 0; aspect-ratio: 16/10; overflow: hidden;">
-                <img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" alt="치과 개원 동선" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
+              <figure class="mw_card_fig">
+                <img src="https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" alt="치과 개원 동선" loading="lazy" />
               </figure>
-              <div style="padding: 20px;">
+              <div class="mw_card_body">
                 <h3 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">치과 개원 시 필수 체크! 수술실 및 X-ray실 엑스선 방어 동선</h3>
                 <p style="color: #ffdacb; font-size: 0.9rem; line-height: 1.5; margin: 0;">진료 과목 특성을 반영한 방사선 차폐 공사 및 환자 이동 동선 최적화 전략</p>
               </div>
             </a>
           </li>
-          <li class="portfolio_card_item" style="background-color: #b83e14; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+          <li class="mw_card_item" style="background-color: #b83e14; border: 1px solid rgba(255,255,255,0.2);">
             <a href="/h-2" style="text-decoration: none; color: inherit; display: block;">
-              <figure style="margin: 0; aspect-ratio: 16/10; overflow: hidden;">
-                <img src="https://indecompany2.mycafe24.com/images/img_visual_02.jpg" alt="내과 대기실" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
+              <figure class="mw_card_fig">
+                <img src="https://indecompany2.mycafe24.com/images/img_visual_02.jpg" alt="내과 대기실" loading="lazy" />
               </figure>
-              <div style="padding: 20px;">
+              <div class="mw_card_body">
                 <h3 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">환자의 대기 시간을 줄이는 내과·안과 대기실 3D 디자인 분석</h3>
                 <p style="color: #ffdacb; font-size: 0.9rem; line-height: 1.5; margin: 0;">쾌적한 혼잡도 관리를 돕는 대기석 분리 배치가 인테리어에 미치는 영향</p>
               </div>
             </a>
           </li>
-          <li class="portfolio_card_item" style="background-color: #b83e14; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+          <li class="mw_card_item" style="background-color: #b83e14; border: 1px solid rgba(255,255,255,0.2);">
             <a href="/h-2" style="text-decoration: none; color: inherit; display: block;">
-              <figure style="margin: 0; aspect-ratio: 16/10; overflow: hidden;">
-                <img src="https://indecompany2.mycafe24.com/images/img_visual_03.jpg" alt="의료법 소방 심의" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
+              <figure class="mw_card_fig">
+                <img src="https://indecompany2.mycafe24.com/images/img_visual_03.jpg" alt="의료법 소방 심의" loading="lazy" />
               </figure>
-              <div style="padding: 20px;">
+              <div class="mw_card_body">
                 <h3 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 8px;">소방 방염 자재 규정과 의료기관 개원 허가 심의 완벽 가이드</h3>
                 <p style="color: #ffdacb; font-size: 0.9rem; line-height: 1.5; margin: 0;">까다로운 소방 기준과 보건소 개원 인허가 실사를 한번에 통과하는 팁</p>
               </div>
@@ -419,7 +457,7 @@
           </li>
         </ul>
 
-        <div style="margin-top: 24px; text-align: center;">
+        <div style="margin-top: 28px; text-align: center;">
           <a href="/h-2" style="display: inline-block; padding: 12px 28px; background-color: #000000; color: #ffffff; font-weight: 700; font-size: 0.95rem; border-radius: 50px; text-decoration: none;">인사이트 더 보기</a>
         </div>
       </div>
@@ -480,7 +518,7 @@
     </div>
   </section>
 
-  <!-- Bottom-Left Floating Contact Button (Black Background, NO Emoji) -->
+  <!-- Bottom-Left Floating Contact Button -->
   <a href="/h-3" class="floating-contact-btn ga4__floating" aria-label="문의하기">
     <span class="txt-chat">문의하기</span>
   </a>
@@ -505,7 +543,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // Force Swiper 3-second autoplay & controls init
   if (typeof Swiper !== 'undefined' && document.querySelector('.main_swiper')) {
     try {
       new Swiper('.main_swiper', {
