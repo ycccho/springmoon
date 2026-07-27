@@ -98,38 +98,40 @@ var handl_utm = [];
       opacity: 1 !important;
     }
 
-    /* Bottom-Left Floating Contact Button */
+    /* Bottom-Left Floating Contact Button (Black Background, No Emoji) */
     .floating-contact-btn {
       position: fixed;
       bottom: 24px;
       left: 24px;
       z-index: 99999;
-      background: #ff5e00;
+      background: #000000;
       color: #ffffff !important;
-      padding: 12px 22px;
+      padding: 12px 26px;
       border-radius: 50px;
-      font-weight: 800;
+      font-weight: 700;
       font-size: 15px;
-      box-shadow: 0 8px 24px rgba(255, 94, 0, 0.4);
+      letter-spacing: -0.01em;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
       text-decoration: none !important;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
     }
     .floating-contact-btn:hover {
       transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 12px 30px rgba(255, 94, 0, 0.5);
-      background: #e05300;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      background: #1f1f1f;
+      border-color: #ff5e00;
     }
     @media (max-width: 768px) {
       .floating-contact-btn {
         bottom: 16px;
         left: 16px;
-        padding: 10px 16px;
+        padding: 10px 20px;
         font-size: 13px;
-        box-shadow: 0 6px 18px rgba(255, 94, 0, 0.4);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
       }
     }
   </style>
@@ -291,7 +293,7 @@ var handl_utm = [];
 
   <!-- Tight Marquee Partner Logo Section -->
   <section class="main_partner" style="background-color: #000000 !important; background: #000000 !important; padding: 16px 0 !important;">
-    <div style="text-align: center; color: #9ca3af; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 8px;">TRUSTED BY LEADING BRANDS & PARTNERS</div>
+    <div style="text-align: center; color: #a3a3a3; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 8px;">LEADING INTERIOR DESIGN &amp; BRANDING PARTNER</div>
     <div class="common-inner _full" style="padding-top: 8px; padding-bottom: 8px;">
       <ul class="partner_list" style="margin-top: 0;">
         <li class="partner_item">
@@ -304,9 +306,8 @@ var handl_utm = [];
     </div>
   </section>
 
-  <!-- Bottom-Left Floating Contact Button -->
+  <!-- Bottom-Left Floating Contact Button (Black Background, No Emoji) -->
   <a href="/h-3" class="floating-contact-btn ga4__floating" aria-label="문의하기">
-    <span class="ico-chat">💬</span>
     <span class="txt-chat">문의하기</span>
   </a>
   <footer class="site-footer" style="background-color: #000000 !important; background: #000000 !important;">
