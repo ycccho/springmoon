@@ -190,36 +190,38 @@ var handl_utm = [];
       </div>
     </div>
 
-    <!-- ABOUT INDE & WORK PROCESS & Text/Image Boxes (가로로 꽉 차는 검정색 배경 섹션 & hover_overlay 적용) -->
-    <div class="about_inde_full_bleed" style="width: 100%; background-color: #141414; padding: 3rem 0; margin-top: 1.5rem; margin-bottom: 2.5rem; color: #ffffff; border-top: 1px solid #282828; border-bottom: 1px solid #282828;">
-      <div class="common-inner" style="padding-top: 0; padding-bottom: 0;">
+    <!-- ABOUT INDE & WORK PROCESS & Cert Images (가로로 꽉 차는 검정색 배경 섹션 & 상시 보임 이미지 & 컴팩트한 간격) -->
+    <div class="about_inde_full_bleed" style="width: 100%; background-color: #141414; padding: 2.2rem 0; margin-top: 1rem; margin-bottom: 1.8rem; color: #ffffff; border-top: 1px solid #282828; border-bottom: 1px solid #282828;">
+      <div class="common-inner" style="padding-top: 0 !important; padding-bottom: 0 !important;">
         
         <!-- ABOUT INDE -->
-        <div style="margin-bottom: 1.8rem; text-align: left;">
-          <h2 class="common-title _left" style="font-size: 2.8rem; font-weight: 700; color: #ffffff; margin-bottom: 0.6rem; text-align: left;">ABOUT INDE</h2>
-          <p class="common-text" style="color: rgba(255, 255, 255, 0.85); text-align: left;">
+        <div style="margin-bottom: 1.2rem; text-align: left;">
+          <h2 class="common-title _left" style="font-size: 2.4rem; font-weight: 700; color: #ffffff; margin-bottom: 0.4rem; text-align: left;">ABOUT INDE</h2>
+          <p class="common-text" style="color: rgba(255, 255, 255, 0.85); text-align: left; font-size: 1.6rem; line-height: 1.6;">
             (주)인디컴퍼니는 원장님의 진료 철학을 완벽한 공간으로 구현하는 병원 인테리어 전문 기업입니다. 의료진의 최적화된 동선과 환자의 심리까지 배려한 하이엔드 의료 공간을 완성합니다.
           </p>
         </div>
 
         <!-- WORK PROCESS -->
-        <div style="margin-bottom: 2rem; text-align: left;">
-          <h2 class="common-title _left" style="font-size: 2.8rem; font-weight: 700; color: #ffffff; margin-bottom: 0.6rem; text-align: left;">WORK PROCESS</h2>
-          <p class="common-text" style="color: rgba(255, 255, 255, 0.85); text-align: left;">
+        <div style="margin-bottom: 1.4rem; text-align: left;">
+          <h2 class="common-title _left" style="font-size: 2.4rem; font-weight: 700; color: #ffffff; margin-bottom: 0.4rem; text-align: left;">WORK PROCESS</h2>
+          <p class="common-text" style="color: rgba(255, 255, 255, 0.85); text-align: left; font-size: 1.6rem; line-height: 1.6;">
             부정확한 온라인 가견적으로 혼란을 드리지 않고자, 온라인 견적 서비스는 진행하지 않습니다. 다만, 1평의 공간이라도 직접 실측하여 정확한 견적과 시공 범위를 안내해 드리고 있습니다.<br />
             원장님의 이름이 곧 신뢰가 되는 공간을 만들기 위해 최선을 다하겠습니다.
           </p>
         </div>
 
-        <!-- 2 Rectangular Cert Boxes with hover_overlay overlay structure -->
-        <div style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-top: 2rem; justify-content: center;">
-          <div class="cert_hover_box" onclick="window.open('1.jpg', '_blank')" style="position: relative; flex: 1; min-width: 140px; max-width: 480px; padding: 1.2rem 1rem; border: 2px solid #383838; background-color: #000000; border-radius: 8px; text-align: center; overflow: hidden; cursor: pointer; transition: border-color 0.3s ease;">
+        <!-- 2 Rectangular Cert Boxes with Always Visible Images (1.jpg & 2.jpg) -->
+        <div style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-top: 1.2rem; justify-content: center;">
+          <div class="cert_hover_box" style="position: relative; flex: 1; min-width: 240px; max-width: 480px; padding: 1rem; border: 1.5px solid #383838; background-color: #000000; border-radius: 8px; text-align: center; overflow: hidden; transition: border-color 0.3s ease;">
             <div class="hover_overlay _hover_overlay" style="position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; background: rgba(255, 94, 0, 0.12); opacity: 0; transition: opacity 0.3s ease; pointer-events: none;"></div>
-            <span style="font-size: 1.3rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; position: relative; z-index: 2;">법인사업자</span>
+            <span style="font-size: 1.2rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; position: relative; z-index: 2; display: block; margin-bottom: 0.6rem;">법인사업자</span>
+            <img src="1.jpg" alt="법인사업자" onclick="window.open('1.jpg', '_blank')" style="width: 100%; height: auto; max-height: 260px; object-fit: contain; border-radius: 4px; position: relative; z-index: 2; display: block; margin: 0 auto; cursor: pointer;" />
           </div>
-          <div class="cert_hover_box" onclick="window.open('2.jpg', '_blank')" style="position: relative; flex: 1; min-width: 140px; max-width: 480px; padding: 1.2rem 1rem; border: 2px solid #383838; background-color: #000000; border-radius: 8px; text-align: center; overflow: hidden; cursor: pointer; transition: border-color 0.3s ease;">
+          <div class="cert_hover_box" style="position: relative; flex: 1; min-width: 240px; max-width: 480px; padding: 1rem; border: 1.5px solid #383838; background-color: #000000; border-radius: 8px; text-align: center; overflow: hidden; transition: border-color 0.3s ease;">
             <div class="hover_overlay _hover_overlay" style="position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; background: rgba(255, 94, 0, 0.12); opacity: 0; transition: opacity 0.3s ease; pointer-events: none;"></div>
-            <span style="font-size: 1.3rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; position: relative; z-index: 2;">실내건축면허</span>
+            <span style="font-size: 1.2rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; position: relative; z-index: 2; display: block; margin-bottom: 0.6rem;">실내건축면허</span>
+            <img src="2.jpg" alt="실내건축면허" onclick="window.open('2.jpg', '_blank')" style="width: 100%; height: auto; max-height: 260px; object-fit: contain; border-radius: 4px; position: relative; z-index: 2; display: block; margin: 0 auto; cursor: pointer;" />
           </div>
         </div>
 
