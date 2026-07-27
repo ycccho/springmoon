@@ -29,11 +29,31 @@
   <link rel="apple-touch-icon" href="https://indecompany2.mycafe24.com/images/image_kakaotalk.png" />
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    /* Main Portfolio Pure Black Theme */
+    /* Fix Main Visual transform lock so banner is IMMEDIATELY visible without scrolling */
+    .main_visual {
+      transform: translateY(0) !important;
+      height: auto !important;
+      position: relative;
+    }
+    .main_visual .main_swiper {
+      clip-path: none !important;
+    }
+    .main_visual .text_area {
+      margin: 4rem auto 0 !important;
+    }
+
+    /* Main Portfolio Pure Black Theme & Tight Top/Bottom Padding (Matching Insights) */
     .main_portfolio {
       background-color: #000000 !important;
       color: #ffffff !important;
-      padding: 70px 0 50px 0;
+      padding: 36px 0 !important;
+    }
+    .main_portfolio .common-inner {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    .main_portfolio .main_portfolio_head {
+      margin-bottom: 24px !important;
     }
     .main_portfolio .common-title,
     .main_portfolio .common-title b {
@@ -66,9 +86,6 @@
     }
 
     /* Custom Slider Navigation Arrows */
-    .main_visual {
-      position: relative;
-    }
     .main_visual .bt-visual-custom {
       position: absolute;
       top: 50%;
@@ -106,20 +123,20 @@
       .main_visual .bt-visual-custom._next { right: 12px; }
     }
 
-    /* Bottom-Left Floating Contact Button (Black Background, No Emoji) */
+    /* Bottom-Left Floating Contact Button (Black Background, NO Emoji, NO Pseudo-element) */
     .floating-contact-btn {
       position: fixed;
       bottom: 24px;
       left: 24px;
       z-index: 99999;
-      background: #000000;
+      background: #000000 !important;
       color: #ffffff !important;
       padding: 12px 26px;
       border-radius: 50px;
       font-weight: 700;
       font-size: 15px;
       letter-spacing: -0.01em;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -127,10 +144,15 @@
       border: 1px solid rgba(255, 255, 255, 0.3);
       transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
     }
+    .floating-contact-btn::before,
+    .floating-contact-btn::after {
+      display: none !important;
+      content: "" !important;
+    }
     .floating-contact-btn:hover {
       transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-      background: #1f1f1f;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      background: #1f1f1f !important;
       border-color: #ff5e00;
     }
     @media (max-width: 768px) {
@@ -139,7 +161,7 @@
         left: 16px;
         padding: 10px 20px;
         font-size: 13px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
       }
     }
 
@@ -185,8 +207,8 @@
 
   <div class="site-container _main">
 
-    <!-- Main Visual Banner with 3-second auto change, ccccc.jpg & walts.webp images, Navigation Buttons -->
-    <section class="main_visual">
+    <!-- Main Visual Banner (Immediately Visible, 3-second Auto Change, Navigation Buttons) -->
+    <section class="main_visual on">
       <button type="button" class="bt-visual-custom _prev" aria-label="이전 슬라이드">&lt;</button>
       <button type="button" class="bt-visual-custom _next" aria-label="다음 슬라이드">&gt;</button>
       <div class="main_swiper swiper">
@@ -238,10 +260,10 @@
       </div>
     </section>
 
-    <!-- Main Portfolio (Pure Black Theme, 3x3 Grid - 9 Items) -->
+    <!-- Main Portfolio (Pure Black Theme, 3x3 Grid, Tight Height) -->
     <section class="main_portfolio" aria-labelledby="main_portfolio_title">
       <div class="common-inner">
-        <header class="main_portfolio_head" style="margin-bottom: 40px; text-align: center;">
+        <header class="main_portfolio_head" style="margin-bottom: 24px; text-align: center;">
           <h2 id="main_portfolio_title" class="common-title _ani"><b style="color: #ffffff;">병원마다 다른 진료 철학</b>으로 완성하는 공간</h2>
         </header>
         <div class="portfolio_content">
@@ -347,7 +369,7 @@
             </li>
           </ul>
         </div>
-        <div class="bt_group" style="margin-top: 40px; text-align: center;"><a href="/h-1" class="bt-base bt-solid ga4__cta_btn_link _ani">포트폴리오 더 보기</a></div>
+        <div class="bt_group" style="margin-top: 24px; text-align: center;"><a href="/h-1" class="bt-base bt-solid ga4__cta_btn_link _ani">포트폴리오 더 보기</a></div>
       </div>
     </section>
 
@@ -458,7 +480,7 @@
     </div>
   </section>
 
-  <!-- Bottom-Left Floating Contact Button (Black Background, No Emoji) -->
+  <!-- Bottom-Left Floating Contact Button (Black Background, NO Emoji) -->
   <a href="/h-3" class="floating-contact-btn ga4__floating" aria-label="문의하기">
     <span class="txt-chat">문의하기</span>
   </a>
@@ -483,7 +505,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // Swiper 3-second autoplay and custom navigation buttons init
+  // Force Swiper 3-second autoplay & controls init
   if (typeof Swiper !== 'undefined' && document.querySelector('.main_swiper')) {
     try {
       new Swiper('.main_swiper', {
@@ -505,62 +527,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 </body>
-</html>e="background-color: #000000 !important; background: #000000 !important; padding: 16px 0 !important;">
-    <div style="text-align: center; color: #9ca3af; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 8px;">TRUSTED BY LEADING BRANDS & PARTNERS</div>
-    <div class="common-inner _full" style="padding-top: 8px; padding-bottom: 8px;">
-      <ul class="partner_list" style="margin-top: 0;">
-        <li class="partner_item">
-          <div class="partner_track _1">
-            <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_01.png" alt="Partners" aria-hidden="true" class="img_resize">
-            <img src="https://hyphendesign.co.kr/wp-content/themes/hyphen/assets/images/main/260309/pc/img_partner_01.png" alt="Partners" aria-hidden="true" class="img_resize">
-          </div>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Bottom-Left Floating Contact Button -->
-  <a href="/h-3" class="floating-contact-btn ga4__floating" aria-label="문의하기">
-    <span class="ico-chat">💬</span>
-    <span class="txt-chat">문의하기</span>
-  </a>
-
-  <footer class="site-footer" style="background-color: #000000 !important; background: #000000 !important;">
-    <div class="common-inner">
-      <h2 class="footer-logo">INDECOMPANY</h2>
-      <ul class="footer-info _center_contact">
-        <li><a href="tel:0507-1321-0569">Tel. <b>0507-1321-0569</b></a></li>
-        <li>Fax. 0504-224-0569</li>
-        <li><a href="mailto:inde_company@naver.com" target="_blank">inde_company@naver.com</a></li>
-      </ul>
-      <ul class="footer-info">
-        <li>Biz License 516-88-02985</li>
-        <li><a href="https://indecompany2.mycafe24.com/terms" class="ga4__footer">이용약관</a></li>
-        <li><a href="https://indecompany2.mycafe24.com/privacy" class="ga4__footer">개인정보처리방침</a></li>
-      </ul>
-      <address>3F, 78, Gwajeong-ro, Yeonje-gu, Busan</address>
-    </div>
-  </footer>
-</main>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  // Swiper 3-second autoplay and custom navigation buttons init
-  if (typeof Swiper !== 'undefined' && document.querySelector('.main_swiper')) {
-    try {
-      new Swiper('.main_swiper', {
-        loop: true,
-        speed: 600,
-        autoplay: {
-          delay: 3000,
-          disableOnInteraction: false
-        },
-        navigation: {
-          nextEl: '.main_visual .bt-visual-custom._next',
-          prevEl: '.main_visual .bt-visual-custom._prev'
-        }
-      });
-    } catch(e) {
+</html>
       console.warn("Swiper init warning:", e);
     }
   }
