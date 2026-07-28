@@ -207,9 +207,13 @@
         bottom: 16px;
         left: 16px;
         padding: 10px 20px;
-        font-size: 13px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
-      }
+    html, body, html.main_intro_lock, body.main_intro_lock {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      min-height: 100% !important;
+      touch-action: auto !important;
+      overscroll-behavior: auto !important;
     }
   </style>
   <script defer src="https://indecompany2.mycafe24.com/js/vendor/jquery.min.js"></script>
@@ -218,7 +222,7 @@
   <script defer src="https://indecompany2.mycafe24.com/js/common.js"></script>
   <script defer src="https://indecompany2.mycafe24.com/js/content.js"></script>
 </head>
-<body class="home">
+<body class="page-home-custom">
 <main class="site-wrapper">
   <header class="site-header ">
     <div class="common-inner">
@@ -541,6 +545,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  document.documentElement.classList.remove('main_intro_lock');
+  document.body.classList.remove('main_intro_lock');
+
   if (typeof Swiper !== 'undefined' && document.querySelector('.main_swiper')) {
     try {
       new Swiper('.main_swiper', {
