@@ -562,79 +562,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 });
-</script>
-</body>
-</html>
-      console.warn("Swiper init warning:", e);
-    }
-  }
-});
-</script>
-</body>
-</html>span>닫기</span></button>
-  <div class="contact_submit_popup__scroll">
-    <div class="submit-end">
-      <h2 id="contact_submit_title" class="popup_title">신청이 완료되었습니다.</h2>
-      <p class="submit-guide">
-        빠른 시일 내로 인디컴퍼니 전담 매니저가 연락드리겠습니다.<br class="br_pc">
-        인디컴퍼니 고객만을 <br class="br_mo">위한 특별 혜택도 확인해 보세요.
-      </p>
-      <ol class="benefit_list">
-        <li class="benefit_item">무료 실측 · 맞춤 견적 상담</li>
-        <li class="benefit_item">인테리어 · 브랜딩 토탈 디자인 제안</li>
-        <li class="benefit_item">교육·사무·의료·상업 공간 전문 시공</li>
-      </ol>
-    </div>
-  </div>
-</div>
-<script defer src="https://indecompany2.mycafe24.com/js/leadform-phrase.js"></script>
-<script defer src="https://indecompany2.mycafe24.com/js/contact-form.js"></script>
-<aside class="site-quick">
-    <!-- <ul>
-      <li class="_04"><a href="https://interior-rfp.com/" target="_blank" class="ga4__floating"><div><span class="hidden_mo">입찰제안서</span><span class="hidden_pc">RFP</span> 자동 생성</div></a></li>
-      <li class="_01"><a href="https://indecompany2.mycafe24.com/estimate" class="ga4__floating">견적 <br class="hidden_pc" />신청</a></li>
-      <li class="_02"><a href="javascript:;" class="ga4__floating" data-set="contact">상담 <br class="hidden_pc" />신청</a></li>
-    </ul> -->
-    <a href="#none" class="bt-go-top">위로</a>
-  </aside>
-  <footer class="site-footer" style="background-color: #000000 !important; background: #000000 !important;">
-    <div class="common-inner">
-      <h2 class="footer-logo">INDECOMPANY</h2>
-      <ul class="footer-info _center_contact">
-        <li><a href="tel:0507-1321-0569">Tel. <b>0507-1321-0569</b></a></li>
-        <li>Fax. 0504-224-0569</li>
-        <li><a href="mailto:inde_company@naver.com" target="_blank">inde_company@naver.com</a></li>
-      </ul>
-      <ul class="footer-info">
-        <li>Biz License 516-88-02985</li>
-        <li><a href="https://indecompany2.mycafe24.com/terms" class="ga4__footer">이용약관</a></li>
-        <li><a href="https://indecompany2.mycafe24.com/privacy" class="ga4__footer">개인정보처리방침</a></li>
-      </ul>
-      <address>3F, 78, Gwajeong-ro, Yeonje-gu, Busan</address>
-      <!-- <nav class="footer-sns">
-        <ul>
-          <li><a href="https://www.linkedin.com/company/hyphen-design" target="_blank" class="ga4__footer"><img src="https://indecompany2.mycafe24.com/images/footer_sns_linkedin.png" alt="linkedin" /></a></li>
-        </ul>
-      </nav> -->
-    </div>
-  </footer>
-</main>
-<script>
+
 (function () {
   var p = location.pathname || '/';
   if (/^\/admin(\/|$)/.test(p) || /^\/api\//.test(p)) return;
   if (sessionStorage.getItem('indco_visit_tracked')) return;
   sessionStorage.setItem('indco_visit_tracked', '1');
-  console.log("Track view bypassed") // fetch(, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path: p }),
-    keepalive: true,
-    credentials: 'same-origin'
-  }).catch(function () {});
+  console.log("Track view bypassed");
 })();
 </script>
-
 </body>
 </html>
 
