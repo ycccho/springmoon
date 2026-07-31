@@ -2,19 +2,17 @@ import dagre from '@dagrejs/dagre';
 import { MarkerType } from '@xyflow/react';
 import { normalizeUrl, PBN_COLORS } from './initialData';
 
-const NODE_WIDTH = 300;
-const NODE_HEIGHT = 180;
+const NODE_WIDTH = 320;
+const NODE_HEIGHT = 200;
 
 export function buildGraphFromSites(sites, direction = 'TB') {
-  // Map normalized URL to site object
-  const urlToSiteMap = new Map();
+  // Map normalized URL to site object and ID
   const urlToIdMap = new Map();
-  sites.forEach((s, idx) => {
-    urlToSiteMap.set(normalizeUrl(s.url), s);
+  sites.forEach((s) => {
     urlToIdMap.set(normalizeUrl(s.url), s.id);
   });
 
-  // Calculate inbound & outbound counts for metrics
+  // Calculate inbound & outbound counts
   const inboundMap = new Map();
   const outboundMap = new Map();
   sites.forEach(s => {
@@ -22,7 +20,7 @@ export function buildGraphFromSites(sites, direction = 'TB') {
     outboundMap.set(s.id, s.targets ? s.targets.length : 0);
   });
 
-  // Assign colors if missing
+  // Color assignments
   sites.forEach((s, idx) => {
     if (!s.color) {
       if (s.type === 'money') s.color = '#eab308';
@@ -31,7 +29,11 @@ export function buildGraphFromSites(sites, direction = 'TB') {
     }
   });
 
-  // Collect edges with Source Node's Unique Color!
+  // Count incoming edges per target to assign separate handles
+  const targetIncomingHandleCounter = new Map();
+  const sourceOutgoingHandleCounter = new Map();
+
+  // Collect edges with Separate Handles and Source PBN Colors!
   const rawEdges = [];
   sites.forEach(sourceSite => {
     const sourceColor = sourceSite.color || '#6366f1';
@@ -41,28 +43,40 @@ export function buildGraphFromSites(sites, direction = 'TB') {
         const normTarget = normalizeUrl(targetUrl);
         const targetId = urlToIdMap.get(normTarget) || targetUrl;
 
-        // Increment inbound count for target
+        // Increment counts
         if (inboundMap.has(targetId)) {
           inboundMap.set(targetId, (inboundMap.get(targetId) || 0) + 1);
         }
 
-        const edgeId = `e-${sourceSite.id}->${targetId}`;
+        // Calculate unique handle index for target node so lines NEVER overlap
+        const inIdx = targetIncomingHandleCounter.get(targetId) || 0;
+        targetIncomingHandleCounter.set(targetId, inIdx + 1);
+        const targetHandleId = `in-${inIdx % 7}`;
+
+        // Calculate unique handle index for source node
+        const outIdx = sourceOutgoingHandleCounter.get(sourceSite.id) || 0;
+        sourceOutgoingHandleCounter.set(sourceSite.id, outIdx + 1);
+        const sourceHandleId = `out-${outIdx % 7}`;
+
+        const edgeId = `e-${sourceSite.id}->${targetId}-${inIdx}`;
 
         rawEdges.push({
           id: edgeId,
           source: sourceSite.id,
+          sourceHandle: sourceHandleId,
           target: targetId,
+          targetHandle: targetHandleId,
           type: 'smoothstep',
           animated: true,
           style: {
-            strokeWidth: 3,
+            strokeWidth: 3.5,
             stroke: sourceColor,
-            filter: `drop-shadow(0 0 6px ${sourceColor}80)`
+            filter: `drop-shadow(0 0 6px ${sourceColor}90)`
           },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            width: 20,
-            height: 20,
+            width: 22,
+            height: 22,
             color: sourceColor
           }
         });
@@ -70,19 +84,21 @@ export function buildGraphFromSites(sites, direction = 'TB') {
     }
   });
 
-  // Dynamic Tier Calculation
-  // Tier 0: Money site (and primary target sites)
-  // Tier 1: Sites pointing to Tier 0
-  // Tier 2: Sites pointing to Tier 1
-  // Tier 3: Sites pointing to Tier 2
+  // Explicit Tier Ranking Logic
+  // Tier 0 (Rank 0): Money Site inde.co.kr (TOP OF CANVAS Y = 0) & Primary Targets
+  // Tier 1 (Rank 1): PBNs pointing directly to Tier 0
+  // Tier 2 (Rank 2): PBNs pointing to Tier 1 PBNs
+  // Tier 3 (Rank 3): PBNs pointing to Tier 2 PBNs
   const nodeTiers = new Map();
 
+  // Step 1: Money sites & targets are Tier 0 (Rank 0)
   sites.forEach(s => {
-    if (s.type === 'money' || s.type === 'target') {
-      nodeTiers.set(s.id, 0);
+    if (s.type === 'money') {
+      nodeTiers.set(s.id, 0); // Guaranteed Rank 0 (Topmost)
     }
   });
 
+  // Step 2: Calculate Tier levels based on link distance to Money Site
   let changed = true;
   let iterations = 0;
   while (changed && iterations < 15) {
@@ -106,20 +122,24 @@ export function buildGraphFromSites(sites, direction = 'TB') {
     });
   }
 
-  // Fallback for unlinked nodes
+  // Fallback for target nodes or standalone nodes
   sites.forEach(s => {
     if (!nodeTiers.has(s.id)) {
-      nodeTiers.set(s.id, s.type === 'money' ? 0 : 1);
+      if (s.type === 'target') {
+        nodeTiers.set(s.id, 0); // Put target sites alongside Money Site at Tier 0 (Top)
+      } else {
+        nodeTiers.set(s.id, 1);
+      }
     }
   });
 
-  // Build Dagre Layout Graph
+  // Build Dagre Layout
   const g = new dagre.graphlib.Graph();
   g.setGraph({
     rankdir: direction,
-    nodesep: 90,
-    ranksep: 160,
-    marginx: 80,
+    nodesep: 120, // Wide spacing between nodes so lines stay clean & separated
+    ranksep: 180, // Vertical spacing between tiers
+    marginx: 100,
     marginy: 80
   });
   g.setDefaultEdgeLabel(() => ({}));
@@ -133,13 +153,16 @@ export function buildGraphFromSites(sites, direction = 'TB') {
     });
   });
 
+  // To layout Dagre from Money Site (top) down to Tier 3 PBNs (bottom),
+  // we add inverted edges to Dagre for layout positioning only!
   rawEdges.forEach(edge => {
-    g.setEdge(edge.source, edge.target);
+    // Invert for Dagre layout ranking so Money Site stays at TOP!
+    g.setEdge(edge.target, edge.source);
   });
 
   dagre.layout(g);
 
-  // Map to React Flow nodes with exact color & tier metadata
+  // Map to React Flow nodes
   const nodes = sites.map(s => {
     const dagreNode = g.node(s.id);
     const inCount = inboundMap.get(s.id) || 0;
@@ -151,7 +174,7 @@ export function buildGraphFromSites(sites, direction = 'TB') {
       type: s.type, // 'money' | 'pbn' | 'target'
       position: {
         x: dagreNode ? dagreNode.x - NODE_WIDTH / 2 : 0,
-        y: dagreNode ? dagreNode.y - NODE_HEIGHT / 2 : tier * 240
+        y: dagreNode ? dagreNode.y - NODE_HEIGHT / 2 : tier * 260
       },
       data: {
         ...s,

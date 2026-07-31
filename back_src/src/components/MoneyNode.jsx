@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Star, ExternalLink, Info, Link2, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 
+const HANDLE_POSITIONS = [12, 25, 38, 50, 62, 75, 88];
+
 export default function MoneyNode({ data, selected }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const [showUrlList, setShowUrlList] = useState(false);
@@ -23,27 +25,32 @@ export default function MoneyNode({ data, selected }) {
 
   return (
     <div
-      className={`relative group rounded-2xl p-4 transition-all duration-300 min-w-[280px] max-w-[320px] shadow-2xl border-2 backdrop-blur-xl cursor-pointer ${
+      className={`relative group rounded-2xl p-4 transition-all duration-300 min-w-[300px] max-w-[340px] shadow-2xl border-3 backdrop-blur-xl cursor-pointer ${
         selected
           ? 'border-amber-400 ring-8 ring-amber-400/40 scale-105'
-          : 'border-amber-500/80 hover:border-amber-300 hover:shadow-amber-500/20'
-      } bg-gradient-to-br from-slate-900 via-amber-950/60 to-slate-900 text-slate-100 ring-2 ring-amber-500/30`}
+          : 'border-amber-400 hover:border-amber-300 hover:shadow-amber-500/30'
+      } bg-gradient-to-br from-slate-900 via-amber-950/70 to-slate-900 text-slate-100 ring-2 ring-amber-500/40`}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      {/* Top Handle (Incoming Backlinks) */}
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="!bg-amber-400 !w-5 !h-5 !border-3 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-lg shadow-amber-500/50"
-      />
+      {/* Multiple Target Handles Across Top to Prevent Line Overlap */}
+      {HANDLE_POSITIONS.map((pos, idx) => (
+        <Handle
+          key={`in-${idx}`}
+          type="target"
+          position={Position.Top}
+          id={`in-${idx}`}
+          style={{ left: `${pos}%` }}
+          className="!bg-amber-400 !w-3.5 !h-3.5 !border-2 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-md"
+        />
+      ))}
 
       {/* Prominent Golden Star Banner */}
       <div className="flex items-center justify-between gap-1.5 mb-2.5 pb-2 border-b border-amber-500/40">
-        <div className="flex items-center gap-1 bg-amber-500/30 border border-amber-400/60 text-amber-200 px-3 py-1 rounded-full text-xs font-extrabold shadow-md">
-          <Star className="w-4 h-4 text-amber-400 fill-amber-400 animate-spin-slow" />
+        <div className="flex items-center gap-1 bg-amber-500/30 border border-amber-400/60 text-amber-200 px-3 py-1 rounded-full text-xs font-black shadow-md">
+          <Star className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse" />
           <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
-          <span className="text-amber-100 tracking-wide font-extrabold">⭐ 머니사이트 ⭐</span>
+          <span className="text-amber-100 tracking-wide font-extrabold">⭐ 최상단 머니사이트 ⭐</span>
         </div>
 
         <div className="flex items-center gap-1">
@@ -68,7 +75,7 @@ export default function MoneyNode({ data, selected }) {
       </h3>
 
       {/* Highly Visible URL Badge */}
-      <div className="flex items-center justify-between gap-1.5 bg-slate-950 p-2 rounded-xl border border-amber-500/40 shadow-inner mb-3">
+      <div className="flex items-center justify-between gap-1.5 bg-slate-950 p-2 rounded-xl border border-amber-500/50 shadow-inner mb-3">
         <span className="font-mono text-xs font-extrabold text-amber-300 truncate select-all">
           {data.url}
         </span>
@@ -88,7 +95,9 @@ export default function MoneyNode({ data, selected }) {
             <Link2 className="w-3.5 h-3.5" />
             <span>수신 백링크 총 {data.inboundCount || 0}개</span>
           </div>
-          <span className="text-[10px] text-amber-300/80 font-semibold">최상단 고정 노드</span>
+          <span className="text-[10px] text-amber-300 font-bold bg-slate-950 px-2 py-0.5 rounded border border-amber-500/30">
+            최상단 Y=0 고정
+          </span>
         </div>
 
         {/* Toggle Backlink List Button */}
@@ -108,23 +117,31 @@ export default function MoneyNode({ data, selected }) {
 
       {/* Expanded Backlink URL List */}
       {showUrlList && (
-        <div className="mt-2 p-2 bg-slate-950/90 rounded-xl border border-amber-500/40 text-xs space-y-1 max-h-36 overflow-y-auto font-mono">
+        <div className="mt-2 p-2 bg-slate-950 rounded-xl border border-amber-500/40 text-xs space-y-1 max-h-36 overflow-y-auto font-mono">
           <div className="text-[11px] font-bold text-amber-300 border-b border-amber-500/20 pb-1">
-            이 머니사이트로 들어오는 백링크:
+            이 머니사이트로 백링크를 전달하는 PBN 목록:
           </div>
           <ul className="space-y-1 text-[10px] text-slate-300">
-            {/* Display list of PBNs or sites pointing to this money site */}
-            <li className="text-amber-200/90 italic">PBN1, PBN2, PBN3, PBN4, PBN5 네트워크에서 백링크 제공 중</li>
+            <li className="p-1 bg-slate-900 rounded text-slate-200 border border-slate-800">https://busaninterior.kr/ (PBN1)</li>
+            <li className="p-1 bg-slate-900 rounded text-slate-200 border border-slate-800">https://pbn-1.pages.dev/ (PBN2)</li>
+            <li className="p-1 bg-slate-900 rounded text-slate-200 border border-slate-800">https://pbn-2.pages.dev/ (PBN3)</li>
+            <li className="p-1 bg-slate-900 rounded text-slate-200 border border-slate-800">https://academyinteriors.pages.dev/ (PBN4)</li>
+            <li className="p-1 bg-slate-900 rounded text-slate-200 border border-slate-800">https://officeinteriors.pages.dev/ (PBN5)</li>
           </ul>
         </div>
       )}
 
-      {/* Bottom Handle */}
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="!bg-amber-400 !w-5 !h-5 !border-3 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-lg shadow-amber-500/50"
-      />
+      {/* Multiple Source Handles Across Bottom */}
+      {HANDLE_POSITIONS.map((pos, idx) => (
+        <Handle
+          key={`out-${idx}`}
+          type="source"
+          position={Position.Bottom}
+          id={`out-${idx}`}
+          style={{ left: `${pos}%` }}
+          className="!bg-amber-400 !w-3.5 !h-3.5 !border-2 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-md"
+        />
+      ))}
 
       {/* Hover Tooltip */}
       {showTooltip && !showUrlList && (

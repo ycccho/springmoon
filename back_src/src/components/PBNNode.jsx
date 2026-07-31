@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Layers, ExternalLink, Info, ArrowUpRight, ArrowDownLeft, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 
+const HANDLE_POSITIONS = [12, 25, 38, 50, 62, 75, 88];
+
 export default function PBNNode({ data, selected }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const [showUrlList, setShowUrlList] = useState(false);
@@ -32,19 +34,23 @@ export default function PBNNode({ data, selected }) {
           ? `0 0 25px ${nodeColor}80, inset 0 0 15px ${nodeColor}30`
           : `0 8px 24px -6px ${nodeColor}30`
       }}
-      className={`relative group rounded-2xl p-4 transition-all duration-300 min-w-[280px] max-w-[320px] border-2 backdrop-blur-xl cursor-pointer ${
+      className={`relative group rounded-2xl p-4 transition-all duration-300 min-w-[290px] max-w-[330px] border-2 backdrop-blur-xl cursor-pointer ${
         selected ? 'scale-105 ring-4' : 'hover:scale-[1.02]'
       } bg-slate-900/95 text-slate-100`}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      {/* Top Handle */}
-      <Handle
-        type="target"
-        position={Position.Top}
-        style={{ backgroundColor: nodeColor }}
-        className="!w-4 !h-4 !border-2 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-md"
-      />
+      {/* Multiple Target Handles Across Top */}
+      {HANDLE_POSITIONS.map((pos, idx) => (
+        <Handle
+          key={`in-${idx}`}
+          type="target"
+          position={Position.Top}
+          id={`in-${idx}`}
+          style={{ left: `${pos}%`, backgroundColor: nodeColor }}
+          className="!w-3 !h-3 !border-2 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-md"
+        />
+      ))}
 
       {/* Header Bar */}
       <div className="flex items-center justify-between gap-1.5 mb-2 pb-2 border-b border-slate-800">
@@ -60,7 +66,7 @@ export default function PBNNode({ data, selected }) {
           {/* Tier Level Badge */}
           <span
             style={{ backgroundColor: nodeColor }}
-            className="px-2 py-0.5 rounded text-slate-950 font-extrabold text-[11px] shadow-sm"
+            className="px-2 py-0.5 rounded text-slate-950 font-black text-[11px] shadow-sm"
           >
             티어 {tier}
           </span>
@@ -155,13 +161,17 @@ export default function PBNNode({ data, selected }) {
         </div>
       )}
 
-      {/* Bottom Handle */}
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        style={{ backgroundColor: nodeColor }}
-        className="!w-4 !h-4 !border-2 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-md"
-      />
+      {/* Multiple Source Handles Across Bottom */}
+      {HANDLE_POSITIONS.map((pos, idx) => (
+        <Handle
+          key={`out-${idx}`}
+          type="source"
+          position={Position.Bottom}
+          id={`out-${idx}`}
+          style={{ left: `${pos}%`, backgroundColor: nodeColor }}
+          className="!w-3 !h-3 !border-2 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-md"
+        />
+      ))}
 
       {/* Hover Tooltip */}
       {showTooltip && !showUrlList && (
