@@ -1,14 +1,16 @@
 import dagre from '@dagrejs/dagre';
 import { MarkerType } from '@xyflow/react';
-import { normalizeUrl } from './initialData';
+import { normalizeUrl, PBN_COLORS } from './initialData';
 
-const NODE_WIDTH = 260;
-const NODE_HEIGHT = 140;
+const NODE_WIDTH = 300;
+const NODE_HEIGHT = 180;
 
 export function buildGraphFromSites(sites, direction = 'TB') {
-  // Map normalized URL to site ID
+  // Map normalized URL to site object
+  const urlToSiteMap = new Map();
   const urlToIdMap = new Map();
-  sites.forEach(s => {
+  sites.forEach((s, idx) => {
+    urlToSiteMap.set(normalizeUrl(s.url), s);
     urlToIdMap.set(normalizeUrl(s.url), s.id);
   });
 
@@ -20,9 +22,20 @@ export function buildGraphFromSites(sites, direction = 'TB') {
     outboundMap.set(s.id, s.targets ? s.targets.length : 0);
   });
 
-  // Collect edges
+  // Assign colors if missing
+  sites.forEach((s, idx) => {
+    if (!s.color) {
+      if (s.type === 'money') s.color = '#eab308';
+      else if (s.type === 'target') s.color = '#38bdf8';
+      else s.color = PBN_COLORS[idx % PBN_COLORS.length].hex;
+    }
+  });
+
+  // Collect edges with Source Node's Unique Color!
   const rawEdges = [];
   sites.forEach(sourceSite => {
+    const sourceColor = sourceSite.color || '#6366f1';
+
     if (sourceSite.targets && Array.isArray(sourceSite.targets)) {
       sourceSite.targets.forEach(targetUrl => {
         const normTarget = normalizeUrl(targetUrl);
@@ -33,56 +46,58 @@ export function buildGraphFromSites(sites, direction = 'TB') {
           inboundMap.set(targetId, (inboundMap.get(targetId) || 0) + 1);
         }
 
+        const edgeId = `e-${sourceSite.id}->${targetId}`;
+
         rawEdges.push({
-          id: `e-${sourceSite.id}->${targetId}`,
+          id: edgeId,
           source: sourceSite.id,
           target: targetId,
           type: 'smoothstep',
           animated: true,
-          style: { strokeWidth: 2, stroke: '#6366f1' },
+          style: {
+            strokeWidth: 3,
+            stroke: sourceColor,
+            filter: `drop-shadow(0 0 6px ${sourceColor}80)`
+          },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            width: 18,
-            height: 18,
-            color: '#6366f1'
+            width: 20,
+            height: 20,
+            color: sourceColor
           }
         });
       });
     }
   });
 
-  // Calculate Node Depths (Ranks)
-  // Money Sites = Rank 0 (Topmost)
-  // Distance from Money Site dictates depth, so Money Site stays at top!
-  const nodeDepths = new Map();
+  // Dynamic Tier Calculation
+  // Tier 0: Money site (and primary target sites)
+  // Tier 1: Sites pointing to Tier 0
+  // Tier 2: Sites pointing to Tier 1
+  // Tier 3: Sites pointing to Tier 2
+  const nodeTiers = new Map();
 
-  // Helper to compute depth
-  // Money sites have depth 0
   sites.forEach(s => {
-    if (s.type === 'money') {
-      nodeDepths.set(s.id, 0);
+    if (s.type === 'money' || s.type === 'target') {
+      nodeTiers.set(s.id, 0);
     }
   });
 
-  // BFS / Topological distance calculation for hierarchy
-  // For links PBN -> Money Site, PBN is 1 level below Money Site
   let changed = true;
   let iterations = 0;
-  while (changed && iterations < 20) {
+  while (changed && iterations < 15) {
     changed = false;
     iterations++;
     sites.forEach(s => {
       if (s.targets && Array.isArray(s.targets)) {
         s.targets.forEach(tUrl => {
           const tId = urlToIdMap.get(normalizeUrl(tUrl)) || tUrl;
-          if (nodeDepths.has(tId)) {
-            const targetDepth = nodeDepths.get(tId);
-            const currentDepth = nodeDepths.get(s.id);
-            const newDepth = targetDepth + 1;
-            if (currentDepth === undefined || currentDepth < newDepth) {
-              // Wait, PBN pointing to Money Site means PBN is level below (higher depth index)
-              // If PBN points to another PBN which points to Money Site, depth increases
-              nodeDepths.set(s.id, newDepth);
+          if (nodeTiers.has(tId)) {
+            const targetTier = nodeTiers.get(tId);
+            const currentTier = nodeTiers.get(s.id);
+            const calculatedTier = targetTier + 1;
+            if (currentTier === undefined || currentTier < calculatedTier) {
+              nodeTiers.set(s.id, calculatedTier);
               changed = true;
             }
           }
@@ -91,65 +106,59 @@ export function buildGraphFromSites(sites, direction = 'TB') {
     });
   }
 
-  // Set default depth for standalone target nodes or unlinked nodes
+  // Fallback for unlinked nodes
   sites.forEach(s => {
-    if (!nodeDepths.has(s.id)) {
-      if (s.type === 'target') {
-        nodeDepths.set(s.id, 0); // Targets like Naver blog / Insta placed at top rank alongside Money Site
-      } else {
-        nodeDepths.set(s.id, 1);
-      }
+    if (!nodeTiers.has(s.id)) {
+      nodeTiers.set(s.id, s.type === 'money' ? 0 : 1);
     }
   });
 
-  // Build Dagre Graph
+  // Build Dagre Layout Graph
   const g = new dagre.graphlib.Graph();
   g.setGraph({
     rankdir: direction,
-    nodesep: 80,
-    ranksep: 120,
-    marginx: 50,
-    marginy: 50
+    nodesep: 90,
+    ranksep: 160,
+    marginx: 80,
+    marginy: 80
   });
   g.setDefaultEdgeLabel(() => ({}));
 
-  // Add nodes to Dagre
   sites.forEach(s => {
-    const depth = nodeDepths.get(s.id) || 0;
+    const tier = nodeTiers.get(s.id) || 0;
     g.setNode(s.id, {
       width: NODE_WIDTH,
       height: NODE_HEIGHT,
-      rank: depth // Enforce rank in Dagre layout
+      rank: tier
     });
   });
 
-  // Add edges to Dagre
   rawEdges.forEach(edge => {
     g.setEdge(edge.source, edge.target);
   });
 
-  // Execute Dagre layout
   dagre.layout(g);
 
-  // Map back to React Flow nodes
+  // Map to React Flow nodes with exact color & tier metadata
   const nodes = sites.map(s => {
     const dagreNode = g.node(s.id);
     const inCount = inboundMap.get(s.id) || 0;
     const outCount = outboundMap.get(s.id) || 0;
-    const depth = nodeDepths.get(s.id) || 0;
+    const tier = nodeTiers.get(s.id) || 0;
 
     return {
       id: s.id,
       type: s.type, // 'money' | 'pbn' | 'target'
       position: {
         x: dagreNode ? dagreNode.x - NODE_WIDTH / 2 : 0,
-        y: dagreNode ? dagreNode.y - NODE_HEIGHT / 2 : depth * 180
+        y: dagreNode ? dagreNode.y - NODE_HEIGHT / 2 : tier * 240
       },
       data: {
         ...s,
         inboundCount: inCount,
         outboundCount: outCount,
-        depth: depth
+        tier: tier,
+        color: s.color || '#6366f1'
       }
     };
   });

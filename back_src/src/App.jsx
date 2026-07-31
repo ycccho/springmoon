@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -19,8 +19,8 @@ import TopMemo from './components/TopMemo';
 import SidePanel from './components/SidePanel';
 import CanvasHeader from './components/CanvasHeader';
 
-const STORAGE_KEY_SITES = 'backlink_visualizer_sites_v2';
-const STORAGE_KEY_MEMO = 'backlink_visualizer_memo_v2';
+const STORAGE_KEY_SITES = 'backlink_visualizer_sites_v3';
+const STORAGE_KEY_MEMO = 'backlink_visualizer_memo_v3';
 
 // Register Custom Node Types
 const nodeTypes = {
@@ -113,7 +113,6 @@ function FlowApp() {
     applyLayout();
   }, [applyLayout]);
 
-  // Center canvas view when search term changes or layout re-applied
   const handleRelayout = () => {
     applyLayout();
     setTimeout(() => {
@@ -121,7 +120,6 @@ function FlowApp() {
     }, 50);
   };
 
-  // Node click: Open URL in new tab
   const handleNodeClick = (_, node) => {
     if (node && node.data && node.data.url) {
       window.open(node.data.url, '_blank', 'noopener,noreferrer');
@@ -147,6 +145,24 @@ function FlowApp() {
 
       {/* 3. Central Visualization Canvas */}
       <div className="flex-1 w-full relative">
+        {/* Tier Level Background Floating Markers */}
+        {direction === 'TB' && (
+          <div className="absolute left-4 top-4 z-10 flex flex-col gap-28 pointer-events-none opacity-40">
+            <div className="flex items-center gap-2 bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40 text-xs font-black">
+              ⭐ [티어 0] 머니사이트 & 타겟 영역 (최상단)
+            </div>
+            <div className="flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3 py-1 rounded-full border border-rose-500/40 text-xs font-black">
+              📌 [티어 1] 1차 백링크 PBN 영역
+            </div>
+            <div className="flex items-center gap-2 bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-full border border-cyan-500/40 text-xs font-black">
+              🔗 [티어 2] 2차 백링크 PBN 영역
+            </div>
+            <div className="flex items-center gap-2 bg-pink-500/20 text-pink-300 px-3 py-1 rounded-full border border-pink-500/40 text-xs font-black">
+              🌐 [티어 3] 3차 백링크 PBN 영역
+            </div>
+          </div>
+        )}
+
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -155,7 +171,7 @@ function FlowApp() {
           nodeTypes={nodeTypes}
           onNodeClick={handleNodeClick}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
+          fitViewOptions={{ padding: 0.25 }}
           minZoom={0.2}
           maxZoom={2}
           defaultEdgeOptions={{
@@ -166,7 +182,7 @@ function FlowApp() {
         >
           <Background variant="dots" gap={24} size={1.2} color="#334155" />
           <Controls
-            className="!bg-slate-900/90 !border !border-indigo-500/30 !rounded-xl !shadow-2xl !text-slate-200"
+            className="!bg-slate-900/90 !border !border-slate-800 !rounded-xl !shadow-2xl !text-slate-200"
             showInteractive={false}
           />
         </ReactFlow>
@@ -180,7 +196,7 @@ function FlowApp() {
             </p>
             <button
               onClick={() => setSites(INITIAL_SITES)}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all"
+              className="px-4 py-2 bg-amber-500 text-slate-950 font-extrabold rounded-xl shadow-lg transition-all"
             >
               기본 프리셋 데이터 복원
             </button>
