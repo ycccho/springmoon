@@ -5,12 +5,13 @@ import { Layers, ExternalLink, Info, ArrowUpRight, ArrowDownLeft, ChevronDown, C
 const HANDLE_POSITIONS = [12, 25, 38, 50, 62, 75, 88];
 
 export default function PBNNode({ data, selected }) {
-  const [showTooltip, setShowTooltip] = useState(false);
   const [showUrlList, setShowUrlList] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
 
   const nodeColor = data.color || '#8b5cf6';
   const tier = data.tier !== undefined ? data.tier : 1;
+
+  const tierBadgeText = tier === 1 ? '🥇 1차 백링크 PBN' : tier === 2 ? '🥈 2차 지원 PBN' : '🥉 3차 하부 PBN';
 
   const handleOpenUrl = (e) => {
     e.stopPropagation();
@@ -31,16 +32,14 @@ export default function PBNNode({ data, selected }) {
       style={{
         borderColor: nodeColor,
         boxShadow: selected
-          ? `0 0 25px ${nodeColor}80, inset 0 0 15px ${nodeColor}30`
-          : `0 8px 24px -6px ${nodeColor}30`
+          ? `0 0 25px ${nodeColor}90, inset 0 0 15px ${nodeColor}30`
+          : `0 8px 20px -4px ${nodeColor}40`
       }}
-      className={`relative group rounded-2xl p-4 transition-all duration-300 min-w-[290px] max-w-[330px] border-2 backdrop-blur-xl cursor-pointer ${
+      className={`relative group rounded-2xl p-4 transition-all duration-300 min-w-[300px] max-w-[340px] border-2 backdrop-blur-xl cursor-pointer ${
         selected ? 'scale-105 ring-4' : 'hover:scale-[1.02]'
       } bg-slate-900/95 text-slate-100`}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
     >
-      {/* Multiple Target Handles Across Top */}
+      {/* Target Handles Across Top */}
       {HANDLE_POSITIONS.map((pos, idx) => (
         <Handle
           key={`in-${idx}`}
@@ -48,40 +47,31 @@ export default function PBNNode({ data, selected }) {
           position={Position.Top}
           id={`in-${idx}`}
           style={{ left: `${pos}%`, backgroundColor: nodeColor }}
-          className="!w-3 !h-3 !border-2 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-md"
+          className="!w-3.5 !h-3.5 !border-2 !border-slate-900 rounded-full shadow-md"
         />
       ))}
 
-      {/* Header Bar */}
+      {/* Header Bar with Human Friendly Tier Label */}
       <div className="flex items-center justify-between gap-1.5 mb-2 pb-2 border-b border-slate-800">
         <div
-          style={{ backgroundColor: `${nodeColor}25`, color: nodeColor, borderColor: `${nodeColor}50` }}
-          className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-xs font-bold"
+          style={{ backgroundColor: `${nodeColor}25`, color: nodeColor, borderColor: `${nodeColor}60` }}
+          className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-xs font-black"
         >
           <Layers className="w-3.5 h-3.5" />
-          <span>PBN 백링크</span>
+          <span>{tierBadgeText}</span>
         </div>
 
-        <div className="flex items-center gap-1">
-          {/* Tier Level Badge */}
-          <span
-            style={{ backgroundColor: nodeColor }}
-            className="px-2 py-0.5 rounded text-slate-950 font-black text-[11px] shadow-sm"
-          >
-            티어 {tier}
-          </span>
-          <button
-            onClick={handleOpenUrl}
-            title="새 탭에서 열기"
-            className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors flex items-center gap-1 text-xs px-2 border border-slate-700"
-          >
-            <span>방문</span>
-            <ExternalLink className="w-3 h-3" />
-          </button>
-        </div>
+        <button
+          onClick={handleOpenUrl}
+          title="새 탭에서 사이트 열기"
+          className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors flex items-center gap-1 text-xs px-2.5 border border-slate-700 font-bold"
+        >
+          <span>방문</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </button>
       </div>
 
-      {/* Title */}
+      {/* Main Title */}
       <h3 className="font-extrabold text-sm text-slate-100 truncate leading-tight mb-1">
         {data.title || data.id}
       </h3>
@@ -97,53 +87,50 @@ export default function PBNNode({ data, selected }) {
         <button
           onClick={handleCopyUrl}
           className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors text-[10px]"
-          title="URL 주소 복사"
+          title="주소 복사"
         >
           {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
         </button>
       </div>
 
-      {/* Backlink Stats & URL List Accordion Button */}
+      {/* Stats & Link Target Accordion */}
       <div className="pt-2 border-t border-slate-800/80 flex flex-col gap-1.5">
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 font-mono">
-            <span className="flex items-center gap-1 text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-500/30" title="발출 백링크 수">
-              <ArrowUpRight className="w-3 h-3 text-amber-400" />
-              <span>발출 {data.outboundCount || 0}개</span>
-            </span>
-            <span className="flex items-center gap-1 text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30" title="수신 백링크 수">
-              <ArrowDownLeft className="w-3 h-3 text-emerald-400" />
-              <span>수신 {data.inboundCount || 0}개</span>
-            </span>
-          </div>
-          <Info className="w-3.5 h-3.5 text-slate-500" />
+        <div className="flex items-center justify-between text-xs font-mono">
+          <span className="flex items-center gap-1 text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-500/30" title="이 사이트가 링크를 보냄">
+            <ArrowUpRight className="w-3.5 h-3.5 text-amber-400" />
+            <span>보내는 백링크: {data.outboundCount || 0}개</span>
+          </span>
+          <span className="flex items-center gap-1 text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-500/30" title="이 사이트로 링크가 들어옴">
+            <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-400" />
+            <span>받는 백링크: {data.inboundCount || 0}개</span>
+          </span>
         </div>
 
-        {/* Toggle Backlink URLs List Button */}
+        {/* Toggle Target URLs */}
         {data.targets && data.targets.length > 0 && (
           <button
             onClick={(e) => {
               e.stopPropagation();
               setShowUrlList(!showUrlList);
             }}
-            style={{ backgroundColor: `${nodeColor}15`, borderColor: `${nodeColor}40`, color: nodeColor }}
-            className="w-full py-1 px-2 rounded-lg text-xs font-bold flex items-center justify-between border transition-colors mt-1"
+            style={{ backgroundColor: `${nodeColor}20`, borderColor: `${nodeColor}50`, color: nodeColor }}
+            className="w-full py-1.5 px-2.5 rounded-lg text-xs font-extrabold flex items-center justify-between border transition-colors mt-1"
           >
-            <span>🔗 백링크 타겟 URL 목록 ({data.targets.length}개)</span>
+            <span>🔗 이 사이트가 링크를 보내는 백링크 목록 ({data.targets.length}개)</span>
             {showUrlList ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         )}
       </div>
 
-      {/* Expanded Backlink URLs List Accordion */}
+      {/* Target URL List Accordion */}
       {showUrlList && data.targets && data.targets.length > 0 && (
         <div className="mt-2 p-2 bg-slate-950 rounded-xl border border-slate-800 text-xs space-y-1 max-h-40 overflow-y-auto font-mono">
           <div className="text-[10px] font-bold text-slate-400 border-b border-slate-800 pb-1">
-            이 PBN이 연결하는 타겟 URL 목록:
+            연결된 백링크 타겟 URL:
           </div>
           <ul className="space-y-1 text-[10px]">
             {data.targets.map((t, idx) => (
-              <li key={idx} className="flex items-center justify-between gap-1 p-1 bg-slate-900 rounded border border-slate-800 text-slate-200">
+              <li key={idx} className="flex items-center justify-between gap-1 p-1.5 bg-slate-900 rounded border border-slate-800 text-slate-200">
                 <span className="truncate flex-1">{t}</span>
                 <button
                   onClick={(e) => {
@@ -161,7 +148,7 @@ export default function PBNNode({ data, selected }) {
         </div>
       )}
 
-      {/* Multiple Source Handles Across Bottom */}
+      {/* Source Handles Across Bottom */}
       {HANDLE_POSITIONS.map((pos, idx) => (
         <Handle
           key={`out-${idx}`}
@@ -169,22 +156,9 @@ export default function PBNNode({ data, selected }) {
           position={Position.Bottom}
           id={`out-${idx}`}
           style={{ left: `${pos}%`, backgroundColor: nodeColor }}
-          className="!w-3 !h-3 !border-2 !border-slate-900 rounded-full hover:scale-150 transition-transform shadow-md"
+          className="!w-3.5 !h-3.5 !border-2 !border-slate-900 rounded-full shadow-md"
         />
       ))}
-
-      {/* Hover Tooltip */}
-      {showTooltip && !showUrlList && (
-        <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-3 w-72 p-3 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl backdrop-blur-xl text-xs space-y-1.5 pointer-events-none animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex items-center gap-1.5 font-bold border-b border-slate-800 pb-1" style={{ color: nodeColor }}>
-            <Info className="w-4 h-4" />
-            <span>티어 {tier} PBN 용도 / 메모</span>
-          </div>
-          <p className="text-slate-200 leading-relaxed font-normal whitespace-pre-wrap">
-            {data.memo || '작성된 메모가 없습니다.'}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

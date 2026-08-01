@@ -19,8 +19,8 @@ import TopMemo from './components/TopMemo';
 import SidePanel from './components/SidePanel';
 import CanvasHeader from './components/CanvasHeader';
 
-const STORAGE_KEY_SITES = 'backlink_visualizer_sites_v3';
-const STORAGE_KEY_MEMO = 'backlink_visualizer_memo_v3';
+const STORAGE_KEY_SITES = 'backlink_visualizer_sites_v4';
+const STORAGE_KEY_MEMO = 'backlink_visualizer_memo_v4';
 
 // Register Custom Node Types
 const nodeTypes = {
@@ -60,6 +60,7 @@ function FlowApp() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [editingSite, setEditingSite] = useState(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState(null);
 
   // React Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -84,30 +85,60 @@ function FlowApp() {
     }
   }, [memo]);
 
-  // Re-layout DAG graph whenever sites or direction changes
+  // Calculate layout and node/edge highlighting
   const applyLayout = useCallback(() => {
     const { nodes: layoutedNodes, edges: layoutedEdges } = buildGraphFromSites(sites, direction);
 
-    // Apply search filter highlighting if search term present
+    // Compute connected node IDs for hovered node
+    const connectedNodeIds = new Set();
+    const connectedEdgeIds = new Set();
+
+    if (hoveredNodeId) {
+      connectedNodeIds.add(hoveredNodeId);
+      layoutedEdges.forEach(e => {
+        if (e.source === hoveredNodeId || e.target === hoveredNodeId) {
+          connectedEdgeIds.add(e.id);
+          connectedNodeIds.add(e.source);
+          connectedNodeIds.add(e.target);
+        }
+      });
+    }
+
+    // Apply search filter and hover highlighting
     const updatedNodes = layoutedNodes.map(n => {
-      const isMatch = searchTerm.trim() === '' ||
+      const isSearchMatch = searchTerm.trim() === '' ||
         n.data.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         n.data.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (n.data.memo && n.data.memo.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      const isHoverMatch = !hoveredNodeId || connectedNodeIds.has(n.id);
+      const isDimmed = !isSearchMatch || !isHoverMatch;
 
       return {
         ...n,
         style: {
           ...n.style,
-          opacity: isMatch ? 1 : 0.25,
+          opacity: isDimmed ? 0.15 : 1,
           transition: 'all 0.3s ease'
         }
       };
     });
 
+    const updatedEdges = layoutedEdges.map(e => {
+      const isHoverMatch = !hoveredNodeId || connectedEdgeIds.has(e.id);
+      return {
+        ...e,
+        style: {
+          ...e.style,
+          opacity: isHoverMatch ? 1 : 0.1,
+          strokeWidth: connectedEdgeIds.has(e.id) ? 5 : 3.5
+        }
+      };
+    });
+
     setNodes(updatedNodes);
-    setEdges(layoutedEdges);
-  }, [sites, direction, searchTerm, setNodes, setEdges]);
+    setEdges(updatedEdges);
+  }, [sites, direction, searchTerm, hoveredNodeId, setNodes, setEdges]);
 
   useEffect(() => {
     applyLayout();
@@ -116,7 +147,7 @@ function FlowApp() {
   const handleRelayout = () => {
     applyLayout();
     setTimeout(() => {
-      reactFlowInstance.fitView({ padding: 0.2, duration: 400 });
+      reactFlowInstance.fitView({ padding: 0.25, duration: 400 });
     }, 50);
   };
 
@@ -126,12 +157,20 @@ function FlowApp() {
     }
   };
 
+  const handleNodeMouseEnter = (_, node) => {
+    setHoveredNodeId(node.id);
+  };
+
+  const handleNodeMouseLeave = () => {
+    setHoveredNodeId(null);
+  };
+
   return (
     <div className="flex flex-col h-screen w-screen bg-slate-950 text-slate-100 overflow-hidden font-sans select-none">
       {/* 1. Top Collapsible Memo Pad */}
       <TopMemo memo={memo} setMemo={setMemo} />
 
-      {/* 2. Canvas Header & Toolbar */}
+      {/* 2. Canvas Header & Toolbar & Beginners Guide */}
       <CanvasHeader
         sites={sites}
         searchTerm={searchTerm}
@@ -145,20 +184,20 @@ function FlowApp() {
 
       {/* 3. Central Visualization Canvas */}
       <div className="flex-1 w-full relative">
-        {/* Tier Level Background Floating Markers */}
+        {/* Tier Level Background Floating Banners */}
         {direction === 'TB' && (
-          <div className="absolute left-4 top-4 z-10 flex flex-col gap-28 pointer-events-none opacity-40">
-            <div className="flex items-center gap-2 bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40 text-xs font-black">
-              ⭐ [티어 0] 머니사이트 & 타겟 영역 (최상단)
+          <div className="absolute left-6 top-6 z-10 flex flex-col gap-32 pointer-events-none opacity-50">
+            <div className="flex items-center gap-2 bg-amber-500/20 text-amber-300 px-3.5 py-1.5 rounded-xl border border-amber-500/50 text-xs font-black shadow-lg">
+              <span>👑 [티어 0] 최상단 머니사이트 & 목표 사이트 (최종 백링크 집결지)</span>
             </div>
-            <div className="flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3 py-1 rounded-full border border-rose-500/40 text-xs font-black">
-              📌 [티어 1] 1차 백링크 PBN 영역
+            <div className="flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3.5 py-1.5 rounded-xl border border-rose-500/50 text-xs font-black shadow-lg">
+              <span>🥇 [티어 1] 1차 직결 PBN 백링크 사이트</span>
             </div>
-            <div className="flex items-center gap-2 bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-full border border-cyan-500/40 text-xs font-black">
-              🔗 [티어 2] 2차 백링크 PBN 영역
+            <div className="flex items-center gap-2 bg-cyan-500/20 text-cyan-300 px-3.5 py-1.5 rounded-xl border border-cyan-500/50 text-xs font-black shadow-lg">
+              <span>🥈 [티어 2] 2차 지원 PBN 백링크 사이트</span>
             </div>
-            <div className="flex items-center gap-2 bg-pink-500/20 text-pink-300 px-3 py-1 rounded-full border border-pink-500/40 text-xs font-black">
-              🌐 [티어 3] 3차 백링크 PBN 영역
+            <div className="flex items-center gap-2 bg-pink-500/20 text-pink-300 px-3.5 py-1.5 rounded-xl border border-pink-500/50 text-xs font-black shadow-lg">
+              <span>🥉 [티어 3] 3차 하부 지원 블로그 사이트</span>
             </div>
           </div>
         )}
@@ -170,6 +209,8 @@ function FlowApp() {
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           onNodeClick={handleNodeClick}
+          onNodeMouseEnter={handleNodeMouseEnter}
+          onNodeMouseLeave={handleNodeMouseLeave}
           fitView
           fitViewOptions={{ padding: 0.25 }}
           minZoom={0.2}
@@ -192,11 +233,11 @@ function FlowApp() {
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm p-6 text-center z-10">
             <h3 className="text-lg font-bold text-slate-200 mb-2">등록된 백링크 사이트가 없습니다</h3>
             <p className="text-sm text-slate-400 max-w-md mb-4">
-              우측 상단 '데이터 입력/관리' 버튼을 눌러 사이트를 직접 추가하거나 기본 프리셋 데이터로 복원하세요.
+              우측 상단 '사이트 추가/관리' 버튼을 눌러 사이트를 직접 추가하거나 기본 프리셋 데이터로 복원하세요.
             </p>
             <button
               onClick={() => setSites(INITIAL_SITES)}
-              className="px-4 py-2 bg-amber-500 text-slate-950 font-extrabold rounded-xl shadow-lg transition-all"
+              className="px-4 py-2 bg-amber-500 text-slate-950 font-black rounded-xl shadow-lg transition-all"
             >
               기본 프리셋 데이터 복원
             </button>
