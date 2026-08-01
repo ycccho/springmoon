@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>세이프티홈 | 주거공간 인테리어 포트폴리오 & 면허 비율 분석</title>
+  <title>세이프티홈 | 프리미엄 주거공간 인테리어 & 건설면허 분석 리포트</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,16 +13,18 @@
     :root {
       --bg-color: #ffffff;
       --surface-bg: #f8fafc;
+      --surface-hover: #f1f5f9;
       --card-bg: #ffffff;
       --border-color: #e2e8f0;
       --border-hover: #cbd5e1;
       --text-primary: #0f172a;
       --text-secondary: #334155;
       --text-muted: #64748b;
-      --brand-primary: #dd5828;
-      --brand-hover: #c44619;
-      --accent-teal: #0d9488;
+      --brand-primary: #d95328;
+      --brand-hover: #c24118;
+      --brand-light: #fff4f0;
       --accent-blue: #2563eb;
+      --accent-slate: #475569;
     }
 
     * {
@@ -32,11 +34,12 @@
     }
 
     body {
-      font-family: 'Noto Sans KR', sans-serif;
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-primary);
       line-height: 1.6;
       padding-bottom: 90px;
+      -webkit-font-smoothing: antialiased;
     }
 
     .container {
@@ -45,20 +48,21 @@
       padding: 0 1.25rem;
     }
 
-    /* 1. Header & Navigation (Clean White Header) */
+    /* 1. Header & Navigation (Clean Minimal White Header) */
     header.main-header {
       background-color: #ffffff;
       border-bottom: 1px solid var(--border-color);
       position: sticky;
       top: 0;
       z-index: 100;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
 
     .header-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 70px;
+      height: 72px;
     }
 
     .logo {
@@ -66,22 +70,29 @@
       align-items: center;
       gap: 0.6rem;
       text-decoration: none;
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 900;
       color: var(--text-primary);
       font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+      letter-spacing: -0.5px;
     }
 
     .logo-icon {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       background-color: var(--brand-primary);
-      border-radius: 0.5rem;
+      border-radius: 0.6rem;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 1.1rem;
+      box-shadow: 0 2px 8px rgba(217, 83, 40, 0.25);
+    }
+
+    .logo-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2.2;
     }
 
     .logo span.highlight {
@@ -90,7 +101,7 @@
 
     nav.main-nav {
       display: flex;
-      gap: 1.75rem;
+      gap: 1.8rem;
       align-items: center;
     }
 
@@ -99,7 +110,7 @@
       color: var(--text-secondary);
       font-size: 0.95rem;
       font-weight: 700;
-      transition: color 0.15s ease;
+      transition: all 0.15s ease;
       position: relative;
       padding: 0.5rem 0;
     }
@@ -125,71 +136,84 @@
 
     /* 2. Hero Category Section */
     .hero-section {
-      padding: 3rem 0 2rem 0;
+      padding: 3.5rem 0 2rem 0;
       text-align: center;
     }
 
     .hero-section h2 {
-      font-size: 1.85rem;
+      font-size: 1.9rem;
       font-weight: 900;
       color: var(--text-primary);
-      margin-bottom: 1.75rem;
+      margin-bottom: 0.5rem;
       letter-spacing: -0.5px;
+    }
+
+    .hero-section p.hero-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 2rem;
     }
 
     .category-grid {
       display: flex;
       justify-content: center;
-      gap: 1rem;
+      gap: 0.85rem;
       flex-wrap: wrap;
     }
 
     .category-btn {
       background-color: #ffffff;
       border: 1px solid var(--border-color);
-      border-radius: 1rem;
-      padding: 0.9rem 1.4rem;
-      min-width: 105px;
+      border-radius: 0.85rem;
+      padding: 0.85rem 1.4rem;
+      min-width: 110px;
       cursor: pointer;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
-      transition: all 0.15s ease;
+      justify-content: center;
+      gap: 0.55rem;
+      transition: all 0.2s ease;
       color: var(--text-secondary);
       user-select: none;
-    }
-
-    .category-btn .icon {
-      font-size: 1.6rem;
-    }
-
-    .category-btn span.label {
       font-size: 0.9rem;
       font-weight: 700;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .category-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2;
     }
 
     .category-btn:hover {
       border-color: var(--brand-primary);
       color: var(--brand-primary);
+      background-color: #ffffff;
+      box-shadow: 0 4px 12px rgba(217, 83, 40, 0.08);
+      transform: translateY(-1px);
     }
 
     .category-btn.active {
-      background-color: #fff4f0;
+      background-color: var(--brand-light);
       border-color: var(--brand-primary);
       color: var(--brand-primary);
+      font-weight: 800;
     }
 
     /* 3. Filter Bar & Search Box */
     .filter-search-bar {
-      background-color: var(--surface-bg);
+      background-color: #ffffff;
       border: 1px solid var(--border-color);
-      border-radius: 1rem;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 2.5rem;
+      border-radius: 0.85rem;
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 2.2rem;
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
     @media (min-width: 768px) {
@@ -211,7 +235,7 @@
       border: 1px solid var(--border-color);
       color: var(--text-primary);
       padding: 0.65rem 1rem;
-      border-radius: 0.65rem;
+      border-radius: 0.6rem;
       font-family: inherit;
       font-size: 0.88rem;
       font-weight: 700;
@@ -236,7 +260,7 @@
       border: 1px solid var(--border-color);
       color: var(--text-primary);
       padding: 0.65rem 1rem 0.65rem 2.6rem;
-      border-radius: 0.65rem;
+      border-radius: 0.6rem;
       font-family: inherit;
       font-size: 0.88rem;
       font-weight: 600;
@@ -246,16 +270,18 @@
 
     .search-input:focus {
       border-color: var(--brand-primary);
-      box-shadow: 0 0 0 3px rgba(221, 88, 40, 0.12);
+      box-shadow: 0 0 0 3px rgba(217, 83, 40, 0.12);
     }
 
-    .search-icon-btn {
+    .search-icon-svg {
       position: absolute;
       left: 0.85rem;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
-      font-size: 0.95rem;
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
     }
 
     /* 4. Portfolio Grid (4 Items) */
@@ -263,7 +289,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 1.75rem;
-      margin-bottom: 3rem;
+      margin-bottom: 3.5rem;
     }
 
     @media (min-width: 640px) {
@@ -283,22 +309,23 @@
       border: 1px solid var(--border-color);
       border-radius: 1rem;
       overflow: hidden;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       cursor: pointer;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     }
 
     .portfolio-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
       border-color: var(--border-hover);
     }
 
     .card-img-wrapper {
       position: relative;
       width: 100%;
-      height: 210px;
+      height: 220px;
       overflow: hidden;
       background-color: #f1f5f9;
     }
@@ -307,28 +334,30 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s ease;
+      transition: transform 0.35s ease;
     }
 
     .portfolio-card:hover .card-img {
-      transform: scale(1.04);
+      transform: scale(1.05);
     }
 
     .badge-type {
       position: absolute;
       top: 0.85rem;
       left: 0.85rem;
-      background-color: rgba(255, 255, 255, 0.92);
-      color: var(--brand-primary);
-      border: 1px solid rgba(221, 88, 40, 0.3);
-      padding: 0.25rem 0.65rem;
-      border-radius: 0.4rem;
+      background-color: rgba(255, 255, 255, 0.95);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 0.3rem 0.7rem;
+      border-radius: 0.5rem;
       font-size: 0.75rem;
       font-weight: 800;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .card-body {
-      padding: 1.15rem;
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -336,7 +365,7 @@
     }
 
     .card-title {
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 800;
       color: var(--text-primary);
       margin-bottom: 0.5rem;
@@ -353,28 +382,34 @@
       font-size: 0.82rem;
       color: var(--text-muted);
       font-weight: 600;
-      margin-bottom: 0.85rem;
+      margin-bottom: 1rem;
       display: flex;
       gap: 0.5rem;
+      align-items: center;
     }
 
     .card-footer-info {
       border-top: 1px solid var(--border-color);
-      padding-top: 0.75rem;
+      padding-top: 0.85rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 700;
     }
 
     .card-price {
       color: var(--brand-primary);
-      font-weight: 800;
+      font-weight: 900;
+      font-size: 0.95rem;
     }
 
     .card-views {
       color: var(--text-muted);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
     }
 
     /* 6. Sticky Bottom CTA Banner */
@@ -385,7 +420,7 @@
       width: 100%;
       background-color: #ffffff;
       border-top: 1px solid var(--border-color);
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
       z-index: 999;
       padding: 0.85rem 1.5rem;
     }
@@ -405,19 +440,19 @@
     }
 
     .cta-heading {
-      font-size: 1rem;
-      font-weight: 800;
+      font-size: 1.05rem;
+      font-weight: 900;
       color: var(--text-primary);
     }
 
     .cta-subtext {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--text-muted);
     }
 
     .btn-cta-estimate {
-      padding: 0.7rem 1.5rem;
+      padding: 0.75rem 1.75rem;
       font-size: 0.92rem;
       font-weight: 800;
       background-color: var(--brand-primary);
@@ -425,33 +460,36 @@
       border: none;
       border-radius: 0.65rem;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
       white-space: nowrap;
       font-family: inherit;
+      box-shadow: 0 4px 12px rgba(217, 83, 40, 0.25);
     }
 
     .btn-cta-estimate:hover {
       background-color: var(--brand-hover);
+      box-shadow: 0 6px 16px rgba(217, 83, 40, 0.35);
+      transform: translateY(-1px);
     }
 
     /* 7. Main Footer & Clean Minimal Analysis Tools */
     footer.main-footer {
       background-color: var(--surface-bg);
       border-top: 1px solid var(--border-color);
-      padding: 3rem 0 2rem 0;
-      margin-top: 3rem;
+      padding: 3.5rem 0 2.5rem 0;
+      margin-top: 4rem;
     }
 
     .footer-credits {
       text-align: center;
       color: var(--text-muted);
       font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 2.5rem;
+      font-weight: 500;
     }
 
     .footer-credits strong {
       color: var(--text-primary);
+      font-weight: 800;
     }
 
     /* CLEAN WHITE REPORT SECTION */
@@ -459,8 +497,8 @@
       background-color: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: 1.25rem;
-      padding: 1.75rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
     }
 
     .report-header-banner {
@@ -468,8 +506,8 @@
       flex-direction: column;
       gap: 1rem;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 1.25rem;
-      margin-bottom: 1.5rem;
+      padding-bottom: 1.4rem;
+      margin-bottom: 1.75rem;
     }
 
     @media (min-width: 768px) {
@@ -481,9 +519,10 @@
     }
 
     .report-title {
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       font-weight: 900;
       color: var(--text-primary);
+      letter-spacing: -0.3px;
     }
 
     .report-meta-info {
@@ -494,7 +533,7 @@
     }
 
     .meta-badge {
-      background-color: #f1f5f9;
+      background-color: var(--surface-bg);
       border: 1px solid var(--border-color);
       padding: 0.35rem 0.75rem;
       border-radius: 0.5rem;
@@ -506,33 +545,33 @@
     .meta-date {
       color: var(--brand-primary);
       border-color: #fed7aa;
-      background-color: #fff4f0;
+      background-color: var(--brand-light);
     }
 
     /* REGION FILTER BUTTONS FOR PERSONAL DATA */
     .region-filter-bar {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
       flex-wrap: wrap;
       align-items: center;
     }
 
     .region-filter-label {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 800;
       color: var(--text-primary);
       margin-right: 0.5rem;
     }
 
     .btn-region {
-      padding: 0.45rem 0.9rem;
-      font-size: 0.82rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
       font-weight: 700;
       background-color: #ffffff;
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
-      border-radius: 0.5rem;
+      border-radius: 0.6rem;
       cursor: pointer;
       transition: all 0.15s ease;
       font-family: inherit;
@@ -547,6 +586,7 @@
       background-color: var(--brand-primary);
       border-color: var(--brand-primary);
       color: white;
+      box-shadow: 0 2px 6px rgba(217, 83, 40, 0.2);
     }
 
     /* Analytics Grid (Light Minimal Cards) */
@@ -554,7 +594,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 1.25rem;
-      margin-bottom: 1.75rem;
+      margin-bottom: 2rem;
     }
 
     @media (min-width: 768px) {
@@ -564,32 +604,33 @@
     }
 
     .analytic-card {
-      background-color: #f8fafc;
+      background-color: var(--surface-bg);
       border: 1px solid var(--border-color);
-      border-radius: 0.85rem;
-      padding: 1.25rem;
+      border-radius: 0.9rem;
+      padding: 1.4rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
 
     .analytic-card.hero-ratio-card {
-      background-color: #fff4f0;
+      background-color: var(--brand-light);
       border: 1.5px solid #ffedd5;
     }
 
     .card-label {
-      font-size: 0.83rem;
+      font-size: 0.85rem;
       font-weight: 800;
       color: var(--text-muted);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
     }
 
     .card-value {
-      font-size: 2.2rem;
+      font-size: 2.3rem;
       font-weight: 900;
       color: var(--text-primary);
       line-height: 1.1;
+      font-family: 'Outfit', 'Noto Sans KR', sans-serif;
     }
 
     .card-value .unit {
@@ -600,10 +641,11 @@
     }
 
     .hero-ratio-value {
-      font-size: 2.6rem;
+      font-size: 2.7rem;
       font-weight: 900;
       color: var(--brand-primary);
       line-height: 1.1;
+      font-family: 'Outfit', 'Noto Sans KR', sans-serif;
     }
 
     .hero-unit {
@@ -612,9 +654,9 @@
     }
 
     .card-sub, .hero-ratio-sub {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
-      margin-top: 0.5rem;
+      margin-top: 0.6rem;
       font-weight: 600;
     }
 
@@ -626,21 +668,21 @@
     /* Industry Breakdown */
     .industry-breakdown-panel {
       border-top: 1px solid var(--border-color);
-      padding-top: 1.25rem;
-      margin-bottom: 1.5rem;
+      padding-top: 1.5rem;
+      margin-bottom: 1.75rem;
     }
 
     .breakdown-title {
-      font-size: 0.95rem;
+      font-size: 0.98rem;
       font-weight: 800;
       color: var(--text-primary);
-      margin-bottom: 1rem;
+      margin-bottom: 1.1rem;
     }
 
     .breakdown-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
+      gap: 0.85rem;
     }
 
     @media (min-width: 768px) {
@@ -650,34 +692,35 @@
     }
 
     .breakdown-card {
-      background-color: #f8fafc;
+      background-color: var(--surface-bg);
       border: 1px solid var(--border-color);
-      border-radius: 0.65rem;
-      padding: 0.85rem 1rem;
+      border-radius: 0.75rem;
+      padding: 0.95rem 1.1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .breakdown-name {
-      font-size: 0.82rem;
+      font-size: 0.83rem;
       font-weight: 700;
       color: var(--text-secondary);
     }
 
     .breakdown-cnt {
-      font-size: 1.05rem;
-      font-weight: 800;
+      font-size: 1.1rem;
+      font-weight: 900;
       color: var(--brand-primary);
+      font-family: 'Outfit', 'Noto Sans KR', sans-serif;
     }
 
     /* KISCON Search Filter Form */
     .filter-panel {
-      background-color: #f8fafc;
+      background-color: var(--surface-bg);
       border: 1px solid var(--border-color);
-      border-radius: 0.85rem;
-      padding: 1.25rem;
-      margin-bottom: 1.25rem;
+      border-radius: 0.9rem;
+      padding: 1.4rem;
+      margin-bottom: 1.5rem;
     }
 
     .filter-grid {
@@ -700,8 +743,8 @@
     }
 
     .form-group label {
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-size: 0.82rem;
+      font-weight: 800;
       color: var(--text-secondary);
     }
 
@@ -709,7 +752,7 @@
       width: 100%;
       padding: 0.65rem 0.9rem;
       border: 1px solid var(--border-color);
-      border-radius: 0.55rem;
+      border-radius: 0.6rem;
       background-color: #ffffff;
       color: var(--text-primary);
       font-family: inherit;
@@ -726,7 +769,7 @@
       width: 100%;
       padding: 0.65rem 0.9rem;
       border: 1px solid var(--border-color);
-      border-radius: 0.55rem;
+      border-radius: 0.6rem;
       background-color: #ffffff;
       color: var(--text-primary);
       font-family: inherit;
@@ -746,11 +789,11 @@
       min-width: 250px;
       background-color: #ffffff;
       border: 1px solid var(--border-color);
-      border-radius: 0.65rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      border-radius: 0.75rem;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
       z-index: 100;
       display: none;
-      padding: 0.5rem;
+      padding: 0.6rem;
       max-height: 250px;
       overflow-y: auto;
     }
@@ -762,16 +805,16 @@
     .multi-select-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem;
-      border-radius: 0.4rem;
+      gap: 0.55rem;
+      padding: 0.55rem;
+      border-radius: 0.45rem;
       cursor: pointer;
-      font-size: 0.82rem;
+      font-size: 0.83rem;
       font-weight: 600;
     }
 
     .multi-select-item:hover {
-      background-color: #f1f5f9;
+      background-color: var(--surface-bg);
     }
 
     .date-row {
@@ -786,8 +829,14 @@
       background-color: #ffffff;
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
-      border-radius: 0.5rem;
+      border-radius: 0.55rem;
       cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-preset:hover {
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
     }
 
     .btn-preset.active {
@@ -798,15 +847,17 @@
 
     .btn-search {
       width: 100%;
-      padding: 0.65rem 0.9rem;
+      padding: 0.68rem 0.9rem;
       font-family: inherit;
       font-size: 0.9rem;
       font-weight: 800;
       background-color: var(--brand-primary);
       color: white;
       border: none;
-      border-radius: 0.55rem;
+      border-radius: 0.6rem;
       cursor: pointer;
+      transition: background-color 0.15s ease;
+      box-shadow: 0 2px 6px rgba(217, 83, 40, 0.2);
     }
 
     .btn-search:hover {
@@ -817,11 +868,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #f8fafc;
+      background-color: var(--surface-bg);
       border: 1px solid var(--border-color);
       border-radius: 0.75rem;
       padding: 0.85rem 1.25rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
       font-size: 0.88rem;
       font-weight: 600;
     }
@@ -831,11 +882,12 @@
       border: 1px solid var(--border-color);
       border-radius: 0.85rem;
       overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
     .table-scroll {
       overflow-x: auto;
-      max-height: 50vh;
+      max-height: 52vh;
     }
 
     table {
@@ -848,12 +900,12 @@
     thead {
       position: sticky;
       top: 0;
-      background-color: #f1f5f9;
+      background-color: var(--surface-bg);
       z-index: 10;
     }
 
     th {
-      padding: 0.85rem 1rem;
+      padding: 0.9rem 1rem;
       font-weight: 800;
       color: var(--text-secondary);
       font-size: 0.78rem;
@@ -861,7 +913,7 @@
     }
 
     td {
-      padding: 0.75rem 1rem;
+      padding: 0.8rem 1rem;
       border-bottom: 1px solid var(--border-color);
       color: var(--text-primary);
     }
@@ -871,30 +923,30 @@
       color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
     }
 
     .badge-item {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       font-weight: 800;
-      padding: 0.15rem 0.4rem;
-      border-radius: 0.3rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.35rem;
     }
 
     .badge-interior {
       color: var(--brand-primary);
-      background-color: #fff4f0;
+      background-color: var(--brand-light);
       border: 1px solid #fed7aa;
     }
 
     .badge-general {
       color: var(--text-muted);
-      background-color: #f1f5f9;
+      background-color: var(--surface-bg);
       border: 1px solid var(--border-color);
     }
 
     .badge-closed {
-      color: #ef4444;
+      color: #dc2626;
       background-color: #fef2f2;
       border: 1px solid #fecaca;
     }
@@ -906,7 +958,12 @@
   <header class="main-header">
     <div class="container header-inner">
       <a href="#" class="logo">
-        <div class="logo-icon">🛡️</div>
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
         <div>세이프티<span class="highlight">홈</span></div>
       </a>
 
@@ -925,31 +982,55 @@
 
     <!-- 2. Hero Section -->
     <section class="hero-section">
-      <h2>어떤 업종의 인테리어를 찾으세요?</h2>
+      <h2>어떤 공간의 인테리어를 찾으시나요?</h2>
+      <p class="hero-subtitle">검증된 전문가의 프리미엄 시공 포트폴리오와 건설면허 공시 정보를 한눈에 확인해보세요</p>
       
       <div class="category-grid">
         <div class="category-btn active" data-cat="all">
-          <span class="icon">🏠</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
           <span class="label">전체</span>
         </div>
         <div class="category-btn" data-cat="apt">
-          <span class="icon">🏢</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+            <path d="M9 22v-4h6v4"/>
+            <path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/>
+            <path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/>
+            <path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/>
+          </svg>
           <span class="label">아파트</span>
         </div>
         <div class="category-btn" data-cat="villa">
-          <span class="icon">🏘️</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+            <path d="M6 12H4a2 2 0 0 0-2 2v8h20v-8a2 2 0 0 0-2-2h-2"/>
+            <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+          </svg>
           <span class="label">빌라</span>
         </div>
         <div class="category-btn" data-cat="house">
-          <span class="icon">🏡</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
           <span class="label">주택</span>
         </div>
         <div class="category-btn" data-cat="stay">
-          <span class="icon">🏝️</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 20h20"/>
+            <path d="M5 20V8.2a2 2 0 0 1 .6-1.4l5-5a2 2 0 0 1 2.8 0l5 5a2 2 0 0 1 .6 1.4V20"/>
+          </svg>
           <span class="label">스테이</span>
         </div>
         <div class="category-btn" data-cat="etc">
-          <span class="icon">✨</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
           <span class="label">기타</span>
         </div>
       </div>
@@ -982,8 +1063,11 @@
       </div>
 
       <div class="search-box">
-        <span class="search-icon-btn">🔍</span>
-        <input type="text" class="search-input" id="search-input" placeholder="주거타입을 입력하세요.">
+        <svg class="search-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="search-input" id="search-input" placeholder="주거타입 및 아파트명을 입력하세요.">
       </div>
     </section>
 
@@ -1007,7 +1091,7 @@
           </div>
           <div class="card-footer-info">
             <span class="card-price">예상 4,500만 원</span>
-            <span class="card-views">👁️ 1,240</span>
+            <span class="card-views">조회 1,240</span>
           </div>
         </div>
       </article>
@@ -1029,7 +1113,7 @@
           </div>
           <div class="card-footer-info">
             <span class="card-price">예상 6,800만 원</span>
-            <span class="card-views">👁️ 2,150</span>
+            <span class="card-views">조회 2,150</span>
           </div>
         </div>
       </article>
@@ -1051,7 +1135,7 @@
           </div>
           <div class="card-footer-info">
             <span class="card-price">예상 8,200만 원</span>
-            <span class="card-views">👁️ 3,420</span>
+            <span class="card-views">조회 3,420</span>
           </div>
         </div>
       </article>
@@ -1073,7 +1157,7 @@
           </div>
           <div class="card-footer-info">
             <span class="card-price">예상 5,100만 원</span>
-            <span class="card-views">👁️ 4,890</span>
+            <span class="card-views">조회 4,890</span>
           </div>
         </div>
       </article>
@@ -1083,22 +1167,22 @@
   </main>
 
   <!-- CLEAN WHITE REPORT SECTION -->
-  <div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+  <div class="container" style="margin-top: 3.5rem; margin-bottom: 3.5rem;">
     <section class="report-section">
       
       <div class="report-header-banner">
         <div class="report-title">
-          <span>📊 부산·울산·경남·경북 인테리어 개인사업자 vs 면허 비율 분석</span>
+          <span>부산·울산·경남·경북 인테리어 개인사업자 vs 면허 비율 분석</span>
         </div>
         <div class="report-meta-info">
-          <span class="meta-badge">📌 비교 기준 기간: 2022년 8월 ~ 2026년 3월 (동일 등록 기간 비교)</span>
-          <span class="meta-badge meta-date">📅 수집일자: 2026년 7월 15일</span>
+          <span class="meta-badge">비교 기준 기간: 2022년 8월 ~ 2026년 3월</span>
+          <span class="meta-badge meta-date">공식 데이터 수집일: 2026년 7월 15일</span>
         </div>
       </div>
 
       <!-- REGION FILTER BUTTONS FOR PERSONAL DATA -->
       <div class="region-filter-bar">
-        <span class="region-filter-label">📍 조회 지역 선택:</span>
+        <span class="region-filter-label">조회 지역 선택:</span>
         <button class="btn-region active" data-region="all">전체 (부·울·경·경북)</button>
         <button class="btn-region" data-region="부산">부산</button>
         <button class="btn-region" data-region="울산">울산</button>
@@ -1109,19 +1193,19 @@
       <!-- Ratio Analytics Grid -->
       <div class="analytics-grid">
         <div class="analytic-card">
-          <div class="card-label">🏠 개인사업자 인테리어 등록 건수</div>
+          <div class="card-label">개인사업자 인테리어 등록 건수</div>
           <div class="card-value" id="val-personal-cnt">11,015<span class="unit">건</span></div>
           <div class="card-sub" id="val-personal-sub">부·울·경·경북 4개 지역 합계</div>
         </div>
 
         <div class="analytic-card">
-          <div class="card-label">📜 실내건축면허 보유 사업자 (KISCON)</div>
+          <div class="card-label">실내건축면허 보유 사업자 (KISCON)</div>
           <div class="card-value" id="val-license-cnt">7,312<span class="unit">건</span></div>
           <div class="card-sub" id="val-license-sub">국토교통부 공시 실내건축면허 등록업체</div>
         </div>
 
         <div class="analytic-card hero-ratio-card">
-          <div class="card-label">🔥 개인사업자 대비 면허 보유 비율</div>
+          <div class="card-label">개인사업자 대비 면허 보유 비율</div>
           <div class="hero-ratio-value" id="val-ratio-pct">66.4<span class="hero-unit">%</span></div>
           <div class="hero-ratio-sub" id="val-ratio-desc">개인사업자 100개 당 면허업체 66개 꼴</div>
         </div>
@@ -1129,7 +1213,7 @@
 
       <!-- Breakdown by Industry -->
       <div class="industry-breakdown-panel">
-        <div class="breakdown-title">🏷️ <span id="selected-region-name">4개 지역 전체</span> 인테리어 업종별 개인사업자 등록 현황</div>
+        <div class="breakdown-title"><span id="selected-region-name">4개 지역 전체</span> 인테리어 업종별 개인사업자 등록 현황</div>
         <div class="breakdown-grid">
           <div class="breakdown-card">
             <span class="breakdown-name">실내인테리어 / 리모델링</span>
@@ -1151,51 +1235,51 @@
       </div>
 
       <!-- Statistics Source Table -->
-      <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; margin-bottom: 2rem;">
-        <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.85rem;">📖 인테리어 업종 통계 집계 기준 및 출처 안내</h4>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.6; word-break: keep-all;">
-          💡 <strong>정부 통계 공표의 시차(Lag) 안내:</strong> 통계청 및 국세청의 공식 행정 통계는 관할 세무서에 접수된 부가가치세/소득세 신고 자료 및 연간 사업체 실태 검증 조사를 통과하여 정합성이 검증된 자료만 공표합니다. 데이터 정리 및 공표 과정에 <strong>1년~1.5년의 시차</strong>가 발생하여 2023~2024년 말 데이터가 공신력 있는 최신 확정치입니다. 본 통계는 모수의 시간차에 따른 왜곡을 최소화하기 위해 동일한 개설/등록 창(2022~2026) 기준으로 설계되었습니다.
+      <div style="margin-top: 1.75rem; border-top: 1px solid var(--border-color); padding-top: 1.75rem; margin-bottom: 2rem;">
+        <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.85rem;">인테리어 업종 통계 집계 기준 및 출처 안내</h4>
+        <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; word-break: keep-all;">
+          <strong>정부 통계 공표의 시차(Lag) 안내:</strong> 통계청 및 국세청의 공식 행정 통계는 관할 세무서에 접수된 부가가치세/소득세 신고 자료 및 연간 사업체 실태 검증 조사를 통과하여 정합성이 검증된 자료만 공표합니다. 데이터 정리 및 공표 과정에 1년~1.5년의 시차가 발생하여 2023~2024년 말 데이터가 공신력 있는 최신 확정치입니다. 본 통계는 모수의 시간차에 따른 왜곡을 최소화하기 위해 동일한 개설/등록 창(2022~2026) 기준으로 설계되었습니다.
         </div>
-        <div class="table-container" style="border-radius: 0.65rem; margin-bottom: 1rem;">
+        <div class="table-container" style="border-radius: 0.75rem; margin-bottom: 1rem;">
           <div class="table-scroll">
-            <table style="font-size: 0.78rem;">
+            <table style="font-size: 0.82rem;">
               <thead>
-                <tr style="background-color: #f8fafc;">
-                  <th style="padding: 0.65rem 0.85rem;">집계 기준</th>
-                  <th style="padding: 0.65rem 0.85rem;">전국 건수</th>
-                  <th style="padding: 0.65rem 0.85rem;">부·울·경·경북 건수</th>
-                  <th style="padding: 0.65rem 0.85rem;">출처 및 데이터 기준</th>
-                  <th style="padding: 0.65rem 0.85rem;">주요 대상 및 특징</th>
+                <tr style="background-color: var(--surface-bg);">
+                  <th style="padding: 0.75rem 1rem;">집계 기준</th>
+                  <th style="padding: 0.75rem 1rem;">전국 건수</th>
+                  <th style="padding: 0.75rem 1rem;">부·울·경·경북 건수</th>
+                  <th style="padding: 0.75rem 1rem;">출처 및 데이터 기준</th>
+                  <th style="padding: 0.75rem 1rem;">주요 대상 및 특징</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="font-weight: 700; padding: 0.65rem 0.85rem;">① 현장 시공 개인사업자</td>
-                  <td style="padding: 0.65rem 0.85rem;">151,756개</td>
-                  <td style="padding: 0.65rem 0.85rem;">약 34,600개</td>
-                  <td style="padding: 0.65rem 0.85rem;">통계청 「전국사업체조사」 (산업코드 42412)</td>
-                  <td style="padding: 0.65rem 0.85rem;">유통 소매점 제외, 실제 현장에서 도배, 내장 목공, 마감 등 시공을 하는 모든 개인사업체 (무점포 포함)</td>
+                  <td style="font-weight: 700; padding: 0.75rem 1rem;">① 현장 시공 개인사업자</td>
+                  <td style="padding: 0.75rem 1rem;">151,756개</td>
+                  <td style="padding: 0.75rem 1rem;">약 34,600개</td>
+                  <td style="padding: 0.75rem 1rem;">통계청 「전국사업체조사」 (산업코드 42412)</td>
+                  <td style="padding: 0.75rem 1rem;">유통 소매점 제외, 실제 현장에서 도배, 내장 목공, 마감 등 시공을 하는 모든 개인사업체 (무점포 포함)</td>
                 </tr>
                 <tr>
-                  <td style="font-weight: 700; padding: 0.65rem 0.85rem;">② 매장/소매 개인사업자</td>
-                  <td style="padding: 0.65rem 0.85rem;">82,106개</td>
-                  <td style="padding: 0.65rem 0.85rem;">약 16,700개</td>
-                  <td style="padding: 0.65rem 0.85rem;">국세청 「100대 생활업종」 (실내장식가게)</td>
-                  <td style="padding: 0.65rem 0.85rem;">가구, 조명, 인테리어 소품 등 매장 쇼룸을 갖춘 사업자 (단순 시공 기술자 제외)</td>
+                  <td style="font-weight: 700; padding: 0.75rem 1rem;">② 매장/소매 개인사업자</td>
+                  <td style="padding: 0.75rem 1rem;">82,106개</td>
+                  <td style="padding: 0.75rem 1rem;">약 16,700개</td>
+                  <td style="padding: 0.75rem 1rem;">국세청 「100대 생활업종」 (실내장식가게)</td>
+                  <td style="padding: 0.75rem 1rem;">가구, 조명, 인테리어 소품 등 매장 쇼룸을 갖춘 사업자 (단순 시공 기술자 제외)</td>
                 </tr>
                 <tr>
-                  <td style="font-weight: 700; padding: 0.65rem 0.85rem;">③ 오프라인 상가 실사업자</td>
-                  <td style="padding: 0.65rem 0.85rem;">-</td>
-                  <td style="padding: 0.65rem 0.85rem;">11,015개</td>
-                  <td style="padding: 0.65rem 0.85rem;">소상공인시장진흥공단 상가 DB (2026.03)</td>
-                  <td style="padding: 0.65rem 0.85rem;">상가 구역에 실제 점포(간판)를 개설하고 운영 중인 인테리어 업체</td>
+                  <td style="font-weight: 700; padding: 0.75rem 1rem;">③ 오프라인 상가 실사업자</td>
+                  <td style="padding: 0.75rem 1rem;">-</td>
+                  <td style="padding: 0.75rem 1rem;">11,015개</td>
+                  <td style="padding: 0.75rem 1rem;">소상공인시장진흥공단 상가 DB (2026.03)</td>
+                  <td style="padding: 0.75rem 1rem;">상가 구역에 실제 점포(간판)를 개설하고 운영 중인 인테리어 업체</td>
                 </tr>
                 <tr>
-                  <td style="font-weight: 700; color: var(--brand-primary); padding: 0.65rem 0.85rem;">④ KISCON 면허 보유업체</td>
-                  <td style="color: var(--brand-primary); padding: 0.65rem 0.85rem;">13,919개</td>
-                  <td style="color: var(--brand-primary); padding: 0.65rem 0.85rem;">7,312개</td>
-                  <td style="padding: 0.65rem 0.85rem;">국토교통부 실내건축공사업 면허 정보 (22.08~26.03)</td>
-                  <td style="padding: 0.65rem 0.85rem;">자본금 1.5억 이상 및 전문 인력 요건을 갖춰 1,500만 원 이상 시공이 가능한 법적 면허업체</td>
+                  <td style="font-weight: 800; color: var(--brand-primary); padding: 0.75rem 1rem;">④ KISCON 면허 보유업체</td>
+                  <td style="color: var(--brand-primary); font-weight: 800; padding: 0.75rem 1rem;">13,919개</td>
+                  <td style="color: var(--brand-primary); font-weight: 800; padding: 0.75rem 1rem;">7,312개</td>
+                  <td style="padding: 0.75rem 1rem;">국토교통부 실내건축공사업 면허 정보 (22.08~26.03)</td>
+                  <td style="padding: 0.75rem 1rem;">자본금 1.5억 이상 및 전문 인력 요건을 갖춰 1,500만 원 이상 시공이 가능한 법적 면허업체</td>
                 </tr>
               </tbody>
             </table>
@@ -1274,20 +1358,20 @@
           </div>
 
           <button id="search-btn" class="btn-search">
-            <span>🔍 KISCON 데이터 조회</span>
+            <span>KISCON 데이터 조회</span>
           </button>
         </div>
       </div>
 
       <div class="summary-bar" style="display: none;" id="summary-section">
         <div style="display: flex; gap: 0.6rem; align-items: center;">
-          <div class="stat-badge" style="background-color: #ffffff; padding: 0.3rem 0.6rem; border-radius: 0.4rem; border: 1px solid var(--border-color);">전체 목록 <span id="stat-total-cnt" style="color: var(--brand-primary); font-weight: 800;">0</span></div>
-          <div class="stat-badge" style="background-color: #ffffff; padding: 0.3rem 0.6rem; border-radius: 0.4rem; border: 1px solid var(--border-color);">실내건축공사업 <span id="stat-match-cnt" style="color: var(--brand-primary); font-weight: 800;">0</span></div>
+          <div class="stat-badge" style="background-color: #ffffff; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">전체 목록 <span id="stat-total-cnt" style="color: var(--brand-primary); font-weight: 900;">0</span></div>
+          <div class="stat-badge" style="background-color: #ffffff; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">실내건축공사업 <span id="stat-match-cnt" style="color: var(--brand-primary); font-weight: 900;">0</span></div>
         </div>
-        <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
-          <input type="text" id="name-filter-input" class="form-input" style="max-width: 200px;" placeholder="💡 실시간 검색...">
-          <button class="btn-preset" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; background-color: #16a34a; color: white; border: none; font-weight: 700; cursor: pointer; border-radius: 0.4rem;" onclick="downloadExcel()">🟢 엑셀 다운로드</button>
-          <button class="btn-preset" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; background-color: #475569; color: white; border: none; font-weight: 700; cursor: pointer; border-radius: 0.4rem;" onclick="downloadTxt()">📄 메모장 다운로드</button>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="name-filter-input" class="form-input" style="max-width: 200px;" placeholder="실시간 상호명 검색...">
+          <button class="btn-preset" style="padding: 0.5rem 0.85rem; font-size: 0.8rem; background-color: #16a34a; color: white; border: none; font-weight: 800; cursor: pointer; border-radius: 0.5rem;" onclick="downloadExcel()">엑셀 다운로드</button>
+          <button class="btn-preset" style="padding: 0.5rem 0.85rem; font-size: 0.8rem; background-color: #475569; color: white; border: none; font-weight: 800; cursor: pointer; border-radius: 0.5rem;" onclick="downloadTxt()">텍스트 다운로드</button>
         </div>
       </div>
 
@@ -1318,11 +1402,11 @@
   <div class="sticky-cta-bar">
     <div class="cta-inner">
       <div class="cta-text-group">
-        <div class="cta-heading">테스트입니다</div>
-        <div class="cta-subtext">test</div>
+        <div class="cta-heading">세이프티홈 주거공간 맞춤 인테리어 무료 견적 신청</div>
+        <div class="cta-subtext">국토교통부 실내건축면허 보유 검증 업체 1:1 안전 매칭</div>
       </div>
-      <button class="btn-cta-estimate" onclick="alert('주거공간 견적 신청 페이지로 이동합니다.')">
-        주거공간 견적뽑기
+      <button class="btn-cta-estimate" onclick="alert('주거공간 맞춤 견적 신청 상담 페이지로 이동합니다.')">
+        무료 견적 신청하기
       </button>
     </div>
   </div>
@@ -1332,7 +1416,7 @@
     <div class="container">
       <div class="footer-credits">
         <p><strong>세이프티홈</strong> | 사업자등록번호: 123-45-67890 | 주소: 서울특별시 강남구 테헤란로 123 세이프티타워</p>
-        <p style="margin-top: 0.3rem;">Copyright © Safety Home. All rights reserved.</p>
+        <p style="margin-top: 0.4rem;">Copyright © Safety Home. All rights reserved.</p>
       </div>
     </div>
   </footer>
@@ -1758,7 +1842,7 @@
 
         let closureReasonHtml = '';
         if (isClosed && company.ncrGsReason && company.ncrGsReason !== '-' && company.ncrGsReason !== '해당사항 없음') {
-          closureReasonHtml = `<div style="font-size: 0.72rem; color: #ef4444; margin-top: 0.2rem;">⚠️ 사유: ${company.ncrGsReason}</div>`;
+          closureReasonHtml = `<div style="font-size: 0.72rem; color: #dc2626; margin-top: 0.2rem;">사유: ${company.ncrGsReason}</div>`;
         }
 
         tr.innerHTML = `
@@ -1777,8 +1861,8 @@
           </td>
           <td>
             <div style="display: flex; gap: 0.3rem;">
-              <button class="btn-preset" style="padding: 0.25rem 0.5rem; font-size: 0.72rem;" onclick="copyAddress(this, '${escapeQuotes(address)}')">📍 복사</button>
-              ${cleanPhone ? `<a href="tel:${cleanPhone}" class="btn-preset" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; text-decoration: none; color: var(--brand-primary);">📞 전화</a>` : ''}
+              <button class="btn-preset" style="padding: 0.25rem 0.55rem; font-size: 0.75rem;" onclick="copyAddress(this, '${escapeQuotes(address)}')">주소 복사</button>
+              ${cleanPhone ? `<a href="tel:${cleanPhone}" class="btn-preset" style="padding: 0.25rem 0.55rem; font-size: 0.75rem; text-decoration: none; color: var(--brand-primary); border-color: var(--brand-primary);">전화 연결</a>` : ''}
             </div>
           </td>
         `;
@@ -1878,7 +1962,7 @@
       }
       navigator.clipboard.writeText(addr).then(() => {
         const originalText = btn.textContent;
-        btn.textContent = "✅ 복사 완료!";
+        btn.textContent = "복사 완료";
         setTimeout(() => {
           btn.textContent = originalText;
         }, 1500);
