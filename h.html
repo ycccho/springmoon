@@ -29,17 +29,24 @@
   <link rel="apple-touch-icon" href="https://indecompany2.mycafe24.com/images/image_kakaotalk.png" />
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    /* Main Visual Banner (Immediately visible at 80vh height, background image visible on landing) */
+    /* Main Visual Banner (Immediately visible, background image 100% clear without black overlay, text placed bottom-left on PC) */
     .main_visual {
       transform: translateY(0) !important;
       height: 80vh !important;
       min-height: 550px !important;
       position: relative !important;
       display: block !important;
+      background-color: transparent !important;
     }
     .main_visual .main_swiper {
       height: 100% !important;
       clip-path: none !important;
+    }
+    .main_visual .swiper-slide::before,
+    .main_visual .img_area::after {
+      display: none !important;
+      opacity: 0 !important;
+      background: none !important;
     }
     .main_visual .img_area {
       position: absolute !important;
@@ -49,11 +56,7 @@
       height: 100% !important;
       z-index: 1 !important;
       overflow: hidden;
-    }
-    .main_visual .text_area {
-      position: relative !important;
-      z-index: 10 !important;
-      margin: 6rem auto 0 !important;
+      background-color: transparent !important;
     }
     .main_visual img {
       width: 100% !important;
@@ -61,7 +64,37 @@
       object-fit: cover !important;
       transform: scale(1) !important;
       opacity: 1 !important;
+      filter: none !important;
     }
+    .main_visual .text_area {
+      position: absolute !important;
+      z-index: 10 !important;
+      left: 6% !important;
+      bottom: 12% !important;
+      top: auto !important;
+      margin: 0 !important;
+      max-width: 650px !important;
+      text-align: left !important;
+      padding: 0 !important;
+    }
+    .main_visual .common-title {
+      color: #ffffff !important;
+      text-shadow: 0 3px 16px rgba(0, 0, 0, 0.7), 0 1px 4px rgba(0, 0, 0, 0.5) !important;
+      font-size: 3.2rem !important;
+      font-weight: 800 !important;
+      line-height: 1.35 !important;
+    }
+    @media (max-width: 960px) {
+      .main_visual .text_area {
+        left: 5% !important;
+        bottom: 10% !important;
+        max-width: 90% !important;
+      }
+      .main_visual .common-title {
+        font-size: 2.2rem !important;
+      }
+    }
+
 
     /* Main Portfolio Pure Black Theme & Tight Top/Bottom Padding (Matching Insights) */
     .main_portfolio {
