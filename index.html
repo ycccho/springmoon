@@ -40,7 +40,10 @@
     .drag-over-blog { border-color: #3b82f6 !important; background-color: #eff6ff !important; }
     .drag-over-hq-flip { border-color: #8b5cf6 !important; background-color: #f5f3ff !important; }
     .drag-over-blog-flip { border-color: #ec4899 !important; background-color: #fdf2f8 !important; }
+    .drag-over-imweb-800 { border-color: #ea580c !important; background-color: #fff7ed !important; }
+    .drag-over-imweb-1200 { border-color: #4f46e5 !important; background-color: #eef2ff !important; }
   </style>
+
 </head>
 <body class="text-gray-800 font-sans min-h-screen">
   <!-- MOBILE HEADER -->
@@ -1439,6 +1442,53 @@
           </div>
         </div>
 
+        <!-- 7번 기능: 아임웹 썸네일용 800사이즈 -->
+        <div class="mb-12">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="bg-orange-600 text-white text-sm font-bold px-3 py-1 rounded-full">7번 기능</span>
+            <h2 class="text-2xl font-bold text-gray-800">아임웹 썸네일용 800사이즈 <span class="text-lg font-medium text-gray-500">(가로 800px / 100KB 내외 고효율 JPG 압축)</span></h2>
+          </div>
+          <div class="bg-orange-50 p-5 rounded-xl border border-orange-200 mb-6">
+            <ul class="text-sm text-orange-900 list-disc list-inside space-y-1">
+              <li><span class="font-bold text-orange-950">아임웹 썸네일 전용 800px 규격:</span> 가로/세로 이미지 모두 비율을 유지하며 <span class="font-bold text-orange-800">가로 800px</span> (4:3 등 원본 비율 유지)로 정밀 리사이징합니다.</li>
+              <li><span class="font-bold text-orange-950">TinyPNG급 고효율 JPG 압축:</span> 화질 손상을 최소화하면서 용량을 <span class="font-bold text-orange-800">100KB 내외</span>로 지능형 초고효율 압축합니다.</li>
+              <li><span class="font-bold text-orange-950">EXIF 메타데이터 100% 제거 & 1px 크롭:</span> 촬영 위치, 시간 정보 삭제 및 AI 스캔 중복 이미지 회피 방어선이 자동 적용됩니다.</li>
+            </ul>
+          </div>
+          <div id="drop-zone-imweb-800" class="border-2 border-dashed border-orange-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-orange-50 group bg-white">
+            <div class="text-orange-400 mb-4 group-hover:text-orange-500 transition-colors flex justify-center gap-2">
+              <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </div>
+            <h3 class="text-xl font-bold text-orange-800 mb-2">아임웹 썸네일용 (800px / ~100KB) 업로드</h3>
+            <p class="text-sm text-orange-600 font-medium mb-1">사진 드래그 (가로 800px 비율 유지 + 100KB 내외 고효율 JPG 압축)</p>
+            <input type="file" id="file-imweb-800" multiple accept=".jpg, .jpeg, .png" class="hidden">
+          </div>
+        </div>
+
+        <!-- 8번 기능: 아임웹 게시글이미지용 1200사이즈 -->
+        <div class="mb-12">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-full">8번 기능</span>
+            <h2 class="text-2xl font-bold text-gray-800">아임웹 게시글이미지용 1200사이즈 <span class="text-lg font-medium text-gray-500">(가로 1200px / 150~200KB 이하 고효율 JPG 압축)</span></h2>
+          </div>
+          <div class="bg-indigo-50 p-5 rounded-xl border border-indigo-200 mb-6">
+            <ul class="text-sm text-indigo-900 list-disc list-inside space-y-1">
+              <li><span class="font-bold text-indigo-950">아임웹 본문 최적화 1200px 규격:</span> 가로/세로 이미지 모두 비율을 유지하며 <span class="font-bold text-indigo-800">가로 1200px</span>로 선명하게 리사이징합니다.</li>
+              <li><span class="font-bold text-indigo-950">TinyPNG급 고효율 JPG 압축:</span> 본문용 고화질을 유지하면서 용량을 <span class="font-bold text-indigo-800">150~200KB 이하</span>로 지능형 초고효율 압축합니다.</li>
+              <li><span class="font-bold text-indigo-950">EXIF 메타데이터 100% 제거 & 1px 크롭:</span> 촬영 위치, 편집 이력 삭제 및 AI 중복 패널티 회피 방어선이 포함됩니다.</li>
+            </ul>
+          </div>
+          <div id="drop-zone-imweb-1200" class="border-2 border-dashed border-indigo-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-indigo-50 group bg-white">
+            <div class="text-indigo-400 mb-4 group-hover:text-indigo-500 transition-colors flex justify-center gap-2">
+              <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </div>
+            <h3 class="text-xl font-bold text-indigo-800 mb-2">아임웹 게시글용 (1200px / 150~200KB) 업로드</h3>
+            <p class="text-sm text-indigo-600 font-medium mb-1">사진 드래그 (가로 1200px 비율 유지 + 150~200KB 이하 고효율 JPG 압축)</p>
+            <input type="file" id="file-imweb-1200" multiple accept=".jpg, .jpeg, .png" class="hidden">
+          </div>
+        </div>
+
+
         <div id="progress-container" class="hidden mb-8">
           <div class="flex justify-between text-sm font-medium text-gray-700 mb-1">
             <span id="progress-status-text">이미지 처리 중...</span>
@@ -2515,7 +2565,168 @@
         });
     }
 
+    // [7번 기능] 아임웹 썸네일용 800사이즈 (가로 800px 비율 유지 + ~100KB 고효율 JPG 압축)
+    function processImwebThumbnail800(file, flip = false) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            
+            img.onload = async () => {
+                const originalWidth = img.width;
+                const originalHeight = img.height;
+                
+                // 1px 크롭 설정
+                let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
+                if (originalWidth > 2 && originalHeight > 2) {
+                    cropX = 1; cropY = 1;
+                    cropW = originalWidth - 2; cropH = originalHeight - 2;
+                }
+
+                const orientation = (cropW > cropH) ? 'landscape' : 'portrait';
+                
+                // 가로/세로 상관없이 비율을 보존하며 가로 800px (4:3 등 원본 비율 유지)
+                const targetW = 800;
+                const targetH = Math.max(1, Math.round((cropH / cropW) * 800));
+
+                const generateBlob = (q) => {
+                    return new Promise((res) => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = targetW;
+                        canvas.height = targetH;
+                        const ctx = canvas.getContext('2d');
+
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, targetW, targetH);
+
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        
+                        if (flip) {
+                            ctx.translate(targetW, 0);
+                            ctx.scale(-1, 1);
+                        }
+                        
+                        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
+                        sharpenCanvas(canvas, ctx, 0.12);
+                        
+                        canvas.toBlob((blob) => {
+                            res({ blob: blob, width: targetW, height: targetH });
+                        }, 'image/jpeg', q);
+                    });
+                };
+
+                try {
+                    // TinyPNG 스타일 지능형 고효율 압축 (~100KB 타겟: 80KB ~ 115KB)
+                    const TARGET_MAX_BYTES = 115 * 1024; // 115KB
+                    let currentQuality = 0.82;
+                    let resultData = await generateBlob(currentQuality);
+
+                    while (resultData.blob.size > TARGET_MAX_BYTES && currentQuality > 0.45) {
+                        currentQuality -= 0.05;
+                        resultData = await generateBlob(currentQuality);
+                    }
+
+                    URL.revokeObjectURL(objectUrl);
+                    resolve({ 
+                        blob: resultData.blob, 
+                        width: resultData.width, 
+                        height: resultData.height, 
+                        originalWidth: originalWidth, 
+                        originalHeight: originalHeight,
+                        orientation: orientation
+                    });
+                } catch (error) {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(error);
+                }
+            };
+            img.onerror = (e) => { URL.revokeObjectURL(objectUrl); reject(e); };
+            img.src = objectUrl;
+        });
+    }
+
+    // [8번 기능] 아임웹 게시글이미지용 1200사이즈 (가로 1200px 비율 유지 + 150~200KB 이하 고효율 JPG 압축)
+    function processImwebContent1200(file, flip = false) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            
+            img.onload = async () => {
+                const originalWidth = img.width;
+                const originalHeight = img.height;
+                
+                // 1px 크롭 설정
+                let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
+                if (originalWidth > 2 && originalHeight > 2) {
+                    cropX = 1; cropY = 1;
+                    cropW = originalWidth - 2; cropH = originalHeight - 2;
+                }
+
+                const orientation = (cropW > cropH) ? 'landscape' : 'portrait';
+                
+                // 가로 1200px 비율 유지 리사이징
+                const targetW = 1200;
+                const targetH = Math.max(1, Math.round((cropH / cropW) * 1200));
+
+                const generateBlob = (q) => {
+                    return new Promise((res) => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = targetW;
+                        canvas.height = targetH;
+                        const ctx = canvas.getContext('2d');
+
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, targetW, targetH);
+
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        
+                        if (flip) {
+                            ctx.translate(targetW, 0);
+                            ctx.scale(-1, 1);
+                        }
+                        
+                        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
+                        sharpenCanvas(canvas, ctx, 0.12);
+                        
+                        canvas.toBlob((blob) => {
+                            res({ blob: blob, width: targetW, height: targetH });
+                        }, 'image/jpeg', q);
+                    });
+                };
+
+                try {
+                    // TinyPNG 스타일 지능형 고효율 압축 (150KB ~ 200KB 이하 타겟: max 200KB)
+                    const TARGET_MAX_BYTES = 200 * 1024; // 200KB
+                    let currentQuality = 0.85;
+                    let resultData = await generateBlob(currentQuality);
+
+                    while (resultData.blob.size > TARGET_MAX_BYTES && currentQuality > 0.45) {
+                        currentQuality -= 0.05;
+                        resultData = await generateBlob(currentQuality);
+                    }
+
+                    URL.revokeObjectURL(objectUrl);
+                    resolve({ 
+                        blob: resultData.blob, 
+                        width: resultData.width, 
+                        height: resultData.height, 
+                        originalWidth: originalWidth, 
+                        originalHeight: originalHeight,
+                        orientation: orientation
+                    });
+                } catch (error) {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(error);
+                }
+            };
+            img.onerror = (e) => { URL.revokeObjectURL(objectUrl); reject(e); };
+            img.src = objectUrl;
+        });
+    }
+
     function setupWebP() {
+
       const dropHq = document.getElementById('drop-zone-hq');
       const fileHq = document.getElementById('file-hq');
       const dropBlog = document.getElementById('drop-zone-blog');
@@ -2528,8 +2739,12 @@
       const fileJpg = document.getElementById('file-jpg');
       const dropJpgResize = document.getElementById('drop-zone-jpg-resize');
       const fileJpgResize = document.getElementById('file-jpg-resize');
+      const dropImweb800 = document.getElementById('drop-zone-imweb-800');
+      const fileImweb800 = document.getElementById('file-imweb-800');
+      const dropImweb1200 = document.getElementById('drop-zone-imweb-1200');
+      const fileImweb1200 = document.getElementById('file-imweb-1200');
 
-      if (!dropHq || !fileHq || !dropBlog || !fileBlog || !dropHqFlip || !fileHqFlip || !dropBlogFlip || !fileBlogFlip || !dropJpg || !fileJpg || !dropJpgResize || !fileJpgResize) return;
+      if (!dropHq || !fileHq || !dropBlog || !fileBlog || !dropHqFlip || !fileHqFlip || !dropBlogFlip || !fileBlogFlip || !dropJpg || !fileJpg || !dropJpgResize || !fileJpgResize || !dropImweb800 || !fileImweb800 || !dropImweb1200 || !fileImweb1200) return;
 
       const progressContainer = document.getElementById('progress-container');
       const progressBar = document.getElementById('progress-bar');
@@ -2564,6 +2779,8 @@
       bindEvents(dropBlogFlip, fileBlogFlip, 'blog-flip', 'drag-over-blog-flip');
       bindEvents(dropJpg, fileJpg, 'jpg', 'drag-over-jpg');
       bindEvents(dropJpgResize, fileJpgResize, 'jpg-resize', 'drag-over-jpg-resize');
+      bindEvents(dropImweb800, fileImweb800, 'imweb-800', 'drag-over-imweb-800');
+      bindEvents(dropImweb1200, fileImweb1200, 'imweb-1200', 'drag-over-imweb-1200');
 
       clearBtn.addEventListener('click', () => {
           convertedFiles = [];
@@ -2575,6 +2792,8 @@
           fileBlogFlip.value = '';
           fileJpg.value = '';
           fileJpgResize.value = '';
+          fileImweb800.value = '';
+          fileImweb1200.value = '';
       });
 
       // ZIP 다운로드
@@ -2638,6 +2857,10 @@
               progressStatusText.textContent = `[히스토리삭제+JPG] 1px 크롭, 히스토리 삭제 및 JPG 변환 진행 중...`;
           } else if (mode === 'jpg-resize') {
               progressStatusText.textContent = `[히스토리삭제+리사이징+JPG] 1920/1080 규격, 1px 크롭 및 JPG 변환 진행 중...`;
+          } else if (mode === 'imweb-800') {
+              progressStatusText.textContent = `[아임웹 썸네일용 800px] 100KB 내외 고효율 JPG 압축 진행 중...`;
+          } else if (mode === 'imweb-1200') {
+              progressStatusText.textContent = `[아임웹 게시글용 1200px] 150~200KB 이하 고효율 JPG 압축 진행 중...`;
           }
           
           const total = imageFiles.length;
@@ -2662,6 +2885,10 @@
                       resultData = await processJpgCleared(file, 0.95, false);
                   } else if (mode === 'jpg-resize') {
                       resultData = await processJpgClearedResized(file, 0.95, false);
+                  } else if (mode === 'imweb-800') {
+                      resultData = await processImwebThumbnail800(file, false);
+                  } else if (mode === 'imweb-1200') {
+                      resultData = await processImwebContent1200(file, false);
                   }
                   
                   const isLandscape = resultData.orientation === 'landscape';
@@ -2686,6 +2913,12 @@
                   } else if (mode === 'jpg-resize') {
                       badgeText = isLandscape ? 'JPG 가로 (1920x1080)' : 'JPG 세로 (1080x1920)';
                       badgeClass = isLandscape ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800';
+                  } else if (mode === 'imweb-800') {
+                      badgeText = isLandscape ? '아임웹 썸네일 (가로 800)' : '아임웹 썸네일 (세로 800)';
+                      badgeClass = 'bg-orange-100 text-orange-800 border border-orange-200 font-bold';
+                  } else if (mode === 'imweb-1200') {
+                      badgeText = isLandscape ? '아임웹 게시글 (가로 1200)' : '아임웹 게시글 (세로 1200)';
+                      badgeClass = 'bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold';
                   }
 
                   let baseName = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase()
@@ -2699,8 +2932,10 @@
                   else if (mode === 'blog-flip') suffix = '-blog-flipped';
                   else if (mode === 'jpg') suffix = '-jpg-cleared';
                   else if (mode === 'jpg-resize') suffix = '-jpg-resized';
+                  else if (mode === 'imweb-800') suffix = '-imweb-thumb-800';
+                  else if (mode === 'imweb-1200') suffix = '-imweb-post-1200';
 
-                  const ext = (mode === 'jpg' || mode === 'jpg-resize') ? '.jpg' : '.webp';
+                  const ext = (mode === 'jpg' || mode === 'jpg-resize' || mode === 'imweb-800' || mode === 'imweb-1200') ? '.jpg' : '.webp';
                   const newName = baseName + suffix + ext;
                   
                   const result = {
@@ -2733,8 +2968,11 @@
               fileBlogFlip.value = '';
               fileJpg.value = '';
               fileJpgResize.value = '';
+              fileImweb800.value = '';
+              fileImweb1200.value = '';
           }, 500);
       }
+
 
       // 테이블 출력
       function addResultToTable(result) {
