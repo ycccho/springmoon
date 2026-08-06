@@ -15,7 +15,7 @@ export async function onRequestGet(context) {
     const listKey = `screenshots:list:${folderPath}`;
     const listData = await kv.get(listKey);
     return new Response(listData || JSON.stringify({ success: true, files: [] }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' }
     });
   }
 
