@@ -8150,6 +8150,7 @@
         if (saveOrderBtn) {
           saveOrderBtn.addEventListener("click", async () => {
             const config = {
+              "메인키워드": [],
               "병원": [],
               "사무실": [],
               "학원": [],
@@ -8293,8 +8294,10 @@
         }
 
         function getAutoKeywordCategory(keyword) {
-          const k = keyword.toLowerCase();
-          if (k.includes("병원") || k.includes("치과") || k.includes("내과") || 
+          const k = keyword.toLowerCase().trim();
+          if (k === "부산병원인테리어" || k === "부산학원인테리어" || k === "부산사무실인테리어") {
+            return "메인키워드";
+          } else if (k.includes("병원") || k.includes("치과") || k.includes("내과") || 
               k.includes("외과") || k.includes("성형외과") || k.includes("피부과") || 
               k.includes("산부인과") || k.includes("정형외과") || k.includes("안과") || 
               k.includes("의원") || k.includes("클리닉") || k.includes("하지정맥") || 
@@ -8315,26 +8318,30 @@
           let config = getKeywordOrderConfig();
           if (!config) {
             config = {
+              "메인키워드": [],
               "병원": [],
               "사무실": [],
               "학원": [],
               "기타": []
             };
           }
-
-          // Backwards compatibility with previous categorizations
-          const oldMapping = localStorage.getItem("local_viewer_keyword_categories");
-          if (oldMapping && (!config.병원.length && !config.사무실.length && !config.학원.length && !config.기타.length)) {
-            try {
-              const mapping = JSON.parse(oldMapping);
-              for (const kw in mapping) {
-                const cat = mapping[kw];
-                if (config[cat]) {
-                  config[cat].push(kw);
-                }
-              }
-            } catch (e) {}
+          if (!config["메인키워드"]) {
+            config["메인키워드"] = [];
           }
+
+          const mainTargetKws = ["부산병원인테리어", "부산학원인테리어", "부산사무실인테리어"];
+          mainTargetKws.forEach(mKw => {
+            // Remove from other categories if present
+            for (const cat in config) {
+              if (cat !== "메인키워드") {
+                config[cat] = config[cat].filter(kw => kw !== mKw);
+              }
+            }
+            // Add to 메인키워드 category if present in keywords list
+            if (!config["메인키워드"].includes(mKw) && allKeywords.includes(mKw)) {
+              config["메인키워드"].push(mKw);
+            }
+          });
 
           // Exclude deleted keywords
           for (const cat in config) {
@@ -8346,6 +8353,7 @@
             const exists = Object.values(config).some(list => list.includes(kw));
             if (!exists) {
               const cat = getAutoKeywordCategory(kw);
+              if (!config[cat]) config[cat] = [];
               config[cat].push(kw);
             }
           });
@@ -8363,6 +8371,13 @@
           
           keywordsContainer.innerHTML = `
             <div class="space-y-3.5 w-full">
+              <!-- Category: 메인키워드 -->
+              <div class="category-zone p-3 bg-orange-50/60 dark-mode:bg-orange-950/20 rounded-xl border border-orange-200/60 dark-mode:border-orange-900/40 space-y-2 transition-all" data-category="메인키워드">
+                <div class="text-[10px] font-black text-orange-600 dark-mode:text-orange-400 flex items-center gap-1 select-none">
+                  <span>⭐ 메인키워드</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 min-h-[32px] p-1 rounded-lg bg-white/20 dark-mode:bg-black/10" id="keywords-zone-메인키워드"></div>
+              </div>
               <!-- Category: 병원 -->
               <div class="category-zone p-3 bg-red-50/50 dark-mode:bg-red-950/10 rounded-xl border border-red-100/40 dark-mode:border-red-900/20 space-y-2 transition-all" data-category="병원">
                 <div class="text-[10px] font-black text-red-655 dark-mode:text-red-400 flex items-center gap-1 select-none">
