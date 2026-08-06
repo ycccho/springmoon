@@ -925,6 +925,11 @@ async function executeScreenshotList(tasks, finalDir, dateStr, ocrKeywords) {
     }
   }
 
+  // Trigger background cloud sync for the updated directory
+  try {
+    fetch(`http://127.0.0.1:${PORT}/api/local-screenshots?folderPath=${encodeURIComponent(finalDir)}`).catch(() => {});
+  } catch (e) {}
+
   return results;
 }
 
@@ -1279,8 +1284,8 @@ app.get('/api/local-screenshots', (req, res) => {
       return b.mtime - a.mtime;
     });
 
-    // Trigger Cloudflare KV sync in the background
-    syncLocalScreenshotsToCloud(folderPath, result).catch(() => {});
+    // Trigger Cloudflare KV sync in the background (top 500 recent items)
+    syncLocalScreenshotsToCloud(folderPath, result.slice(0, 500)).catch(() => {});
 
     res.json({ success: true, files: result });
   } catch (err) {
@@ -1291,16 +1296,24 @@ app.get('/api/local-screenshots', (req, res) => {
 // Background Cloudflare KV sync function
 async function syncLocalScreenshotsToCloud(folderPath, files) {
   try {
+    console.log(`[클라우드 동기화 시작] (${folderPath}) 총 ${files ? files.length : 0}개 항목 전송 중...`);
     const listRes = await fetch('https://springmoons.pages.dev/api/sync-screenshots?action=sync-list', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify({ folderPath, files })
     });
-    if (!listRes.ok) return;
+    if (!listRes.ok) {
+      const errText = await listRes.text();
+      console.warn(`[클라우드 동기화 목록 실패] HTTP ${listRes.status}: ${errText}`);
+      return;
+    }
 
     const data = await listRes.json();
     const missing = data.missingFiles || [];
-    for (const fileName of missing) {
+    console.log(`[클라우드 동기화 목록 업로드 성공] 누락된 이미지 수: ${missing.length}개`);
+
+    for (let i = 0; i < missing.length; i++) {
+      const fileName = missing[i];
       const filePath = path.join(folderPath, fileName);
       if (fs.existsSync(filePath)) {
         const buffer = fs.readFileSync(filePath);
@@ -1308,15 +1321,21 @@ async function syncLocalScreenshotsToCloud(folderPath, files) {
         const ext = path.extname(fileName).toLowerCase();
         const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
 
-        await fetch('https://springmoons.pages.dev/api/sync-screenshots?action=upload-file', {
+        const uploadRes = await fetch('https://springmoons.pages.dev/api/sync-screenshots?action=upload-file', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
           body: JSON.stringify({ folderPath, fileName, mimeType, base64Data })
         });
+        if (uploadRes.ok) {
+          console.log(`[클라우드 업로드 완료 ${i+1}/${missing.length}] ${fileName}`);
+        } else {
+          console.warn(`[클라우드 업로드 실패 ${i+1}/${missing.length}] ${fileName}: ${uploadRes.status}`);
+        }
       }
     }
+    console.log(`[클라우드 동기화 전체 완료] (${folderPath})`);
   } catch (err) {
-    console.warn(`[클라우드 동기화 실패] ${err.message}`);
+    console.warn(`[클라우드 동기화 에러] ${err.message}`);
   }
 }
 

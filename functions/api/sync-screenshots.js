@@ -1,9 +1,14 @@
+function normalizeFolderPath(pathStr) {
+  if (!pathStr) return 'D:\\rank';
+  return pathStr.replace(/[\/\\]+/g, '\\').replace(/\\$/, '');
+}
+
 export async function onRequestGet(context) {
   const kv = context.env.POWER_CONTENT_KV;
   if (!kv) {
     return new Response(JSON.stringify({ error: "POWER_CONTENT_KV binding not found" }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "*" }
     });
   }
 
@@ -11,30 +16,42 @@ export async function onRequestGet(context) {
   const action = searchParams.get('action') || 'list';
 
   if (action === 'list') {
-    const folderPath = searchParams.get('folderPath') || 'D:\\rank';
+    const rawFolder = searchParams.get('folderPath') || 'D:\\rank';
+    const folderPath = normalizeFolderPath(rawFolder);
     const listKey = `screenshots:list:${folderPath}`;
     const listData = await kv.get(listKey);
-    return new Response(listData || JSON.stringify({ success: true, files: [] }), {
+
+    let finalData = listData;
+    if (!finalData && rawFolder !== folderPath) {
+      finalData = await kv.get(`screenshots:list:${rawFolder}`);
+    }
+
+    return new Response(finalData || JSON.stringify({ success: true, files: [] }), {
       headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' }
     });
   }
 
   if (action === 'view-file') {
-    const folderPath = searchParams.get('folderPath');
+    const rawFolder = searchParams.get('folderPath');
     const fileName = searchParams.get('fileName');
-    if (!folderPath || !fileName) {
+    if (!rawFolder || !fileName) {
       return new Response("Missing folderPath or fileName", { status: 400 });
     }
 
-    const fileKey = `screenshots:file:${folderPath}:${fileName}`;
-    const fileDataStr = await kv.get(fileKey);
+    const folderPath = normalizeFolderPath(rawFolder);
+    let fileKey = `screenshots:file:${folderPath}:${fileName}`;
+    let fileDataStr = await kv.get(fileKey);
+
+    if (!fileDataStr && rawFolder !== folderPath) {
+      fileDataStr = await kv.get(`screenshots:file:${rawFolder}:${fileName}`);
+    }
+
     if (!fileDataStr) {
       return new Response("File not found in KV", { status: 404 });
     }
 
     try {
       const fileData = JSON.parse(fileDataStr);
-      // Decode base64 string to binary array
       const binaryString = atob(fileData.base64Data);
       const len = binaryString.length;
       const bytes = new Uint8Array(len);
@@ -44,7 +61,7 @@ export async function onRequestGet(context) {
 
       return new Response(bytes.buffer, {
         headers: {
-          'Content-Type': fileData.mimeType || 'image/png',
+          'Content-Type': fileData.mimeType || 'image/jpeg',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'public, max-age=31536000'
         }
@@ -62,7 +79,7 @@ export async function onRequestPost(context) {
   if (!kv) {
     return new Response(JSON.stringify({ error: "POWER_CONTENT_KV binding not found" }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "*" }
     });
   }
 
@@ -73,12 +90,13 @@ export async function onRequestPost(context) {
     const body = await context.request.json();
 
     if (action === 'sync-list') {
-      const { folderPath, files } = body;
-      if (!folderPath || !Array.isArray(files)) {
+      const { folderPath: rawFolder, files } = body;
+      if (!rawFolder || !Array.isArray(files)) {
         return new Response(JSON.stringify({ error: "Invalid body parameters" }), { status: 400 });
       }
 
-      // Check which files are missing in KV to optimize upload bandwidth
+      const folderPath = normalizeFolderPath(rawFolder);
+
       const missingFiles = [];
       for (const file of files) {
         const fileKey = `screenshots:file:${folderPath}:${file.fileName}`;
@@ -88,32 +106,39 @@ export async function onRequestPost(context) {
         }
       }
 
-      // Save list metadata
-      const listKey = `screenshots:list:${folderPath}`;
-      await kv.put(listKey, JSON.stringify({ success: true, files }));
+      const listData = JSON.stringify({ success: true, files });
+      await kv.put(`screenshots:list:${folderPath}`, listData);
+      if (rawFolder !== folderPath) {
+        await kv.put(`screenshots:list:${rawFolder}`, listData);
+      }
 
       return new Response(JSON.stringify({ success: true, missingFiles }), {
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' }
       });
     }
 
     if (action === 'upload-file') {
-      const { folderPath, fileName, mimeType, base64Data } = body;
-      if (!folderPath || !fileName || !base64Data) {
+      const { folderPath: rawFolder, fileName, mimeType, base64Data } = body;
+      if (!rawFolder || !fileName || !base64Data) {
         return new Response(JSON.stringify({ error: "Invalid upload parameters" }), { status: 400 });
       }
 
-      const fileKey = `screenshots:file:${folderPath}:${fileName}`;
-      await kv.put(fileKey, JSON.stringify({ mimeType, base64Data }));
+      const folderPath = normalizeFolderPath(rawFolder);
+      const val = JSON.stringify({ mimeType, base64Data });
+
+      await kv.put(`screenshots:file:${folderPath}:${fileName}`, val);
+      if (rawFolder !== folderPath) {
+        await kv.put(`screenshots:file:${rawFolder}:${fileName}`, val);
+      }
 
       return new Response(JSON.stringify({ success: true }), {
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' }
       });
     }
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "*" }
     });
   }
 
