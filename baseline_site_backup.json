@@ -1,0 +1,87 @@
+{
+  "backupDate": "2026-08-11T19:26:00+09:00",
+  "version": "v2026_08_11_user_baseline_snapshot",
+  "brand": {
+    "name": "INDECOMPANY",
+    "url": "https://INDE.CO.KR",
+    "themeColor": "#dd5828"
+  },
+  "masterSites": [
+    { "id": 1, "code": "g-1", "title": "회사 별장공사 3억평", "subtitle": "테스트 고객님의 공사", "url": "/g-1" },
+    { "id": 2, "code": "g-2", "title": "마린시티 아이파크 65평", "subtitle": "김철수 원장님 현장", "url": "/g-2" },
+    { "id": 3, "code": "g-3", "title": "센텀 펜트하우스 70평", "subtitle": "박지성 고객님 현장", "url": "/g-3" },
+    { "id": 4, "code": "g-4", "title": "해운대 엘시티 85평", "subtitle": "최유진 고객님 현장", "url": "/g-4" },
+    { "id": 5, "code": "g-5", "title": "광안리 자이 45평", "subtitle": "이정훈 고객님 현장", "url": "/g-5" }
+  ],
+  "initialProject": {
+    "subtitle": "테스트 고객님의 공사",
+    "title": "회사 별장공사 3억평",
+    "startDate": "2026-07-08",
+    "endDate": "2026-09-03"
+  },
+  "customColors": [
+    { "name": "보라 (필름/가구)", "hex": "#8b5cf6" },
+    { "name": "갈색 (전기/설비)", "hex": "#a16207" },
+    { "name": "청록 (타일)", "hex": "#0d9488" },
+    { "name": "라임 (줄춤기)", "hex": "#84cc16" },
+    { "name": "노랑 (청소)", "hex": "#eab308" },
+    { "name": "분홍 (도배)", "hex": "#be185d" },
+    { "name": "오렌지 (마루)", "hex": "#ea580c" },
+    { "name": "파랑 (에어컨)", "hex": "#0284c7" },
+    { "name": "슬레이트 (기타)", "hex": "#475569" }
+  ],
+  "managers": [
+    { "id": "m1", "role": "디자인 담당", "name": "박예빈", "phone": "010-1234-5678" },
+    { "id": "m2", "role": "취객 담당", "name": "김윤직", "phone": "010-2345-6789" }
+  ],
+  "schedules": [
+    { "id": "s1", "name": "필름", "startDate": "2026-08-03", "endDate": "2026-08-07", "color": "#8b5cf6" },
+    { "id": "s2", "name": "전기타공", "startDate": "2026-08-03", "endDate": "2026-08-04", "color": "#a16207" },
+    { "id": "s3", "name": "타일양생", "startDate": "2026-08-06", "endDate": "2026-08-07", "color": "#0f766e" },
+    { "id": "s5", "name": "타일", "startDate": "2026-08-10", "endDate": "2026-08-14", "color": "#0d9488" },
+    { "id": "s5_dance1", "name": "현장에서 줄춤기", "startDate": "2026-08-11", "endDate": "2026-08-16", "color": "#84cc16" },
+    { "id": "s5_clean1", "name": "쓰레기 청소", "startDate": "2026-08-11", "endDate": "2026-08-15", "color": "#eab308" },
+    { "id": "s7", "name": "도배양생", "startDate": "2026-08-12", "endDate": "2026-08-13", "color": "#db2777" },
+    { "id": "s6", "name": "탄성,등", "startDate": "2026-08-14", "endDate": "2026-08-15", "color": "#475569" },
+    { "id": "s8", "name": "도배", "startDate": "2026-08-13", "endDate": "2026-08-14", "color": "#be185d" },
+    { "id": "s9", "name": "도배", "startDate": "2026-08-17", "endDate": "2026-08-18", "color": "#be185d" },
+    { "id": "s11", "name": "위생설비", "startDate": "2026-08-19", "endDate": "2026-08-19", "color": "#854d0e" },
+    { "id": "s12", "name": "마루", "startDate": "2026-08-20", "endDate": "2026-08-22", "color": "#ea580c" },
+    { "id": "s5_dance2", "name": "현장에서 줄춤기", "startDate": "2026-08-17", "endDate": "2026-08-23", "color": "#84cc16" },
+    { "id": "s5_clean2", "name": "쓰레기 청소", "startDate": "2026-08-17", "endDate": "2026-08-22", "color": "#eab308" },
+    { "id": "s10", "name": "도기세팅", "startDate": "2026-08-17", "endDate": "2026-08-18", "color": "#475569" },
+    { "id": "s13", "name": "가구", "startDate": "2026-08-24", "endDate": "2026-08-26", "color": "#8b5cf6" },
+    { "id": "s17", "name": "도어틀/틀", "startDate": "2026-08-27", "endDate": "2026-08-27", "color": "#9333ea" },
+    { "id": "s19", "name": "사다리차", "startDate": "2026-08-28", "endDate": "2026-08-28", "color": "#475569" },
+    { "id": "s5_dance3", "name": "현장에서 줄춤기", "startDate": "2026-08-24", "endDate": "2026-08-30", "color": "#84cc16" },
+    { "id": "s14", "name": "세라믹실측", "startDate": "2026-08-25", "endDate": "2026-08-25", "color": "#64748b" },
+    { "id": "s15", "name": "AC설치", "startDate": "2026-08-26", "endDate": "2026-08-26", "color": "#0284c7" },
+    { "id": "s16", "name": "도어설치", "startDate": "2026-08-26", "endDate": "2026-08-26", "color": "#0f766e" },
+    { "id": "s18", "name": "중문설치", "startDate": "2026-08-27", "endDate": "2026-08-27", "color": "#475569" },
+    { "id": "s20", "name": "입주청소", "startDate": "2026-08-28", "endDate": "2026-08-28", "color": "#475569" },
+    { "id": "s21", "name": "실리콘마감", "startDate": "2026-08-31", "endDate": "2026-08-31", "color": "#475569" },
+    { "id": "s5_dance4", "name": "현장에서 줄춤기", "startDate": "2026-08-31", "endDate": "2026-08-31", "color": "#84cc16" }
+  ],
+  "journals": [
+    {
+      "id": "j1",
+      "date": "2026-08-11",
+      "tags": ["오늘 공정"],
+      "description": "커피마시고 그대로 버리고오기",
+      "photos": [
+        "https://indecompany2.mycafe24.com/images/img_visual_01.jpg",
+        "https://indecompany2.mycafe24.com/images/img_visual_02.jpg",
+        "https://indecompany2.mycafe24.com/images/img_visual_03.jpg"
+      ]
+    }
+  ],
+  "designs": [
+    { "id": "d1", "title": "평면배치도", "url": "https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" },
+    { "id": "d2", "title": "3D 아이소메트릭", "url": "https://indecompany2.mycafe24.com/images/img_visual_02.jpg" },
+    { "id": "d3", "title": "3D 공간 투시도", "url": "https://indecompany2.mycafe24.com/images/img_visual_03.jpg" }
+  ],
+  "documents": [
+    { "id": "doc1", "name": "계약서", "type": "pdf", "url": "#" },
+    { "id": "doc2", "name": "하자이행보증서류", "type": "pdf", "url": "#" }
+  ]
+}

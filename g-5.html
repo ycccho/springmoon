@@ -1361,9 +1361,14 @@
         if (res.ok) {
           const cloudData = await res.json();
           if (cloudData && cloudData.project) {
-            appState = cloudData;
-            localStorage.setItem(`edam_site_data_${CURRENT_SITE_CODE}`, JSON.stringify(appState));
-            renderApp();
+            const localUpdatedAt = appState.updatedAt || 0;
+            const cloudUpdatedAt = cloudData.updatedAt || 0;
+
+            if (!appState.updatedAt || cloudUpdatedAt >= localUpdatedAt) {
+              appState = cloudData;
+              localStorage.setItem(`edam_site_data_${CURRENT_SITE_CODE}`, JSON.stringify(appState));
+              renderApp();
+            }
           }
         }
       } catch (e) {}
@@ -1380,6 +1385,7 @@
     }
 
     function saveState() {
+      appState.updatedAt = Date.now();
       const storageKey = `edam_site_data_${CURRENT_SITE_CODE}`;
       try {
         localStorage.setItem(storageKey, JSON.stringify(appState));
@@ -1396,7 +1402,6 @@
       }
 
       syncToCloud();
-
       renderApp();
     }
 
@@ -1444,6 +1449,7 @@
       setupEventListeners();
       renderApp();
       syncFromCloud();
+      setInterval(syncFromCloud, 4000);
     });
 
     function setupEventListeners() {
