@@ -1211,6 +1211,14 @@
 
     const CURRENT_SITE_CODE = getCurrentSiteCode();
 
+    const DEFAULT_MASTER_SITES = [
+      { id: 1, code: "g-1", title: "회사 별장공사 3억평", subtitle: "테스트 고객님의 공사", url: "/g-1" },
+      { id: 2, code: "g-2", title: "마린시티 아이파크 65평", subtitle: "김철수 원장님 현장", url: "/g-2" },
+      { id: 3, code: "g-3", title: "센텀 펜트하우스 70평", subtitle: "박지성 고객님 현장", url: "/g-3" },
+      { id: 4, code: "g-4", title: "해운대 엘시티 85평", subtitle: "최유진 고객님 현장", url: "/g-4" },
+      { id: 5, code: "g-5", title: "광안리 자이 45평", subtitle: "이정훈 고객님 현장", url: "/g-5" }
+    ];
+
     function getMasterSitesList() {
       let masterList = [];
       const saved = localStorage.getItem("edam_master_sites_list");
@@ -1224,9 +1232,11 @@
 
       if (!Array.isArray(masterList)) masterList = [];
 
-      if (!masterList.some(s => s.code === "g-1")) {
-        masterList.unshift({ id: 1, code: "g-1", title: "회사 별장공사 3억평", subtitle: "테스트 고객님의 공사", url: "/g-1" });
-      }
+      DEFAULT_MASTER_SITES.forEach(defSite => {
+        if (!masterList.some(s => s.code === defSite.code)) {
+          masterList.push({ ...defSite });
+        }
+      });
 
       try {
         for (let i = 0; i < localStorage.length; i++) {
@@ -1256,7 +1266,7 @@
                 subtitle: siteSubtitle,
                 url: `/${code}`
               });
-            } else {
+            } else if (dataStr) {
               siteItem.title = siteTitle;
               siteItem.subtitle = siteSubtitle;
             }
