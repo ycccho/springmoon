@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>현장 관리 & 공사일보 | 이담공간</title>
+  <title>현장 관리 & 공사일보 | INDECOMPANY</title>
 
   <!-- Google Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,15 +12,15 @@
   
   <style>
     :root {
-      --primary-color: #557967;
-      --primary-dark: #3f5d4e;
-      --primary-light: #e8f0ec;
+      --primary-color: #dd5828;
+      --primary-dark: #b84318;
+      --primary-light: #fdf0eb;
       --accent-color: #e07a5f;
-      --bg-color: #f7f6f2;
+      --bg-color: #f8f7f4;
       --card-bg: #ffffff;
       --text-main: #2b2d42;
       --text-muted: #6c757d;
-      --border-color: #eaede8;
+      --border-color: #eee8e4;
       --radius-lg: 20px;
       --radius-md: 14px;
       --radius-sm: 8px;
@@ -51,18 +51,47 @@
       padding: 16px;
     }
 
-    /* Header Bar */
+    /* Header Bar (Sleek Mobile & PC Layout) */
     .app-header {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 8px 4px 18px;
+    }
+
+    .header-main-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 4px 20px;
+      width: 100%;
+    }
+
+    .header-sub-row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .app-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .header-main-row {
+        width: auto;
+        gap: 16px;
+      }
+      .header-sub-row {
+        width: auto;
+      }
     }
 
     .brand-logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       text-decoration: none;
     }
 
@@ -70,27 +99,35 @@
       background: var(--primary-color);
       color: #fff;
       font-size: 0.75rem;
-      font-weight: 800;
+      font-weight: 900;
       padding: 4px 10px;
       border-radius: 8px;
-      letter-spacing: -0.02em;
+      letter-spacing: 0.04em;
     }
 
     .brand-name {
-      font-size: 1.2rem;
-      font-weight: 800;
+      font-size: 1.15rem;
+      font-weight: 900;
       color: var(--text-main);
+      letter-spacing: -0.01em;
     }
 
     /* Site Selector Dropdown */
     .site-selector-container {
       position: relative;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .site-selector-container {
+        width: auto;
+      }
     }
 
     .site-selector-btn {
       background: #ffffff;
       border: 1px solid var(--border-color);
-      padding: 6px 14px;
+      padding: 7px 14px;
       border-radius: 20px;
       font-size: 0.82rem;
       font-weight: 700;
@@ -101,6 +138,13 @@
       cursor: pointer;
       box-shadow: var(--shadow-sm);
       transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .site-selector-btn {
+        width: auto;
+      }
     }
 
     .site-selector-btn:hover {
@@ -112,7 +156,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 200px;
+      max-width: 220px;
     }
 
     .site-selector-dropdown {
@@ -196,7 +240,7 @@
       background: #ffffff;
       border: 1px solid var(--primary-color);
       color: var(--primary-color);
-      padding: 8px 14px;
+      padding: 7px 14px;
       border-radius: 30px;
       font-size: 0.82rem;
       font-weight: 700;
@@ -238,12 +282,6 @@
     }
 
     @media (max-width: 899px) {
-      .app-header {
-        gap: 10px;
-      }
-      .site-name-txt {
-        max-width: 120px;
-      }
       .dashboard-grid {
         display: flex;
         flex-direction: column;
@@ -298,14 +336,14 @@
 
     /* 1. Hero Project Card */
     .hero-card {
-      background: linear-gradient(135deg, #5b7b6a 0%, #466354 100%);
+      background: linear-gradient(135deg, #e06637 0%, #b84318 100%);
       color: #ffffff;
       border: none;
     }
 
     .hero-subtitle {
       font-size: 0.88rem;
-      opacity: 0.85;
+      opacity: 0.88;
       font-weight: 500;
       margin-bottom: 4px;
     }
@@ -324,7 +362,7 @@
     }
 
     .progress-bar-wrap {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.28);
       border-radius: 10px;
       height: 10px;
       overflow: hidden;
@@ -462,7 +500,7 @@
     }
 
     .cal-cell.today {
-      background: #f4f8f5;
+      background: #fdf5f2;
     }
 
     .cal-date-num {
@@ -547,7 +585,7 @@
     }
 
     .tag-item {
-      background: #f0f4f1;
+      background: #fdf0eb;
       color: var(--primary-dark);
       font-size: 0.75rem;
       font-weight: 700;
@@ -696,7 +734,6 @@
       display: block;
     }
 
-    /* File Drop Zone / Upload Area */
     .file-upload-box {
       border: 2px dashed #cbd5e0;
       border-radius: var(--radius-md);
@@ -723,7 +760,6 @@
       color: #4a5568;
     }
 
-    /* Buttons & Form Styles */
     .btn-primary {
       background: var(--primary-color);
       color: #fff;
@@ -875,14 +911,21 @@
 <body>
 
   <div class="app-wrapper">
-    <!-- Header -->
+    <!-- Header Bar (Responsive Mobile & PC) -->
     <header class="app-header">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <a href="/h-0" class="brand-logo">
-          <span class="brand-badge">EDAM</span>
-          <span class="brand-name">이담공간</span>
+      <div class="header-main-row">
+        <a href="https://INDE.CO.KR" target="_blank" class="brand-logo">
+          <span class="brand-badge">INDE</span>
+          <span class="brand-name">INDECOMPANY</span>
         </a>
 
+        <button class="admin-toggle-btn" id="adminToggleBtn">
+          <span class="icon">✏️</span>
+          <span id="adminToggleTxt">수정모드</span>
+        </button>
+      </div>
+
+      <div class="header-sub-row">
         <!-- Collapsible Multi-Site Selector Dropdown -->
         <div class="site-selector-container">
           <button class="site-selector-btn" id="siteSelectorBtn">
@@ -902,11 +945,6 @@
           </div>
         </div>
       </div>
-
-      <button class="admin-toggle-btn" id="adminToggleBtn">
-        <span class="icon">✏️</span>
-        <span id="adminToggleTxt">관리자 수정모드</span>
-      </button>
     </header>
 
     <!-- Main Dashboard Grid -->
@@ -1034,8 +1072,11 @@
 
   <!-- JavaScript App Logic -->
   <script>
+    const DATA_VERSION = "v2026_08_11_screenshot_fix_v3";
+
     // Initial Seed Data (Matches attached reference screenshot)
     const initialData = {
+      version: DATA_VERSION,
       isAdmin: false,
       project: {
         subtitle: "테스트 고객님의 공사",
@@ -1141,17 +1182,7 @@
       if (!Array.isArray(masterList)) masterList = [];
 
       if (!masterList.some(s => s.code === "g-1")) {
-        const g1DataStr = localStorage.getItem("edam_site_data_g-1") || localStorage.getItem("edam_site_manager_state");
-        let g1Title = "회사 별장공사 3억평";
-        let g1Subtitle = "테스트 고객님의 공사";
-        if (g1DataStr) {
-          try {
-            const p = JSON.parse(g1DataStr);
-            if (p.project && p.project.title) g1Title = p.project.title;
-            if (p.project && p.project.subtitle) g1Subtitle = p.project.subtitle;
-          } catch (e) {}
-        }
-        masterList.unshift({ id: 1, code: "g-1", title: g1Title, subtitle: g1Subtitle, url: "/g-1" });
+        masterList.unshift({ id: 1, code: "g-1", title: "회사 별장공사 3억평", subtitle: "테스트 고객님의 공사", url: "/g-1" });
       }
 
       try {
@@ -1212,21 +1243,16 @@
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
+          if (CURRENT_SITE_CODE === "g-1" && parsed.version !== DATA_VERSION) {
+            localStorage.setItem(storageKey, JSON.stringify(initialData));
+            return initialData;
+          }
           if (!parsed.customColors) parsed.customColors = initialData.customColors;
           return parsed;
         } catch (e) {}
       }
       
       if (CURRENT_SITE_CODE === "g-1") {
-        const legacySaved = localStorage.getItem("edam_site_manager_state");
-        if (legacySaved) {
-          try {
-            const parsedLegacy = JSON.parse(legacySaved);
-            if (!parsedLegacy.customColors) parsedLegacy.customColors = initialData.customColors;
-            localStorage.setItem(storageKey, legacySaved);
-            return parsedLegacy;
-          } catch (e) {}
-        }
         localStorage.setItem(storageKey, JSON.stringify(initialData));
         return initialData;
       }
@@ -1241,6 +1267,7 @@
     function createNewSiteTemplate(code, customTitle = null) {
       const idNum = parseInt(code.replace('g-', ''), 10) || 2;
       const template = {
+        version: DATA_VERSION,
         isAdmin: false,
         project: {
           subtitle: "신규 고객님의 공사",
@@ -1312,17 +1339,14 @@
         saveMasterSitesList(masterList);
       }
 
-      // Sync data to Cloud Database for multi-user sharing!
       syncToCloud();
 
       renderApp();
     }
 
-    // Current Calendar Month Focus (Default: 2026년 8월)
     let currentYear = 2026;
     let currentMonth = 8;
 
-    // DOM Elements
     const siteSelectorBtn = document.getElementById("siteSelectorBtn");
     const siteSelectorDropdown = document.getElementById("siteSelectorDropdown");
     const siteSelectorNameTxt = document.getElementById("siteSelectorNameTxt");
@@ -1341,15 +1365,13 @@
     const modalCancelBtn = document.getElementById("modalCancelBtn");
     const modalCloseBtn = document.getElementById("modalCloseBtn");
 
-    // Initialize App
     document.addEventListener("DOMContentLoaded", () => {
       setupEventListeners();
       renderApp();
-      syncFromCloud(); // Async sync from global Cloud API
+      syncFromCloud();
     });
 
     function setupEventListeners() {
-      // Site Selector Dropdown Toggle
       siteSelectorBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         siteSelectorDropdown.classList.toggle("active");
@@ -1366,7 +1388,6 @@
 
       btnCreateSite.addEventListener("click", createNewSite);
 
-      // Admin Mode Toggle
       adminToggleBtn.addEventListener("click", () => {
         appState.isAdmin = !appState.isAdmin;
         if (appState.isAdmin) {
@@ -1375,13 +1396,12 @@
           document.body.classList.add("admin-mode");
         } else {
           adminToggleBtn.classList.remove("active");
-          adminToggleTxt.textContent = "관리자 수정모드";
+          adminToggleTxt.textContent = "수정모드";
           document.body.classList.remove("admin-mode");
         }
         renderApp();
       });
 
-      // Calendar Month Nav
       document.getElementById("prevMonthBtn").addEventListener("click", () => {
         currentMonth--;
         if (currentMonth < 1) {
@@ -1400,7 +1420,6 @@
         renderCalendar();
       });
 
-      // Lightbox Close
       lightboxCloseBtn.addEventListener("click", closeLightbox);
       lightboxModal.addEventListener("click", (e) => {
         if (e.target === lightboxModal) closeLightbox();
@@ -1409,11 +1428,9 @@
         if (e.key === "Escape") closeLightbox();
       });
 
-      // Modal Controls
       modalCloseBtn.addEventListener("click", closeModal);
       modalCancelBtn.addEventListener("click", closeModal);
 
-      // Section Edit Triggers
       document.getElementById("editHeroBtn").addEventListener("click", openEditHeroModal);
       document.getElementById("addManagerBtn").addEventListener("click", openAddManagerModal);
       document.getElementById("addScheduleBtn").addEventListener("click", openAddScheduleModal);
@@ -1422,7 +1439,6 @@
       document.getElementById("viewJournalHistoryBtn").addEventListener("click", openJournalHistoryModal);
     }
 
-    // Render Site Dropdown List
     function renderSiteDropdownList() {
       const masterList = getMasterSitesList();
       siteDropdownListContainer.innerHTML = "";
@@ -1507,7 +1523,6 @@
       }
     }
 
-    // Create New Site Handler
     function createNewSite() {
       const masterList = getMasterSitesList();
       
@@ -1524,6 +1539,7 @@
       if (!siteName) return;
 
       const newSiteData = {
+        version: DATA_VERSION,
         isAdmin: true,
         project: {
           subtitle: "신규 진행 공사",
@@ -1566,7 +1582,6 @@
       location.href = `/${nextCode}`;
     }
 
-    // Render Entire Page
     function renderApp() {
       siteSelectorNameTxt.textContent = `${CURRENT_SITE_CODE.toUpperCase()}: ${appState.project.title}`;
 
@@ -1582,7 +1597,6 @@
       });
     }
 
-    // 1. Render Hero Card
     function renderHero() {
       document.getElementById("projSubtitle").textContent = appState.project.subtitle;
       document.getElementById("projTitle").textContent = appState.project.title;
@@ -1604,7 +1618,6 @@
       document.getElementById("projProgressTxt").textContent = `${percent}%`;
     }
 
-    // 2. Render Managers
     function renderManagers() {
       const container = document.getElementById("managerListContainer");
       container.innerHTML = "";
@@ -1628,7 +1641,6 @@
       });
     }
 
-    // 3. Render Naver-Style Continuous Gantt Bar Calendar
     function renderCalendar() {
       document.getElementById("currentMonthTxt").textContent = `${currentYear}년 ${currentMonth}월`;
       const grid = document.getElementById("calendarGrid");
@@ -1654,7 +1666,7 @@
       const lastDay = new Date(currentYear, currentMonth, 0);
       const prevLastDay = new Date(currentYear, currentMonth - 1, 0);
 
-      let startDayOfWeek = firstDay.getDay() - 1; // Mon = 0, Sun = 6
+      let startDayOfWeek = firstDay.getDay() - 1;
       if (startDayOfWeek < 0) startDayOfWeek = 6;
 
       const totalDays = lastDay.getDate();
@@ -1687,7 +1699,7 @@
           isSun,
           isSat,
           holidayName,
-          dayOfWeekIndex: (dayOfWeek + 6) % 7 // Mon = 0, Sun = 6
+          dayOfWeekIndex: (dayOfWeek + 6) % 7
         });
       }
 
@@ -1758,7 +1770,7 @@
               continue;
             }
 
-            const dayIndexInWeek = d.dayOfWeekIndex; // 0 = Mon, 6 = Sun
+            const dayIndexInWeek = d.dayOfWeekIndex;
             const isEventStart = (d.dateStr === s.startDate) || (dayIndexInWeek === 0);
             const isEventEnd = (d.dateStr === s.endDate) || (dayIndexInWeek === 6);
 
@@ -1798,7 +1810,6 @@
       });
     }
 
-    // 4. Render Daily Construction Journal
     function renderJournal() {
       if (!appState.journals || appState.journals.length === 0) return;
 
@@ -1829,7 +1840,6 @@
       });
     }
 
-    // 5. Render Documents & Drawings
     function renderDocs() {
       const designContainer = document.getElementById("designPhotosContainer");
       designContainer.innerHTML = "";
@@ -1866,7 +1876,6 @@
       });
     }
 
-    // Lightbox Control
     function openLightbox(url, caption) {
       lightboxImg.src = url;
       lightboxCaption.textContent = caption || "";
@@ -1877,7 +1886,6 @@
       lightboxModal.classList.remove("active");
     }
 
-    // Modal Control Helpers
     function openModal(title, bodyHtml, onSave) {
       modalTitle.textContent = title;
       modalBodyContainer.innerHTML = bodyHtml;
@@ -1893,8 +1901,6 @@
     function closeModal() {
       editModalOverlay.classList.remove("active");
     }
-
-    // --- Modal Handler Implementations ---
 
     function openEditHeroModal() {
       const html = `
