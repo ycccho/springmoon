@@ -1333,15 +1333,80 @@
       siteDropdownListContainer.innerHTML = "";
 
       masterList.forEach(s => {
-        const a = document.createElement("a");
-        a.className = `site-dropdown-item ${s.code === CURRENT_SITE_CODE ? 'active' : ''}`;
-        a.href = s.code === "g-1" ? "/g-1" : `/${s.code}`;
-        a.innerHTML = `
-          <span>${s.code === CURRENT_SITE_CODE ? '👉 ' : ''}${escapeHtml(s.title)}</span>
-          <span class="site-dropdown-code">${s.code}</span>
+        const item = document.createElement("div");
+        item.className = `site-dropdown-item ${s.code === CURRENT_SITE_CODE ? 'active' : ''}`;
+        item.style.padding = "8px 12px";
+        item.style.display = "flex";
+        item.style.alignItems = "center";
+        item.style.justifySpaceBetween = "space-between";
+        
+        item.innerHTML = `
+          <a href="${s.code === 'g-1' ? '/g-1' : '/' + s.code}" style="flex:1; display:flex; align-items:center; gap:6px; text-decoration:none; color:var(--text-main); font-size:0.85rem; font-weight:600; overflow:hidden;">
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.code === CURRENT_SITE_CODE ? '👉 ' : ''}${escapeHtml(s.title)}</span>
+            <span class="site-dropdown-code" style="font-size:0.7rem; background:rgba(0,0,0,0.06); padding:2px 5px; border-radius:4px;">${s.code}</span>
+          </a>
+          <div style="display:flex; align-items:center; gap:4px; margin-left:8px;">
+            <button onclick="event.preventDefault(); event.stopPropagation(); editSiteTitle('${s.code}')" style="background:none; border:none; cursor:pointer; font-size:0.85rem; padding:2px 4px;" title="현장명 수정">✏️</button>
+            ${s.code !== 'g-1' ? `<button onclick="event.preventDefault(); event.stopPropagation(); deleteSite('${s.code}')" style="background:none; border:none; cursor:pointer; font-size:0.85rem; color:#e53e3e; padding:2px 4px;" title="현장 삭제">🗑️</button>` : ''}
+          </div>
         `;
-        siteDropdownListContainer.appendChild(a);
+        siteDropdownListContainer.appendChild(item);
       });
+    }
+
+    function editSiteTitle(code) {
+      const masterList = getMasterSitesList();
+      const site = masterList.find(s => s.code === code);
+      if (!site) return;
+
+      const newTitle = prompt(`[${code}] 현장명을 변경하시겠습니까?`, site.title);
+      if (!newTitle || !newTitle.trim()) return;
+
+      site.title = newTitle.trim();
+      saveMasterSitesList(masterList);
+
+      if (code === CURRENT_SITE_CODE) {
+        appState.project.title = newTitle.trim();
+        saveState();
+      } else {
+        const targetKey = `edam_site_data_${code}`;
+        const targetDataStr = localStorage.getItem(targetKey);
+        if (targetDataStr) {
+          try {
+            const targetData = JSON.parse(targetDataStr);
+            targetData.project.title = newTitle.trim();
+            localStorage.setItem(targetKey, JSON.stringify(targetData));
+          } catch (e) {}
+        }
+      }
+
+      renderSiteDropdownList();
+      renderApp();
+    }
+
+    function deleteSite(code) {
+      if (code === "g-1") {
+        alert("기본 현장(g-1)은 삭제할 수 없습니다.");
+        return;
+      }
+
+      const masterList = getMasterSitesList();
+      const site = masterList.find(s => s.code === code);
+      if (!site) return;
+
+      if (confirm(`정말로 [${code}] (${site.title}) 현장을 삭제하시겠습니까?`)) {
+        const updatedList = masterList.filter(s => s.code !== code);
+        saveMasterSitesList(updatedList);
+        localStorage.removeItem(`edam_site_data_${code}`);
+
+        alert(`[${code}] 현장이 삭제되었습니다.`);
+
+        if (code === CURRENT_SITE_CODE) {
+          location.href = "/g-1";
+        } else {
+          renderSiteDropdownList();
+        }
+      }
     }
 
     // Create New Site Handler
