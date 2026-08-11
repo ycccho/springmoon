@@ -1122,17 +1122,79 @@
     const CURRENT_SITE_CODE = getCurrentSiteCode();
 
     function getMasterSitesList() {
+      let masterList = [];
       const saved = localStorage.getItem("edam_master_sites_list");
       if (saved) {
         try {
-          return JSON.parse(saved);
-        } catch (e) {}
+          masterList = JSON.parse(saved);
+        } catch (e) {
+          masterList = [];
+        }
       }
-      const defaultList = [
-        { id: 1, code: "g-1", title: "엑소디움 59평", subtitle: "테스트 고객님의 공사", url: "/g-1" }
-      ];
-      localStorage.setItem("edam_master_sites_list", JSON.stringify(defaultList));
-      return defaultList;
+
+      if (!Array.isArray(masterList)) masterList = [];
+
+      // Always ensure g-1 is present in master list
+      if (!masterList.some(s => s.code === "g-1")) {
+        const g1DataStr = localStorage.getItem("edam_site_data_g-1") || localStorage.getItem("edam_site_manager_state");
+        let g1Title = "엑소디움 59평";
+        let g1Subtitle = "테스트 고객님의 공사";
+        if (g1DataStr) {
+          try {
+            const p = JSON.parse(g1DataStr);
+            if (p.project && p.project.title) g1Title = p.project.title;
+            if (p.project && p.project.subtitle) g1Subtitle = p.project.subtitle;
+          } catch (e) {}
+        }
+        masterList.unshift({ id: 1, code: "g-1", title: g1Title, subtitle: g1Subtitle, url: "/g-1" });
+      }
+
+      // Scan all localStorage keys for any edam_site_data_g-X to discover all user-created sites!
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("edam_site_data_g-")) {
+            const code = key.replace("edam_site_data_", "");
+            const idNum = parseInt(code.replace("g-", ""), 10);
+            
+            let siteItem = masterList.find(s => s.code === code);
+            const dataStr = localStorage.getItem(key);
+            let siteTitle = `현장 ${idNum}`;
+            let siteSubtitle = "공사 진행 중";
+
+            if (dataStr) {
+              try {
+                const p = JSON.parse(dataStr);
+                if (p.project && p.project.title) siteTitle = p.project.title;
+                if (p.project && p.project.subtitle) siteSubtitle = p.project.subtitle;
+              } catch (e) {}
+            }
+
+            if (!siteItem) {
+              masterList.push({
+                id: idNum || Date.now(),
+                code,
+                title: siteTitle,
+                subtitle: siteSubtitle,
+                url: `/${code}`
+              });
+            } else {
+              siteItem.title = siteTitle;
+              siteItem.subtitle = siteSubtitle;
+            }
+          }
+        }
+      } catch (e) {}
+
+      // Sort by site numeric ID (g-1, g-2, g-3...)
+      masterList.sort((a, b) => {
+        const numA = parseInt(a.code.replace("g-", ""), 10) || 0;
+        const numB = parseInt(b.code.replace("g-", ""), 10) || 0;
+        return numA - numB;
+      });
+
+      localStorage.setItem("edam_master_sites_list", JSON.stringify(masterList));
+      return masterList;
     }
 
     function saveMasterSitesList(list) {
