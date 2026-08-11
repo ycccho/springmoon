@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>현장 관리 & 공사일보 | 이담공간</title>
+
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800;900&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #557967;
+      --primary-dark: #3f5d4e;
+      --primary-light: #e8f0ec;
+      --accent-color: #e07a5f;
+      --bg-color: #f7f6f2;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --border-color: #eaede8;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --font-kr: 'Noto Sans KR', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-kr);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* Container & Layout */
+    .app-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Header Bar */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 4px 20px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-badge {
+      background: var(--primary-color);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .admin-toggle-btn {
+      background: #ffffff;
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+      padding: 8px 14px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .admin-toggle-btn.active {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    /* PC Dashboard Grid vs Mobile Stack Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    @media (min-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 380px 1fr;
+        align-items: start;
+      }
+      .grid-col-left {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .grid-col-right {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+    }
+
+    /* Card Box */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-edit-section {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      background: var(--primary-light);
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* 1. Hero Project Card */
+    .hero-card {
+      background: linear-gradient(135deg, #5b7b6a 0%, #466354 100%);
+      color: #ffffff;
+      border: none;
+    }
+
+    .hero-subtitle {
+      font-size: 0.88rem;
+      opacity: 0.85;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .hero-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .hero-meta {
+      font-size: 0.84rem;
+      opacity: 0.9;
+      margin-bottom: 18px;
+    }
+
+    .progress-bar-wrap {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 10px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #ffffff;
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    /* 2. Managers List */
+    .manager-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .manager-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #f0f0f0;
+    }
+
+    .manager-item:last-child {
+      border-bottom: none;
+    }
+
+    .manager-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.92rem;
+    }
+
+    .manager-role {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .manager-name {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-call {
+      background: #1e2432;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.15s ease;
+    }
+
+    .btn-call:active {
+      transform: scale(0.96);
+    }
+
+    /* 3. Calendar & Schedule UI (Naver Calendar Style) */
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .calendar-month-btn {
+      background: none;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .calendar-current-month {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: #f0f2ee;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid #e2e6df;
+    }
+
+    .cal-day-header {
+      background: #fafbf9;
+      text-align: center;
+      padding: 8px 2px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #4a5568;
+    }
+
+    .cal-day-header.sun { color: #e53e3e; }
+    .cal-day-header.sat { color: #3182ce; }
+
+    .cal-cell {
+      background: #ffffff;
+      min-height: 72px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .cal-cell.other-month {
+      background: #fcfdfc;
+      opacity: 0.4;
+    }
+
+    .cal-cell.today {
+      background: #f4f8f5;
+    }
+
+    .cal-date-num {
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cal-cell.sun .cal-date-num { color: #e53e3e; }
+    .cal-cell.sat .cal-date-num { color: #3182ce; }
+
+    .cal-holiday-tag {
+      font-size: 0.65rem;
+      color: #e53e3e;
+      font-weight: 400;
+    }
+
+    .gantt-bar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+    }
+
+    .gantt-item {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #ffffff;
+      padding: 2px 5px;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    /* 4. Daily Construction Journal (공사일보) */
+    .journal-date-badge {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .tag-item {
+      background: #f0f4f1;
+      color: var(--primary-dark);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+
+    .journal-desc {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #333d47;
+      margin-bottom: 16px;
+      white-space: pre-line;
+      background: #fbfbf9;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--primary-color);
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .photo-thumb {
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      background: #eaede8;
+      cursor: pointer;
+    }
+
+    .photo-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .photo-thumb:hover img {
+      transform: scale(1.05);
+    }
+
+    .photo-delete-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      border: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .admin-mode .photo-delete-btn {
+      display: flex;
+    }
+
+    .btn-journal-history {
+      color: #2b6cb0;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+      width: 100%;
+      cursor: pointer;
+      background: none;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    /* 5. Documents & Drawings Section */
+    .docs-section-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin: 14px 0 8px;
+    }
+
+    .docs-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: background 0.15s ease;
+    }
+
+    .file-item:hover {
+      background: #f8fafc;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .file-icon {
+      font-size: 1.1rem;
+    }
+
+    .file-name {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-remove-file {
+      background: none;
+      border: none;
+      color: #e53e3e;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: none;
+    }
+
+    .admin-mode .btn-remove-file {
+      display: block;
+    }
+
+    /* Buttons & Form Styles */
+    .btn-primary {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #4a5568;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Lightbox Modal */
+    .lightbox-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .lightbox-modal.active {
+      display: flex;
+    }
+
+    .lightbox-img {
+      max-width: 95%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .lightbox-caption {
+      color: #ffffff;
+      font-size: 0.95rem;
+      margin-top: 14px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .lightbox-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* General Edit Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #4a5568;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+      <a href="/h-0" class="brand-logo">
+        <span class="brand-badge">EDAM</span>
+        <span class="brand-name">이담공간</span>
+      </a>
+      <button class="admin-toggle-btn" id="adminToggleBtn">
+        <span class="icon">✏️</span>
+        <span id="adminToggleTxt">관리자 수정모드</span>
+      </button>
+    </header>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- LEFT COLUMN -->
+      <div class="grid-col-left">
+        
+        <!-- 1. Hero Card (Project Info & Progress) -->
+        <section class="card hero-card" id="heroSection">
+          <div class="hero-subtitle" id="projSubtitle">테스트 고객님의 공사</div>
+          <h1 class="hero-title" id="projTitle">엑소디움 59평</h1>
+          <div class="hero-meta" id="projMeta">공사 27일차 · 공사 완료 2026-09-03</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="projProgressBar"></div>
+          </div>
+          <div class="progress-labels">
+            <span>진행률</span>
+            <span id="projProgressTxt">47%</span>
+          </div>
+          <button class="btn-edit-section" style="margin-top:14px; background:rgba(255,255,255,0.2); color:#fff; display:none;" id="editHeroBtn">현장 정보 수정</button>
+        </section>
+
+        <!-- 2. Managers Section -->
+        <section class="card" id="managersSection">
+          <div class="card-header">
+            <h2 class="card-title">👥 담당자</h2>
+            <button class="btn-edit-section" style="display:none;" id="addManagerBtn">+ 담당자 추가</button>
+          </div>
+          <div class="manager-list" id="managerListContainer">
+            <!-- Manager items injected dynamically -->
+          </div>
+        </section>
+
+        <!-- 5. Documents & Drawings Section -->
+        <section class="card" id="docsSection">
+          <div class="card-header">
+            <h2 class="card-title">📁 문서 · 시안</h2>
+            <button class="btn-edit-section" style="display:none;" id="addDocBtn">+ 자료 업로드</button>
+          </div>
+          
+          <div class="docs-section-title">🖼️ 최종 시안 / 평면도</div>
+          <div class="photo-grid" id="designPhotosContainer">
+            <!-- Design images injected dynamically -->
+          </div>
+
+          <div class="docs-section-title" style="margin-top: 18px;">📄 계약서 및 첨부 서류</div>
+          <div class="docs-file-list" id="fileListContainer">
+            <!-- Files injected dynamically -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="grid-col-right">
+        
+        <!-- 3. Construction Schedule (Calendar & Gantt Chart) -->
+        <section class="card" id="scheduleSection">
+          <div class="card-header">
+            <h2 class="card-title">📅 공사 스케줄</h2>
+            <button class="btn-edit-section" style="display:none;" id="addScheduleBtn">+ 일정 추가</button>
+          </div>
+          <div class="calendar-nav">
+            <button class="calendar-month-btn" id="prevMonthBtn">&lt; 지난 달</button>
+            <div class="calendar-current-month" id="currentMonthTxt">8월</div>
+            <button class="calendar-month-btn" id="nextMonthBtn">다음 달 &gt;</button>
+          </div>
+          
+          <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar day headers & cells injected dynamically -->
+          </div>
+        </section>
+
+        <!-- 4. Daily Construction Journal (공사일보) -->
+        <section class="card" id="journalSection">
+          <div class="card-header">
+            <h2 class="card-title">📝 공사일보</h2>
+            <button class="btn-edit-section" style="display:none;" id="addJournalBtn">+ 새 일보 작성</button>
+          </div>
+
+          <div class="journal-date-badge" id="journalDateTxt">2026-08-03</div>
+          <div class="tag-cloud" id="journalTagsContainer">
+            <!-- Tags injected -->
+          </div>
+          <div class="journal-desc" id="journalDescTxt">
+            필름 현장월들 위치 확인
+            전기 거실·복도·안방 2인치 타공 위치 확인
+            화장실 방수 확인, 욕수 실리콘작업
+          </div>
+
+          <div class="photo-grid" id="journalPhotosContainer">
+            <!-- Journal photos injected -->
+          </div>
+
+          <button class="btn-journal-history" id="viewJournalHistoryBtn">▶ 지난 일보 목록 보기 (<span id="historyCountTxt">5</span>건)</button>
+        </section>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Lightbox Zoom Modal -->
+  <div class="lightbox-modal" id="lightboxModal">
+    <button class="lightbox-close-btn" id="lightboxCloseBtn">&times;</button>
+    <img src="" alt="확대 이미지" class="lightbox-img" id="lightboxImg" />
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+
+  <!-- General Edit Modal (Used for editing Project, Managers, Schedule, Journal, Docs) -->
+  <div class="modal-overlay" id="editModalOverlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">정보 수정</h3>
+        <button style="background:none; border:none; font-size:20px; cursor:pointer;" id="modalCloseBtn">&times;</button>
+      </div>
+      <div id="modalBodyContainer">
+        <!-- Dynamic Form Fields -->
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button class="btn-secondary" id="modalCancelBtn">취소</button>
+        <button class="btn-primary" id="modalSaveBtn">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript App Logic -->
+  <script>
+    // Initial Seed Data (Matches attached reference images)
+    const initialData = {
+      isAdmin: false,
+      project: {
+        subtitle: "테스트 고객님의 공사",
+        title: "엑소디움 59평",
+        startDate: "2026-07-08",
+        endDate: "2026-09-03"
+      },
+      managers: [
+        { id: "m1", role: "디자인 담당", name: "박민재", phone: "010-1234-5678" },
+        { id: "m2", role: "디자인 담당", name: "서지원", phone: "010-2345-6789" },
+        { id: "m3", role: "감리 담당", name: "정희동", phone: "010-3456-7890" },
+        { id: "m4", role: "감리 담당", name: "조영영", phone: "010-4567-8901" }
+      ],
+      schedules: [
+        { id: "s1", name: "필름", startDate: "2026-08-03", endDate: "2026-08-07", color: "#8b5cf6" },
+        { id: "s2", name: "전기타공", startDate: "2026-08-03", endDate: "2026-08-04", color: "#a16207" },
+        { id: "s3", name: "타일", startDate: "2026-08-07", endDate: "2026-08-08", color: "#0d9488" },
+        { id: "s4", name: "타일양생", startDate: "2026-08-06", endDate: "2026-08-07", color: "#0f766e" },
+        { id: "s5", name: "타일", startDate: "2026-08-10", endDate: "2026-08-14", color: "#0d9488" },
+        { id: "s6", name: "탄성,등", startDate: "2026-08-14", endDate: "2026-08-15", color: "#64748b" },
+        { id: "s7", name: "도배양생", startDate: "2026-08-12", endDate: "2026-08-13", color: "#db2777" },
+        { id: "s8", name: "도배", startDate: "2026-08-13", endDate: "2026-08-14", color: "#be185d" },
+        { id: "s9", name: "도배", startDate: "2026-08-17", endDate: "2026-08-18", color: "#be185d" },
+        { id: "s10", name: "도기세팅", startDate: "2026-08-17", endDate: "2026-08-18", color: "#475569" },
+        { id: "s11", name: "위생설비", startDate: "2026-08-19", endDate: "2026-08-19", color: "#854d0e" },
+        { id: "s12", name: "마루", startDate: "2026-08-20", endDate: "2026-08-22", color: "#ea580c" },
+        { id: "s13", name: "가구", startDate: "2026-08-24", endDate: "2026-08-26", color: "#4f46e5" },
+        { id: "s14", name: "세라믹실측", startDate: "2026-08-25", endDate: "2026-08-25", color: "#64748b" },
+        { id: "s15", name: "AC설치", startDate: "2026-08-26", endDate: "2026-08-26", color: "#0284c7" },
+        { id: "s16", name: "도어설치", startDate: "2026-08-26", endDate: "2026-08-26", color: "#0f766e" },
+        { id: "s17", name: "도어틀/틀", startDate: "2026-08-27", endDate: "2026-08-27", color: "#9333ea" },
+        { id: "s18", name: "중문설치", startDate: "2026-08-27", endDate: "2026-08-27", color: "#475569" },
+        { id: "s19", name: "사다리차", startDate: "2026-08-28", endDate: "2026-08-28", color: "#64748b" },
+        { id: "s20", name: "입주청소", startDate: "2026-08-28", endDate: "2026-08-28", color: "#475569" },
+        { id: "s21", name: "실리콘마감", startDate: "2026-08-31", endDate: "2026-08-31", color: "#475569" }
+      ],
+      journals: [
+        {
+          id: "j1",
+          date: "2026-08-03",
+          tags: ["필름", "전기타공"],
+          description: "필름 현장월들 위치 확인\n전기 거실·복도·안방 2인치 타공 위치 확인\n화장실 방수 확인, 욕수 실리콘작업",
+          photos: [
+            "https://indecompany2.mycafe24.com/images/img_visual_01.jpg",
+            "https://indecompany2.mycafe24.com/images/img_visual_02.jpg",
+            "https://indecompany2.mycafe24.com/images/img_visual_03.jpg",
+            "https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png",
+            "https://indecompany2.mycafe24.com/images/img_visual_02.jpg",
+            "https://indecompany2.mycafe24.com/images/img_visual_01.jpg"
+          ]
+        },
+        {
+          id: "j2",
+          date: "2026-08-02",
+          tags: ["철거", "목공"],
+          description: "거실 천장 철거 및 보강 작업 진행\n안방 가벽 설치 및 도어 프레임 맞춤 시공 완료",
+          photos: [
+            "https://indecompany2.mycafe24.com/images/img_visual_02.jpg",
+            "https://indecompany2.mycafe24.com/images/img_visual_03.jpg"
+          ]
+        }
+      ],
+      designs: [
+        { id: "d1", title: "평면배치도", url: "https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" },
+        { id: "d2", title: "3D 아이소메트릭", url: "https://indecompany2.mycafe24.com/images/img_visual_02.jpg" },
+        { id: "d3", title: "3D 공간 투시도", url: "https://indecompany2.mycafe24.com/images/img_visual_03.jpg" },
+        { id: "d4", title: "거실 렌더링", url: "https://indecompany2.mycafe24.com/images/img_visual_01.jpg" },
+        { id: "d5", title: "욕실 렌더링", url: "https://indecompany2.mycafe24.com/images/img_visual_02.jpg" },
+        { id: "d6", title: "복도 렌더링", url: "https://indecompany2.mycafe24.com/images/img_visual_03.jpg" }
+      ],
+      documents: [
+        { id: "doc1", name: "실측진단보고서 _ 이담공간.pdf", type: "pdf", url: "#" },
+        { id: "doc2", name: "해운대엑소디움59평103동1801호_디자인보드.pdf", type: "pdf", url: "#" },
+        { id: "doc3", name: "해운대엑소디움59평103동1801호_전기도면.pdf", type: "pdf", url: "#" },
+        { id: "doc4", name: "에어컨 견적서 송부.png", type: "image", url: "https://indecompany2.mycafe24.com/images/img_visual_01.jpg" },
+        { id: "doc5", name: "보일러 견적서.pdf", type: "pdf", url: "#" },
+        { id: "doc6", name: "보일러 내역서.pdf", type: "pdf", url: "#" }
+      ]
+    };
+
+    // State Management (LocalStorage)
+    let appState = loadState();
+
+    function loadState() {
+      const saved = localStorage.getItem("edam_site_manager_state");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
+      return initialData;
+    }
+
+    function saveState() {
+      localStorage.setItem("edam_site_manager_state", JSON.stringify(appState));
+      renderApp();
+    }
+
+    // Current Calendar Month Focus (Default: 2026년 8월)
+    let currentYear = 2026;
+    let currentMonth = 8; // 1-indexed
+
+    // DOM Elements
+    const adminToggleBtn = document.getElementById("adminToggleBtn");
+    const adminToggleTxt = document.getElementById("adminToggleTxt");
+    const lightboxModal = document.getElementById("lightboxModal");
+    const lightboxImg = document.getElementById("lightboxImg");
+    const lightboxCaption = document.getElementById("lightboxCaption");
+    const lightboxCloseBtn = document.getElementById("lightboxCloseBtn");
+    const editModalOverlay = document.getElementById("editModalOverlay");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBodyContainer = document.getElementById("modalBodyContainer");
+    const modalSaveBtn = document.getElementById("modalSaveBtn");
+    const modalCancelBtn = document.getElementById("modalCancelBtn");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+
+    // Initialize App
+    document.addEventListener("DOMContentLoaded", () => {
+      setupEventListeners();
+      renderApp();
+    });
+
+    function setupEventListeners() {
+      // Admin Mode Toggle
+      adminToggleBtn.addEventListener("click", () => {
+        appState.isAdmin = !appState.isAdmin;
+        if (appState.isAdmin) {
+          adminToggleBtn.classList.add("active");
+          adminToggleTxt.textContent = "수정모드 ON (종료하기)";
+          document.body.classList.add("admin-mode");
+        } else {
+          adminToggleBtn.classList.remove("active");
+          adminToggleTxt.textContent = "관리자 수정모드";
+          document.body.classList.remove("admin-mode");
+        }
+        renderApp();
+      });
+
+      // Calendar Month Nav
+      document.getElementById("prevMonthBtn").addEventListener("click", () => {
+        currentMonth--;
+        if (currentMonth < 1) {
+          currentMonth = 12;
+          currentYear--;
+        }
+        renderCalendar();
+      });
+
+      document.getElementById("nextMonthBtn").addEventListener("click", () => {
+        currentMonth++;
+        if (currentMonth > 12) {
+          currentMonth = 1;
+          currentYear++;
+        }
+        renderCalendar();
+      });
+
+      // Lightbox Close
+      lightboxCloseBtn.addEventListener("click", closeLightbox);
+      lightboxModal.addEventListener("click", (e) => {
+        if (e.target === lightboxModal) closeLightbox();
+      });
+
+      // Modal Controls
+      modalCloseBtn.addEventListener("click", closeModal);
+      modalCancelBtn.addEventListener("click", closeModal);
+
+      // Section Edit Triggers
+      document.getElementById("editHeroBtn").addEventListener("click", openEditHeroModal);
+      document.getElementById("addManagerBtn").addEventListener("click", openAddManagerModal);
+      document.getElementById("addScheduleBtn").addEventListener("click", openAddScheduleModal);
+      document.getElementById("addJournalBtn").addEventListener("click", openAddJournalModal);
+      document.getElementById("addDocBtn").addEventListener("click", openAddDocModal);
+      document.getElementById("viewJournalHistoryBtn").addEventListener("click", openJournalHistoryModal);
+    }
+
+    // Render Entire Page
+    function renderApp() {
+      renderHero();
+      renderManagers();
+      renderCalendar();
+      renderJournal();
+      renderDocs();
+
+      // Show/Hide Edit Buttons based on Admin Mode
+      const editBtns = document.querySelectorAll(".btn-edit-section");
+      editBtns.forEach(btn => {
+        btn.style.display = appState.isAdmin ? "inline-block" : "none";
+      });
+    }
+
+    // 1. Render Hero Card
+    function renderHero() {
+      document.getElementById("projSubtitle").textContent = appState.project.subtitle;
+      document.getElementById("projTitle").textContent = appState.project.title;
+
+      const today = new Date();
+      const start = new Date(appState.project.startDate);
+      const end = new Date(appState.project.endDate);
+
+      // Days Elapsed Calculation
+      const diffDays = Math.max(1, Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1);
+      document.getElementById("projMeta").textContent = `공사 ${diffDays}일차 · 공사 완료 ${appState.project.endDate}`;
+
+      // Progress % Calculation
+      const totalTime = end - start;
+      const elapsedTime = today - start;
+      let percent = 0;
+      if (totalTime > 0) {
+        percent = Math.min(100, Math.max(0, Math.round((elapsedTime / totalTime) * 100)));
+      }
+      document.getElementById("projProgressBar").style.width = `${percent}%`;
+      document.getElementById("projProgressTxt").textContent = `${percent}%`;
+    }
+
+    // 2. Render Managers
+    function renderManagers() {
+      const container = document.getElementById("managerListContainer");
+      container.innerHTML = "";
+
+      appState.managers.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "manager-item";
+        div.innerHTML = `
+          <div class="manager-info">
+            <span class="manager-role">${escapeHtml(m.role)}</span>
+            <span class="manager-name">${escapeHtml(m.name)}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <a href="tel:${m.phone}" class="btn-call">
+              <span style="font-size:12px;">📞</span> 전화
+            </a>
+            ${appState.isAdmin ? `<button onclick="deleteManager('${m.id}')" style="background:none; border:none; color:#e53e3e; cursor:pointer; font-weight:bold; padding:4px;">✕</button>` : ''}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // 3. Render Naver-Style Calendar & Gantt Bars
+    function renderCalendar() {
+      document.getElementById("currentMonthTxt").textContent = `${currentYear}년 ${currentMonth}월`;
+      const grid = document.getElementById("calendarGrid");
+      grid.innerHTML = "";
+
+      // Day Headers
+      const days = [
+        { name: "월", cls: "" },
+        { name: "화", cls: "" },
+        { name: "수", cls: "" },
+        { name: "목", cls: "" },
+        { name: "금", cls: "" },
+        { name: "토", cls: "sat" },
+        { name: "일", cls: "sun" }
+      ];
+      days.forEach(d => {
+        const div = document.createElement("div");
+        div.className = `cal-day-header ${d.cls}`;
+        div.textContent = d.name;
+        grid.appendChild(div);
+      });
+
+      // Calculate Calendar Days for currentYear & currentMonth
+      const firstDay = new Date(currentYear, currentMonth - 1, 1);
+      const lastDay = new Date(currentYear, currentMonth, 0);
+      const prevLastDay = new Date(currentYear, currentMonth - 1, 0);
+
+      let startDayOfWeek = firstDay.getDay() - 1; // Mon = 0, Sun = 6
+      if (startDayOfWeek < 0) startDayOfWeek = 6;
+
+      const totalDays = lastDay.getDate();
+      const prevDaysCount = startDayOfWeek;
+
+      // Render Prev Month Padding Days
+      for (let i = prevDaysCount - 1; i >= 0; i--) {
+        const num = prevLastDay.getDate() - i;
+        const cell = createCalCell(num, true, false, null);
+        grid.appendChild(cell);
+      }
+
+      // Render Current Month Days
+      const todayStr = getTodayString();
+      for (let day = 1; day <= totalDays; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isToday = dateStr === todayStr;
+        const dObj = new Date(currentYear, currentMonth - 1, day);
+        const dayOfWeek = dObj.getDay();
+        const isSun = dayOfWeek === 0;
+        const isSat = dayOfWeek === 6;
+
+        let holidayName = null;
+        if (currentMonth === 8 && day === 15) holidayName = "광복절";
+
+        const cell = createCalCell(day, false, isToday, dateStr, isSun, isSat, holidayName);
+        grid.appendChild(cell);
+      }
+
+      // Fill remaining cells for 5 or 6 weeks total
+      const totalCellsSoFar = prevDaysCount + totalDays;
+      const totalCellRows = Math.ceil(totalCellsSoFar / 7) * 7;
+      for (let day = 1; day <= (totalCellRows - totalCellsSoFar); day++) {
+        const cell = createCalCell(day, true, false, null);
+        grid.appendChild(cell);
+      }
+    }
+
+    function createCalCell(num, isOtherMonth, isToday, dateStr, isSun, isSat, holidayName) {
+      const cell = document.createElement("div");
+      cell.className = `cal-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${isSun ? 'sun' : ''} ${isSat ? 'sat' : ''}`;
+
+      const dateHeader = document.createElement("div");
+      dateHeader.className = "cal-date-num";
+      dateHeader.innerHTML = `
+        <span>${num}</span>
+        ${holidayName ? `<span class="cal-holiday-tag">${holidayName}</span>` : ''}
+      `;
+      cell.appendChild(dateHeader);
+
+      if (dateStr) {
+        const barContainer = document.createElement("div");
+        barContainer.className = "gantt-bar-container";
+
+        // Find schedules overlapping this date
+        const matchingSchedules = appState.schedules.filter(s => {
+          return dateStr >= s.startDate && dateStr <= s.endDate;
+        });
+
+        matchingSchedules.forEach(s => {
+          const bar = document.createElement("div");
+          bar.className = "gantt-item";
+          bar.style.backgroundColor = s.color || "#475569";
+          bar.textContent = s.name;
+          bar.title = `${s.name} (${s.startDate} ~ ${s.endDate})`;
+          
+          if (appState.isAdmin) {
+            bar.style.cursor = "pointer";
+            bar.onclick = (e) => {
+              e.stopPropagation();
+              openEditScheduleModal(s);
+            };
+          }
+          barContainer.appendChild(bar);
+        });
+
+        cell.appendChild(barContainer);
+
+        // Click cell in admin mode to add schedule for this date
+        if (appState.isAdmin) {
+          cell.onclick = () => {
+            openAddScheduleModal(dateStr);
+          };
+        }
+      }
+
+      return cell;
+    }
+
+    // 4. Render Daily Construction Journal
+    function renderJournal() {
+      if (!appState.journals || appState.journals.length === 0) return;
+
+      const latest = appState.journals[0]; // Most recent journal
+      document.getElementById("journalDateTxt").textContent = latest.date;
+      document.getElementById("journalDescTxt").textContent = latest.description;
+      document.getElementById("historyCountTxt").textContent = appState.journals.length;
+
+      // Tags
+      const tagsContainer = document.getElementById("journalTagsContainer");
+      tagsContainer.innerHTML = "";
+      latest.tags.forEach(t => {
+        const span = document.createElement("span");
+        span.className = "tag-item";
+        span.textContent = t;
+        tagsContainer.appendChild(span);
+      });
+
+      // Photos
+      const photosContainer = document.getElementById("journalPhotosContainer");
+      photosContainer.innerHTML = "";
+      latest.photos.forEach((url, idx) => {
+        const thumb = document.createElement("div");
+        thumb.className = "photo-thumb";
+        thumb.innerHTML = `
+          <img src="${url}" alt="공사일보 사진 ${idx+1}" onclick="openLightbox('${url}', '공사일보 사진 ${idx+1}')" />
+          <button class="photo-delete-btn" onclick="deleteJournalPhoto('${latest.id}', ${idx})">✕</button>
+        `;
+        photosContainer.appendChild(thumb);
+      });
+    }
+
+    // 5. Render Documents & Drawings
+    function renderDocs() {
+      // Design Photos
+      const designContainer = document.getElementById("designPhotosContainer");
+      designContainer.innerHTML = "";
+      appState.designs.forEach(d => {
+        const thumb = document.createElement("div");
+        thumb.className = "photo-thumb";
+        thumb.innerHTML = `
+          <img src="${d.url}" alt="${escapeHtml(d.title)}" onclick="openLightbox('${d.url}', '${escapeHtml(d.title)}')" />
+          <button class="photo-delete-btn" onclick="deleteDesignPhoto('${d.id}')">✕</button>
+        `;
+        designContainer.appendChild(thumb);
+      });
+
+      // Files
+      const fileContainer = document.getElementById("fileListContainer");
+      fileContainer.innerHTML = "";
+      appState.documents.forEach(doc => {
+        const a = document.createElement("a");
+        a.className = "file-item";
+        a.href = doc.url !== "#" ? doc.url : "javascript:;";
+        if (doc.type === "image" && doc.url !== "#") {
+          a.onclick = (e) => {
+            e.preventDefault();
+            openLightbox(doc.url, doc.name);
+          };
+        }
+        a.innerHTML = `
+          <div class="file-info">
+            <span class="file-icon">${doc.type === 'pdf' ? '📄' : '🖼️'}</span>
+            <span class="file-name">${escapeHtml(doc.name)}</span>
+          </div>
+          <button class="btn-remove-file" onclick="event.preventDefault(); deleteDocument('${doc.id}')">삭제</button>
+        `;
+        fileContainer.appendChild(a);
+      });
+    }
+
+    // Lightbox Control
+    function openLightbox(url, caption) {
+      lightboxImg.src = url;
+      lightboxCaption.textContent = caption || "";
+      lightboxModal.classList.add("active");
+    }
+
+    function closeLightbox() {
+      lightboxModal.classList.remove("active");
+    }
+
+    // Modal Control Helpers
+    function openModal(title, bodyHtml, onSave) {
+      modalTitle.textContent = title;
+      modalBodyContainer.innerHTML = bodyHtml;
+      editModalOverlay.classList.add("active");
+
+      modalSaveBtn.onclick = () => {
+        if (onSave()) {
+          closeModal();
+        }
+      };
+    }
+
+    function closeModal() {
+      editModalOverlay.classList.remove("active");
+    }
+
+    // --- Modal Handler Implementations ---
+
+    // Edit Hero (Project Info)
+    function openEditHeroModal() {
+      const html = `
+        <div class="form-group">
+          <label class="form-label">고객명/서브타이틀</label>
+          <input type="text" class="form-input" id="inputSubtitle" value="${escapeHtml(appState.project.subtitle)}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">현장명/메인타이틀</label>
+          <input type="text" class="form-input" id="inputTitle" value="${escapeHtml(appState.project.title)}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">공사 시작일</label>
+          <input type="date" class="form-input" id="inputStartDate" value="${appState.project.startDate}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">공사 마감예정일</label>
+          <input type="date" class="form-input" id="inputEndDate" value="${appState.project.endDate}" />
+        </div>
+      `;
+      openModal("현장 정보 수정", html, () => {
+        appState.project.subtitle = document.getElementById("inputSubtitle").value.trim();
+        appState.project.title = document.getElementById("inputTitle").value.trim();
+        appState.project.startDate = document.getElementById("inputStartDate").value;
+        appState.project.endDate = document.getElementById("inputEndDate").value;
+        saveState();
+        return true;
+      });
+    }
+
+    // Add Manager
+    function openAddManagerModal() {
+      const html = `
+        <div class="form-group">
+          <label class="form-label">담당 직책/역할 (예: 디자인 담당, 감리 담당)</label>
+          <input type="text" class="form-input" id="inputRole" placeholder="디자인 담당" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당자 성함</label>
+          <input type="text" class="form-input" id="inputName" placeholder="홍길동" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">전화번호 (터치 시 연결)</label>
+          <input type="tel" class="form-input" id="inputPhone" placeholder="010-1234-5678" />
+        </div>
+      `;
+      openModal("새 담당자 추가", html, () => {
+        const role = document.getElementById("inputRole").value.trim();
+        const name = document.getElementById("inputName").value.trim();
+        const phone = document.getElementById("inputPhone").value.trim();
+        if (!name || !phone) {
+          alert("성함과 전화번호를 입력해주세요.");
+          return false;
+        }
+        appState.managers.push({
+          id: "m_" + Date.now(),
+          role: role || "담당자",
+          name,
+          phone
+        });
+        saveState();
+        return true;
+      });
+    }
+
+    function deleteManager(id) {
+      if (confirm("이 담당자를 삭제하시겠습니까?")) {
+        appState.managers = appState.managers.filter(m => m.id !== id);
+        saveState();
+      }
+    }
+
+    // Add/Edit Schedule
+    function openAddScheduleModal(defaultDate = "") {
+      const dateVal = typeof defaultDate === "string" ? defaultDate : "";
+      const html = `
+        <div class="form-group">
+          <label class="form-label">공정명 (예: 필름, 타일, 전기, 도배)</label>
+          <input type="text" class="form-input" id="inputSchedName" placeholder="도배 공사" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">시작일</label>
+          <input type="date" class="form-input" id="inputSchedStart" value="${dateVal || getTodayString()}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">마감일</label>
+          <input type="date" class="form-input" id="inputSchedEnd" value="${dateVal || getTodayString()}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">간트차트 색상 선택</label>
+          <select class="form-select" id="inputSchedColor">
+            <option value="#8b5cf6" selected>보라 (필름/가구)</option>
+            <option value="#a16207">갈색 (전기/설비)</option>
+            <option value="#0d9488">청록 (타일)</option>
+            <option value="#be185d">분홍 (도배)</option>
+            <option value="#ea580c">오렌지 (마루)</option>
+            <option value="#0284c7">파랑 (에어컨)</option>
+            <option value="#475569">슬레이트 (기타/청소)</option>
+          </select>
+        </div>
+      `;
+      openModal("새 공사 일정 추가", html, () => {
+        const name = document.getElementById("inputSchedName").value.trim();
+        const startDate = document.getElementById("inputSchedStart").value;
+        const endDate = document.getElementById("inputSchedEnd").value;
+        const color = document.getElementById("inputSchedColor").value;
+        if (!name || !startDate || !endDate) {
+          alert("공정명과 날짜를 입력해주세요.");
+          return false;
+        }
+        appState.schedules.push({
+          id: "s_" + Date.now(),
+          name,
+          startDate,
+          endDate,
+          color
+        });
+        saveState();
+        return true;
+      });
+    }
+
+    function openEditScheduleModal(s) {
+      const html = `
+        <div class="form-group">
+          <label class="form-label">공정명</label>
+          <input type="text" class="form-input" id="inputSchedName" value="${escapeHtml(s.name)}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">시작일</label>
+          <input type="date" class="form-input" id="inputSchedStart" value="${s.startDate}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">마감일</label>
+          <input type="date" class="form-input" id="inputSchedEnd" value="${s.endDate}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">간트차트 색상</label>
+          <select class="form-select" id="inputSchedColor">
+            <option value="#8b5cf6" ${s.color === '#8b5cf6' ? 'selected' : ''}>보라 (필름/가구)</option>
+            <option value="#a16207" ${s.color === '#a16207' ? 'selected' : ''}>갈색 (전기/설비)</option>
+            <option value="#0d9488" ${s.color === '#0d9488' ? 'selected' : ''}>청록 (타일)</option>
+            <option value="#be185d" ${s.color === '#be185d' ? 'selected' : ''}>분홍 (도배)</option>
+            <option value="#ea580c" ${s.color === '#ea580c' ? 'selected' : ''}>오렌지 (마루)</option>
+            <option value="#0284c7" ${s.color === '#0284c7' ? 'selected' : ''}>파랑 (에어컨)</option>
+            <option value="#475569" ${s.color === '#475569' ? 'selected' : ''}>슬레이트 (기타/청소)</option>
+          </select>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn-secondary" style="color:#e53e3e; width:100%; border:1px solid #feb2b2;" onclick="deleteSchedule('${s.id}')">이 일정 삭제</button>
+        </div>
+      `;
+      openModal("공사 일정 수정", html, () => {
+        s.name = document.getElementById("inputSchedName").value.trim();
+        s.startDate = document.getElementById("inputSchedStart").value;
+        s.endDate = document.getElementById("inputSchedEnd").value;
+        s.color = document.getElementById("inputSchedColor").value;
+        saveState();
+        return true;
+      });
+    }
+
+    function deleteSchedule(id) {
+      if (confirm("이 일정을 삭제하시겠습니까?")) {
+        appState.schedules = appState.schedules.filter(s => s.id !== id);
+        closeModal();
+        saveState();
+      }
+    }
+
+    // Add Journal
+    function openAddJournalModal() {
+      const html = `
+        <div class="form-group">
+          <label class="form-label">일보 날짜</label>
+          <input type="date" class="form-input" id="inputJDate" value="${getTodayString()}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">공정 태그 (쉼표로 구분)</label>
+          <input type="text" class="form-input" id="inputJTags" placeholder="필름, 전기타공, 방수" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">금일 공사내용 수기입력</label>
+          <textarea class="form-textarea" id="inputJDesc" rows="4" placeholder="현장 작업 내용을 입력하세요..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">사진 추가 (이미지 URL 입력 또는 기본 이미지 사용)</label>
+          <input type="text" class="form-input" id="inputJPhoto" placeholder="https://example.com/photo.jpg (선택사항)" />
+        </div>
+      `;
+      openModal("새 공사일보 작성", html, () => {
+        const date = document.getElementById("inputJDate").value;
+        const tagsRaw = document.getElementById("inputJTags").value;
+        const description = document.getElementById("inputJDesc").value.trim();
+        const photoUrl = document.getElementById("inputJPhoto").value.trim();
+
+        if (!date || !description) {
+          alert("날짜와 공사내용을 입력해주세요.");
+          return false;
+        }
+
+        const tags = tagsRaw.split(",").map(t => t.trim()).filter(t => t.length > 0);
+        const photos = photoUrl ? [photoUrl] : [
+          "https://indecompany2.mycafe24.com/images/img_visual_01.jpg",
+          "https://indecompany2.mycafe24.com/images/img_visual_02.jpg"
+        ];
+
+        appState.journals.unshift({
+          id: "j_" + Date.now(),
+          date,
+          tags: tags.length > 0 ? tags : ["일반공사"],
+          description,
+          photos
+        });
+
+        saveState();
+        return true;
+      });
+    }
+
+    function deleteJournalPhoto(journalId, photoIdx) {
+      if (confirm("이 사진을 삭제하시겠습니까?")) {
+        const j = appState.journals.find(item => item.id === journalId);
+        if (j) {
+          j.photos.splice(photoIdx, 1);
+          saveState();
+        }
+      }
+    }
+
+    function openJournalHistoryModal() {
+      let html = `<div style="display:flex; flex-direction:column; gap:16px;">`;
+      appState.journals.forEach(j => {
+        html += `
+          <div style="border-bottom:1px solid #e2e8f0; padding-bottom:12px;">
+            <div style="font-weight:800; color:var(--primary-dark);">${j.date}</div>
+            <div style="font-size:0.85rem; color:#4a5568; margin:6px 0; white-space:pre-line;">${escapeHtml(j.description)}</div>
+            <div class="photo-grid" style="margin-top:8px;">
+              ${j.photos.map(p => `<img src="${p}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px;" onclick="openLightbox('${p}', '${j.date} 일보')" />`).join('')}
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+      openModal(`지난 일보 목록 (${appState.journals.length}건)`, html, () => true);
+    }
+
+    // Add Document / Design Image
+    function openAddDocModal() {
+      const html = `
+        <div class="form-group">
+          <label class="form-label">자료 유형 선택</label>
+          <select class="form-select" id="inputDocCategory">
+            <option value="design">🖼️ 최종 시안 / 평면도 (이미지)</option>
+            <option value="file">📄 계약서 및 서류 (PDF / 문서)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">자료/파일 명칭</label>
+          <input type="text" class="form-input" id="inputDocName" placeholder="예: 전기전멸도면.pdf" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">이미지/파일 URL 경로 (또는 샘플 URL)</label>
+          <input type="text" class="form-input" id="inputDocUrl" placeholder="https://example.com/file.pdf" />
+        </div>
+      `;
+      openModal("현장 자료 업로드", html, () => {
+        const cat = document.getElementById("inputDocCategory").value;
+        const name = document.getElementById("inputDocName").value.trim();
+        let url = document.getElementById("inputDocUrl").value.trim();
+
+        if (!name) {
+          alert("명칭을 입력해주세요.");
+          return false;
+        }
+
+        if (cat === "design") {
+          if (!url) url = "https://indecompany2.mycafe24.com/images/img_visual_03.jpg";
+          appState.designs.push({
+            id: "d_" + Date.now(),
+            title: name,
+            url
+          });
+        } else {
+          appState.documents.push({
+            id: "doc_" + Date.now(),
+            name,
+            type: name.toLowerCase().endsWith(".pdf") ? "pdf" : "image",
+            url: url || "#"
+          });
+        }
+
+        saveState();
+        return true;
+      });
+    }
+
+    function deleteDesignPhoto(id) {
+      if (confirm("이 시안/도면 이미지를 삭제하시겠습니까?")) {
+        appState.designs = appState.designs.filter(d => d.id !== id);
+        saveState();
+      }
+    }
+
+    function deleteDocument(id) {
+      if (confirm("이 서류/문서를 삭제하시겠습니까?")) {
+        appState.documents = appState.documents.filter(doc => doc.id !== id);
+        saveState();
+      }
+    }
+
+    // Helper Functions
+    function getTodayString() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+  </script>
+</body>
+</html>
