@@ -1152,8 +1152,17 @@
         } catch (e) {}
       }
       
-      // Initial default for g-1
+      // Check legacy storage key for g-1 so user's browser edits are NEVER overwritten
       if (CURRENT_SITE_CODE === "g-1") {
+        const legacySaved = localStorage.getItem("edam_site_manager_state");
+        if (legacySaved) {
+          try {
+            const parsedLegacy = JSON.parse(legacySaved);
+            if (!parsedLegacy.customColors) parsedLegacy.customColors = initialData.customColors;
+            localStorage.setItem(storageKey, legacySaved);
+            return parsedLegacy;
+          } catch (e) {}
+        }
         localStorage.setItem(storageKey, JSON.stringify(initialData));
         return initialData;
       }
