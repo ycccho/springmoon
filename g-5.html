@@ -108,12 +108,19 @@
       background: #fafbf9;
     }
 
+    .site-name-txt {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
     .site-selector-dropdown {
       position: absolute;
       top: 100%;
       left: 0;
       margin-top: 8px;
-      width: 270px;
+      width: 280px;
       background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
@@ -138,33 +145,27 @@
     }
 
     .site-dropdown-list {
-      max-height: 240px;
+      max-height: 260px;
       overflow-y: auto;
     }
 
     .site-dropdown-item {
-      padding: 10px 14px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      text-decoration: none;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      font-weight: 600;
       border-bottom: 1px dashed #f0f0f0;
       transition: background 0.15s ease;
     }
 
     .site-dropdown-item:hover, .site-dropdown-item.active {
       background: var(--primary-light);
-      color: var(--primary-dark);
-      font-weight: 800;
     }
 
     .site-dropdown-code {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       background: rgba(0,0,0,0.06);
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 4px;
       font-family: monospace;
     }
@@ -233,6 +234,28 @@
         display: flex;
         flex-direction: column;
         gap: 18px;
+      }
+    }
+
+    @media (max-width: 899px) {
+      .app-header {
+        gap: 10px;
+      }
+      .site-name-txt {
+        max-width: 120px;
+      }
+      .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .cal-cell {
+        min-height: 72px;
+      }
+      .gantt-item {
+        font-size: 0.62rem;
+        height: 17px;
+        line-height: 17px;
       }
     }
 
@@ -854,7 +877,7 @@
   <div class="app-wrapper">
     <!-- Header -->
     <header class="app-header">
-      <div style="display:flex; align-items:center; gap:12px;">
+      <div style="display:flex; align-items:center; gap:10px;">
         <a href="/h-0" class="brand-logo">
           <span class="brand-badge">EDAM</span>
           <span class="brand-name">이담공간</span>
@@ -864,7 +887,7 @@
         <div class="site-selector-container">
           <button class="site-selector-btn" id="siteSelectorBtn">
             <span style="font-size:0.9rem;">🏛️</span>
-            <span id="siteSelectorNameTxt">현장 1: 엑소디움 59평</span>
+            <span class="site-name-txt" id="siteSelectorNameTxt">G-1: 회사 별장공사 3억평</span>
             <span style="font-size:0.7rem; color:#888;">▼</span>
           </button>
 
@@ -895,14 +918,14 @@
         <!-- 1. Hero Card (Project Info & Progress) -->
         <section class="card hero-card" id="heroSection">
           <div class="hero-subtitle" id="projSubtitle">테스트 고객님의 공사</div>
-          <h1 class="hero-title" id="projTitle">엑소디움 59평</h1>
-          <div class="hero-meta" id="projMeta">공사 27일차 · 공사 완료 2026-09-03</div>
+          <h1 class="hero-title" id="projTitle">회사 별장공사 3억평</h1>
+          <div class="hero-meta" id="projMeta">공사 35일차 · 공사 완료 2026-09-03</div>
           <div class="progress-bar-wrap">
             <div class="progress-bar-fill" id="projProgressBar"></div>
           </div>
           <div class="progress-labels">
             <span>진행률</span>
-            <span id="projProgressTxt">47%</span>
+            <span id="projProgressTxt">60%</span>
           </div>
           <button class="btn-edit-section" style="margin-top:14px; background:rgba(255,255,255,0.2); color:#fff; display:none;" id="editHeroBtn">현장 정보 수정</button>
         </section>
@@ -965,14 +988,12 @@
             <button class="btn-edit-section" style="display:none;" id="addJournalBtn">+ 새 일보 작성 및 사진 업로드</button>
           </div>
 
-          <div class="journal-date-badge" id="journalDateTxt">2026-08-03</div>
+          <div class="journal-date-badge" id="journalDateTxt">2026-08-11</div>
           <div class="tag-cloud" id="journalTagsContainer">
             <!-- Tags injected -->
           </div>
           <div class="journal-desc" id="journalDescTxt">
-            필름 현장월들 위치 확인
-            전기 거실·복도·안방 2인치 타공 위치 확인
-            화장실 방수 확인, 욕수 실리콘작업
+            커피마시고 그대로 버리고오기
           </div>
 
           <div class="photo-grid" id="journalPhotosContainer">
@@ -1013,12 +1034,12 @@
 
   <!-- JavaScript App Logic -->
   <script>
-    // Initial Seed Data (Matches attached reference images)
+    // Initial Seed Data (Matches attached reference screenshot)
     const initialData = {
       isAdmin: false,
       project: {
         subtitle: "테스트 고객님의 공사",
-        title: "엑소디움 59평",
+        title: "회사 별장공사 3억평",
         startDate: "2026-07-08",
         endDate: "2026-09-03"
       },
@@ -1026,61 +1047,53 @@
         { name: "보라 (필름/가구)", hex: "#8b5cf6" },
         { name: "갈색 (전기/설비)", hex: "#a16207" },
         { name: "청록 (타일)", hex: "#0d9488" },
-        { name: "진청록 (타일양생)", hex: "#0f766e" },
+        { name: "라임 (줄춤기)", hex: "#84cc16" },
+        { name: "노랑 (청소)", hex: "#eab308" },
         { name: "분홍 (도배)", hex: "#be185d" },
         { name: "오렌지 (마루)", hex: "#ea580c" },
         { name: "파랑 (에어컨)", hex: "#0284c7" },
-        { name: "슬레이트 (기타/청소)", hex: "#475569" }
+        { name: "슬레이트 (기타)", hex: "#475569" }
       ],
       managers: [
-        { id: "m1", role: "디자인 담당", name: "박민재", phone: "010-1234-5678" },
-        { id: "m2", role: "디자인 담당", name: "서지원", phone: "010-2345-6789" },
-        { id: "m3", role: "감리 담당", name: "정희동", phone: "010-3456-7890" },
-        { id: "m4", role: "감리 담당", name: "조영영", phone: "010-4567-8901" }
+        { id: "m1", role: "디자인 담당", name: "박예빈", phone: "010-1234-5678" },
+        { id: "m2", role: "취객 담당", name: "김윤직", phone: "010-2345-6789" }
       ],
       schedules: [
         { id: "s1", name: "필름", startDate: "2026-08-03", endDate: "2026-08-07", color: "#8b5cf6" },
         { id: "s2", name: "전기타공", startDate: "2026-08-03", endDate: "2026-08-04", color: "#a16207" },
         { id: "s3", name: "타일양생", startDate: "2026-08-06", endDate: "2026-08-07", color: "#0f766e" },
         { id: "s5", name: "타일", startDate: "2026-08-10", endDate: "2026-08-14", color: "#0d9488" },
-        { id: "s6", name: "탄성,등", startDate: "2026-08-14", endDate: "2026-08-15", color: "#64748b" },
+        { id: "s5_dance1", name: "현장에서 줄춤기", startDate: "2026-08-11", endDate: "2026-08-16", color: "#84cc16" },
+        { id: "s5_clean1", name: "쓰레기 청소", startDate: "2026-08-11", endDate: "2026-08-15", color: "#eab308" },
         { id: "s7", name: "도배양생", startDate: "2026-08-12", endDate: "2026-08-13", color: "#db2777" },
+        { id: "s6", name: "탄성,등", startDate: "2026-08-14", endDate: "2026-08-15", color: "#475569" },
         { id: "s8", name: "도배", startDate: "2026-08-13", endDate: "2026-08-14", color: "#be185d" },
         { id: "s9", name: "도배", startDate: "2026-08-17", endDate: "2026-08-18", color: "#be185d" },
-        { id: "s10", name: "도기세팅", startDate: "2026-08-17", endDate: "2026-08-18", color: "#475569" },
         { id: "s11", name: "위생설비", startDate: "2026-08-19", endDate: "2026-08-19", color: "#854d0e" },
         { id: "s12", name: "마루", startDate: "2026-08-20", endDate: "2026-08-22", color: "#ea580c" },
-        { id: "s13", name: "가구", startDate: "2026-08-24", endDate: "2026-08-26", color: "#4f46e5" },
+        { id: "s5_dance2", name: "현장에서 줄춤기", startDate: "2026-08-17", endDate: "2026-08-23", color: "#84cc16" },
+        { id: "s5_clean2", name: "쓰레기 청소", startDate: "2026-08-17", endDate: "2026-08-22", color: "#eab308" },
+        { id: "s10", name: "도기세팅", startDate: "2026-08-17", endDate: "2026-08-18", color: "#475569" },
+        { id: "s13", name: "가구", startDate: "2026-08-24", endDate: "2026-08-26", color: "#8b5cf6" },
+        { id: "s17", name: "도어틀/틀", startDate: "2026-08-27", endDate: "2026-08-27", color: "#9333ea" },
+        { id: "s19", name: "사다리차", startDate: "2026-08-28", endDate: "2026-08-28", color: "#475569" },
+        { id: "s5_dance3", name: "현장에서 줄춤기", startDate: "2026-08-24", endDate: "2026-08-30", color: "#84cc16" },
         { id: "s14", name: "세라믹실측", startDate: "2026-08-25", endDate: "2026-08-25", color: "#64748b" },
         { id: "s15", name: "AC설치", startDate: "2026-08-26", endDate: "2026-08-26", color: "#0284c7" },
         { id: "s16", name: "도어설치", startDate: "2026-08-26", endDate: "2026-08-26", color: "#0f766e" },
-        { id: "s17", name: "도어틀/틀", startDate: "2026-08-27", endDate: "2026-08-27", color: "#9333ea" },
         { id: "s18", name: "중문설치", startDate: "2026-08-27", endDate: "2026-08-27", color: "#475569" },
-        { id: "s19", name: "사다리차", startDate: "2026-08-28", endDate: "2026-08-28", color: "#64748b" },
         { id: "s20", name: "입주청소", startDate: "2026-08-28", endDate: "2026-08-28", color: "#475569" },
-        { id: "s21", name: "실리콘마감", startDate: "2026-08-31", endDate: "2026-08-31", color: "#475569" }
+        { id: "s21", name: "실리콘마감", startDate: "2026-08-31", endDate: "2026-08-31", color: "#475569" },
+        { id: "s5_dance4", name: "현장에서 줄춤기", startDate: "2026-08-31", endDate: "2026-08-31", color: "#84cc16" }
       ],
       journals: [
         {
           id: "j1",
-          date: "2026-08-03",
-          tags: ["필름", "전기타공"],
-          description: "필름 현장월들 위치 확인\n전기 거실·복도·안방 2인치 타공 위치 확인\n화장실 방수 확인, 욕수 실리콘작업",
+          date: "2026-08-11",
+          tags: ["오늘 공정"],
+          description: "커피마시고 그대로 버리고오기",
           photos: [
             "https://indecompany2.mycafe24.com/images/img_visual_01.jpg",
-            "https://indecompany2.mycafe24.com/images/img_visual_02.jpg",
-            "https://indecompany2.mycafe24.com/images/img_visual_03.jpg",
-            "https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png",
-            "https://indecompany2.mycafe24.com/images/img_visual_02.jpg",
-            "https://indecompany2.mycafe24.com/images/img_visual_01.jpg"
-          ]
-        },
-        {
-          id: "j2",
-          date: "2026-08-02",
-          tags: ["철거", "목공"],
-          description: "거실 천장 철거 및 보강 작업 진행\n안방 가벽 설치 및 도어 프레임 맞춤 시공 완료",
-          photos: [
             "https://indecompany2.mycafe24.com/images/img_visual_02.jpg",
             "https://indecompany2.mycafe24.com/images/img_visual_03.jpg"
           ]
@@ -1089,22 +1102,15 @@
       designs: [
         { id: "d1", title: "평면배치도", url: "https://indecompany2.mycafe24.com/uploads/portfolio/img_6a43901fcf718.png" },
         { id: "d2", title: "3D 아이소메트릭", url: "https://indecompany2.mycafe24.com/images/img_visual_02.jpg" },
-        { id: "d3", title: "3D 공간 투시도", url: "https://indecompany2.mycafe24.com/images/img_visual_03.jpg" },
-        { id: "d4", title: "거실 렌더링", url: "https://indecompany2.mycafe24.com/images/img_visual_01.jpg" },
-        { id: "d5", title: "욕실 렌더링", url: "https://indecompany2.mycafe24.com/images/img_visual_02.jpg" },
-        { id: "d6", title: "복도 렌더링", url: "https://indecompany2.mycafe24.com/images/img_visual_03.jpg" }
+        { id: "d3", title: "3D 공간 투시도", url: "https://indecompany2.mycafe24.com/images/img_visual_03.jpg" }
       ],
       documents: [
-        { id: "doc1", name: "실측진단보고서 _ 이담공간.pdf", type: "pdf", url: "#" },
-        { id: "doc2", name: "해운대엑소디움59평103동1801호_디자인보드.pdf", type: "pdf", url: "#" },
-        { id: "doc3", name: "해운대엑소디움59평103동1801호_전기도면.pdf", type: "pdf", url: "#" },
-        { id: "doc4", name: "에어컨 견적서 송부.png", type: "image", url: "https://indecompany2.mycafe24.com/images/img_visual_01.jpg" },
-        { id: "doc5", name: "보일러 견적서.pdf", type: "pdf", url: "#" },
-        { id: "doc6", name: "보일러 내역서.pdf", type: "pdf", url: "#" }
+        { id: "doc1", name: "계약서", type: "pdf", url: "#" },
+        { id: "doc2", name: "하자이행보증서류", type: "pdf", url: "#" }
       ]
     };
 
-    // --- Multi-Site & LocalStorage Master System ---
+    // --- Multi-Site & Cloud Database Sync Engine ---
     function getCurrentSiteCode() {
       const path = location.pathname.toLowerCase();
       const match = path.match(/\/g-(\d+)/);
@@ -1116,7 +1122,7 @@
       if (siteParam) {
         return `g-${siteParam}`;
       }
-      return "g-1"; // Default site is g-1
+      return "g-1";
     }
 
     const CURRENT_SITE_CODE = getCurrentSiteCode();
@@ -1134,10 +1140,9 @@
 
       if (!Array.isArray(masterList)) masterList = [];
 
-      // Always ensure g-1 is present in master list
       if (!masterList.some(s => s.code === "g-1")) {
         const g1DataStr = localStorage.getItem("edam_site_data_g-1") || localStorage.getItem("edam_site_manager_state");
-        let g1Title = "엑소디움 59평";
+        let g1Title = "회사 별장공사 3억평";
         let g1Subtitle = "테스트 고객님의 공사";
         if (g1DataStr) {
           try {
@@ -1149,7 +1154,6 @@
         masterList.unshift({ id: 1, code: "g-1", title: g1Title, subtitle: g1Subtitle, url: "/g-1" });
       }
 
-      // Scan all localStorage keys for any edam_site_data_g-X to discover all user-created sites!
       try {
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
@@ -1186,7 +1190,6 @@
         }
       } catch (e) {}
 
-      // Sort by site numeric ID (g-1, g-2, g-3...)
       masterList.sort((a, b) => {
         const numA = parseInt(a.code.replace("g-", ""), 10) || 0;
         const numB = parseInt(b.code.replace("g-", ""), 10) || 0;
@@ -1214,7 +1217,6 @@
         } catch (e) {}
       }
       
-      // Check legacy storage key for g-1 so user's browser edits are NEVER overwritten
       if (CURRENT_SITE_CODE === "g-1") {
         const legacySaved = localStorage.getItem("edam_site_manager_state");
         if (legacySaved) {
@@ -1229,17 +1231,20 @@
         return initialData;
       }
 
-      // Generate clean new site template for g-2, g-3...
-      return createNewSiteTemplate(CURRENT_SITE_CODE);
+      const masterList = getMasterSitesList();
+      const masterSiteItem = masterList.find(s => s.code === CURRENT_SITE_CODE);
+      const customTitle = masterSiteItem ? masterSiteItem.title : null;
+
+      return createNewSiteTemplate(CURRENT_SITE_CODE, customTitle);
     }
 
-    function createNewSiteTemplate(code) {
+    function createNewSiteTemplate(code, customTitle = null) {
       const idNum = parseInt(code.replace('g-', ''), 10) || 2;
       const template = {
         isAdmin: false,
         project: {
           subtitle: "신규 고객님의 공사",
-          title: `신규 현장 ${idNum}`,
+          title: customTitle || `신규 현장 ${idNum}`,
           startDate: getTodayString(),
           endDate: getTodayString()
         },
@@ -1266,6 +1271,31 @@
       return template;
     }
 
+    // Global Cloud Database Sync Methods
+    async function syncFromCloud() {
+      try {
+        const res = await fetch(`/api/site?code=${CURRENT_SITE_CODE}`);
+        if (res.ok) {
+          const cloudData = await res.json();
+          if (cloudData && cloudData.project) {
+            appState = cloudData;
+            localStorage.setItem(`edam_site_data_${CURRENT_SITE_CODE}`, JSON.stringify(appState));
+            renderApp();
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function syncToCloud() {
+      try {
+        await fetch(`/api/site`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: CURRENT_SITE_CODE, data: appState })
+        });
+      } catch (e) {}
+    }
+
     function saveState() {
       const storageKey = `edam_site_data_${CURRENT_SITE_CODE}`;
       try {
@@ -1274,7 +1304,6 @@
         console.warn("Storage warning:", err);
       }
 
-      // Sync site title in master list
       const masterList = getMasterSitesList();
       const siteItem = masterList.find(s => s.code === CURRENT_SITE_CODE);
       if (siteItem) {
@@ -1283,12 +1312,15 @@
         saveMasterSitesList(masterList);
       }
 
+      // Sync data to Cloud Database for multi-user sharing!
+      syncToCloud();
+
       renderApp();
     }
 
     // Current Calendar Month Focus (Default: 2026년 8월)
     let currentYear = 2026;
-    let currentMonth = 8; // 1-indexed
+    let currentMonth = 8;
 
     // DOM Elements
     const siteSelectorBtn = document.getElementById("siteSelectorBtn");
@@ -1313,6 +1345,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       setupEventListeners();
       renderApp();
+      syncFromCloud(); // Async sync from global Cloud API
     });
 
     function setupEventListeners() {
@@ -1400,7 +1433,7 @@
         item.style.padding = "8px 12px";
         item.style.display = "flex";
         item.style.alignItems = "center";
-        item.style.justifySpaceBetween = "space-between";
+        item.style.justifyContent = "space-between";
         
         item.innerHTML = `
           <a href="${s.code === 'g-1' ? '/g-1' : '/' + s.code}" style="flex:1; display:flex; align-items:center; gap:6px; text-decoration:none; color:var(--text-main); font-size:0.85rem; font-weight:600; overflow:hidden;">
@@ -1424,26 +1457,29 @@
       const newTitle = prompt(`[${code}] 현장명을 변경하시겠습니까?`, site.title);
       if (!newTitle || !newTitle.trim()) return;
 
-      site.title = newTitle.trim();
+      const trimmedTitle = newTitle.trim();
+      site.title = trimmedTitle;
+
+      const targetKey = `edam_site_data_${code}`;
+      const targetDataStr = localStorage.getItem(targetKey);
+      if (targetDataStr) {
+        try {
+          const targetData = JSON.parse(targetDataStr);
+          targetData.project.title = trimmedTitle;
+          localStorage.setItem(targetKey, JSON.stringify(targetData));
+        } catch (e) {}
+      } else {
+        createNewSiteTemplate(code, trimmedTitle);
+      }
+
       saveMasterSitesList(masterList);
 
       if (code === CURRENT_SITE_CODE) {
-        appState.project.title = newTitle.trim();
+        appState.project.title = trimmedTitle;
         saveState();
       } else {
-        const targetKey = `edam_site_data_${code}`;
-        const targetDataStr = localStorage.getItem(targetKey);
-        if (targetDataStr) {
-          try {
-            const targetData = JSON.parse(targetDataStr);
-            targetData.project.title = newTitle.trim();
-            localStorage.setItem(targetKey, JSON.stringify(targetData));
-          } catch (e) {}
-        }
+        renderSiteDropdownList();
       }
-
-      renderSiteDropdownList();
-      renderApp();
     }
 
     function deleteSite(code) {
@@ -1515,10 +1551,8 @@
         documents: []
       };
 
-      // Save new site data to localStorage
       localStorage.setItem(`edam_site_data_${nextCode}`, JSON.stringify(newSiteData));
 
-      // Add to master list
       masterList.push({
         id: nextId,
         code: nextCode,
@@ -1534,7 +1568,6 @@
 
     // Render Entire Page
     function renderApp() {
-      // Update Site Selector Title Button Text
       siteSelectorNameTxt.textContent = `${CURRENT_SITE_CODE.toUpperCase()}: ${appState.project.title}`;
 
       renderHero();
@@ -1543,7 +1576,6 @@
       renderJournal();
       renderDocs();
 
-      // Show/Hide Edit Buttons based on Admin Mode
       const editBtns = document.querySelectorAll(".btn-edit-section");
       editBtns.forEach(btn => {
         btn.style.display = appState.isAdmin ? "inline-block" : "none";
@@ -1559,11 +1591,9 @@
       const start = new Date(appState.project.startDate);
       const end = new Date(appState.project.endDate);
 
-      // Days Elapsed Calculation
       const diffDays = Math.max(1, Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1);
       document.getElementById("projMeta").textContent = `공사 ${diffDays}일차 · 공사 완료 ${appState.project.endDate}`;
 
-      // Progress % Calculation
       const totalTime = end - start;
       const elapsedTime = today - start;
       let percent = 0;
@@ -1604,7 +1634,6 @@
       const grid = document.getElementById("calendarGrid");
       grid.innerHTML = "";
 
-      // Day Headers
       const days = [
         { name: "월", cls: "" },
         { name: "화", cls: "" },
@@ -1633,13 +1662,11 @@
 
       const calendarDates = [];
 
-      // Prev Month Padding Days
       for (let i = prevDaysCount - 1; i >= 0; i--) {
         const num = prevLastDay.getDate() - i;
         calendarDates.push({ num, isOtherMonth: true, dateStr: null });
       }
 
-      // Current Month Days
       const todayStr = getTodayString();
       for (let day = 1; day <= totalDays; day++) {
         const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -1664,14 +1691,12 @@
         });
       }
 
-      // Remaining padding
       const totalCellsSoFar = calendarDates.length;
       const totalCellRows = Math.ceil(totalCellsSoFar / 7) * 7;
       for (let day = 1; day <= (totalCellRows - totalCellsSoFar); day++) {
         calendarDates.push({ num: day, isOtherMonth: true, dateStr: null });
       }
 
-      // Calculate Track Slots for Gantt items
       const activeSchedules = [...appState.schedules].sort((a, b) => {
         if (a.startDate !== b.startDate) return a.startDate.localeCompare(b.startDate);
         return b.endDate.localeCompare(a.endDate);
@@ -1705,7 +1730,6 @@
         }
       });
 
-      // Render cells with seamless Gantt bar lines
       calendarDates.forEach(d => {
         const cell = document.createElement("div");
         cell.className = `cal-cell ${d.isOtherMonth ? 'other-month' : ''} ${d.isToday ? 'today' : ''} ${d.isSun ? 'sun' : ''} ${d.isSat ? 'sat' : ''}`;
@@ -1783,7 +1807,6 @@
       document.getElementById("journalDescTxt").textContent = latest.description;
       document.getElementById("historyCountTxt").textContent = appState.journals.length;
 
-      // Tags
       const tagsContainer = document.getElementById("journalTagsContainer");
       tagsContainer.innerHTML = "";
       latest.tags.forEach(t => {
@@ -1793,7 +1816,6 @@
         tagsContainer.appendChild(span);
       });
 
-      // Photos
       const photosContainer = document.getElementById("journalPhotosContainer");
       photosContainer.innerHTML = "";
       latest.photos.forEach((url, idx) => {
@@ -1809,7 +1831,6 @@
 
     // 5. Render Documents & Drawings
     function renderDocs() {
-      // Design Photos
       const designContainer = document.getElementById("designPhotosContainer");
       designContainer.innerHTML = "";
       appState.designs.forEach(d => {
@@ -1822,7 +1843,6 @@
         designContainer.appendChild(thumb);
       });
 
-      // Files
       const fileContainer = document.getElementById("fileListContainer");
       fileContainer.innerHTML = "";
       appState.documents.forEach(doc => {
@@ -1876,7 +1896,6 @@
 
     // --- Modal Handler Implementations ---
 
-    // Edit Hero (Project Info)
     function openEditHeroModal() {
       const html = `
         <div class="form-group">
@@ -1906,7 +1925,6 @@
       });
     }
 
-    // Add Manager
     function openAddManagerModal() {
       const html = `
         <div class="form-group">
@@ -1948,14 +1966,12 @@
       }
     }
 
-    // Render Custom Color Select Options
     function renderColorOptionsHtml(selectedHex = "") {
       return appState.customColors.map(c => 
         `<option value="${c.hex}" ${c.hex === selectedHex ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
       ).join('');
     }
 
-    // Add/Edit Schedule Modal with Custom Color Creator
     function openAddScheduleModal(defaultDate = "") {
       const dateVal = typeof defaultDate === "string" ? defaultDate : "";
       const html = `
@@ -1978,7 +1994,6 @@
           </select>
         </div>
         
-        <!-- Add New Custom Color Section -->
         <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:10px; margin-top:10px;">
           <div style="font-size:0.8rem; font-weight:800; color:var(--primary-dark); margin-bottom:8px;">🎨 새 커스텀 색상 및 명칭 추가</div>
           <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
@@ -2074,7 +2089,6 @@
       }
     }
 
-    // Add Journal with Direct File Upload
     let tempUploadedJournalPhotos = [];
 
     function openAddJournalModal() {
@@ -2087,11 +2101,11 @@
         </div>
         <div class="form-group">
           <label class="form-label">공정 태그 (쉼표로 구분)</label>
-          <input type="text" class="form-input" id="inputJTags" placeholder="필름, 전기타공, 방수" />
+          <input type="text" class="form-input" id="inputJTags" placeholder="오늘 공정, 필름" />
         </div>
         <div class="form-group">
           <label class="form-label">금일 공사내용 수기입력</label>
-          <textarea class="form-textarea" id="inputJDesc" rows="4" placeholder="현장 작업 내용을 입력하세요..."></textarea>
+          <textarea class="form-textarea" id="inputJDesc" rows="4" placeholder="커피마시고 그대로 버리고오기"></textarea>
         </div>
         <div class="form-group">
           <label class="form-label">📷 현장 사진 업로드 (PC / 모바일 파일 선택)</label>
@@ -2123,7 +2137,7 @@
         appState.journals.unshift({
           id: "j_" + Date.now(),
           date,
-          tags: tags.length > 0 ? tags : ["일반공사"],
+          tags: tags.length > 0 ? tags : ["오늘 공정"],
           description,
           photos
         });
@@ -2179,7 +2193,6 @@
       openModal(`지난 일보 목록 (${appState.journals.length}건)`, html, () => true);
     }
 
-    // Add Document / Design Image with Direct PC/Mobile File Upload
     let selectedDocFile = null;
 
     function openAddDocModal() {
@@ -2195,7 +2208,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">자료/파일 명칭</label>
-          <input type="text" class="form-input" id="inputDocName" placeholder="예: 엑소디움 59평 전기도면.pdf" />
+          <input type="text" class="form-input" id="inputDocName" placeholder="예: 회사 별장공사 전기도면.pdf" />
         </div>
         <div class="form-group">
           <label class="form-label">📁 파일 업로드 (PC / 모바일 선택)</label>
@@ -2269,7 +2282,6 @@
       }
     }
 
-    // Helper Functions
     function getTodayString() {
       const today = new Date();
       const yyyy = today.getFullYear();
