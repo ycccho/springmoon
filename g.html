@@ -268,7 +268,7 @@
       transform: scale(0.96);
     }
 
-    /* 3. Calendar & Schedule UI (Naver Calendar Style) */
+    /* 3. Calendar & Schedule UI (Naver Calendar Continuous Gantt Style) */
     .calendar-nav {
       display: flex;
       align-items: center;
@@ -295,7 +295,7 @@
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 1px;
-      background: #f0f2ee;
+      background: #e2e6df;
       border-radius: var(--radius-md);
       overflow: hidden;
       border: 1px solid #e2e6df;
@@ -315,12 +315,13 @@
 
     .cal-cell {
       background: #ffffff;
-      min-height: 72px;
-      padding: 4px;
+      min-height: 82px;
+      padding: 4px 0px 6px 0px;
       display: flex;
       flex-direction: column;
       position: relative;
       cursor: pointer;
+      overflow: visible;
     }
 
     .cal-cell.other-month {
@@ -333,9 +334,10 @@
     }
 
     .cal-date-num {
+      padding: 0 5px;
       font-size: 0.78rem;
       font-weight: 700;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       color: var(--text-main);
       display: flex;
       align-items: center;
@@ -354,20 +356,47 @@
     .gantt-bar-container {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
       width: 100%;
     }
 
+    .gantt-item-placeholder {
+      height: 19px;
+      visibility: hidden;
+    }
+
     .gantt-item {
-      font-size: 0.65rem;
+      font-size: 0.68rem;
       font-weight: 700;
       color: #ffffff;
-      padding: 2px 5px;
-      border-radius: 4px;
+      height: 19px;
+      line-height: 19px;
+      padding: 0 4px;
+      border-radius: 0;
+      margin-left: -1px;
+      margin-right: -1px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.2;
+      position: relative;
+      z-index: 1;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08);
+    }
+
+    .gantt-item.is-start {
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+      margin-left: 2px;
+      padding-left: 5px;
+      z-index: 2;
+    }
+
+    .gantt-item.is-end {
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+      margin-right: 2px;
+      padding-right: 5px;
+      z-index: 2;
     }
 
     /* 4. Daily Construction Journal (공사일보) */
@@ -535,6 +564,33 @@
       display: block;
     }
 
+    /* File Drop Zone / Upload Area */
+    .file-upload-box {
+      border: 2px dashed #cbd5e0;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .file-upload-box:hover {
+      border-color: var(--primary-color);
+      background: #f1f5f9;
+    }
+
+    .file-upload-icon {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+
+    .file-upload-txt {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #4a5568;
+    }
+
     /* Buttons & Form Styles */
     .btn-primary {
       background: var(--primary-color);
@@ -639,7 +695,7 @@
       background: #ffffff;
       border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       padding: 24px;
       box-shadow: var(--shadow-md);
       max-height: 90vh;
@@ -735,7 +791,7 @@
         <section class="card" id="docsSection">
           <div class="card-header">
             <h2 class="card-title">📁 문서 · 시안</h2>
-            <button class="btn-edit-section" style="display:none;" id="addDocBtn">+ 자료 업로드</button>
+            <button class="btn-edit-section" style="display:none;" id="addDocBtn">+ 자료 파일 직접 업로드</button>
           </div>
           
           <div class="docs-section-title">🖼️ 최종 시안 / 평면도</div>
@@ -754,11 +810,11 @@
       <!-- RIGHT COLUMN -->
       <div class="grid-col-right">
         
-        <!-- 3. Construction Schedule (Calendar & Gantt Chart) -->
+        <!-- 3. Construction Schedule (Calendar & Continuous Gantt Chart) -->
         <section class="card" id="scheduleSection">
           <div class="card-header">
             <h2 class="card-title">📅 공사 스케줄</h2>
-            <button class="btn-edit-section" style="display:none;" id="addScheduleBtn">+ 일정 추가</button>
+            <button class="btn-edit-section" style="display:none;" id="addScheduleBtn">+ 일정 및 색상 관리</button>
           </div>
           <div class="calendar-nav">
             <button class="calendar-month-btn" id="prevMonthBtn">&lt; 지난 달</button>
@@ -775,7 +831,7 @@
         <section class="card" id="journalSection">
           <div class="card-header">
             <h2 class="card-title">📝 공사일보</h2>
-            <button class="btn-edit-section" style="display:none;" id="addJournalBtn">+ 새 일보 작성</button>
+            <button class="btn-edit-section" style="display:none;" id="addJournalBtn">+ 새 일보 작성 및 사진 업로드</button>
           </div>
 
           <div class="journal-date-badge" id="journalDateTxt">2026-08-03</div>
@@ -807,7 +863,7 @@
     <div class="lightbox-caption" id="lightboxCaption"></div>
   </div>
 
-  <!-- General Edit Modal (Used for editing Project, Managers, Schedule, Journal, Docs) -->
+  <!-- General Edit Modal -->
   <div class="modal-overlay" id="editModalOverlay">
     <div class="modal-box">
       <div class="modal-header">
@@ -835,6 +891,16 @@
         startDate: "2026-07-08",
         endDate: "2026-09-03"
       },
+      customColors: [
+        { name: "보라 (필름/가구)", hex: "#8b5cf6" },
+        { name: "갈색 (전기/설비)", hex: "#a16207" },
+        { name: "청록 (타일)", hex: "#0d9488" },
+        { name: "진청록 (타일양생)", hex: "#0f766e" },
+        { name: "분홍 (도배)", hex: "#be185d" },
+        { name: "오렌지 (마루)", hex: "#ea580c" },
+        { name: "파랑 (에어컨)", hex: "#0284c7" },
+        { name: "슬레이트 (기타/청소)", hex: "#475569" }
+      ],
       managers: [
         { id: "m1", role: "디자인 담당", name: "박민재", phone: "010-1234-5678" },
         { id: "m2", role: "디자인 담당", name: "서지원", phone: "010-2345-6789" },
@@ -844,8 +910,7 @@
       schedules: [
         { id: "s1", name: "필름", startDate: "2026-08-03", endDate: "2026-08-07", color: "#8b5cf6" },
         { id: "s2", name: "전기타공", startDate: "2026-08-03", endDate: "2026-08-04", color: "#a16207" },
-        { id: "s3", name: "타일", startDate: "2026-08-07", endDate: "2026-08-08", color: "#0d9488" },
-        { id: "s4", name: "타일양생", startDate: "2026-08-06", endDate: "2026-08-07", color: "#0f766e" },
+        { id: "s3", name: "타일양생", startDate: "2026-08-06", endDate: "2026-08-07", color: "#0f766e" },
         { id: "s5", name: "타일", startDate: "2026-08-10", endDate: "2026-08-14", color: "#0d9488" },
         { id: "s6", name: "탄성,등", startDate: "2026-08-14", endDate: "2026-08-15", color: "#64748b" },
         { id: "s7", name: "도배양생", startDate: "2026-08-12", endDate: "2026-08-13", color: "#db2777" },
@@ -908,21 +973,27 @@
       ]
     };
 
-    // State Management (LocalStorage)
+    // State Management (LocalStorage with Permanent Persistence)
     let appState = loadState();
 
     function loadState() {
       const saved = localStorage.getItem("edam_site_manager_state");
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          if (!parsed.customColors) parsed.customColors = initialData.customColors;
+          return parsed;
         } catch (e) {}
       }
       return initialData;
     }
 
     function saveState() {
-      localStorage.setItem("edam_site_manager_state", JSON.stringify(appState));
+      try {
+        localStorage.setItem("edam_site_manager_state", JSON.stringify(appState));
+      } catch (err) {
+        console.warn("Storage warning:", err);
+      }
       renderApp();
     }
 
@@ -989,6 +1060,9 @@
       lightboxCloseBtn.addEventListener("click", closeLightbox);
       lightboxModal.addEventListener("click", (e) => {
         if (e.target === lightboxModal) closeLightbox();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeLightbox();
       });
 
       // Modal Controls
@@ -1067,7 +1141,7 @@
       });
     }
 
-    // 3. Render Naver-Style Calendar & Gantt Bars
+    // 3. Render Naver-Style Continuous Gantt Bar Calendar
     function renderCalendar() {
       document.getElementById("currentMonthTxt").textContent = `${currentYear}년 ${currentMonth}월`;
       const grid = document.getElementById("calendarGrid");
@@ -1090,7 +1164,6 @@
         grid.appendChild(div);
       });
 
-      // Calculate Calendar Days for currentYear & currentMonth
       const firstDay = new Date(currentYear, currentMonth - 1, 1);
       const lastDay = new Date(currentYear, currentMonth, 0);
       const prevLastDay = new Date(currentYear, currentMonth - 1, 0);
@@ -1101,14 +1174,15 @@
       const totalDays = lastDay.getDate();
       const prevDaysCount = startDayOfWeek;
 
-      // Render Prev Month Padding Days
+      const calendarDates = [];
+
+      // Prev Month Padding Days
       for (let i = prevDaysCount - 1; i >= 0; i--) {
         const num = prevLastDay.getDate() - i;
-        const cell = createCalCell(num, true, false, null);
-        grid.appendChild(cell);
+        calendarDates.push({ num, isOtherMonth: true, dateStr: null });
       }
 
-      // Render Current Month Days
+      // Current Month Days
       const todayStr = getTodayString();
       for (let day = 1; day <= totalDays; day++) {
         const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -1121,75 +1195,133 @@
         let holidayName = null;
         if (currentMonth === 8 && day === 15) holidayName = "광복절";
 
-        const cell = createCalCell(day, false, isToday, dateStr, isSun, isSat, holidayName);
-        grid.appendChild(cell);
+        calendarDates.push({
+          num: day,
+          isOtherMonth: false,
+          isToday,
+          dateStr,
+          isSun,
+          isSat,
+          holidayName,
+          dayOfWeekIndex: (dayOfWeek + 6) % 7 // Mon = 0, Sun = 6
+        });
       }
 
-      // Fill remaining cells for 5 or 6 weeks total
-      const totalCellsSoFar = prevDaysCount + totalDays;
+      // Remaining padding
+      const totalCellsSoFar = calendarDates.length;
       const totalCellRows = Math.ceil(totalCellsSoFar / 7) * 7;
       for (let day = 1; day <= (totalCellRows - totalCellsSoFar); day++) {
-        const cell = createCalCell(day, true, false, null);
-        grid.appendChild(cell);
+        calendarDates.push({ num: day, isOtherMonth: true, dateStr: null });
       }
-    }
 
-    function createCalCell(num, isOtherMonth, isToday, dateStr, isSun, isSat, holidayName) {
-      const cell = document.createElement("div");
-      cell.className = `cal-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${isSun ? 'sun' : ''} ${isSat ? 'sat' : ''}`;
+      // Calculate Track Slots for Gantt items
+      const activeSchedules = [...appState.schedules].sort((a, b) => {
+        if (a.startDate !== b.startDate) return a.startDate.localeCompare(b.startDate);
+        return b.endDate.localeCompare(a.endDate);
+      });
 
-      const dateHeader = document.createElement("div");
-      dateHeader.className = "cal-date-num";
-      dateHeader.innerHTML = `
-        <span>${num}</span>
-        ${holidayName ? `<span class="cal-holiday-tag">${holidayName}</span>` : ''}
-      `;
-      cell.appendChild(dateHeader);
+      const dateTracks = {};
+      calendarDates.forEach(d => {
+        if (d.dateStr) dateTracks[d.dateStr] = [];
+      });
 
-      if (dateStr) {
-        const barContainer = document.createElement("div");
-        barContainer.className = "gantt-bar-container";
+      activeSchedules.forEach(s => {
+        let slot = 0;
+        while (true) {
+          let conflict = false;
+          for (const d of calendarDates) {
+            if (d.dateStr && d.dateStr >= s.startDate && d.dateStr <= s.endDate) {
+              if (dateTracks[d.dateStr][slot]) {
+                conflict = true;
+                break;
+              }
+            }
+          }
+          if (!conflict) break;
+          slot++;
+        }
 
-        // Find schedules overlapping this date
-        const matchingSchedules = appState.schedules.filter(s => {
-          return dateStr >= s.startDate && dateStr <= s.endDate;
-        });
+        for (const d of calendarDates) {
+          if (d.dateStr && d.dateStr >= s.startDate && d.dateStr <= s.endDate) {
+            dateTracks[d.dateStr][slot] = s;
+          }
+        }
+      });
 
-        matchingSchedules.forEach(s => {
-          const bar = document.createElement("div");
-          bar.className = "gantt-item";
-          bar.style.backgroundColor = s.color || "#475569";
-          bar.textContent = s.name;
-          bar.title = `${s.name} (${s.startDate} ~ ${s.endDate})`;
-          
+      // Render cells with seamless Gantt bar lines
+      calendarDates.forEach(d => {
+        const cell = document.createElement("div");
+        cell.className = `cal-cell ${d.isOtherMonth ? 'other-month' : ''} ${d.isToday ? 'today' : ''} ${d.isSun ? 'sun' : ''} ${d.isSat ? 'sat' : ''}`;
+
+        const dateHeader = document.createElement("div");
+        dateHeader.className = "cal-date-num";
+        dateHeader.innerHTML = `
+          <span>${d.num}</span>
+          ${d.holidayName ? `<span class="cal-holiday-tag">${d.holidayName}</span>` : ''}
+        `;
+        cell.appendChild(dateHeader);
+
+        if (d.dateStr) {
+          const barContainer = document.createElement("div");
+          barContainer.className = "gantt-bar-container";
+
+          const daySlotSchedules = dateTracks[d.dateStr] || [];
+          const maxSlots = daySlotSchedules.length;
+
+          for (let slot = 0; slot < maxSlots; slot++) {
+            const s = daySlotSchedules[slot];
+            if (!s) {
+              const empty = document.createElement("div");
+              empty.className = "gantt-item-placeholder";
+              barContainer.appendChild(empty);
+              continue;
+            }
+
+            const dayIndexInWeek = d.dayOfWeekIndex; // 0 = Mon, 6 = Sun
+            const isEventStart = (d.dateStr === s.startDate) || (dayIndexInWeek === 0);
+            const isEventEnd = (d.dateStr === s.endDate) || (dayIndexInWeek === 6);
+
+            const bar = document.createElement("div");
+            bar.className = `gantt-item ${isEventStart ? 'is-start' : ''} ${isEventEnd ? 'is-end' : ''}`;
+            bar.style.backgroundColor = s.color || "#475569";
+
+            if (isEventStart || d.dateStr === s.startDate) {
+              bar.textContent = s.name;
+            } else {
+              bar.textContent = "";
+            }
+
+            bar.title = `${s.name} (${s.startDate} ~ ${s.endDate})`;
+
+            if (appState.isAdmin) {
+              bar.style.cursor = "pointer";
+              bar.onclick = (e) => {
+                e.stopPropagation();
+                openEditScheduleModal(s);
+              };
+            }
+
+            barContainer.appendChild(bar);
+          }
+
+          cell.appendChild(barContainer);
+
           if (appState.isAdmin) {
-            bar.style.cursor = "pointer";
-            bar.onclick = (e) => {
-              e.stopPropagation();
-              openEditScheduleModal(s);
+            cell.onclick = () => {
+              openAddScheduleModal(d.dateStr);
             };
           }
-          barContainer.appendChild(bar);
-        });
-
-        cell.appendChild(barContainer);
-
-        // Click cell in admin mode to add schedule for this date
-        if (appState.isAdmin) {
-          cell.onclick = () => {
-            openAddScheduleModal(dateStr);
-          };
         }
-      }
 
-      return cell;
+        grid.appendChild(cell);
+      });
     }
 
     // 4. Render Daily Construction Journal
     function renderJournal() {
       if (!appState.journals || appState.journals.length === 0) return;
 
-      const latest = appState.journals[0]; // Most recent journal
+      const latest = appState.journals[0];
       document.getElementById("journalDateTxt").textContent = latest.date;
       document.getElementById("journalDescTxt").textContent = latest.description;
       document.getElementById("historyCountTxt").textContent = appState.journals.length;
@@ -1359,7 +1491,14 @@
       }
     }
 
-    // Add/Edit Schedule
+    // Render Custom Color Select Options
+    function renderColorOptionsHtml(selectedHex = "") {
+      return appState.customColors.map(c => 
+        `<option value="${c.hex}" ${c.hex === selectedHex ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+      ).join('');
+    }
+
+    // Add/Edit Schedule Modal with Custom Color Creator
     function openAddScheduleModal(defaultDate = "") {
       const dateVal = typeof defaultDate === "string" ? defaultDate : "";
       const html = `
@@ -1378,25 +1517,32 @@
         <div class="form-group">
           <label class="form-label">간트차트 색상 선택</label>
           <select class="form-select" id="inputSchedColor">
-            <option value="#8b5cf6" selected>보라 (필름/가구)</option>
-            <option value="#a16207">갈색 (전기/설비)</option>
-            <option value="#0d9488">청록 (타일)</option>
-            <option value="#be185d">분홍 (도배)</option>
-            <option value="#ea580c">오렌지 (마루)</option>
-            <option value="#0284c7">파랑 (에어컨)</option>
-            <option value="#475569">슬레이트 (기타/청소)</option>
+            ${renderColorOptionsHtml("#0d9488")}
           </select>
         </div>
+        
+        <!-- Add New Custom Color Section -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:10px; margin-top:10px;">
+          <div style="font-size:0.8rem; font-weight:800; color:var(--primary-dark); margin-bottom:8px;">🎨 새 커스텀 색상 및 명칭 추가</div>
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <input type="color" id="newColorHex" value="#ec4899" style="width:40px; height:36px; border:none; background:none; cursor:pointer;" />
+            <input type="text" class="form-input" id="newColorName" placeholder="예: 목공 (우드)" style="flex:1;" />
+          </div>
+          <button type="button" class="btn-secondary" style="width:100%; padding:6px 0; font-size:0.8rem;" onclick="addNewCustomColor()">+ 색상 팔레트에 추가하기</button>
+        </div>
       `;
+
       openModal("새 공사 일정 추가", html, () => {
         const name = document.getElementById("inputSchedName").value.trim();
         const startDate = document.getElementById("inputSchedStart").value;
         const endDate = document.getElementById("inputSchedEnd").value;
         const color = document.getElementById("inputSchedColor").value;
+
         if (!name || !startDate || !endDate) {
           alert("공정명과 날짜를 입력해주세요.");
           return false;
         }
+
         appState.schedules.push({
           id: "s_" + Date.now(),
           name,
@@ -1404,9 +1550,29 @@
           endDate,
           color
         });
+
         saveState();
         return true;
       });
+    }
+
+    function addNewCustomColor() {
+      const hex = document.getElementById("newColorHex").value;
+      const name = document.getElementById("newColorName").value.trim();
+
+      if (!name) {
+        alert("색상 명칭을 입력해주세요.");
+        return;
+      }
+
+      appState.customColors.push({ name, hex });
+      saveState();
+
+      const select = document.getElementById("inputSchedColor");
+      if (select) {
+        select.innerHTML = renderColorOptionsHtml(hex);
+      }
+      alert(`'${name}' 색상이 추가되었습니다!`);
     }
 
     function openEditScheduleModal(s) {
@@ -1426,13 +1592,7 @@
         <div class="form-group">
           <label class="form-label">간트차트 색상</label>
           <select class="form-select" id="inputSchedColor">
-            <option value="#8b5cf6" ${s.color === '#8b5cf6' ? 'selected' : ''}>보라 (필름/가구)</option>
-            <option value="#a16207" ${s.color === '#a16207' ? 'selected' : ''}>갈색 (전기/설비)</option>
-            <option value="#0d9488" ${s.color === '#0d9488' ? 'selected' : ''}>청록 (타일)</option>
-            <option value="#be185d" ${s.color === '#be185d' ? 'selected' : ''}>분홍 (도배)</option>
-            <option value="#ea580c" ${s.color === '#ea580c' ? 'selected' : ''}>오렌지 (마루)</option>
-            <option value="#0284c7" ${s.color === '#0284c7' ? 'selected' : ''}>파랑 (에어컨)</option>
-            <option value="#475569" ${s.color === '#475569' ? 'selected' : ''}>슬레이트 (기타/청소)</option>
+            ${renderColorOptionsHtml(s.color)}
           </select>
         </div>
         <div style="margin-top:14px;">
@@ -1457,8 +1617,12 @@
       }
     }
 
-    // Add Journal
+    // Add Journal with Direct File Upload
+    let tempUploadedJournalPhotos = [];
+
     function openAddJournalModal() {
+      tempUploadedJournalPhotos = [];
+
       const html = `
         <div class="form-group">
           <label class="form-label">일보 날짜</label>
@@ -1473,15 +1637,20 @@
           <textarea class="form-textarea" id="inputJDesc" rows="4" placeholder="현장 작업 내용을 입력하세요..."></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">사진 추가 (이미지 URL 입력 또는 기본 이미지 사용)</label>
-          <input type="text" class="form-input" id="inputJPhoto" placeholder="https://example.com/photo.jpg (선택사항)" />
+          <label class="form-label">📷 현장 사진 업로드 (PC / 모바일 파일 선택)</label>
+          <div class="file-upload-box" onclick="document.getElementById('inputJPhotoFiles').click()">
+            <div class="file-upload-icon">📸</div>
+            <div class="file-upload-txt">클릭하여 사진 파일 여러 개 선택 (또는 드래그)</div>
+            <input type="file" id="inputJPhotoFiles" multiple accept="image/*" style="display:none;" onchange="handleJournalPhotoUpload(event)" />
+          </div>
+          <div id="journalUploadPreview" class="photo-grid" style="margin-top:10px;"></div>
         </div>
       `;
+
       openModal("새 공사일보 작성", html, () => {
         const date = document.getElementById("inputJDate").value;
         const tagsRaw = document.getElementById("inputJTags").value;
         const description = document.getElementById("inputJDesc").value.trim();
-        const photoUrl = document.getElementById("inputJPhoto").value.trim();
 
         if (!date || !description) {
           alert("날짜와 공사내용을 입력해주세요.");
@@ -1489,7 +1658,7 @@
         }
 
         const tags = tagsRaw.split(",").map(t => t.trim()).filter(t => t.length > 0);
-        const photos = photoUrl ? [photoUrl] : [
+        const photos = tempUploadedJournalPhotos.length > 0 ? tempUploadedJournalPhotos : [
           "https://indecompany2.mycafe24.com/images/img_visual_01.jpg",
           "https://indecompany2.mycafe24.com/images/img_visual_02.jpg"
         ];
@@ -1504,6 +1673,25 @@
 
         saveState();
         return true;
+      });
+    }
+
+    function handleJournalPhotoUpload(event) {
+      const files = Array.from(event.target.files);
+      const previewContainer = document.getElementById("journalUploadPreview");
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const dataUrl = e.target.result;
+          tempUploadedJournalPhotos.push(dataUrl);
+
+          const thumb = document.createElement("div");
+          thumb.className = "photo-thumb";
+          thumb.innerHTML = `<img src="${dataUrl}" alt="업로드 이미지" />`;
+          previewContainer.appendChild(thumb);
+        };
+        reader.readAsDataURL(file);
       });
     }
 
@@ -1534,54 +1722,80 @@
       openModal(`지난 일보 목록 (${appState.journals.length}건)`, html, () => true);
     }
 
-    // Add Document / Design Image
+    // Add Document / Design Image with Direct PC/Mobile File Upload
+    let selectedDocFile = null;
+
     function openAddDocModal() {
+      selectedDocFile = null;
+
       const html = `
         <div class="form-group">
           <label class="form-label">자료 유형 선택</label>
           <select class="form-select" id="inputDocCategory">
-            <option value="design">🖼️ 최종 시안 / 평면도 (이미지)</option>
-            <option value="file">📄 계약서 및 서류 (PDF / 문서)</option>
+            <option value="design">🖼️ 최종 시안 / 평면도 / 3D 렌더링 (이미지)</option>
+            <option value="file">📄 계약서 / 견적서 / 하자보증서 (문서/PDF)</option>
           </select>
         </div>
         <div class="form-group">
           <label class="form-label">자료/파일 명칭</label>
-          <input type="text" class="form-input" id="inputDocName" placeholder="예: 전기전멸도면.pdf" />
+          <input type="text" class="form-input" id="inputDocName" placeholder="예: 엑소디움 59평 전기도면.pdf" />
         </div>
         <div class="form-group">
-          <label class="form-label">이미지/파일 URL 경로 (또는 샘플 URL)</label>
-          <input type="text" class="form-input" id="inputDocUrl" placeholder="https://example.com/file.pdf" />
+          <label class="form-label">📁 파일 업로드 (PC / 모바일 선택)</label>
+          <div class="file-upload-box" onclick="document.getElementById('inputDocFile').click()">
+            <div class="file-upload-icon">📄</div>
+            <div class="file-upload-txt" id="docUploadStatusTxt">클릭하여 파일 선택 (이미지, PDF, 문서 등)</div>
+            <input type="file" id="inputDocFile" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.hwp" style="display:none;" onchange="handleDocFileUpload(event)" />
+          </div>
         </div>
       `;
-      openModal("현장 자료 업로드", html, () => {
-        const cat = document.getElementById("inputDocCategory").value;
-        const name = document.getElementById("inputDocName").value.trim();
-        let url = document.getElementById("inputDocUrl").value.trim();
 
-        if (!name) {
-          alert("명칭을 입력해주세요.");
+      openModal("현장 자료 직접 업로드", html, () => {
+        const cat = document.getElementById("inputDocCategory").value;
+        let name = document.getElementById("inputDocName").value.trim();
+
+        if (!selectedDocFile) {
+          alert("업로드할 파일을 선택해주세요.");
           return false;
         }
 
-        if (cat === "design") {
-          if (!url) url = "https://indecompany2.mycafe24.com/images/img_visual_03.jpg";
-          appState.designs.push({
-            id: "d_" + Date.now(),
-            title: name,
-            url
-          });
-        } else {
-          appState.documents.push({
-            id: "doc_" + Date.now(),
-            name,
-            type: name.toLowerCase().endsWith(".pdf") ? "pdf" : "image",
-            url: url || "#"
-          });
-        }
+        if (!name) name = selectedDocFile.name;
 
-        saveState();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const fileDataUrl = e.target.result;
+          if (cat === "design") {
+            appState.designs.push({
+              id: "d_" + Date.now(),
+              title: name,
+              url: fileDataUrl
+            });
+          } else {
+            appState.documents.push({
+              id: "doc_" + Date.now(),
+              name,
+              type: name.toLowerCase().endsWith(".pdf") ? "pdf" : "image",
+              url: fileDataUrl
+            });
+          }
+          saveState();
+        };
+        reader.readAsDataURL(selectedDocFile);
+
         return true;
       });
+    }
+
+    function handleDocFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        selectedDocFile = file;
+        document.getElementById("docUploadStatusTxt").textContent = `✅ 선택됨: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+        const nameInput = document.getElementById("inputDocName");
+        if (nameInput && !nameInput.value) {
+          nameInput.value = file.name;
+        }
+      }
     }
 
     function deleteDesignPhoto(id) {
