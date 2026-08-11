@@ -1873,6 +1873,12 @@
       });
     }
 
+    function openEditScheduleModalById(sId) {
+      const s = appState.schedules.find(item => item.id === sId);
+      if (!s) return;
+      openEditScheduleModal(s);
+    }
+
     // Day Details Popup Modal
     function openDayDetailsModal(dateStr, dayNum, schedules) {
       const activeSchedules = schedules.filter(Boolean);
@@ -1886,25 +1892,24 @@
         html += `<div style="display:flex; flex-direction:column; gap:10px;">`;
         activeSchedules.forEach(s => {
           html += `
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#f8fafc; border-left:5px solid ${s.color}; border-radius:10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#f8fafc; border-left:5px solid ${s.color}; border-radius:10px; cursor:pointer;" onclick="closeModal(true); openEditScheduleModalById('${s.id}');">
               <div>
                 <div style="font-size:0.95rem; font-weight:800; color:var(--text-main);">${escapeHtml(s.name)}</div>
                 <div style="font-size:0.78rem; color:#718096; margin-top:2px;">📅 ${s.startDate} ~ ${s.endDate}</div>
               </div>
-              ${appState.isAdmin ? `<button class="btn-edit-section" onclick="event.stopPropagation(); closeModal(true); openEditScheduleModal(s);">수정</button>` : ''}
+              <button class="btn-edit-section" style="cursor:pointer;" onclick="event.stopPropagation(); closeModal(true); openEditScheduleModalById('${s.id}');">✏️ 일정/색상 수정</button>
             </div>
           `;
         });
         html += `</div>`;
       }
 
-      if (appState.isAdmin) {
-        html += `
-          <div style="margin-top:16px;">
-            <button class="btn-primary" style="width:100%; padding:10px 0;" onclick="closeModal(true); openAddScheduleModal('${dateStr}');">+ 이 날짜에 새 일정 추가</button>
-          </div>
-        `;
-      }
+      html += `
+        <div style="margin-top:16px; display:flex; gap:8px;">
+          <button class="btn-primary" style="flex:1; padding:10px 0;" onclick="closeModal(true); openAddScheduleModal('${dateStr}');">+ 이 날짜에 새 일정 추가</button>
+          <button class="btn-secondary" style="padding:10px 16px;" onclick="closeModal(true);">닫기</button>
+        </div>
+      `;
       html += `</div>`;
 
       openModal(`${currentYear}년 ${currentMonth}월 ${dayNum}일 공정 상세`, html, () => true);
