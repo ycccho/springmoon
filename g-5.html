@@ -580,8 +580,7 @@
       position: relative;
       z-index: 1;
       box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08);
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow: visible !important;
     }
 
     .gantt-item.is-start {
@@ -589,19 +588,23 @@
       border-bottom-left-radius: 6px;
       margin-left: 2px;
       padding-left: 5px;
-      z-index: 3;
+      z-index: 5;
     }
 
     .gantt-item.is-start > .bar-txt-label {
       position: absolute;
-      left: 5px;
+      left: 4px;
       top: 0;
       height: 100%;
       display: flex;
       align-items: center;
       white-space: nowrap;
-      z-index: 5;
+      z-index: 10;
       pointer-events: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 700;
+      color: #ffffff;
     }
 
     .gantt-item.is-end {
@@ -1850,9 +1853,24 @@
             bar.style.backgroundColor = s.color || "#475569";
 
             if (isEventStart || d.dateStr === s.startDate) {
+              let spanDaysInRow = 1;
+              const dCur = new Date(d.dateStr);
+              const totalRemainingWeek = 7 - dayIndexInWeek;
+              for (let step = 1; step < totalRemainingWeek; step++) {
+                const dNext = new Date(dCur);
+                dNext.setDate(dNext.getDate() + step);
+                const nextStr = dNext.getFullYear() + '-' + String(dNext.getMonth() + 1).padStart(2, '0') + '-' + String(dNext.getDate()).padStart(2, '0');
+                if (nextStr <= s.endDate) {
+                  spanDaysInRow++;
+                } else {
+                  break;
+                }
+              }
+
               const labelSpan = document.createElement("span");
               labelSpan.className = "bar-txt-label";
               labelSpan.textContent = s.name;
+              labelSpan.style.maxWidth = `calc(${spanDaysInRow * 100}% + ${(spanDaysInRow - 1) * 2}px)`;
               bar.appendChild(labelSpan);
             }
 
