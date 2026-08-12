@@ -148,12 +148,12 @@
   <div class="bg-gradient-to-r from-slate-900 via-teal-950/40 to-slate-900 border-b border-teal-500/20 px-4 py-3">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm">
       <div class="flex items-center space-x-2 text-teal-300">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-base flex-shrink-0"></i>
-        <span><strong>원고 반영 완료:</strong> 요청하신 예시 원고 전문(네이버 블로그 및 홈페이지 저널)이 100% 보존·반영되었습니다.</span>
+        <i class="fa-solid fa-arrows-up-down-left-right text-emerald-400 text-base flex-shrink-0"></i>
+        <span><strong>양쪽 동시 동기화 스크롤 적용:</strong> '동시 비교 View'에서 어느 한쪽 원고를 스크롤하면 두 원고가 동일한 위치로 함께 움직입니다.</span>
       </div>
       <div class="flex items-center space-x-2 text-slate-400 text-xs flex-shrink-0">
         <span class="inline-flex items-center gap-1 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700">
-          <i class="fa-solid fa-camera text-slate-300"></i> 사진 4컷 매칭 완료
+          <i class="fa-solid fa-link text-emerald-400"></i> 동기화 스크롤
         </span>
       </div>
     </div>
@@ -177,7 +177,7 @@
         </button>
         <button id="tab-btn-split" onclick="switchTab('split')" class="hidden md:inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-medium text-slate-400 hover:text-white transition-all">
           <i class="fa-solid fa-columns"></i>
-          📑 양쪽 동시 비교 View
+          📑 양쪽 동시 비교 View (동기화 스크롤)
         </button>
       </div>
 
@@ -647,30 +647,38 @@
 
 
     <!-- =================================================================================== -->
-    <!-- TAB SPLIT: SIDE BY SIDE COMPARISON VIEW -->
+    <!-- TAB SPLIT: SIDE BY SIDE SYNCHRONIZED COMPARISON VIEW -->
     <!-- =================================================================================== -->
     <div id="view-tab-split" class="tab-content hidden">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        <!-- Left: Naver Blog Mini Container -->
-        <div class="bg-white text-slate-900 rounded-2xl p-6 border-t-8 border-t-naver shadow-2xl overflow-y-auto max-h-[85vh]">
-          <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-            <span class="font-bold text-emerald-600 text-sm">🟢 [출력 1] 네이버 블로그 원고</span>
-            <button onclick="copyManuscript(1)" class="text-xs text-emerald-600 hover:underline">복사하기</button>
+        <!-- Left: Naver Blog Synchronized Container -->
+        <div id="split-left-col" class="bg-white text-slate-900 rounded-2xl p-6 border-t-8 border-t-naver shadow-2xl overflow-y-auto max-h-[80vh] relative">
+          <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-200 pb-3 mb-4 flex items-center justify-between z-10">
+            <span class="font-bold text-emerald-600 text-sm flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 🟢 [출력 1] 네이버 블로그 원고
+            </span>
+            <button onclick="copyManuscript(1)" class="text-xs text-emerald-600 hover:text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
+              복사하기
+            </button>
           </div>
           <div id="split-naver-target">
-            <!-- Rendered dynamically or mirrors Tab 1 content -->
+            <!-- Rendered dynamically -->
           </div>
         </div>
 
-        <!-- Right: Journal Mini Container -->
-        <div class="bg-white text-slate-900 rounded-2xl p-6 border border-slate-200 shadow-2xl overflow-y-auto max-h-[85vh]">
-          <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-            <span class="font-bold text-sky-600 text-sm">🌐 [출력 2] 홈페이지/저널 원고</span>
-            <button onclick="copyManuscript(2)" class="text-xs text-sky-600 hover:underline">복사하기</button>
+        <!-- Right: Journal Synchronized Container -->
+        <div id="split-right-col" class="bg-white text-slate-900 rounded-2xl p-6 border-t-8 border-t-sky-500 shadow-2xl overflow-y-auto max-h-[80vh] relative">
+          <div class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-200 pb-3 mb-4 flex items-center justify-between z-10">
+            <span class="font-bold text-sky-600 text-sm flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> 🌐 [출력 2] 홈페이지/저널 원고
+            </span>
+            <button onclick="copyManuscript(2)" class="text-xs text-sky-600 hover:text-sky-700 font-semibold bg-sky-50 px-2.5 py-1 rounded border border-sky-200">
+              복사하기
+            </button>
           </div>
           <div id="split-journal-target">
-            <!-- Rendered dynamically or mirrors Tab 2 content -->
+            <!-- Rendered dynamically -->
           </div>
         </div>
 
@@ -848,6 +856,46 @@
       
       t1.appendChild(naverSrc);
       t2.appendChild(journalSrc);
+
+      setupSynchronizedScroll();
+    }
+
+    function setupSynchronizedScroll() {
+      const leftCol = document.getElementById('split-left-col');
+      const rightCol = document.getElementById('split-right-col');
+
+      if (!leftCol || !rightCol) return;
+
+      let isSyncingLeft = false;
+      let isSyncingRight = false;
+
+      leftCol.onscroll = () => {
+        if (isSyncingLeft) {
+          isSyncingLeft = false;
+          return;
+        }
+        isSyncingRight = true;
+        const maxLeft = leftCol.scrollHeight - leftCol.clientHeight;
+        const maxRight = rightCol.scrollHeight - rightCol.clientHeight;
+        if (maxLeft > 0) {
+          const ratio = leftCol.scrollTop / maxLeft;
+          rightCol.scrollTop = ratio * maxRight;
+        }
+      };
+
+      rightCol.onscroll = () => {
+        if (isSyncingRight) {
+          isSyncingRight = false;
+          return;
+        }
+        isSyncingLeft = true;
+        const maxLeft = leftCol.scrollHeight - leftCol.clientHeight;
+        const maxRight = rightCol.scrollHeight - rightCol.clientHeight;
+        if (maxRight > 0) {
+          const ratio = rightCol.scrollTop / maxRight;
+          leftCol.scrollTop = ratio * maxLeft;
+        }
+      };
     }
 
     function copyManuscript(num) {
