@@ -1590,17 +1590,40 @@
                   </div>
                 </div>
 
-                <button id="keyword-combine-btn" class="w-full mt-8 bg-indigo-600 hover:bg-indigo-700 dark-mode:hover:bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">🔄 선택한 조건으로 조합하기</button>
-                <button id="keyword-combine-comma-btn" class="w-full mt-3 bg-teal-600 hover:bg-teal-700 dark-mode:hover:bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-teal-200 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">🔗 콤마(,) 조합하기</button>
+                <!-- Live Combination Count Notice Bar -->
+                <div id="keyword-estimated-box" class="mt-6 bg-slate-50 dark-mode:bg-gray-750 p-4 rounded-xl border border-slate-200 dark-mode:border-slate-600 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="text-base">📊</span>
+                    <div>
+                      <span class="font-bold text-slate-700 dark-mode:text-slate-200">예상 조합 결과 수: </span>
+                      <span id="keyword-estimated-count" class="font-extrabold text-indigo-600 dark-mode:text-indigo-400 text-sm">0개</span>
+                    </div>
+                  </div>
+                  <div id="keyword-large-warning" class="hidden text-amber-600 dark-mode:text-amber-400 font-bold text-[11px] flex items-center gap-1">
+                    ⚠️ 대량 조합 (메모장 TXT 다운로드 권장)
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                  <button id="keyword-combine-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 dark-mode:hover:bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">🔄 선택한 조건으로 조합하기</button>
+                  <button id="keyword-combine-comma-btn" class="w-full bg-teal-600 hover:bg-teal-700 dark-mode:hover:bg-teal-600 text-white font-bold py-3.5 rounded-xl shadow-md shadow-teal-200 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">🔗 콤마(,) 조합하기</button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <button id="keyword-download-txt-btn" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.98]">📄 메모장(.txt)으로 다운로드</button>
+                  <button id="keyword-download-csv-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.98]">📊 엑셀(.csv)로 다운로드</button>
+                </div>
               </div>
             </div>
 
             <div class="xl:col-span-1 flex flex-col gap-3 h-full">
               <div class="flex items-center justify-between px-1">
                 <label class="font-bold flex items-center gap-2 text-slate-700 dark-mode:text-slate-200 text-sm">📝 조합 결과 <span id="keyword-result-count" class="bg-indigo-100 dark-mode:bg-indigo-900 text-indigo-700 dark-mode:text-indigo-300 text-[10px] px-2 py-0.5 rounded-full">0</span></label>
-                <button id="keyword-copy-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark-mode:bg-gray-800 text-slate-700 dark-mode:text-slate-300 border border-slate-200 dark-mode:border-slate-600 hover:bg-slate-50 dark-mode:hover:bg-gray-700 disabled:opacity-50">📋 복사</button>
+                <div class="flex items-center gap-2">
+                  <button id="keyword-copy-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark-mode:bg-gray-800 text-slate-700 dark-mode:text-slate-300 border border-slate-200 dark-mode:border-slate-600 hover:bg-slate-50 dark-mode:hover:bg-gray-700 disabled:opacity-50">📋 복사</button>
+                </div>
               </div>
-              <textarea id="keyword-output" readonly class="w-full flex-grow min-h-[500px] xl:min-h-0 xl:h-[calc(100vh-280px)] p-4 rounded-2xl border border-slate-200 dark-mode:border-slate-600 bg-white dark-mode:bg-gray-800 font-mono text-[13px] leading-relaxed focus:outline-none resize-none shadow-inner text-slate-800 dark-mode:text-slate-100" placeholder="조합 결과가 여기에 표시됩니다."></textarea>
+              <textarea id="keyword-output" readonly class="w-full flex-grow min-h-[500px] xl:min-h-0 xl:h-[calc(100vh-280px)] p-4 rounded-2xl border border-slate-200 dark-mode:border-slate-600 bg-white dark-mode:bg-gray-800 font-mono text-[13px] leading-relaxed focus:outline-none resize-none shadow-inner text-slate-800 dark-mode:text-slate-100" placeholder="조합 결과가 여기에 표시됩니다. 대량 키워드의 경우 상단 [메모장(.txt)으로 다운로드] 버튼을 이용해 주세요."></textarea>
             </div>
           </div>
 
@@ -3043,6 +3066,7 @@
       document.querySelectorAll('.keyword-input').forEach(input => {
         input.addEventListener('input', (e) => {
           keywordState.inputs[e.target.dataset.group] = e.target.value;
+          updateKeywordEstimate();
         });
       });
 
@@ -3050,6 +3074,7 @@
       document.querySelectorAll('.keyword-comb').forEach(checkbox => {
         checkbox.addEventListener('change', (e) => {
           keywordState.combOptions[e.target.dataset.comb] = e.target.checked;
+          updateKeywordEstimate();
         });
       });
 
@@ -3081,6 +3106,13 @@
       const combineCommaBtn = document.getElementById('keyword-combine-comma-btn');
       if (combineCommaBtn) combineCommaBtn.addEventListener('click', () => combineKeywords(true));
 
+      // 파일 다운로드 버튼
+      const downloadTxtBtn = document.getElementById('keyword-download-txt-btn');
+      if (downloadTxtBtn) downloadTxtBtn.addEventListener('click', () => downloadKeywordFile('txt', false));
+
+      const downloadCsvBtn = document.getElementById('keyword-download-csv-btn');
+      if (downloadCsvBtn) downloadCsvBtn.addEventListener('click', () => downloadKeywordFile('csv', false));
+
       // 복사 버튼
       const copyBtn = document.getElementById('keyword-copy-btn');
       if (copyBtn) {
@@ -3094,58 +3126,190 @@
           });
         });
       }
+
+      updateKeywordEstimate();
     }
 
-    function combineKeywords(useComma = false) {
-      const lists = {
+    function formatKoreanCount(num) {
+      if (num === 0) return '0개';
+      if (num < 10000) return `${num.toLocaleString()}개`;
+      const euk = Math.floor(num / 100000000);
+      const man = Math.floor((num % 100000000) / 10000);
+      let str = `${num.toLocaleString()}개`;
+      let kor = '(';
+      if (euk > 0) kor += `${euk}억 `;
+      if (man > 0) kor += `${man.toLocaleString()}만 `;
+      kor = kor.trim() + '개)';
+      return `${str} ${kor}`;
+    }
+
+    function getParsedLists() {
+      return {
         1: keywordState.inputs[1].split('\n').map(s => s.trim()).filter(s => s !== ''),
         2: keywordState.inputs[2].split('\n').map(s => s.trim()).filter(s => s !== ''),
         3: keywordState.inputs[3].split('\n').map(s => s.trim()).filter(s => s !== ''),
         4: keywordState.inputs[4].split('\n').map(s => s.trim()).filter(s => s !== '')
       };
+    }
 
-      const separator = keywordState.settings.useSpace ? ' ' : '';
-      let results = [];
-
-      const getCombinations = (ids) => {
-        if (ids.some(id => lists[id].length === 0)) return [];
-        let temp = lists[ids[0]];
-        for (let i = 1; i < ids.length; i++) {
-          let next = [];
-          temp.forEach(current => {
-            lists[ids[i]].forEach(item => {
-              next.push(`${current}${separator}${item}`);
-            });
-          });
-          temp = next;
-        }
-        return temp;
+    function calculateTotalCount() {
+      const lists = getParsedLists();
+      const l = {
+        1: lists[1].length,
+        2: lists[2].length,
+        3: lists[3].length,
+        4: lists[4].length
       };
 
-      if (keywordState.combOptions.c12) results.push(...getCombinations([1, 2]));
-      if (keywordState.combOptions.c13) results.push(...getCombinations([1, 3]));
-      if (keywordState.combOptions.c14) results.push(...getCombinations([1, 4]));
-      if (keywordState.combOptions.c23) results.push(...getCombinations([2, 3]));
-      if (keywordState.combOptions.c24) results.push(...getCombinations([2, 4]));
-      if (keywordState.combOptions.c34) results.push(...getCombinations([3, 4]));
-      if (keywordState.combOptions.c123) results.push(...getCombinations([1, 2, 3]));
-      if (keywordState.combOptions.c124) results.push(...getCombinations([1, 2, 4]));
-      if (keywordState.combOptions.c134) results.push(...getCombinations([1, 3, 4]));
-      if (keywordState.combOptions.c234) results.push(...getCombinations([2, 3, 4]));
-      if (keywordState.combOptions.c1234) results.push(...getCombinations([1, 2, 3, 4]));
+      let total = 0;
+      const opts = keywordState.combOptions;
 
-      let finalResults = [...new Set(results)];
+      if (opts.c12 && l[1] && l[2]) total += l[1] * l[2];
+      if (opts.c13 && l[1] && l[3]) total += l[1] * l[3];
+      if (opts.c14 && l[1] && l[4]) total += l[1] * l[4];
+      if (opts.c23 && l[2] && l[3]) total += l[2] * l[3];
+      if (opts.c24 && l[2] && l[4]) total += l[2] * l[4];
+      if (opts.c34 && l[3] && l[4]) total += l[3] * l[4];
 
-      if (keywordState.settings.matchType === 'exact') {
-        finalResults = finalResults.map(kw => `[${kw}]`);
-      } else if (keywordState.settings.matchType === 'phrase') {
-        finalResults = finalResults.map(kw => `"${kw}"`);
+      if (opts.c123 && l[1] && l[2] && l[3]) total += l[1] * l[2] * l[3];
+      if (opts.c124 && l[1] && l[2] && l[4]) total += l[1] * l[2] * l[4];
+      if (opts.c134 && l[1] && l[3] && l[4]) total += l[1] * l[3] * l[4];
+      if (opts.c234 && l[2] && l[3] && l[4]) total += l[2] * l[3] * l[4];
+
+      if (opts.c1234 && l[1] && l[2] && l[3] && l[4]) total += l[1] * l[2] * l[3] * l[4];
+
+      return total;
+    }
+
+    function updateKeywordEstimate() {
+      const countEl = document.getElementById('keyword-estimated-count');
+      const warnEl = document.getElementById('keyword-large-warning');
+      const total = calculateTotalCount();
+
+      if (countEl) {
+        countEl.textContent = formatKoreanCount(total);
+      }
+      if (warnEl) {
+        if (total > 50000) {
+          warnEl.classList.remove('hidden');
+        } else {
+          warnEl.classList.add('hidden');
+        }
+      }
+    }
+
+    function generateCombinationsGenerator(limit = 0) {
+      const lists = getParsedLists();
+      const separator = keywordState.settings.useSpace ? ' ' : '';
+      const opts = keywordState.combOptions;
+      const matchType = keywordState.settings.matchType;
+
+      const cases = [];
+      if (opts.c12 && lists[1].length && lists[2].length) cases.push([1, 2]);
+      if (opts.c13 && lists[1].length && lists[3].length) cases.push([1, 3]);
+      if (opts.c14 && lists[1].length && lists[4].length) cases.push([1, 4]);
+      if (opts.c23 && lists[2].length && lists[3].length) cases.push([2, 3]);
+      if (opts.c24 && lists[2].length && lists[4].length) cases.push([2, 4]);
+      if (opts.c34 && lists[3].length && lists[4].length) cases.push([3, 4]);
+
+      if (opts.c123 && lists[1].length && lists[2].length && lists[3].length) cases.push([1, 2, 3]);
+      if (opts.c124 && lists[1].length && lists[2].length && lists[4].length) cases.push([1, 2, 4]);
+      if (opts.c134 && lists[1].length && lists[3].length && lists[4].length) cases.push([1, 3, 4]);
+      if (opts.c234 && lists[2].length && lists[3].length && lists[4].length) cases.push([2, 3, 4]);
+
+      if (opts.c1234 && lists[1].length && lists[2].length && lists[3].length && lists[4].length) cases.push([1, 2, 3, 4]);
+
+      let count = 0;
+      const results = [];
+
+      function applyMatch(kw) {
+        if (matchType === 'exact') return `[${kw}]`;
+        if (matchType === 'phrase') return `"${kw}"`;
+        return kw;
       }
 
-      const output = finalResults.join(useComma ? ', ' : '\n');
-      document.getElementById('keyword-output').value = output;
-      document.getElementById('keyword-result-count').textContent = finalResults.length;
-      keywordState.output = output;
+      function combineGroupRecursive(ids, index, currentStr) {
+        if (limit > 0 && count >= limit) return;
+
+        if (index === ids.length) {
+          results.push(applyMatch(currentStr));
+          count++;
+          return;
+        }
+
+        const groupItems = lists[ids[index]];
+        for (let i = 0; i < groupItems.length; i++) {
+          if (limit > 0 && count >= limit) break;
+          const nextStr = index === 0 ? groupItems[i] : `${currentStr}${separator}${groupItems[i]}`;
+          combineGroupRecursive(ids, index + 1, nextStr);
+        }
+      }
+
+      for (const groupIds of cases) {
+        if (limit > 0 && count >= limit) break;
+        combineGroupRecursive(groupIds, 0, '');
+      }
+
+      return results;
+    }
+
+    function combineKeywords(useComma = false) {
+      const totalEstimated = calculateTotalCount();
+
+      if (totalEstimated === 0) {
+        alert('조합할 키워드와 조합 조건을 확인해 주세요.');
+        return;
+      }
+
+      const outputEl = document.getElementById('keyword-output');
+      const countEl = document.getElementById('keyword-result-count');
+
+      // If total exceeds 50,000, cap preview at 10,000 to prevent browser freezing
+      const PREVIEW_LIMIT = 10000;
+      const isLarge = totalEstimated > 20000;
+
+      const results = generateCombinationsGenerator(isLarge ? PREVIEW_LIMIT : 0);
+      const uniqueResults = [...new Set(results)];
+
+      let outputText = uniqueResults.join(useComma ? ', ' : '\n');
+
+      if (isLarge) {
+        outputText += `\n\n--------------------------------------------------\n⚠️ [대량 조합 안내]\n총 예상 조합 수: ${totalEstimated.toLocaleString()}개 (${formatKoreanCount(totalEstimated)})\n\n브라우저 멈춤 및 메모리 부족 방지를 위해 결과창에는 상위 ${uniqueResults.length.toLocaleString()}개만 미리보기로 표시됩니다.\n\n전체 ${totalEstimated.toLocaleString()}개 키워드는 상단 [📄 메모장(.txt)으로 다운로드] 버튼을 클릭하시면 파일로 즉시 안전하게 수신하실 수 있습니다.\n--------------------------------------------------`;
+      }
+
+      if (outputEl) outputEl.value = outputText;
+      if (countEl) countEl.textContent = isLarge ? `${totalEstimated.toLocaleString()} (미리보기 ${uniqueResults.length.toLocaleString()})` : uniqueResults.length.toLocaleString();
+    }
+
+    function downloadKeywordFile(fileType = 'txt', useComma = false) {
+      const totalCount = calculateTotalCount();
+
+      if (totalCount === 0) {
+        alert('다운로드할 키워드가 없습니다. 키워드를 입력해 주세요.');
+        return;
+      }
+
+      // Generate results in safe batches
+      const batchLimit = 500000; // Cap single file generation at 500K for safety if mega-size
+      const results = generateCombinationsGenerator(Math.min(totalCount, batchLimit));
+      const uniqueResults = [...new Set(results)];
+
+      const separator = useComma ? ', ' : '\n';
+      const content = uniqueResults.join(separator);
+
+      const mimeType = fileType === 'csv' ? 'text/csv;charset=utf-8;' : 'text/plain;charset=utf-8;';
+      const ext = fileType === 'csv' ? 'csv' : 'txt';
+      const filename = `keyword_combination_${Date.now()}.${ext}`;
+
+      const blob = new Blob(['\uFEFF' + content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     // ============================================
