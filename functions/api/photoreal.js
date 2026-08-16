@@ -17,8 +17,8 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Determine API Key
-    const fallbackKey = atob("QVEuQWI4Uk42TDRHRnlHellTNmg1VXpQYTJ4aGtvVW9odlE0WkV2UUswNXhZNjZRZEFaZ0E=");
+    // Active Tier-1 Paid Key
+    const fallbackKey = atob("QVEuQWI4Uk42SzJLOTZWb2FTOVNSYlU5NWZPV21CYUJpZnp0ZnlidWhXbmJkM0RwSmpxelE=");
     let apiKey = clientApiKey || context.env?.GEMINI_API_KEY || fallbackKey;
 
     // Clean base64 image data
@@ -39,7 +39,7 @@ export async function onRequestPost(context) {
       customNotes = ''
     } = options;
 
-    // Master System Instruction for INDE RENDER v3.5
+    // Step 1: Vision analysis via Gemini 3.7 Flash
     const systemInstruction = `You are the specialized INDE RENDER Master Architectural AI.
 Analyze the attached SketchUp viewport capture / CAD perspective image and generate an exhaustive, production-grade JSON photoreal conversion prompt following the 6 absolute rules:
 1. STRUCTURE & CEILING APPARATUS LOCK (100%): Never add AC units where none exist in the reference. If AC exists, strictly preserve its exact position and type (1-way/2-way rectangular vs 4-way square). Do NOT move, add, or delete lighting fixtures (pendants, downlights, track rails).
@@ -59,7 +59,6 @@ User Selected Options:
 
 Return ONLY a valid JSON object matching the standard INDE RENDER schema.`;
 
-    // Step 1: Multimodal Vision Analysis via Gemini 3.7 Flash API
     const geminiVisionUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
     
     const analysisPayload = {
@@ -67,9 +66,7 @@ Return ONLY a valid JSON object matching the standard INDE RENDER schema.`;
         {
           role: "user",
           parts: [
-            {
-              text: systemInstruction + "\n\nAnalyze this image and output the complete JSON prompt."
-            },
+            { text: systemInstruction + "\n\nAnalyze this image and output the complete JSON prompt." },
             {
               inline_data: {
                 mime_type: mimeType,
@@ -93,7 +90,7 @@ Return ONLY a valid JSON object matching the standard INDE RENDER schema.`;
 
     if (!visionRes.ok) {
       const errText = await visionRes.text();
-      throw new Error(`Gemini Vision API 오류 (${visionRes.status}): ${errText}`);
+      throw new Error(`도면 분석 API 오류 (${visionRes.status}): ${errText}`);
     }
 
     const visionData = await visionRes.json();
@@ -106,69 +103,61 @@ Return ONLY a valid JSON object matching the standard INDE RENDER schema.`;
       promptJson = { raw: rawJsonText };
     }
 
-    // Step 2: High-Resolution Architectural Image Generation via Gemini 3.1 Flash Image API
+    // Step 2: High-Resolution Architectural Image-to-Image Generation via Gemini 3.1 Flash Image API
     let renderedImageBase64 = null;
     let renderStatus = 'prompt_only';
 
     const imageGenPrompt = `Masterpiece architectural interior photograph of the attached scene. ${promptJson.task || ''}
 DIRECTIVE: ${promptJson.directive || ''}
-CEILING: ${promptJson.materials?.ceiling || 'Gypsum plasterboard with micro-stipple texture and soft cove gradient wash.'}
-FIXTURES: ${promptJson.materials?.ceiling_fixtures || 'Physical 3D fixtures strictly anchored to reference position.'}
-MATERIALS: ${promptJson.materials?.walls || ''} ${promptJson.materials?.floor || ''} ${promptJson.materials?.furniture || ''}
-LIGHTING: ${promptJson.lighting?.color_temperature || ''} ${promptJson.lighting?.illuminance_level || ''}
-OPTICS: 24mm perspective-control tilt-shift lens, perfectly parallel verticals, f/8, ISO 100.
+CEILING & FIXTURES: ${promptJson.materials?.ceiling || 'Gypsum plasterboard with micro-stipple texture and soft cove gradient wash.'} ${promptJson.materials?.ceiling_fixtures || 'Physical 3D fixtures strictly anchored to reference position.'}
+MATERIALS & FINISHES: ${promptJson.materials?.walls || ''} ${promptJson.materials?.floor || ''} ${promptJson.materials?.furniture || ''}
+LIGHTING & ATMOSPHERE: ${promptJson.lighting?.color_temperature || ''} ${promptJson.lighting?.illuminance_level || ''}
+CAMERA & OPTICS: 24mm perspective-control tilt-shift lens, perfectly parallel verticals, f/8, ISO 100, zero distortion.
 NEGATIVE: sketch outlines, black contour lines, CAD wireframe edges, flat polygon shading, 3D render look, CGI, overexposed lighting, altered material finish.`;
 
-    try {
-      const imageApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const imagePayload = {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: imageGenPrompt
-              },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Data
-                }
+    const imageApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const imagePayload = {
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: imageGenPrompt },
+            {
+              inline_data: {
+                mime_type: mimeType,
+                data: base64Data
               }
-            ]
-          }
-        ]
-      };
-
-      const imageRes = await fetch(imageApiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(imagePayload)
-      });
-
-      if (imageRes.ok) {
-        const imgData = await imageRes.json();
-        const candidateParts = imgData.candidates?.[0]?.content?.parts || [];
-        for (const part of candidateParts) {
-          // Check both camelCase (inlineData) and snake_case (inline_data)
-          const inlineObj = part.inlineData || part.inline_data;
-          if (inlineObj && inlineObj.data) {
-            const outMime = inlineObj.mimeType || inlineObj.mime_type || 'image/jpeg';
-            renderedImageBase64 = `data:${outMime};base64,${inlineObj.data}`;
-            renderStatus = 'rendered';
-            break;
-          }
+            }
+          ]
         }
-      } else {
-        const imgErrText = await imageRes.text();
-        console.warn("Gemini 3.1 Flash Image API response:", imgErrText);
-        throw new Error(`이미지 렌더링 API 오류: ${imgErrText}`);
+      ]
+    };
+
+    const imageRes = await fetch(imageApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(imagePayload)
+    });
+
+    if (!imageRes.ok) {
+      const imgErrText = await imageRes.text();
+      throw new Error(`실사 이미지 생성 API 오류 (${imageRes.status}): ${imgErrText}`);
+    }
+
+    const imgData = await imageRes.json();
+    const candidateParts = imgData.candidates?.[0]?.content?.parts || [];
+    for (const part of candidateParts) {
+      const inlineObj = part.inlineData || part.inline_data;
+      if (inlineObj && inlineObj.data) {
+        const outMime = inlineObj.mimeType || inlineObj.mime_type || 'image/jpeg';
+        renderedImageBase64 = `data:${outMime};base64,${inlineObj.data}`;
+        renderStatus = 'rendered';
+        break;
       }
-    } catch (renderErr) {
-      console.warn("Image generation catch:", renderErr);
-      if (!renderedImageBase64) {
-        throw new Error(`실사 이미지 생성 중 오류: ${renderErr.message}`);
-      }
+    }
+
+    if (!renderedImageBase64) {
+      throw new Error('AI 모델에서 이미지 데이터를 수신하지 못했습니다. 다시 시도해 주세요.');
     }
 
     return new Response(JSON.stringify({
