@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "ui-inspector": {
+      "command": "node",
+      "args": ["C:/Users/whdyd/ui-inspector/servers/inspector-server.mjs"],
+      "env": {}
+    },
+    "meta-ads": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-meta-ads"],
+      "env": {
+        "META_AD_ACCOUNT_ID": "1147194969619413"
+      }
+    }
+  }
+}

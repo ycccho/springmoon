@@ -1,0 +1,76 @@
+{
+  "task": "Photograph this existing executive office interior as if it were built and shot on site. This is a photographic re-recording of the attached scene to remove CAD/SketchUp line artifacts while preserving exact geometry, materials, and lighting.",
+  "directive": "The attached image is the ground-truth reference of an already-built space. Preserve 100% of the geometry, spatial layout, furniture positions, and color palette. Eliminate all black 3D contour lines, sketch outlines, and flat polygon shading, replacing them with authentic architectural photography physics, realistic material micro-textures, and natural flambient lighting.",
+  "edit_scope": {
+    "change": "eliminate black sketch lines, wireframe contours, and CGI flatness; render tactile dark walnut woodgrain, supple black leather, matte grey porcelain tiles, ceiling drywall stipple texture, indirect LED cove gradient wash, 3D fan blades, and authentic camera optics",
+    "do_not_change": "geometry, architectural proportions, furniture layout and count, wall/door/window positions, camera viewpoint, perspective, and color palette"
+  },
+  "structure_lock": {
+    "camera_and_framing": "exact same camera position, eye level, viewing direction, field of view, vanishing point and crop as the attached image — unchanged",
+    "walls_and_openings": "exact dark walnut paneled rear wall, recessed illuminated niche, left window opening, and right glass partition — unchanged",
+    "ceiling_and_floor": "exact stepped cove ceiling with ceiling fan, recessed track lighting, and floor tile grid — unchanged",
+    "furniture_and_fixtures": "exact position, scale, and orientation of the executive desk, high-back chair, black leather sofa, two lounge armchairs, glass coffee table, and wall shelf — unchanged",
+    "lighting_fixture_layout": "exact ceiling cove LED wash, recessed spotlights, track heads, and warm linear LED strips inside the display shelves — unchanged",
+    "critical_details": [
+      "the horizontal dark Venetian blinds on the left window must remain closed/slanted as in the reference",
+      "the four circular wall clocks on the rear wall and their spacing must remain identical",
+      "the glass partition wall on the right must stay transparent with thin structural frames"
+    ]
+  },
+  "photographic_setup": {
+    "capture_intent": "commissioned commercial interior photography for an architectural publication",
+    "camera_body": "full-frame professional mirrorless, tripod-mounted and levelled",
+    "lens": "24mm perspective-control tilt-shift lens",
+    "perspective_control": "lens shift used to maintain perfectly parallel vertical lines, matching the 2-point perspective of the attached image",
+    "aperture": "f/8",
+    "iso": "100",
+    "exposure_technique": "flash-ambient blend (flambient): daylight ambient balanced with soft bounced fill, maintaining soft exterior window light without blowout",
+    "white_balance": "5000K neutral daylight balance with warm 3000K practical shelf lighting retained naturally",
+    "depth_of_field": "deep and crisp front to back — no shallow focus or artificial bokeh"
+  },
+  "lighting": {
+    "time_of_day": "bright diffused daytime with warm interior accent lighting",
+    "daylight": "soft diffused daylight filtering through the dark horizontal window blinds on the left",
+    "practicals": "recessed ceiling cove emits a smooth soft gradient down the ceiling; under-shelf warm LED strips cast a gentle luminous wash across the rear dark wood backing",
+    "shadow_behavior": "soft directional ambient shadows with clean contact shadows where sofa legs and desk base meet the floor",
+    "window_view": "diffused neutral daylight glow beyond the blinds without harsh overexposure"
+  },
+  "materials": {
+    "ceiling": "flat matte painted gypsum plasterboard with subtle micro-stipple paint texture, smooth ambient light gradient falloff, clean physical shadow gaps instead of drawn black outline edges",
+    "ceiling_fixtures": "recessed downlights with ultra-thin white/metallic bezels; contemporary 3-blade aerodynamic ceiling fan in satin white with 3D sculpted blades catching light; ceiling cassette AC unit with realistic physical louvers and vents; matte black extruded aluminum track rails with cylindrical spotlight heads",
+    "floor": "large-format 600x600 matte grey porcelain tiles, non-repeating subtle stone grain, thin muted grout lines, soft diffused floor sheen",
+    "walls": "dark espresso walnut architectural veneer panels, vertical non-repeating woodgrain, low-sheen satin finish, clean micro-groove joints instead of black sketch lines",
+    "furniture": "executive desk in matching dark walnut veneer; black full-grain leather sofa and armchairs with natural subtle leather grain and gentle micro-creases; clear tempered glass coffee table with brushed steel legs",
+    "window_blinds": "matte dark charcoal-brown horizontal aluminum/wood Venetian blinds, clean physical slats catching subtle raking light",
+    "glass_partition": "10mm clear architectural tempered glass, natural subtle edge reflections and flawless transparency"
+  },
+  "realism_layer": {
+    "surface_imperfection": "subtle non-repeating roughness variation, realistic low-sheen reflections across leather and wood surfaces, imperceptible dust and micro-texture on hard surfaces",
+    "edge_behavior": "replace all black SketchUp outline strokes with physical micro-radiused bevels that catch delicate specular edge highlights",
+    "optical_signature": "clean rectilinear lens rendering, subtle natural corner light falloff, zero fisheye distortion",
+    "lived_in_cues": "pristine executive office standard — natural physical weight to leather cushions, realistic slim laptop on desk with subtle screen reflection",
+    "grain": "negligible; ultra-clean base ISO 100 capture, no added digital noise or film grain"
+  },
+  "added_elements": [],
+  "color_grade": {
+    "profile": "neutral commercial architectural interior grade",
+    "contrast": "balanced moderate contrast, preserving rich dark wood tones without crushing deep shadows",
+    "saturation": "restrained and natural to the dark walnut, black leather, and warm 3000K LED lighting",
+    "highlight_rolloff": "smooth gradual rolloff at the ceiling cove and window edges",
+    "shadow_tone": "neutral dark brown-grey, free of artificial color tint"
+  },
+  "output": {
+    "aspect_ratio": "identical to the input image — do not crop, pad, extend, or recompose",
+    "resolution": "4K",
+    "framing_rule": "maintain exact framing and bounding crop of the reference image"
+  },
+  "negative_prompt": [
+    "sketch outlines", "black contour lines", "CAD wireframe edges", "cartoon edges", "visible edge profiles",
+    "3D model line overlay", "flat polygon shading", "flat 2D ceiling fan", "flat 2D ceiling cutout",
+    "flat 2D track light line", "3D render", "CGI", "architectural visualization", "V-Ray", "Enscape", "D5 Render",
+    "Lumion", "Unreal Engine", "plastic surfaces", "mirror-like floor reflections", "tiled repeating texture",
+    "heavy film grain", "shallow depth of field", "bokeh", "converging verticals", "fisheye distortion",
+    "added or moved furniture", "watermark", "text overlay"
+  ],
+  "final_check": "Confirm the output preserves the exact spatial geometry, furniture layout, dark wood finish, and lighting placement of the reference image while completely eliminating sketch outlines and reconstructing the ceiling photorealistically."
+}

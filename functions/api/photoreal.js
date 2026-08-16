@@ -17,7 +17,7 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Determine API Key (Client override -> Env var -> Default system key)
+    // Determine API Key
     const fallbackKey = atob("QVEuQWI4Uk42TDRHRnlHellTNmg1VXpQYTJ4aGtvVW9odlE0WkV2UUswNXhZNjZRZEFaZ0E=");
     let apiKey = clientApiKey || context.env?.GEMINI_API_KEY || fallbackKey;
 
@@ -39,8 +39,8 @@ export async function onRequestPost(context) {
       customNotes = ''
     } = options;
 
-    // Master System Instruction for PPOK_PHOTOREAL v3.4
-    const systemInstruction = `You are the specialized PPOK_PHOTOREAL v3.4 Master Architectural AI.
+    // Master System Instruction for INDE RENDER v3.5
+    const systemInstruction = `You are the specialized INDE RENDER Master Architectural AI.
 Analyze the attached SketchUp viewport capture / CAD perspective image and generate an exhaustive, production-grade JSON photoreal conversion prompt following the 6 absolute rules:
 1. STRUCTURE & CEILING APPARATUS LOCK (100%): Never add AC units where none exist in the reference. If AC exists, strictly preserve its exact position and type (1-way/2-way rectangular vs 4-way square). Do NOT move, add, or delete lighting fixtures (pendants, downlights, track rails).
 2. MATERIAL ANCHORING (100%): Strictly inherit all original material identities (wood species/tones like dark walnut or light oak, tile patterns, leather colors, paint) from the attached image without altering them. Upgrade ONLY their physical micro-roughness, open pores, weave relief, and edge bevel reflections.
@@ -57,7 +57,7 @@ User Selected Options:
 - Cross-Scene Sync: ${crossSceneSync}
 - Additional Custom Notes: ${customNotes || 'None'}
 
-Return ONLY a valid JSON object matching the standard PPOK_PHOTOREAL schema.`;
+Return ONLY a valid JSON object matching the standard INDE RENDER schema.`;
 
     // Step 1: Multimodal Vision Analysis via Gemini 3.7 Flash API
     const geminiVisionUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
@@ -150,8 +150,11 @@ NEGATIVE: sketch outlines, black contour lines, CAD wireframe edges, flat polygo
         const imgData = await imageRes.json();
         const candidateParts = imgData.candidates?.[0]?.content?.parts || [];
         for (const part of candidateParts) {
-          if (part.inline_data && part.inline_data.data) {
-            renderedImageBase64 = `data:${part.inline_data.mime_type || 'image/jpeg'};base64,${part.inline_data.data}`;
+          // Check both camelCase (inlineData) and snake_case (inline_data)
+          const inlineObj = part.inlineData || part.inline_data;
+          if (inlineObj && inlineObj.data) {
+            const outMime = inlineObj.mimeType || inlineObj.mime_type || 'image/jpeg';
+            renderedImageBase64 = `data:${outMime};base64,${inlineObj.data}`;
             renderStatus = 'rendered';
             break;
           }
@@ -159,9 +162,13 @@ NEGATIVE: sketch outlines, black contour lines, CAD wireframe edges, flat polygo
       } else {
         const imgErrText = await imageRes.text();
         console.warn("Gemini 3.1 Flash Image API response:", imgErrText);
+        throw new Error(`이미지 렌더링 API 오류: ${imgErrText}`);
       }
     } catch (renderErr) {
       console.warn("Image generation catch:", renderErr);
+      if (!renderedImageBase64) {
+        throw new Error(`실사 이미지 생성 중 오류: ${renderErr.message}`);
+      }
     }
 
     return new Response(JSON.stringify({

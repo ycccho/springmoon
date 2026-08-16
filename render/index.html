@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PPOK PHOTOREAL | 스케치업 → 실사 사진 변환기</title>
+  <title>INDE RENDER | 스케치업 → 실사 사진 변환기</title>
   <meta name="description" content="스케치업 캡처 및 CAD 뷰포트를 천장 설비와 기존 재질을 100% 고정한 채 최고급 실사 건축 사진으로 변환하는 전문 AI 렌더러">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -649,10 +649,10 @@
   <header>
     <div class="header-container">
       <a href="/" class="brand">
-        <div class="brand-logo">P</div>
+        <div class="brand-logo">I</div>
         <div>
-          <span class="brand-title">PPOK PHOTOREAL</span>
-          <span class="brand-badge">v3.4 Engine</span>
+          <span class="brand-title">INDE RENDER</span>
+          <span class="brand-badge">v3.5 Engine</span>
         </div>
       </a>
       <div class="header-actions">
@@ -684,7 +684,7 @@
 
       <!-- Smart Options -->
       <div class="card-title" style="margin-top: 8px;">
-        <span>⚙️ 실사화 옵션 설정</span>
+        <span>⚙️ INDE RENDER 실사화 옵션</span>
       </div>
 
       <div class="options-grid">
@@ -730,7 +730,7 @@
 
       <!-- Action Button -->
       <button class="btn-submit" id="btnSubmit">
-        <span>🚀 실사 렌더링 변환 시작</span>
+        <span>🚀 INDE RENDER 실사 변환 시작</span>
       </button>
     </div>
 
@@ -743,7 +743,7 @@
       <!-- Empty State -->
       <div class="empty-state" id="emptyState">
         <div class="empty-icon">🎨</div>
-        <p>왼쪽에서 스케치업 이미지를 업로드하고<br><strong>[실사 렌더링 변환 시작]</strong> 버튼을 누르세요.</p>
+        <p>왼쪽에서 스케치업 이미지를 업로드하고<br><strong>[INDE RENDER 실사 변환 시작]</strong> 버튼을 누르세요.</p>
       </div>
 
       <!-- Progress Box -->
@@ -757,7 +757,7 @@
         </div>
         <div class="progress-steps">
           <div class="progress-step" id="step1">⏳ 1단계: 스케치업 도면 및 천장 설비/조명 분석</div>
-          <div class="progress-step" id="step2">⏳ 2단계: PPOK_PHOTOREAL 6대 원칙 물리 프롬프트 조립</div>
+          <div class="progress-step" id="step2">⏳ 2단계: INDE RENDER 6대 원칙 물리 프롬프트 조립</div>
           <div class="progress-step" id="step3">⏳ 3단계: 초고화질 건축 사진 렌더링 및 디테일링</div>
         </div>
       </div>
@@ -777,7 +777,7 @@
         </div>
 
         <div class="result-actions">
-          <a href="#" class="btn-download" id="btnDownload" download="ppok_photoreal_render.jpg">
+          <a href="#" class="btn-download" id="btnDownload" download="inde_render_photoreal.jpg">
             💾 고화질 사진 다운로드
           </a>
           <button class="btn-secondary" id="btnViewPrompt">
@@ -792,7 +792,7 @@
   <div class="modal-overlay" id="promptModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 style="font-size: 1.05rem; font-weight: 700;">📋 PPOK_PHOTOREAL 생성 프롬프트 (JSON)</h3>
+        <h3 style="font-size: 1.05rem; font-weight: 700;">📋 INDE RENDER 생성 프롬프트 (JSON)</h3>
         <button class="btn-secondary" id="btnCloseModal" style="padding: 4px 8px;">✕</button>
       </div>
       <div class="modal-body">
@@ -815,7 +815,7 @@
         <p style="font-size: 0.85rem; color: var(--text-muted);">
           기본 서버 키를 사용하지 않고 본인의 개인 무료 API 키를 사용하시려면 입력해 주세요. (브라우저 로컬 저장)
         </p>
-        <input type="password" id="inputApiKey" class="text-input" placeholder="AIzaSy...">
+        <input type="password" id="inputApiKey" class="text-input" placeholder="AQ...">
       </div>
       <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
         <button class="btn-submit" id="btnSaveApiKey" style="padding: 8px 16px; font-size: 0.9rem;">저장</button>
@@ -959,8 +959,7 @@
       sliderWrapper.style.display = 'none';
       progressBox.style.display = 'flex';
 
-      // Step 1
-      updateProgress(25, '1단계: 스케치업 도면 및 천장 설비/조명 분석 중...', 1);
+      updateProgress(20, '1단계: 스케치업 도면 및 천장 설비/조명 분석 중...', 1);
 
       const options = {
         lockCeiling: document.getElementById('optLockCeiling').checked,
@@ -970,18 +969,16 @@
         customNotes: document.getElementById('optCustomNotes').value
       };
 
-      const savedApiKey = localStorage.getItem('ppok_gemini_api_key') || '';
+      const savedApiKey = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
 
       try {
-        // Step 2
-        setTimeout(() => {
-          updateProgress(55, '2단계: PPOK_PHOTOREAL 6대 원칙 물리 프롬프트 조립 중...', 2);
-        }, 1200);
+        const step2Timer = setTimeout(() => {
+          updateProgress(50, '2단계: INDE RENDER 6대 원칙 물리 프롬프트 조립 중...', 2);
+        }, 1500);
 
-        // Step 3
-        setTimeout(() => {
+        const step3Timer = setTimeout(() => {
           updateProgress(80, '3단계: 초고화질 건축 사진 렌더링 중...', 3);
-        }, 3000);
+        }, 3500);
 
         const response = await fetch('/api/photoreal', {
           method: 'POST',
@@ -994,14 +991,21 @@
           })
         });
 
+        clearTimeout(step2Timer);
+        clearTimeout(step3Timer);
+
         const resData = await response.json();
         if (!resData.success) {
           throw new Error(resData.error || '변환 중 오류가 발생했습니다.');
         }
 
-        updateProgress(100, '🎉 실사 변환 완료!', 3);
+        if (!resData.renderedImage) {
+          throw new Error('실사 이미지 생성 결과가 없습니다. 다시 시도해 주세요.');
+        }
+
+        updateProgress(100, '🎉 INDE RENDER 실사 변환 완료!', 3);
         currentJsonPrompt = resData.jsonPrompt;
-        currentRenderedBase64 = resData.renderedImage || currentOriginalBase64;
+        currentRenderedBase64 = resData.renderedImage;
 
         setTimeout(() => {
           progressBox.style.display = 'none';
@@ -1058,14 +1062,14 @@
     const apiKeyModal = document.getElementById('apiKeyModal');
     const inputApiKey = document.getElementById('inputApiKey');
     document.getElementById('btnApiKeyModal').addEventListener('click', () => {
-      inputApiKey.value = localStorage.getItem('ppok_gemini_api_key') || '';
+      inputApiKey.value = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
       apiKeyModal.style.display = 'flex';
     });
     document.getElementById('btnCloseApiKeyModal').addEventListener('click', () => {
       apiKeyModal.style.display = 'none';
     });
     document.getElementById('btnSaveApiKey').addEventListener('click', () => {
-      localStorage.setItem('ppok_gemini_api_key', inputApiKey.value.trim());
+      localStorage.setItem('inde_render_api_key', inputApiKey.value.trim());
       apiKeyModal.style.display = 'none';
       showToast('API 키가 저장되었습니다.');
     });
