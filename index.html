@@ -159,6 +159,7 @@
     // ============================================
     const PASSWORD = "2";
     const defaultMenus = [
+      { id: "place-rank-check", name: "플레이스순위체크", categoryId: "cat-rank", protected: true },
       { id: "total-statistics", name: "1. 전체 통계", categoryId: "cat-stats", protected: true },
       { id: "ad-dashboard", name: "2. 검색광고 통계", categoryId: "cat-stats", protected: true },
       { id: "place-statistics", name: "3. 플레이스 통계", categoryId: "cat-stats", protected: true },
@@ -523,6 +524,10 @@
         menus.push({ id: "ad-dashboard", name: "파워링크 분석", protected: true });
         changed = true;
       }
+      if (!menus.some(m => m.id === "place-rank-check")) {
+        menus.unshift({ id: "place-rank-check", name: "플레이스순위체크", categoryId: "cat-rank", protected: true });
+        changed = true;
+      }
       if (!menus.some(m => m.id === "competitor-blog")) {
         menus.push({ id: "competitor-blog", name: "7.경쟁 블로그 탐색", protected: true });
         changed = true;
@@ -570,6 +575,10 @@
       let cats = JSON.parse(localStorage.getItem("categories") || "[]");
       let changed = false;
       // Ensure cat-interior exists and default it to collapsed
+      if (!cats.some(c => c.id === "cat-rank")) {
+        cats.unshift({ id: "cat-rank", name: "순위확인", collapsed: false });
+        changed = true;
+      }
       if (!cats.some(c => c.id === "cat-interior")) {
         cats.push({ id: "cat-interior", name: "인테리어", collapsed: true });
         changed = true;
@@ -1096,6 +1105,7 @@
         setupKeywordScreenshot();
         setupBlogPostScreenshot();
         setupPopularPostsSearch();
+        setupPlaceRankCheck();
         setupDailyReport();
         setupAdDashboard();
         setupCompetitorBlog();
@@ -1112,6 +1122,7 @@
     }
 
     function getPanelHTML(id, name) {
+      if (id === "place-rank-check") return getPlaceRankCheckHTML();
       if (id === "webp") return getWebPHTML();
       if (id === "keyword") return getKeywordHTML();
       if (id === "keyword-search-count") return getKeywordSearchCountHTML();
@@ -14498,6 +14509,635 @@
         runNext();
       });
     }
+
+    
+    // ============================================
+    // 13: 네이버 플레이스 키워드 순위 체크 & 영구 기록 UI
+    // ============================================
+    function getPlaceRankCheckHTML() {
+      return `
+        <div class="max-w-7xl mx-auto space-y-6">
+          <!-- Main Header & Control Banner -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8 border border-gray-150 dark-mode:border-gray-700 space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-gray-150 dark-mode:border-gray-700 pb-5">
+              <div>
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-600 text-white shadow-sm">
+                    Place Rank Tracker
+                  </span>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-600 dark-mode:bg-blue-900/40 dark-mode:text-blue-300 border border-blue-200 dark-mode:border-blue-700">
+                    ⏰ 매일 아침 09:00 자동 추적
+                  </span>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-600 dark-mode:bg-emerald-900/40 dark-mode:text-emerald-300 border border-emerald-200 dark-mode:border-emerald-700">
+                    💾 영구 기록 보존
+                  </span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
+                  🏆 네이버 플레이스 순위 모니터링
+                </h1>
+                <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-1 font-medium leading-relaxed">
+                  네이버 검색에서 광고를 제외한 <strong>(주)인디컴퍼니</strong>의 실제 플레이스 순위를 매일 아침 09시에 측정하여 영구 누적 기록합니다.
+                </p>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-wrap items-center gap-2.5">
+                <button id="pr-refresh-btn" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-gray-750 dark-mode:text-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                  <span>🔄</span> 데이터 새로고침
+                </button>
+                <button id="pr-export-excel-btn" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 shadow-md">
+                  <span>📥</span> 엑셀 다운로드
+                </button>
+                <button id="pr-run-now-btn" class="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-lg transition-all flex items-center gap-1.5">
+                  <span id="pr-run-btn-icon">⚡</span>
+                  <span id="pr-run-btn-text">지금 즉시 순위 체크 (1회 실행)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Server Status & Last Update Info -->
+            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-500 dark-mode:text-gray-400 font-medium">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-1.5">
+                  <span id="pr-server-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span id="pr-server-status" class="font-bold text-gray-700 dark-mode:text-gray-300">로컬 백엔드 서버 연결됨</span>
+                </div>
+                <span class="text-gray-300 dark-mode:text-gray-600">|</span>
+                <div>
+                  마지막 측정 시각: <strong id="pr-last-run-time" class="font-mono text-gray-800 dark-mode:text-gray-200">-</strong>
+                </div>
+                <span class="text-gray-300 dark-mode:text-gray-600">|</span>
+                <div>
+                  누적 기록 수: <strong id="pr-total-records-count" class="font-mono text-orange-600 font-bold">0건</strong>
+                </div>
+              </div>
+              <div class="text-[11px] font-bold text-gray-400">
+                타겟 업체: <span class="text-orange-600 dark-mode:text-orange-400 font-extrabold">(주)인디컴퍼니</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top KPI Summary Cards (4 Keywords) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="pr-kpi-cards-container">
+            <!-- 4 Keyword cards will be dynamically rendered here -->
+            <div class="col-span-full py-10 text-center text-gray-400 bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-150 dark-mode:border-gray-700">
+              데이터를 불러오는 중입니다...
+            </div>
+          </div>
+
+          <!-- Trend Chart Section -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-150 dark-mode:border-gray-700 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-150 dark-mode:border-gray-700 pb-4">
+              <div>
+                <h2 class="text-lg font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
+                  📈 일자별 순위 변동 추이 (1위 가까울수록 상단)
+                </h2>
+                <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5 font-medium">
+                  키워드를 선택하여 일자별 순위 등락 그래프를 확인합니다.
+                </p>
+              </div>
+              <!-- Keyword Tabs -->
+              <div class="flex flex-wrap gap-1.5" id="pr-chart-tabs">
+                <button data-kw="부산사무실인테리어" class="pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-600 text-white shadow-sm">부산사무실인테리어</button>
+                <button data-kw="부산상가인테리어" class="pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300">부산상가인테리어</button>
+                <button data-kw="부산병원인테리어" class="pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300">부산병원인테리어</button>
+                <button data-kw="부산학원인테리어" class="pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300">부산학원인테리어</button>
+              </div>
+            </div>
+
+            <!-- Chart SVG Container -->
+            <div class="relative h-64 w-full bg-slate-50/50 dark-mode:bg-gray-900/40 rounded-xl p-4 border border-gray-100 dark-mode:border-gray-800" id="pr-trend-chart-container">
+              <div class="absolute inset-0 flex items-center justify-center text-xs text-gray-400 font-bold">차트 로딩 중...</div>
+            </div>
+          </div>
+
+          <!-- Permanent History Table Section -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-150 dark-mode:border-gray-700 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-150 dark-mode:border-gray-700 pb-4">
+              <div>
+                <h2 class="text-lg font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
+                  📋 일자별 순위 기록 히스토리 (영구 누적 보관)
+                </h2>
+                <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5 font-medium">
+                  매일 아침 기록된 모든 순위 데이터는 절대 유실되거나 덮어쓰이지 않고 안전하게 영구 저장됩니다.
+                </p>
+              </div>
+
+              <!-- Filters -->
+              <div class="flex items-center gap-2">
+                <select id="pr-table-filter-kw" class="px-3 py-1.5 text-xs font-bold bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-lg text-gray-800 dark-mode:text-gray-200">
+                  <option value="all">전체 키워드</option>
+                  <option value="부산사무실인테리어">부산사무실인테리어</option>
+                  <option value="부산상가인테리어">부산상가인테리어</option>
+                  <option value="부산병원인테리어">부산병원인테리어</option>
+                  <option value="부산학원인테리어">부산학원인테리어</option>
+                </select>
+                <input type="text" id="pr-table-search" placeholder="검색어 필터..." class="px-3 py-1.5 text-xs font-bold bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-lg text-gray-800 dark-mode:text-gray-200 w-36" />
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-gray-50 dark-mode:bg-gray-900/60 border-b border-gray-200 dark-mode:border-gray-700 text-gray-600 dark-mode:text-gray-300 font-extrabold uppercase tracking-wider">
+                    <th class="py-3 px-3 text-center w-24">측정일자</th>
+                    <th class="py-3 px-3 text-center w-20">시각</th>
+                    <th class="py-3 px-3 w-36">키워드</th>
+                    <th class="py-3 px-3 text-center w-28">순위 (광고제외)</th>
+                    <th class="py-3 px-3 text-center w-20">전일대비</th>
+                    <th class="py-3 px-3 w-48">확인된 등록 상호명</th>
+                    <th class="py-3 px-3">등록 주소지</th>
+                    <th class="py-3 px-3 w-36 text-center">네이버 플레이스</th>
+                  </tr>
+                </thead>
+                <tbody id="pr-history-tbody" class="divide-y divide-gray-100 dark-mode:divide-gray-700/60 text-gray-700 dark-mode:text-gray-300 font-medium">
+                  <tr>
+                    <td colspan="8" class="py-8 text-center text-gray-400">데이터 로딩 중...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Bottom Reference & Target Place Details Section -->
+          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8 border border-gray-150 dark-mode:border-gray-700 space-y-6">
+            <div class="border-b border-gray-150 dark-mode:border-gray-700 pb-4">
+              <h2 class="text-xl font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
+                🏢 순위 체크 대상 플레이스 정보 & 키워드 매핑 가이드
+              </h2>
+              <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-1 font-medium leading-relaxed">
+                어떤 네이버 플레이스 등록 정보가 어떤 키워드의 순위로 매칭되어 있는지 상세히 확인할 수 있도록 정리된 목록입니다.
+              </p>
+            </div>
+
+            <!-- 3 Branches Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Branch 1: 연산동 상가/사무실 -->
+              <div class="p-5 bg-orange-50/40 dark-mode:bg-orange-950/20 border border-orange-200/80 dark-mode:border-orange-900/40 rounded-xl space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-orange-600 text-white">사무실·상가 전문</span>
+                  <span class="text-[11px] font-bold text-orange-600 dark-mode:text-orange-400">📞 0507-1375-3683</span>
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-gray-900 dark-mode:text-white">인디컴퍼니 상가사무실인테리어</h3>
+                  <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5">부산광역시 연제구 과정로 78 3층</p>
+                </div>
+                <div class="pt-2 border-t border-orange-200/60 dark-mode:border-orange-900/30 text-xs space-y-1">
+                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 추적 키워드:</div>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded border border-orange-200 dark-mode:border-gray-700 text-[10px] font-bold text-orange-700 dark-mode:text-orange-300">부산사무실인테리어 (1위)</span>
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded border border-orange-200 dark-mode:border-gray-700 text-[10px] font-bold text-orange-700 dark-mode:text-orange-300">부산상가인테리어 (3위)</span>
+                  </div>
+                </div>
+                <a href="https://map.naver.com/p/search/%EB%B6%80%EC%82%B0%EC%82%AC%EB%AC%B4%EC%8B%A4%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black rounded-lg transition-all shadow-sm">
+                  네이버 지도에서 보기 ↗
+                </a>
+              </div>
+
+              <!-- Branch 2: 망미동 학원 -->
+              <div class="p-5 bg-blue-50/40 dark-mode:bg-blue-950/20 border border-blue-200/80 dark-mode:border-blue-900/40 rounded-xl space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-600 text-white">학원 인테리어 전문</span>
+                  <span class="text-[11px] font-bold text-blue-600 dark-mode:text-blue-400">📞 0507-1371-3683</span>
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-gray-900 dark-mode:text-white">학원인테리어 인디컴퍼니</h3>
+                  <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5">부산광역시 수영구 망미번영로88번길 26 301호</p>
+                </div>
+                <div class="pt-2 border-t border-blue-200/60 dark-mode:border-blue-900/30 text-xs space-y-1">
+                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 추적 키워드:</div>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded border border-blue-200 dark-mode:border-gray-700 text-[10px] font-bold text-blue-700 dark-mode:text-blue-300">부산학원인테리어 (1위)</span>
+                  </div>
+                </div>
+                <a href="https://map.naver.com/p/search/%EB%B6%80%EC%82%B0%ED%95%99%EC%9B%90%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-lg transition-all shadow-sm">
+                  네이버 지도에서 보기 ↗
+                </a>
+              </div>
+
+              <!-- Branch 3: 재송동 병원/본사 -->
+              <div class="p-5 bg-purple-50/40 dark-mode:bg-purple-950/20 border border-purple-200/80 dark-mode:border-purple-900/40 rounded-xl space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-600 text-white">병원·종합 인테리어</span>
+                  <span class="text-[11px] font-bold text-purple-600 dark-mode:text-purple-400">📞 0507-1321-0569</span>
+                </div>
+                <div>
+                  <h3 class="text-base font-black text-gray-900 dark-mode:text-white">인디컴퍼니 (본점)</h3>
+                  <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5">부산광역시 해운대구 해운대로81번길 24 3층 305호</p>
+                </div>
+                <div class="pt-2 border-t border-purple-200/60 dark-mode:border-purple-900/30 text-xs space-y-1">
+                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 추적 키워드:</div>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded border border-purple-200 dark-mode:border-gray-700 text-[10px] font-bold text-purple-700 dark-mode:text-purple-300">부산병원인테리어 (43위)</span>
+                  </div>
+                </div>
+                <a href="https://map.naver.com/p/search/%EB%B6%80%EC%82%B0%EB%B3%91%EC%9B%90%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-black rounded-lg transition-all shadow-sm">
+                  네이버 지도에서 보기 ↗
+                </a>
+              </div>
+            </div>
+
+            <!-- Top 5 Competitors Accordion/Table -->
+            <div class="pt-4 border-t border-gray-150 dark-mode:border-gray-700 space-y-3">
+              <h3 class="text-sm font-black text-gray-800 dark-mode:text-gray-200">
+                🔍 키워드별 최상위 경쟁사 TOP 5 현황
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="pr-competitors-breakdown">
+                <!-- Competitors will be inserted here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function setupPlaceRankCheck() {
+      let prHistoryData = [];
+      let prSummaryData = [];
+      let activeChartKw = "부산사무실인테리어";
+
+      const refreshBtn = document.getElementById("pr-refresh-btn");
+      const exportExcelBtn = document.getElementById("pr-export-excel-btn");
+      const runNowBtn = document.getElementById("pr-run-now-btn");
+      const filterKw = document.getElementById("pr-table-filter-kw");
+      const searchInput = document.getElementById("pr-table-search");
+
+      if (!refreshBtn || !runNowBtn) return;
+
+      // 1. Data Loader Function
+      async function loadPlaceRankData() {
+        const serverStatus = document.getElementById("pr-server-status");
+        const serverDot = document.getElementById("pr-server-dot");
+
+        try {
+          const url = getLocalServerUrl("/api/place-rank/history");
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          
+          const data = await res.json();
+          if (data.success) {
+            prHistoryData = data.history || [];
+            prSummaryData = data.summary || [];
+
+            if (serverStatus) serverStatus.textContent = "로컬 백엔드 서버 연결됨";
+            if (serverDot) serverDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+
+            const countEl = document.getElementById("pr-total-records-count");
+            if (countEl) countEl.textContent = `${prHistoryData.length}건`;
+
+            const lastRunEl = document.getElementById("pr-last-run-time");
+            if (lastRunEl && prHistoryData.length > 0) {
+              const latest = prHistoryData[0];
+              lastRunEl.textContent = `${latest.date} ${latest.time || ''}`;
+            }
+
+            renderKPICards(prSummaryData);
+            renderHistoryTable();
+            renderTrendChart(activeChartKw);
+            renderCompetitorsBreakdown(prSummaryData);
+          }
+        } catch (err) {
+          console.error("플레이스 순위 데이터 로드 실패:", err);
+          if (serverStatus) serverStatus.textContent = "로컬 백엔드 연결 필요 (localhost:3888)";
+          if (serverDot) serverDot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+        }
+      }
+
+      // 2. Render Top KPI Cards
+      function renderKPICards(summaryList) {
+        const container = document.getElementById("pr-kpi-cards-container");
+        if (!container) return;
+
+        const defaultKeywords = [
+          "부산사무실인테리어",
+          "부산상가인테리어",
+          "부산병원인테리어",
+          "부산학원인테리어"
+        ];
+
+        let html = "";
+        defaultKeywords.forEach(kw => {
+          const item = summaryList.find(s => s.keyword === kw) || {
+            keyword: kw,
+            targetRank: null,
+            diffText: "-",
+            totalOrganicCount: 0,
+            targetInfo: { name: "인디컴퍼니", address: "-" }
+          };
+
+          const rank = item.targetRank;
+          const rankDisplay = rank ? `${rank}위` : "순위 밖";
+          const isTop1 = rank === 1;
+          const isTop3 = rank && rank <= 3;
+          
+          let badgeColor = "bg-gray-100 text-gray-700 dark-mode:bg-gray-700 dark-mode:text-gray-300";
+          let medal = "";
+          if (isTop1) {
+            badgeColor = "bg-amber-500 text-white font-black shadow-sm";
+            medal = "🥇 ";
+          } else if (isTop3) {
+            badgeColor = "bg-orange-500 text-white font-black shadow-sm";
+            medal = "🥉 ";
+          } else if (rank) {
+            badgeColor = "bg-blue-600 text-white font-bold";
+          }
+
+          let diffBadge = `<span class="text-xs font-bold text-gray-400 font-mono">-</span>`;
+          if (item.diff > 0) {
+            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-black bg-red-50 text-red-600 border border-red-200 dark-mode:bg-red-950/40 dark-mode:text-red-400 dark-mode:border-red-800">▲ ${item.diff}</span>`;
+          } else if (item.diff < 0) {
+            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-black bg-blue-50 text-blue-600 border border-blue-200 dark-mode:bg-blue-950/40 dark-mode:text-blue-400 dark-mode:border-blue-800">▼ ${Math.abs(item.diff)}</span>`;
+          }
+
+          html += `
+            <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-150 dark-mode:border-gray-700 flex flex-col justify-between space-y-4 hover:shadow-md transition-all">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="text-xs font-black text-gray-600 dark-mode:text-gray-300 truncate">${kw}</span>
+                  ${diffBadge}
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-3xl font-black font-mono text-gray-900 dark-mode:text-white tracking-tight">${medal}${rankDisplay}</span>
+                  <span class="text-[11px] text-gray-400 font-medium">/ ${item.totalOrganicCount || 70}개</span>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-gray-100 dark-mode:border-gray-700/60 text-[11px] space-y-1">
+                <div class="text-gray-500 dark-mode:text-gray-400 flex items-center justify-between">
+                  <span class="font-bold text-gray-800 dark-mode:text-gray-200 truncate">${(item.targetInfo && item.targetInfo.name) || '인디컴퍼니'}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[9px] ${badgeColor}">광고제외</span>
+                </div>
+                <div class="text-gray-400 truncate text-[10px]">
+                  ${(item.targetInfo && (item.targetInfo.address || item.targetInfo.fullAddress)) || '주소 정보 확인 중'}
+                </div>
+              </div>
+
+              <a href="https://map.naver.com/p/search/${encodeURIComponent(kw)}" target="_blank" class="w-full py-1.5 bg-gray-50 hover:bg-orange-50 dark-mode:bg-gray-700 dark-mode:hover:bg-orange-950/40 text-gray-700 hover:text-orange-600 dark-mode:text-gray-200 text-center text-[11px] font-black rounded-lg border border-gray-200 dark-mode:border-gray-600 transition-all flex items-center justify-center gap-1">
+                플레이스 검색결과 보기 ↗
+              </a>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      }
+
+      // 3. Render Historical Table
+      function renderHistoryTable() {
+        const tbody = document.getElementById("pr-history-tbody");
+        if (!tbody) return;
+
+        const kwFilterVal = filterKw ? filterKw.value : "all";
+        const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+        const filtered = prHistoryData.filter(item => {
+          if (kwFilterVal !== "all" && item.keyword !== kwFilterVal) return false;
+          if (searchVal) {
+            const str = `${item.date} ${item.keyword} ${(item.targetInfo && item.targetInfo.name) || ''} ${(item.targetInfo && item.targetInfo.address) || ''}`.toLowerCase();
+            if (!str.includes(searchVal)) return false;
+          }
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" class="py-10 text-center text-gray-400 font-semibold">
+                기록된 순위 데이터가 없습니다.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        let html = "";
+        filtered.forEach(item => {
+          const rank = item.targetRank;
+          let rankBadge = `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-100 text-gray-500">순위 밖</span>`;
+          if (rank === 1) {
+            rankBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-black bg-amber-500 text-white shadow-sm">🥇 1위</span>`;
+          } else if (rank && rank <= 3) {
+            rankBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-black bg-orange-500 text-white shadow-sm">🥉 ${rank}위</span>`;
+          } else if (rank) {
+            rankBadge = `<span class="px-2 py-0.5 rounded text-xs font-black bg-blue-50 text-blue-600 border border-blue-200 dark-mode:bg-blue-900/40 dark-mode:text-blue-300">${rank}위</span>`;
+          }
+
+          const targetName = (item.targetInfo && item.targetInfo.name) || item.targetName || "인디컴퍼니";
+          const targetAddr = (item.targetInfo && (item.targetInfo.address || item.targetInfo.fullAddress)) || "-";
+
+          html += `
+            <tr class="hover:bg-gray-50 dark-mode:hover:bg-gray-750 transition-colors">
+              <td class="py-3 px-3 text-center font-mono font-bold text-gray-800 dark-mode:text-gray-200">${item.date}</td>
+              <td class="py-3 px-3 text-center font-mono text-gray-400 text-[11px]">${item.time || '-'}</td>
+              <td class="py-3 px-3 font-bold text-gray-900 dark-mode:text-white">${item.keyword}</td>
+              <td class="py-3 px-3 text-center font-mono">${rankBadge}</td>
+              <td class="py-3 px-3 text-center font-mono font-bold text-gray-400">-</td>
+              <td class="py-3 px-3 font-bold text-gray-800 dark-mode:text-gray-200">${targetName}</td>
+              <td class="py-3 px-3 text-gray-500 dark-mode:text-gray-400 text-[11px] truncate max-w-xs" title="${targetAddr}">${targetAddr}</td>
+              <td class="py-3 px-3 text-center">
+                <a href="https://map.naver.com/p/search/${encodeURIComponent(item.keyword)}" target="_blank" class="px-2.5 py-1 rounded bg-gray-100 hover:bg-orange-600 hover:text-white dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300 text-[10px] font-bold transition-all inline-block">
+                  검색결과 ↗
+                </a>
+              </td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
+      }
+
+      // 4. Render Trend Chart
+      function renderTrendChart(kw) {
+        const container = document.getElementById("pr-trend-chart-container");
+        if (!container) return;
+
+        const kwItems = prHistoryData.filter(h => h.keyword === kw);
+        // Sort chronologically ascending
+        const sorted = [...kwItems].sort((a, b) => new Date(a.timestamp || a.date).getTime() - new Date(b.timestamp || b.date).getTime());
+
+        if (sorted.length === 0) {
+          container.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-xs text-gray-400 font-bold">[${kw}]에 대한 순위 기록이 아직 없습니다.</div>`;
+          return;
+        }
+
+        const width = container.clientWidth || 700;
+        const height = 220;
+        const padding = 35;
+
+        // Invert Y axis so rank 1 is at top, rank 100 is at bottom
+        const maxRank = Math.max(...sorted.map(s => s.targetRank || 70), 50);
+        const minRank = 1;
+
+        const points = [];
+        const stepX = (width - padding * 2) / Math.max(sorted.length - 1, 1);
+
+        sorted.forEach((d, idx) => {
+          const x = padding + idx * stepX;
+          const rank = d.targetRank || maxRank;
+          // Inverted ratio (rank 1 is at ratio 1, maxRank is at ratio 0)
+          const ratio = (maxRank - rank) / Math.max(maxRank - minRank, 1);
+          const y = height - padding - ratio * (height - padding * 2);
+          points.push({ x, y, date: d.date.substring(5), rank: d.targetRank ? `${d.targetRank}위` : '순위밖', val: d.targetRank });
+        });
+
+        let pathD = `M ${points[0].x} ${points[0].y}`;
+        points.forEach((p, idx) => {
+          if (idx > 0) pathD += ` L ${p.x} ${p.y}`;
+        });
+
+        let pointsHtml = "";
+        points.forEach(p => {
+          pointsHtml += `
+            <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#ea580c" stroke="#ffffff" stroke-width="2" />
+            <text x="${p.x}" y="${p.y - 8}" fill="#ea580c" font-size="9" text-anchor="middle" font-weight="900" class="font-mono">${p.rank}</text>
+            <text x="${p.x}" y="${height - 12}" fill="#9CA3AF" font-size="8" text-anchor="middle" font-weight="bold" class="font-mono">${p.date}</text>
+          `;
+        });
+
+        container.innerHTML = `
+          <svg width="${width}" height="${height}" class="w-full h-full select-none">
+            <!-- Grid Lines -->
+            <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="#E5E7EB" stroke-dasharray="4,4" class="dark-mode:stroke-gray-700" />
+            <text x="${padding - 6}" y="${padding + 4}" fill="#10B981" font-size="9" text-anchor="end" font-weight="black" class="font-mono">1위</text>
+            
+            <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#E5E7EB" stroke-dasharray="4,4" class="dark-mode:stroke-gray-700" />
+            <text x="${padding - 6}" y="${height - padding + 4}" fill="#9CA3AF" font-size="8" text-anchor="end" font-weight="bold" class="font-mono">${maxRank}위</text>
+
+            <!-- Line Path -->
+            <path d="${pathD}" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            ${pointsHtml}
+          </svg>
+        `;
+      }
+
+      // 5. Render Competitors Breakdown
+      function renderCompetitorsBreakdown(summaryList) {
+        const container = document.getElementById("pr-competitors-breakdown");
+        if (!container) return;
+
+        let html = "";
+        summaryList.forEach(item => {
+          const comps = item.topCompetitors || [];
+          html += `
+            <div class="p-4 bg-gray-50/70 dark-mode:bg-gray-900/50 rounded-xl border border-gray-150 dark-mode:border-gray-750 space-y-2.5">
+              <div class="flex items-center justify-between border-b border-gray-200 dark-mode:border-gray-700 pb-2">
+                <span class="font-black text-xs text-gray-800 dark-mode:text-gray-200">📌 ${item.keyword}</span>
+                <span class="text-[10px] font-bold text-orange-600">인디컴퍼니: ${item.targetRank ? item.targetRank + '위' : '순위밖'}</span>
+              </div>
+              <div class="space-y-1.5 text-xs">
+                ${comps.map(c => `
+                  <div class="flex items-center justify-between text-[11px]">
+                    <div class="flex items-center gap-1.5 truncate">
+                      <span class="w-5 h-5 rounded flex items-center justify-center font-mono font-black text-[10px] ${c.name.includes('인디') ? 'bg-orange-600 text-white' : 'bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300'}">${c.rank}</span>
+                      <span class="font-bold truncate ${c.name.includes('인디') ? 'text-orange-600 dark-mode:text-orange-400 font-black' : 'text-gray-800 dark-mode:text-gray-200'}">${c.name}</span>
+                    </div>
+                    <span class="text-gray-400 text-[10px] truncate max-w-[120px]">${c.address || ''}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      }
+
+      // 6. Event Listeners
+      refreshBtn.addEventListener("click", () => {
+        loadPlaceRankData();
+      });
+
+      if (filterKw) {
+        filterKw.addEventListener("change", () => renderHistoryTable());
+      }
+      if (searchInput) {
+        searchInput.addEventListener("input", () => renderHistoryTable());
+      }
+
+      // Chart Tabs
+      document.querySelectorAll(".pr-chart-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".pr-chart-tab").forEach(t => {
+            t.className = "pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300";
+          });
+          tab.className = "pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-600 text-white shadow-sm";
+          activeChartKw = tab.dataset.kw;
+          renderTrendChart(activeChartKw);
+        });
+      });
+
+      // Manual Run Now Button
+      runNowBtn.addEventListener("click", async () => {
+        const icon = document.getElementById("pr-run-btn-icon");
+        const text = document.getElementById("pr-run-btn-text");
+
+        if (runNowBtn.disabled) return;
+        runNowBtn.disabled = true;
+        if (icon) icon.textContent = "⏳";
+        if (text) text.textContent = "네이버 플레이스 순위 측정 중... (약 15~20초 소요)";
+
+        try {
+          const url = getLocalServerUrl("/api/place-rank/check");
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+          });
+          const result = await res.json();
+          if (result.success) {
+            alert(`✅ 순위 측정이 완료되었습니다! (총 ${result.count}개 키워드 최신 순위 영구 기록 완료)`);
+            await loadPlaceRankData();
+          } else {
+            alert(`❌ 순위 측정 실패: ${result.error || '알 수 없는 오류'}`);
+          }
+        } catch (err) {
+          alert(`⚠️ 서버 통신 오류: ${err.message}`);
+        } finally {
+          runNowBtn.disabled = false;
+          if (icon) icon.textContent = "⚡";
+          if (text) text.textContent = "지금 즉시 순위 체크 (1회 실행)";
+        }
+      });
+
+      // Excel Export
+      if (exportExcelBtn) {
+        exportExcelBtn.addEventListener("click", () => {
+          if (typeof XLSX === "undefined") {
+            alert("XLSX 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
+            return;
+          }
+
+          if (prHistoryData.length === 0) {
+            alert("다운로드할 순위 데이터가 없습니다.");
+            return;
+          }
+
+          const exportRows = prHistoryData.map((h, i) => ({
+            "번호": i + 1,
+            "측정일자": h.date,
+            "측정시각": h.time || "",
+            "키워드": h.keyword,
+            "순위(광고제외)": h.targetRank ? `${h.targetRank}위` : "순위권 외",
+            "대상업체명": (h.targetInfo && h.targetInfo.name) || h.targetName || "인디컴퍼니",
+            "등록주소": (h.targetInfo && (h.targetInfo.fullAddress || h.targetInfo.address)) || "",
+            "연락처": (h.targetInfo && h.targetInfo.phone) || "",
+            "전체검색업체수": h.totalOrganicCount || 0
+          }));
+
+          const ws = XLSX.utils.json_to_sheet(exportRows);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "플레이스순위기록");
+
+          const now = new Date();
+          const filename = `네이버플레이스_순위기록_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.xlsx`;
+          XLSX.writeFile(wb, filename);
+        });
+      }
+
+      // Initial Load
+      loadPlaceRankData();
+    }
+
 
     window.addEventListener("load", initApp);
   </script>

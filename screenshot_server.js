@@ -172,12 +172,18 @@ app.get('/api/blog-posts/list', async (req, res) => {
 
   try {
     // 1페이지 호출하여 전체 글 개수 파악
+    // categoryNo=0 => "전체보기" (모든 카테고리 포함)
+    // itemcount=30 => 페이지당 30개씩 (API 호출 횟수 최소화)
+    const ITEMS_PER_PAGE = 30;
+
     const fetchPage = async (p) => {
-      const apiUrl = `https://blog.naver.com/PostTitleListAsync.naver?blogId=${encodeURIComponent(blogId)}&viewdate=&parentCategoryNo=&categoryNo=&itemcount=5&authorid=&userSelectMenu=&parentCategoryCode=&currentPage=${p}`;
+      const apiUrl = `https://blog.naver.com/PostTitleListAsync.naver?blogId=${encodeURIComponent(blogId)}&viewdate=&currentPage=${p}&categoryNo=0&parentCategoryNo=&countPerPage=${ITEMS_PER_PAGE}&itemcount=${ITEMS_PER_PAGE}`;
       const response = await fetch(apiUrl, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Referer': `https://blog.naver.com/${encodeURIComponent(blogId)}`
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+          'Referer': `https://blog.naver.com/${encodeURIComponent(blogId)}`,
+          'Accept': 'application/json, text/javascript, */*; q=0.01',
+          'X-Requested-With': 'XMLHttpRequest'
         }
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -192,14 +198,17 @@ app.get('/api/blog-posts/list', async (req, res) => {
     }
 
     const totalCount = parseInt(firstPage.totalCount, 10) || 0;
-    const countPerPage = parseInt(firstPage.countPerPage, 10) || 5;
+    const countPerPage = parseInt(firstPage.countPerPage, 10) || ITEMS_PER_PAGE;
     let allPosts = [...firstPage.postList];
+
+    console.log(`[블로그 목록] blogId=${blogId}, API totalCount=${totalCount}, 1페이지 게시글=${allPosts.length}개, countPerPage=${countPerPage}`);
 
     if (totalCount > allPosts.length && countPerPage > 0) {
       const totalPages = Math.ceil(totalCount / countPerPage);
+      console.log(`[블로그 목록] 총 ${totalPages}페이지 수집 필요 (2~${totalPages}페이지 추가 수집 시작)`);
       
-      // 소켓 과부하를 방지하기 위해 15페이지 단위로 나누어 순차 병렬 처리
-      const batchSize = 15;
+      // 소켓 과부하를 방지하기 위해 10페이지 단위로 나누어 순차 병렬 처리
+      const batchSize = 10;
       for (let i = 2; i <= totalPages; i += batchSize) {
         const promises = [];
         for (let p = i; p < i + batchSize && p <= totalPages; p++) {
@@ -215,9 +224,19 @@ app.get('/api/blog-posts/list', async (req, res) => {
           }
         }
         // 네이버 서버 부하 방지를 위한 미세한 대기
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
     }
+
+    // logNo 기준 중복 제거 (카테고리 중복 방지)
+    const seen = new Set();
+    allPosts = allPosts.filter(post => {
+      if (seen.has(post.logNo)) return false;
+      seen.add(post.logNo);
+      return true;
+    });
+
+    console.log(`[블로그 목록] 중복 제거 후 최종 게시글 수: ${allPosts.length}개 (API totalCount: ${totalCount})`);
 
     // 제목 디코딩 및 링크 포맷팅
     const decodeNaverTitle = (title) => {
@@ -268,6 +287,38 @@ app.post('/api/blog-posts/process-one', async (req, res) => {
 
   const safeTitle = title.replace(/[\\/:*?"<>|]/g, '_').trim().slice(0, 80);
   const postUrl = `https://m.blog.naver.com/PostView.naver?blogId=${encodeURIComponent(blogId)}&logNo=${logNo}`;
+
+  // ── 중복 파일 건너뛰기 로직 ──
+  // 이미 저장된 파일이 있으면 스킵 (날짜 기반 파일명은 처리 후에야 알 수 있으므로, 폴더 내에서 logNo 또는 제목으로 검색)
+  try {
+    if (fs.existsSync(saveFolder)) {
+      const existingFiles = fs.readdirSync(saveFolder);
+      const needsTxt = (mode === "1" || mode === "4");
+      const needsImg = (mode === "2" || mode === "3" || mode === "4");
+
+      // logNo 또는 safeTitle 기반으로 이미 존재하는 파일 확인
+      const hasTxt = existingFiles.some(f => f.endsWith('.txt') && (f.includes(safeTitle) || f.includes(logNo)));
+      const hasImg = existingFiles.some(f => (f.endsWith('.png') || f.endsWith('.jpg')) && (f.includes(safeTitle) || f.includes(logNo)));
+
+      const txtOk = !needsTxt || hasTxt;
+      const imgOk = !needsImg || hasImg;
+
+      if (txtOk && imgOk) {
+        const skippedFiles = existingFiles.filter(f => f.includes(safeTitle) || f.includes(logNo));
+        return res.json({
+          success: true,
+          skipped: true,
+          absoluteDate: '',
+          textSaved: hasTxt,
+          screenshotSaved: hasImg,
+          savedFiles: skippedFiles
+        });
+      }
+    }
+  } catch (e) {
+    // 건너뛰기 확인 실패해도 그냥 정상 처리 진행
+    console.error('중복 확인 중 에러 (무시):', e.message);
+  }
 
   try {
     // 1. 상세 페이지 HTML 가져오기 (절대 날짜 파싱 및 텍스트 추출용)
@@ -2929,6 +2980,12 @@ function processNaverReportRows(rows, campaignMap) {
 
   return stats;
 }
+
+// ----------------------------------------------------------------
+// 네이버 플레이스 순위 추적 & 영구 기록 시스템 (Place Rank Tracker)
+// ----------------------------------------------------------------
+const { setupPlaceRankRoutes } = require('./place_rank_tracker');
+setupPlaceRankRoutes(app);
 
 const PORT = 3888;
 app.listen(PORT, () => {
