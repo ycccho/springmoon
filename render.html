@@ -3,33 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INDE RENDER | 스케치업 → 실사 사진 변환기</title>
-  <meta name="description" content="스케치업 캡처 및 CAD 뷰포트를 천장 설비와 기존 재질을 100% 고정한 채 최고급 실사 건축 사진으로 변환하는 전문 AI 렌더러">
+  <title>INDE RENDER | 건축 인테리어 실사 AI 렌더러</title>
+  <meta name="description" content="스케치업 캡처 및 CAD 뷰포트를 천장 설비와 기존 마감재를 100% 고정한 채 최고급 실사 건축 사진으로 변환하는 전문 AI 렌더러">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #0c0e12;
-      --bg-card: #15181f;
-      --bg-card-hover: #1c212b;
-      --bg-input: #0f1217;
-      --border-subtle: #262c37;
-      --border-focus: #3b82f6;
-      --accent-primary: #3b82f6;
-      --accent-hover: #2563eb;
-      --accent-glow: rgba(59, 130, 246, 0.25);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --text-dim: #6b7280;
+      /* Calm Architectural Studio Color Palette */
+      --bg-base: #0e1013;
+      --bg-surface: #15181d;
+      --bg-surface-elevated: #1b1f26;
+      --bg-surface-hover: #222730;
+      --bg-input: #101317;
+      
+      /* Hairline Architectural Borders */
+      --border-subtle: #252a34;
+      --border-strong: #363d4b;
+      --border-focus: #5b677a;
+      
+      /* Calm, High-Visibility Accents */
+      --accent-warm: #d4a373;
+      --accent-warm-hover: #e0b080;
+      --accent-action: #3b82f6;
+      --accent-action-hover: #2563eb;
+      --accent-action-glow: rgba(59, 130, 246, 0.18);
       --success: #10b981;
-      --warning: #f59e0b;
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 18px;
+      
+      /* High Contrast Text Tokens */
+      --text-primary: #f8f9fa;
+      --text-secondary: #c5cbd5;
+      --text-muted: #8b95a5;
+      --text-dim: #5c6575;
+      
+      /* Geometry & Spacing */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
       --radius-full: 9999px;
-      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      
+      /* Shadows & Transitions */
+      --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+      --shadow-elevated: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
+      --ease-studio: cubic-bezier(0.16, 1, 0.3, 1);
+      --transition: all 0.22s var(--ease-studio);
     }
 
     * {
@@ -41,27 +58,28 @@
     }
 
     body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
+      background-color: var(--bg-base);
+      color: var(--text-primary);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      line-height: 1.5;
+      line-height: 1.55;
+      letter-spacing: -0.01em;
     }
 
-    /* Header */
+    /* Top Navigation */
     header {
-      background: rgba(21, 24, 31, 0.85);
-      backdrop-filter: blur(12px);
+      background: rgba(21, 24, 29, 0.92);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border-subtle);
       position: sticky;
       top: 0;
       z-index: 50;
-      padding: 14px 24px;
+      padding: 14px 28px;
     }
 
     .header-container {
-      max-width: 1300px;
+      max-width: 1360px;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -75,36 +93,43 @@
       text-decoration: none;
     }
 
-    .brand-logo {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      border-radius: var(--radius-md);
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      background: #1e232b;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 1.1rem;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      font-size: 0.95rem;
+      color: var(--accent-warm);
+      letter-spacing: -0.05em;
+    }
+
+    .brand-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .brand-title {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--text-primary);
       letter-spacing: -0.02em;
     }
 
     .brand-badge {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
-      background: #1e293b;
-      color: #93c5fd;
-      border: 1px solid #3b82f644;
-      padding: 2px 8px;
+      background: rgba(212, 163, 115, 0.12);
+      color: var(--accent-warm);
+      border: 1px solid rgba(212, 163, 115, 0.28);
+      padding: 2px 7px;
       border-radius: var(--radius-full);
-      margin-left: 6px;
+      letter-spacing: 0.02em;
     }
 
     .header-actions {
@@ -114,12 +139,12 @@
     }
 
     .btn-secondary {
-      background: var(--bg-card);
+      background: var(--bg-surface-elevated);
       border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
+      color: var(--text-secondary);
       padding: 8px 14px;
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 500;
       cursor: pointer;
       display: inline-flex;
@@ -129,24 +154,24 @@
     }
 
     .btn-secondary:hover {
-      background: var(--bg-card-hover);
-      color: var(--text-main);
-      border-color: #4b5563;
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
     }
 
-    /* Main Container */
+    /* Main Console Grid */
     main {
       flex: 1;
-      max-width: 1300px;
+      max-width: 1360px;
       width: 100%;
       margin: 0 auto;
-      padding: 32px 24px 60px;
+      padding: 28px 28px 60px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 460px 1fr;
       gap: 28px;
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1080px) {
       main {
         grid-template-columns: 1fr;
       }
@@ -154,30 +179,43 @@
 
     /* Cards */
     .card {
-      background: var(--bg-card);
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 24px;
-      box-shadow: var(--shadow-card);
+      box-shadow: var(--shadow-subtle);
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
+    }
+
     .card-title {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
+    .card-subtext {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
     /* Upload Zone */
     .upload-zone {
-      border: 2px dashed #374151;
+      border: 1.5px dashed var(--border-strong);
       border-radius: var(--radius-md);
-      padding: 36px 20px;
+      padding: 32px 20px;
       text-align: center;
       cursor: pointer;
       background: var(--bg-input);
@@ -186,36 +224,37 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       position: relative;
     }
 
     .upload-zone:hover, .upload-zone.drag-over {
-      border-color: var(--accent-primary);
-      background: rgba(59, 130, 246, 0.05);
+      border-color: var(--accent-warm);
+      background: rgba(212, 163, 115, 0.04);
     }
 
-    .upload-icon {
-      width: 48px;
-      height: 48px;
-      background: #1e293b;
+    .upload-icon-box {
+      width: 44px;
+      height: 44px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
-      color: var(--accent-primary);
+      font-size: 1.25rem;
+      color: var(--accent-warm);
     }
 
     .upload-text {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--text-primary);
     }
 
     .upload-sub {
-      font-size: 0.8rem;
-      color: var(--text-dim);
+      font-size: 0.78rem;
+      color: var(--text-muted);
     }
 
     .file-input {
@@ -228,21 +267,21 @@
       cursor: pointer;
     }
 
-    /* Image Preview List */
+    /* Preview Chips */
     .preview-container {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 4px;
     }
 
     .preview-chip {
       position: relative;
-      width: 80px;
-      height: 60px;
+      width: 88px;
+      height: 64px;
       border-radius: var(--radius-sm);
       overflow: hidden;
-      border: 1px solid var(--border-subtle);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-input);
     }
 
     .preview-chip img {
@@ -253,11 +292,11 @@
 
     .preview-chip .btn-remove {
       position: absolute;
-      top: 2px;
-      right: 2px;
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      border: none;
+      top: 3px;
+      right: 3px;
+      background: rgba(14, 16, 19, 0.85);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
       border-radius: 50%;
       width: 18px;
       height: 18px;
@@ -266,54 +305,77 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: var(--transition);
     }
 
-    /* Options Form */
+    .preview-chip .btn-remove:hover {
+      background: #dc2626;
+      color: #fff;
+      border-color: #dc2626;
+    }
+
+    /* Options Section */
     .options-grid {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .option-item {
+    .option-card {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
+      gap: 12px;
       padding: 12px 14px;
       background: var(--bg-input);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
+      cursor: pointer;
       transition: var(--transition);
+      user-select: none;
     }
 
-    .option-item:hover {
-      border-color: #374151;
-      background: #12161d;
+    .option-card:hover {
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-strong);
     }
 
-    .option-item input[type="checkbox"] {
+    .option-card input[type="checkbox"] {
       margin-top: 3px;
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent-primary);
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent-action);
       cursor: pointer;
     }
 
-    .option-content {
+    .option-text-group {
       flex: 1;
     }
 
     .option-label {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--text-primary);
       cursor: pointer;
     }
 
     .option-desc {
-      font-size: 0.78rem;
+      font-size: 0.77rem;
       color: var(--text-muted);
       margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
     }
 
     .select-input, .text-input {
@@ -321,117 +383,152 @@
       background: var(--bg-input);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
-      color: var(--text-main);
+      color: var(--text-primary);
       padding: 10px 12px;
-      font-size: 0.88rem;
-      margin-top: 6px;
+      font-size: 0.86rem;
       outline: none;
       transition: var(--transition);
     }
 
     .select-input:focus, .text-input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: var(--bg-surface-elevated);
     }
 
     /* Submit Button */
     .btn-submit {
-      background: linear-gradient(135deg, var(--accent-primary), #2563eb);
-      color: #fff;
+      background: var(--text-primary);
+      color: #0e1013;
       border: none;
-      padding: 15px 24px;
+      padding: 14px 20px;
       border-radius: var(--radius-md);
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.08);
       transition: var(--transition);
+      margin-top: 4px;
     }
 
     .btn-submit:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.5);
+      background: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
     }
 
     .btn-submit:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
       transform: none;
     }
 
-    /* Right Panel (Results) */
+    /* Right Panel (Results Viewer) */
     .results-card {
       display: flex;
       flex-direction: column;
+      min-height: 580px;
     }
 
     .empty-state {
       flex: 1;
-      min-height: 400px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      gap: 14px;
-      color: var(--text-dim);
+      gap: 12px;
+      color: var(--text-muted);
       border: 1px dashed var(--border-subtle);
       border-radius: var(--radius-md);
       padding: 40px 20px;
+      background: rgba(16, 19, 23, 0.5);
     }
 
     .empty-icon {
-      font-size: 3rem;
-      opacity: 0.4;
+      font-size: 2.5rem;
+      color: var(--text-dim);
     }
 
-    /* Progress Indicator */
+    .empty-text {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .empty-sub {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    /* Calm Progress Container */
     .progress-container {
       display: none;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
       padding: 24px;
       background: var(--bg-input);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
     }
 
-    .progress-bar-bg {
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .progress-status-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .progress-pct {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-warm);
+      font-mono: true;
+    }
+
+    .progress-track {
       width: 100%;
-      height: 8px;
-      background: #1f2937;
+      height: 6px;
+      background: var(--bg-surface-elevated);
       border-radius: var(--radius-full);
       overflow: hidden;
     }
 
-    .progress-bar-fill {
+    .progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #3b82f6, #10b981);
+      background: linear-gradient(90deg, #c29b38, #10b981);
       border-radius: var(--radius-full);
-      transition: width 0.4s ease;
+      transition: width 0.4s var(--ease-studio);
     }
 
     .progress-steps {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
     }
 
     .progress-step {
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      font-size: 0.82rem;
+      color: var(--text-dim);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      transition: var(--transition);
     }
 
     .progress-step.active {
-      color: var(--text-main);
+      color: var(--text-primary);
       font-weight: 600;
     }
 
@@ -439,11 +536,11 @@
       color: var(--success);
     }
 
-    /* Before & After Slider */
+    /* Comparison Slider */
     .slider-wrapper {
       display: none;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
     }
 
     .comparison-slider {
@@ -453,8 +550,9 @@
       border-radius: var(--radius-md);
       overflow: hidden;
       user-select: none;
-      border: 1px solid var(--border-subtle);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-elevated);
+      background: #000;
     }
 
     .comparison-slider img {
@@ -494,12 +592,12 @@
       top: 0;
       bottom: 0;
       left: 50%;
-      width: 4px;
-      background: #fff;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.9);
       z-index: 10;
       cursor: ew-resize;
       transform: translateX(-50%);
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
     }
 
     .slider-button {
@@ -507,29 +605,30 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 36px;
-      height: 36px;
-      background: #fff;
+      width: 32px;
+      height: 32px;
+      background: #ffffff;
       border-radius: 50%;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #111;
+      color: #111827;
       font-weight: 800;
-      font-size: 14px;
+      font-size: 13px;
     }
 
-    .badge-label {
+    .badge-pill {
       position: absolute;
       bottom: 12px;
       padding: 4px 10px;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      color: #fff;
-      font-size: 0.75rem;
+      background: rgba(14, 16, 19, 0.82);
+      backdrop-filter: blur(8px);
+      color: var(--text-primary);
+      font-size: 0.74rem;
       font-weight: 600;
       border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       z-index: 5;
     }
 
@@ -539,6 +638,8 @@
 
     .badge-after {
       right: 12px;
+      border-color: rgba(212, 163, 115, 0.35);
+      color: var(--accent-warm);
     }
 
     .result-actions {
@@ -549,12 +650,12 @@
 
     .btn-download {
       flex: 1;
-      background: var(--success);
-      color: #fff;
+      background: var(--text-primary);
+      color: #0e1013;
       border: none;
       padding: 12px 18px;
       border-radius: var(--radius-sm);
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -566,16 +667,17 @@
     }
 
     .btn-download:hover {
-      background: #059669;
+      background: #ffffff;
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12);
     }
 
-    /* JSON Viewer Modal */
+    /* Modal Sheet */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
       z-index: 100;
       align-items: center;
       justify-content: center;
@@ -583,15 +685,15 @@
     }
 
     .modal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
       border-radius: var(--radius-lg);
-      max-width: 750px;
+      max-width: 720px;
       width: 100%;
       max-height: 85vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: var(--shadow-elevated);
     }
 
     .modal-header {
@@ -609,11 +711,12 @@
     }
 
     pre {
-      background: #0a0c10;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
       padding: 14px;
       border-radius: var(--radius-sm);
-      color: #e5e7eb;
-      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
       overflow-x: auto;
       line-height: 1.6;
     }
@@ -623,17 +726,17 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #1f2937;
-      border: 1px solid var(--border-subtle);
-      color: var(--text-main);
-      padding: 12px 20px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 12px 18px;
       border-radius: var(--radius-md);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      box-shadow: var(--shadow-elevated);
       z-index: 200;
-      transform: translateY(100px);
+      transform: translateY(80px);
       opacity: 0;
       transition: var(--transition);
-      font-size: 0.9rem;
+      font-size: 0.86rem;
       font-weight: 500;
     }
 
@@ -645,14 +748,14 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Top Header -->
   <header>
     <div class="header-container">
       <a href="/" class="brand">
-        <div class="brand-logo">I</div>
-        <div>
+        <div class="brand-mark">IN</div>
+        <div class="brand-text">
           <span class="brand-title">INDE RENDER</span>
-          <span class="brand-badge">v3.5 Engine</span>
+          <span class="brand-badge">STUDIO v3.5</span>
         </div>
       </a>
       <div class="header-actions">
@@ -663,18 +766,21 @@
     </div>
   </header>
 
-  <!-- Main Grid -->
+  <!-- Main Console -->
   <main>
-    <!-- Left: Upload & Config -->
+    <!-- Left Panel: Input & Control -->
     <div class="card">
-      <div class="card-title">
-        <span>📸 스케치업 도면 업로드</span>
+      <div class="card-header">
+        <div>
+          <div class="card-title">📐 스케치업 도면 입력</div>
+          <div class="card-subtext">3D 뷰포트 캡처 또는 CAD 투시도 이미지</div>
+        </div>
       </div>
 
-      <!-- Drag & Drop Zone -->
+      <!-- Upload Zone -->
       <div class="upload-zone" id="dropZone">
-        <div class="upload-icon">📁</div>
-        <div class="upload-text">스케치업 캡처 이미지를 여기에 드래그하세요</div>
+        <div class="upload-icon-box">📂</div>
+        <div class="upload-text">스케치업 캡처 이미지를 여기에 끌어다 놓으세요</div>
         <div class="upload-sub">또는 클릭하여 파일 선택 (JPG, PNG, WEBP)</div>
         <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/webp">
       </div>
@@ -682,78 +788,85 @@
       <!-- Preview Chips -->
       <div class="preview-container" id="previewContainer"></div>
 
-      <!-- Smart Options -->
-      <div class="card-title" style="margin-top: 8px;">
-        <span>⚙️ INDE RENDER 실사화 옵션</span>
+      <!-- Options -->
+      <div class="card-header" style="margin-top: 4px;">
+        <div>
+          <div class="card-title">⚙️ 실사화 정밀 설정</div>
+          <div class="card-subtext">설계 도면 고정 및 표면 PBR 물성 계승</div>
+        </div>
       </div>
 
       <div class="options-grid">
-        <label class="option-item">
+        <label class="option-card">
           <input type="checkbox" id="optLockCeiling" checked>
-          <div class="option-content">
+          <div class="option-text-group">
             <div class="option-label">천장 설비 & 조명 위치 100% 고정</div>
-            <div class="option-desc">에어컨 기종(1-way/4-way), 펜던트, 다운라이트 위치를 도면 그대로 유지</div>
+            <div class="option-desc">1-way/4-way 에어컨 기종, 펜던트, 다운라이트 위치를 도면 그대로 유지</div>
           </div>
         </label>
 
-        <label class="option-item">
+        <label class="option-card">
           <input type="checkbox" id="optAnchorMaterials" checked>
-          <div class="option-content">
-            <div class="option-label">원본 마감재 100% 계승 (Material Anchoring)</div>
+          <div class="option-text-group">
+            <div class="option-label">기존 마감재 100% 계승 (Material Anchoring)</div>
             <div class="option-desc">우드 수종(월넛/오크), 타일, 가죽 색상을 유지하고 물리적 질감만 실사화</div>
           </div>
         </label>
 
-        <label class="option-item">
+        <label class="option-card">
           <input type="checkbox" id="optPreserveExposure" checked>
-          <div class="option-content">
+          <div class="option-text-group">
             <div class="option-label">원본 조도 & 어두운 무드 보존</div>
-            <div class="option-desc">과도한 인위적 밝기 상승을 방지하고 설계자의 의도된 명암비 유지</div>
+            <div class="option-desc">과도한 밝기 상승을 방지하고 설계자의 의도된 명암비 보존</div>
           </div>
         </label>
 
-        <div class="option-item" style="flex-direction: column; gap: 4px;">
-          <div class="option-label">조명 색온도 밸런스</div>
+        <div class="form-group">
+          <label class="form-label" for="optColorTemp">조명 색온도 밸런스</label>
           <select id="optColorTemp" class="select-input">
             <option value="auto" selected>✨ 원본 자동 추종 (권장)</option>
-            <option value="neutral">💡 주백색 (4000K 깔끔한 화이트)</option>
+            <option value="neutral">💡 주백색 (4000K 뉴트럴 화이트)</option>
             <option value="warm">🕯️ 전구색 (3000K 아늑한 웜톤 코브)</option>
             <option value="cool">❄️ 주광색 (6000K 시원한 쿨톤)</option>
           </select>
         </div>
 
-        <div class="option-item" style="flex-direction: column; gap: 4px;">
-          <div class="option-label">추가 요청사항 (선택)</div>
-          <input type="text" id="optCustomNotes" class="text-input" placeholder="예: 바닥 타일 광택을 더 은은하게, 창밖 풍경 선명하게">
+        <div class="form-group">
+          <label class="form-label" for="optCustomNotes">추가 요청사항 (선택)</label>
+          <input type="text" id="optCustomNotes" class="text-input" placeholder="예: 바닥 타일 광택을 은은하게, 창밖 풍경 디테일 살리기">
         </div>
       </div>
 
-      <!-- Action Button -->
+      <!-- Submit Button -->
       <button class="btn-submit" id="btnSubmit">
-        <span>🚀 INDE RENDER 실사 변환 시작</span>
+        <span>🚀 실사 렌더링 변환 시작</span>
       </button>
     </div>
 
-    <!-- Right: Results & Live Viewer -->
+    <!-- Right Panel: Live Results Viewer -->
     <div class="card results-card">
-      <div class="card-title">
-        <span>🖼️ 실사 변환 결과 (Before & After)</span>
+      <div class="card-header">
+        <div>
+          <div class="card-title">🖼️ 실사 렌더링 결과 (Before & After)</div>
+          <div class="card-subtext">전문 건축 사진 틸트시프트 렌더링 뷰어</div>
+        </div>
       </div>
 
       <!-- Empty State -->
       <div class="empty-state" id="emptyState">
-        <div class="empty-icon">🎨</div>
-        <p>왼쪽에서 스케치업 이미지를 업로드하고<br><strong>[INDE RENDER 실사 변환 시작]</strong> 버튼을 누르세요.</p>
+        <div class="empty-icon">🏛️</div>
+        <div class="empty-text">왼쪽에서 스케치업 도면을 업로드하세요</div>
+        <div class="empty-sub">PPOK/INDE 6대 원칙이 적용된 초고화질 실사 사진이 생성됩니다.</div>
       </div>
 
       <!-- Progress Box -->
       <div class="progress-container" id="progressBox">
-        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 600;">
-          <span id="progressStatusText">변환 준비 중...</span>
-          <span id="progressPercent">0%</span>
+        <div class="progress-header">
+          <span class="progress-status-title" id="progressStatusText">변환 준비 중...</span>
+          <span class="progress-pct" id="progressPercent">0%</span>
         </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="progressBarFill"></div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressBarFill"></div>
         </div>
         <div class="progress-steps">
           <div class="progress-step" id="step1">⏳ 1단계: 스케치업 도면 및 천장 설비/조명 분석</div>
@@ -765,15 +878,15 @@
       <!-- Comparison Slider -->
       <div class="slider-wrapper" id="sliderWrapper">
         <div class="comparison-slider" id="compSlider">
-          <img src="" id="imgAfter" class="image-after" alt="Rendered">
+          <img src="" id="imgAfter" class="image-after" alt="Rendered Photoreal">
           <div class="image-before-wrapper" id="beforeWrapper">
             <img src="" id="imgBefore" alt="SketchUp Original">
           </div>
           <div class="slider-handle" id="sliderHandle">
             <div class="slider-button">↔</div>
           </div>
-          <span class="badge-label badge-before">스케치업 원본</span>
-          <span class="badge-label badge-after">완성 실사 사진</span>
+          <span class="badge-pill badge-before">스케치업 원본</span>
+          <span class="badge-pill badge-after">완성 실사 사진</span>
         </div>
 
         <div class="result-actions">
@@ -792,7 +905,7 @@
   <div class="modal-overlay" id="promptModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 style="font-size: 1.05rem; font-weight: 700;">📋 INDE RENDER 생성 프롬프트 (JSON)</h3>
+        <h3 style="font-size: 0.95rem; font-weight: 700;">📋 INDE RENDER 생성 프롬프트 (JSON)</h3>
         <button class="btn-secondary" id="btnCloseModal" style="padding: 4px 8px;">✕</button>
       </div>
       <div class="modal-body">
@@ -806,24 +919,24 @@
 
   <!-- API Key Modal -->
   <div class="modal-overlay" id="apiKeyModal">
-    <div class="modal-card" style="max-width: 500px;">
+    <div class="modal-card" style="max-width: 480px;">
       <div class="modal-header">
-        <h3 style="font-size: 1.05rem; font-weight: 700;">🔑 Google Gemini API 키 설정</h3>
+        <h3 style="font-size: 0.95rem; font-weight: 700;">🔑 Google Gemini API 키 설정</h3>
         <button class="btn-secondary" id="btnCloseApiKeyModal" style="padding: 4px 8px;">✕</button>
       </div>
       <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
-        <p style="font-size: 0.85rem; color: var(--text-muted);">
-          기본 서버 키를 사용하지 않고 본인의 개인 무료 API 키를 사용하시려면 입력해 주세요. (브라우저 로컬 저장)
+        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+          기본 서버 키 대신 본인의 개인 무료 API 키를 등록하여 사용하시려면 입력해 주세요. (브라우저 로컬 저장)
         </p>
         <input type="password" id="inputApiKey" class="text-input" placeholder="AQ...">
       </div>
       <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="btn-submit" id="btnSaveApiKey" style="padding: 8px 16px; font-size: 0.9rem;">저장</button>
+        <button class="btn-submit" id="btnSaveApiKey" style="padding: 8px 16px; font-size: 0.88rem; margin: 0;">저장</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
+  <!-- Toast Notification -->
   <div class="toast" id="toastMsg">알림 메시지</div>
 
   <script>
