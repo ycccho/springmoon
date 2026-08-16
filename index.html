@@ -14531,238 +14531,243 @@
     
     // ============================================
     // 13: 네이버 플레이스 키워드 순위 체크 & 영구 기록 UI
+    //
+    // ============================================
+    // 13: 네이버 플레이스 키워드 순위 체크 & 달력형 기록 UI (Design-Taste-Frontend)
     // ============================================
     function getPlaceRankCheckHTML() {
       return `
-        <div class="max-w-7xl mx-auto space-y-6">
-          <!-- Main Header & Control Banner -->
-          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8 border border-gray-150 dark-mode:border-gray-700 space-y-4">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-gray-150 dark-mode:border-gray-700 pb-5">
-              <div>
-                <div class="flex items-center gap-2 mb-1.5">
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-600 text-white shadow-sm">
-                    Place Rank Tracker
+        <div class="max-w-7xl mx-auto space-y-8 pb-12">
+          <!-- 1. Executive Summary & Control Ribbon -->
+          <div class="bg-white dark-mode:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl p-6 md:p-8 border border-gray-150 dark-mode:border-gray-700 space-y-5">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-gray-150 dark-mode:border-gray-700/80 pb-6">
+              <div class="space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-sm">
+                    Place Rank Intelligence
                   </span>
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-600 dark-mode:bg-blue-900/40 dark-mode:text-blue-300 border border-blue-200 dark-mode:border-blue-700">
-                    ⏰ 매일 아침 09:00 자동 추적
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-50 text-orange-700 dark-mode:bg-orange-950/40 dark-mode:text-orange-300 border border-orange-200 dark-mode:border-orange-800">
+                    ⏰ 매일 09:00 자동 측정
                   </span>
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-600 dark-mode:bg-emerald-900/40 dark-mode:text-emerald-300 border border-emerald-200 dark-mode:border-emerald-700">
-                    💾 영구 기록 보존
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark-mode:bg-emerald-950/40 dark-mode:text-emerald-300 border border-emerald-200 dark-mode:border-emerald-800">
+                    🛡️ 100위 이내 선별 영구저장
                   </span>
                 </div>
-                <h1 class="text-2xl md:text-3xl font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
-                  🏆 네이버 플레이스 순위 모니터링
+                <h1 class="text-2xl md:text-3xl font-black text-gray-900 dark-mode:text-white tracking-tight flex items-center gap-2.5">
+                  🏆 네이버 플레이스 키워드 순위 모니터링
                 </h1>
-                <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-1 font-medium leading-relaxed">
-                  네이버 검색에서 광고를 제외한 <strong>(주)인디컴퍼니</strong>의 실제 플레이스 순위를 매일 아침 09시에 측정하여 영구 누적 기록합니다.
+                <p class="text-xs md:text-sm text-gray-500 dark-mode:text-gray-400 font-medium max-w-2xl leading-relaxed">
+                  네이버 검색에서 광고를 제외하고 <strong>100위 이내에 (주)인디컴퍼니가 포함된 키워드만 자동으로 선별 추적</strong>하며, 각 키워드별 일자별 순위를 <strong>달력(Calendar) 뷰</strong>로 시각화합니다.
                 </p>
               </div>
 
-              <!-- Action Buttons -->
+              <!-- Action Ribbon -->
               <div class="flex flex-wrap items-center gap-2.5">
-                <button id="pr-refresh-btn" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-600 text-gray-750 dark-mode:text-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                <button id="pr-refresh-btn" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark-mode:bg-gray-700 dark-mode:hover:bg-gray-650 text-gray-700 dark-mode:text-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
                   <span>🔄</span> 데이터 새로고침
                 </button>
-                <button id="pr-export-excel-btn" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 shadow-md">
+                <button id="pr-export-excel-btn" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 shadow-md active:scale-95">
                   <span>📥</span> 엑셀 다운로드
                 </button>
-                <button id="pr-run-now-btn" class="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-lg transition-all flex items-center gap-1.5">
+                <button id="pr-run-now-btn" class="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white text-xs font-black rounded-xl shadow-lg transition-all flex items-center gap-2 active:scale-95">
                   <span id="pr-run-btn-icon">⚡</span>
                   <span id="pr-run-btn-text">지금 즉시 순위 체크 (1회 실행)</span>
                 </button>
               </div>
             </div>
 
-            <!-- Server Status & Last Update Info -->
-            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-500 dark-mode:text-gray-400 font-medium">
-              <div class="flex items-center gap-4">
-                <div class="flex items-center gap-1.5">
+            <!-- Server State & Stats Ribbon -->
+            <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500 dark-mode:text-gray-400 font-medium pt-1">
+              <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-2">
                   <span id="pr-server-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span id="pr-server-status" class="font-bold text-gray-700 dark-mode:text-gray-300">로컬 백엔드 서버 연결됨</span>
+                  <span id="pr-server-status" class="font-bold text-gray-800 dark-mode:text-gray-200">로컬 백엔드 서버 연결됨 (3888)</span>
                 </div>
-                <span class="text-gray-300 dark-mode:text-gray-600">|</span>
-                <div>
-                  마지막 측정 시각: <strong id="pr-last-run-time" class="font-mono text-gray-800 dark-mode:text-gray-200">-</strong>
-                </div>
-                <span class="text-gray-300 dark-mode:text-gray-600">|</span>
-                <div>
-                  누적 기록 수: <strong id="pr-total-records-count" class="font-mono text-orange-600 font-bold">0건</strong>
-                </div>
-              </div>
-              <div class="text-[11px] font-bold text-gray-400">
-                타겟 업체: <span class="text-orange-600 dark-mode:text-orange-400 font-extrabold">(주)인디컴퍼니</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Top KPI Summary Cards (4 Keywords) -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="pr-kpi-cards-container">
-            <!-- 4 Keyword cards will be dynamically rendered here -->
-            <div class="col-span-full py-10 text-center text-gray-400 bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-150 dark-mode:border-gray-700">
-              데이터를 불러오는 중입니다...
-            </div>
-          </div>
-
-          <!-- Trend Chart Section -->
-          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-150 dark-mode:border-gray-700 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-150 dark-mode:border-gray-700 pb-4">
-              <div>
-                <h2 class="text-lg font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
-                  📈 일자별 순위 변동 추이 (1위 가까울수록 상단)
-                </h2>
-                <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5 font-medium">
-                  키워드를 선택하여 일자별 순위 등락 그래프를 확인합니다.
-                </p>
-              </div>
-              <!-- Keyword Tabs -->
-              <div class="flex flex-wrap gap-1.5" id="pr-chart-tabs">
-                <button data-kw="부산사무실인테리어" class="pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-600 text-white shadow-sm">부산사무실인테리어</button>
-                <button data-kw="부산상가인테리어" class="pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300">부산상가인테리어</button>
-                <button data-kw="부산병원인테리어" class="pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300">부산병원인테리어</button>
-                <button data-kw="부산학원인테리어" class="pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300">부산학원인테리어</button>
-              </div>
-            </div>
-
-            <!-- Chart SVG Container -->
-            <div class="relative h-64 w-full bg-slate-50/50 dark-mode:bg-gray-900/40 rounded-xl p-4 border border-gray-100 dark-mode:border-gray-800" id="pr-trend-chart-container">
-              <div class="absolute inset-0 flex items-center justify-center text-xs text-gray-400 font-bold">차트 로딩 중...</div>
-            </div>
-          </div>
-
-          <!-- Permanent History Table Section -->
-          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-150 dark-mode:border-gray-700 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-150 dark-mode:border-gray-700 pb-4">
-              <div>
-                <h2 class="text-lg font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
-                  📋 일자별 순위 기록 히스토리 (영구 누적 보관)
-                </h2>
-                <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5 font-medium">
-                  매일 아침 기록된 모든 순위 데이터는 절대 유실되거나 덮어쓰이지 않고 안전하게 영구 저장됩니다.
-                </p>
+                <span class="text-gray-300 dark-mode:text-gray-700">|</span>
+                <div>마지막 측정: <strong id="pr-last-run-time" class="font-mono text-gray-900 dark-mode:text-gray-100 font-bold">-</strong></div>
+                <span class="text-gray-300 dark-mode:text-gray-700">|</span>
+                <div>추적 중인 키워드: <strong id="pr-active-kw-count" class="font-mono text-orange-600 font-bold">0개</strong></div>
+                <span class="text-gray-300 dark-mode:text-gray-700">|</span>
+                <div>누적 기록: <strong id="pr-total-records-count" class="font-mono text-emerald-600 font-bold">0건</strong></div>
               </div>
 
-              <!-- Filters -->
+              <!-- Accordion Control Buttons -->
               <div class="flex items-center gap-2">
-                <select id="pr-table-filter-kw" class="px-3 py-1.5 text-xs font-bold bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-lg text-gray-800 dark-mode:text-gray-200">
+                <button id="pr-expand-all-btn" class="px-2.5 py-1 text-[11px] font-bold bg-orange-50 dark-mode:bg-orange-950/30 text-orange-600 dark-mode:text-orange-300 rounded-lg border border-orange-200 dark-mode:border-orange-800/60 hover:bg-orange-100 transition-colors">
+                  ▼ 전체 달력 펼치기
+                </button>
+                <button id="pr-collapse-all-btn" class="px-2.5 py-1 text-[11px] font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300 rounded-lg border border-gray-200 dark-mode:border-gray-600 hover:bg-gray-200 transition-colors">
+                  ▲ 전체 접기
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Today's Rank Overview Grid (Cards) -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
+                <span>📊</span> 100위 내 포함 키워드 오늘 순위 요약
+              </h2>
+              <span class="text-xs text-gray-400 font-bold">※ 100위 내 인디컴퍼니가 포함된 키워드만 실시간 노출</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="pr-kpi-cards-container">
+              <div class="col-span-full py-10 text-center text-gray-400 bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-150 dark-mode:border-gray-700">
+                데이터를 불러오는 중입니다...
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Collapsible Keyword Accordion with Monthly Calendar View -->
+          <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 dark-mode:border-gray-700 pb-3">
+              <div>
+                <h2 class="text-lg font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
+                  <span>📅</span> 키워드별 일자별 달력 순위 추적 (접기 / 펼치기)
+                </h2>
+                <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">
+                  키워드를 클릭하여 펼치면 달력에서 매일 날짜별 순위 기록을 한눈에 확인할 수 있습니다.
+                </p>
+              </div>
+              <div class="text-xs font-bold text-gray-500 dark-mode:text-gray-400 flex items-center gap-3">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-500 inline-block"></span> 🥇 1위</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-orange-500 inline-block"></span> 🥉 2~3위</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-blue-600 inline-block"></span> 4~10위</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-700 inline-block"></span> 11위+</span>
+              </div>
+            </div>
+
+            <!-- Accordion List Container -->
+            <div class="space-y-3" id="pr-accordion-container">
+              <div class="py-10 text-center text-gray-400 bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-150 dark-mode:border-gray-700">
+                키워드 달력 데이터를 구성하는 중입니다...
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Permanent History Audit Table -->
+          <div class="bg-white dark-mode:bg-gray-800/95 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-150 dark-mode:border-gray-700 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-150 dark-mode:border-gray-700/80 pb-4">
+              <div>
+                <h2 class="text-lg font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
+                  <span>📋</span> 영구 누적 순위 히스토리 (절대 유실 방지)
+                </h2>
+                <p class="text-xs text-gray-500 dark-mode:text-gray-400 font-medium">
+                  매일 기록된 모든 순위 데이터는 별도 파일(place_rank_history.json)에 안전하게 영구 저장됩니다.
+                </p>
+              </div>
+
+              <!-- Table Filters -->
+              <div class="flex items-center gap-2">
+                <select id="pr-table-filter-kw" class="px-3 py-2 text-xs font-bold bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-xl text-gray-800 dark-mode:text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500">
                   <option value="all">전체 키워드</option>
-                  <option value="부산사무실인테리어">부산사무실인테리어</option>
-                  <option value="부산상가인테리어">부산상가인테리어</option>
-                  <option value="부산병원인테리어">부산병원인테리어</option>
-                  <option value="부산학원인테리어">부산학원인테리어</option>
                 </select>
-                <input type="text" id="pr-table-search" placeholder="검색어 필터..." class="px-3 py-1.5 text-xs font-bold bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-lg text-gray-800 dark-mode:text-gray-200 w-36" />
+                <input type="text" id="pr-table-search" placeholder="검색어..." class="px-3 py-2 text-xs font-bold bg-gray-50 dark-mode:bg-gray-900 border border-gray-200 dark-mode:border-gray-700 rounded-xl text-gray-800 dark-mode:text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 w-36" />
               </div>
             </div>
 
             <!-- Table -->
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto rounded-xl border border-gray-100 dark-mode:border-gray-750">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr class="bg-gray-50 dark-mode:bg-gray-900/60 border-b border-gray-200 dark-mode:border-gray-700 text-gray-600 dark-mode:text-gray-300 font-extrabold uppercase tracking-wider">
-                    <th class="py-3 px-3 text-center w-24">측정일자</th>
-                    <th class="py-3 px-3 text-center w-20">시각</th>
-                    <th class="py-3 px-3 w-36">키워드</th>
-                    <th class="py-3 px-3 text-center w-28">순위 (광고제외)</th>
-                    <th class="py-3 px-3 text-center w-20">전일대비</th>
-                    <th class="py-3 px-3 w-48">확인된 등록 상호명</th>
-                    <th class="py-3 px-3">등록 주소지</th>
-                    <th class="py-3 px-3 w-36 text-center">네이버 플레이스</th>
+                    <th class="py-3.5 px-4 text-center w-28">측정일자</th>
+                    <th class="py-3.5 px-3 text-center w-20">시각</th>
+                    <th class="py-3.5 px-4 w-40">키워드</th>
+                    <th class="py-3.5 px-3 text-center w-32">순위 (광고제외)</th>
+                    <th class="py-3.5 px-3 text-center w-20">전일대비</th>
+                    <th class="py-3.5 px-4 w-52">확인된 등록 상호명</th>
+                    <th class="py-3.5 px-4">등록 주소지</th>
+                    <th class="py-3.5 px-4 text-center w-32">네이버 플레이스</th>
                   </tr>
                 </thead>
-                <tbody id="pr-history-tbody" class="divide-y divide-gray-100 dark-mode:divide-gray-700/60 text-gray-700 dark-mode:text-gray-300 font-medium">
+                <tbody id="pr-history-tbody" class="divide-y divide-gray-100 dark-mode:divide-gray-750 text-gray-700 dark-mode:text-gray-300 font-medium">
                   <tr>
-                    <td colspan="8" class="py-8 text-center text-gray-400">데이터 로딩 중...</td>
+                    <td colspan="8" class="py-8 text-center text-gray-400">데이터를 불러오는 중입니다...</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Bottom Reference & Target Place Details Section -->
-          <div class="bg-white dark-mode:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8 border border-gray-150 dark-mode:border-gray-700 space-y-6">
-            <div class="border-b border-gray-150 dark-mode:border-gray-700 pb-4">
+          <!-- 5. Bottom Reference: Target Place Branches & Competitors Breakdown -->
+          <div class="bg-white dark-mode:bg-gray-800/95 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-150 dark-mode:border-gray-700 space-y-6">
+            <div class="border-b border-gray-150 dark-mode:border-gray-700/80 pb-4">
               <h2 class="text-xl font-black text-gray-900 dark-mode:text-white flex items-center gap-2">
-                🏢 순위 체크 대상 플레이스 정보 & 키워드 매핑 가이드
+                <span>🏢</span> 순위 매핑 플레이스 등록 지점 3개소 상세 정보
               </h2>
               <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-1 font-medium leading-relaxed">
-                어떤 네이버 플레이스 등록 정보가 어떤 키워드의 순위로 매칭되어 있는지 상세히 확인할 수 있도록 정리된 목록입니다.
+                현재 네이버 스마트플레이스에 등록되어 순위가 매칭되고 있는 (주)인디컴퍼니의 3개 지점 정보입니다.
               </p>
             </div>
 
-            <!-- 3 Branches Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <!-- Branch 1: 연산동 상가/사무실 -->
-              <div class="p-5 bg-orange-50/40 dark-mode:bg-orange-950/20 border border-orange-200/80 dark-mode:border-orange-900/40 rounded-xl space-y-3">
+            <!-- 3 Branch Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <!-- Branch 1 -->
+              <div class="p-5 bg-gradient-to-br from-orange-50/60 to-amber-50/30 dark-mode:from-orange-950/30 dark-mode:to-amber-950/10 border border-orange-200/80 dark-mode:border-orange-900/40 rounded-2xl space-y-3 shadow-sm">
                 <div class="flex items-center justify-between">
                   <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-orange-600 text-white">사무실·상가 전문</span>
-                  <span class="text-[11px] font-bold text-orange-600 dark-mode:text-orange-400">📞 0507-1375-3683</span>
+                  <span class="text-xs font-bold font-mono text-orange-600 dark-mode:text-orange-400">📞 0507-1375-3683</span>
                 </div>
                 <div>
                   <h3 class="text-base font-black text-gray-900 dark-mode:text-white">인디컴퍼니 상가사무실인테리어</h3>
                   <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5">부산광역시 연제구 과정로 78 3층</p>
                 </div>
-                <div class="pt-2 border-t border-orange-200/60 dark-mode:border-orange-900/30 text-xs space-y-1">
-                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 추적 키워드:</div>
-                  <div class="flex flex-wrap gap-1">
-                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded border border-orange-200 dark-mode:border-gray-700 text-[10px] font-bold text-orange-700 dark-mode:text-orange-300">부산사무실인테리어 (1위)</span>
-                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded border border-orange-200 dark-mode:border-gray-700 text-[10px] font-bold text-orange-700 dark-mode:text-orange-300">부산상가인테리어 (3위)</span>
+                <div class="pt-2.5 border-t border-orange-200/60 dark-mode:border-orange-900/30 text-xs space-y-1.5">
+                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 상위 노출 키워드:</div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded-md border border-orange-200 dark-mode:border-gray-700 text-[11px] font-bold text-orange-700 dark-mode:text-orange-300">부산사무실인테리어 (1위)</span>
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded-md border border-orange-200 dark-mode:border-gray-700 text-[11px] font-bold text-orange-700 dark-mode:text-orange-300">부산상가인테리어 (3위)</span>
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded-md border border-orange-200 dark-mode:border-gray-700 text-[11px] font-bold text-orange-700 dark-mode:text-orange-300">연제구 사무실인테리어 (1위)</span>
                   </div>
                 </div>
-                <a href="https://map.naver.com/p/search/%EB%B6%80%EC%82%B0%EC%82%AC%EB%AC%B4%EC%8B%A4%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black rounded-lg transition-all shadow-sm">
-                  네이버 지도에서 보기 ↗
+                <a href="https://map.naver.com/p/search/%EB%B6%80%EC%82%B0%EC%82%AC%EB%AC%B4%EC%8B%A4%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black rounded-xl transition-all shadow-sm">
+                  네이버 지도에서 확인 ↗
                 </a>
               </div>
 
-              <!-- Branch 2: 망미동 학원 -->
-              <div class="p-5 bg-blue-50/40 dark-mode:bg-blue-950/20 border border-blue-200/80 dark-mode:border-blue-900/40 rounded-xl space-y-3">
+              <!-- Branch 2 -->
+              <div class="p-5 bg-gradient-to-br from-blue-50/60 to-indigo-50/30 dark-mode:from-blue-950/30 dark-mode:to-indigo-950/10 border border-blue-200/80 dark-mode:border-blue-900/40 rounded-2xl space-y-3 shadow-sm">
                 <div class="flex items-center justify-between">
                   <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-600 text-white">학원 인테리어 전문</span>
-                  <span class="text-[11px] font-bold text-blue-600 dark-mode:text-blue-400">📞 0507-1371-3683</span>
+                  <span class="text-xs font-bold font-mono text-blue-600 dark-mode:text-blue-400">📞 0507-1371-3683</span>
                 </div>
                 <div>
                   <h3 class="text-base font-black text-gray-900 dark-mode:text-white">학원인테리어 인디컴퍼니</h3>
                   <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5">부산광역시 수영구 망미번영로88번길 26 301호</p>
                 </div>
-                <div class="pt-2 border-t border-blue-200/60 dark-mode:border-blue-900/30 text-xs space-y-1">
-                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 추적 키워드:</div>
-                  <div class="flex flex-wrap gap-1">
-                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded border border-blue-200 dark-mode:border-gray-700 text-[10px] font-bold text-blue-700 dark-mode:text-blue-300">부산학원인테리어 (1위)</span>
+                <div class="pt-2.5 border-t border-blue-200/60 dark-mode:border-blue-900/30 text-xs space-y-1.5">
+                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 상위 노출 키워드:</div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded-md border border-blue-200 dark-mode:border-gray-700 text-[11px] font-bold text-blue-700 dark-mode:text-blue-300">부산학원인테리어 (1위)</span>
                   </div>
                 </div>
-                <a href="https://map.naver.com/p/search/%EB%B6%80%EC%82%B0%ED%95%99%EC%9B%90%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-lg transition-all shadow-sm">
-                  네이버 지도에서 보기 ↗
+                <a href="https://map.naver.com/p/search/%EB%B6%80%EC%82%B0%ED%95%99%EC%9B%90%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl transition-all shadow-sm">
+                  네이버 지도에서 확인 ↗
                 </a>
               </div>
 
-              <!-- Branch 3: 재송동 병원/본사 -->
-              <div class="p-5 bg-purple-50/40 dark-mode:bg-purple-950/20 border border-purple-200/80 dark-mode:border-purple-900/40 rounded-xl space-y-3">
+              <!-- Branch 3 -->
+              <div class="p-5 bg-gradient-to-br from-purple-50/60 to-fuchsia-50/30 dark-mode:from-purple-950/30 dark-mode:to-fuchsia-950/10 border border-purple-200/80 dark-mode:border-purple-900/40 rounded-2xl space-y-3 shadow-sm">
                 <div class="flex items-center justify-between">
                   <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-600 text-white">병원·종합 인테리어</span>
-                  <span class="text-[11px] font-bold text-purple-600 dark-mode:text-purple-400">📞 0507-1321-0569</span>
+                  <span class="text-xs font-bold font-mono text-purple-600 dark-mode:text-purple-400">📞 0507-1321-0569</span>
                 </div>
                 <div>
                   <h3 class="text-base font-black text-gray-900 dark-mode:text-white">인디컴퍼니 (본점)</h3>
                   <p class="text-xs text-gray-500 dark-mode:text-gray-400 mt-0.5">부산광역시 해운대구 해운대로81번길 24 3층 305호</p>
                 </div>
-                <div class="pt-2 border-t border-purple-200/60 dark-mode:border-purple-900/30 text-xs space-y-1">
-                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 추적 키워드:</div>
-                  <div class="flex flex-wrap gap-1">
-                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded border border-purple-200 dark-mode:border-gray-700 text-[10px] font-bold text-purple-700 dark-mode:text-purple-300">부산병원인테리어 (43위)</span>
+                <div class="pt-2.5 border-t border-purple-200/60 dark-mode:border-purple-900/30 text-xs space-y-1.5">
+                  <div class="text-[11px] text-gray-600 dark-mode:text-gray-300 font-bold">🎯 상위 노출 키워드:</div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded-md border border-purple-200 dark-mode:border-gray-700 text-[11px] font-bold text-purple-700 dark-mode:text-purple-300">해운대 병원인테리어 (19위)</span>
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded-md border border-purple-200 dark-mode:border-gray-700 text-[11px] font-bold text-purple-700 dark-mode:text-purple-300">연제구 병원인테리어 (25위)</span>
+                    <span class="px-2 py-0.5 bg-white dark-mode:bg-gray-800 rounded-md border border-purple-200 dark-mode:border-gray-700 text-[11px] font-bold text-purple-700 dark-mode:text-purple-300">부산병원인테리어 (43위)</span>
                   </div>
                 </div>
-                <a href="https://map.naver.com/p/search/%EB%B6%80%EC%82%B0%EB%B3%91%EC%9B%90%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-black rounded-lg transition-all shadow-sm">
-                  네이버 지도에서 보기 ↗
+                <a href="https://map.naver.com/p/search/%ED%95%B4%EC%9A%B4%EB%8C%80%20%EB%B3%91%EC%9B%90%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4" target="_blank" class="block text-center py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-black rounded-xl transition-all shadow-sm">
+                  네이버 지도에서 확인 ↗
                 </a>
-              </div>
-            </div>
-
-            <!-- Top 5 Competitors Accordion/Table -->
-            <div class="pt-4 border-t border-gray-150 dark-mode:border-gray-700 space-y-3">
-              <h3 class="text-sm font-black text-gray-800 dark-mode:text-gray-200">
-                🔍 키워드별 최상위 경쟁사 TOP 5 현황
-              </h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="pr-competitors-breakdown">
-                <!-- Competitors will be inserted here -->
               </div>
             </div>
           </div>
@@ -14773,13 +14778,15 @@
     function setupPlaceRankCheck() {
       let prHistoryData = [];
       let prSummaryData = [];
-      let activeChartKw = "부산사무실인테리어";
+      let expandedKeywords = new Set(); // Stores expanded keyword names
 
       const refreshBtn = document.getElementById("pr-refresh-btn");
       const exportExcelBtn = document.getElementById("pr-export-excel-btn");
       const runNowBtn = document.getElementById("pr-run-now-btn");
       const filterKw = document.getElementById("pr-table-filter-kw");
       const searchInput = document.getElementById("pr-table-search");
+      const expandAllBtn = document.getElementById("pr-expand-all-btn");
+      const collapseAllBtn = document.getElementById("pr-collapse-all-btn");
 
       if (!refreshBtn || !runNowBtn) return;
 
@@ -14798,11 +14805,17 @@
             prHistoryData = data.history || [];
             prSummaryData = data.summary || [];
 
-            if (serverStatus) serverStatus.textContent = "로컬 백엔드 서버 연결됨";
+            // Filter summary data to only included/ranked keywords (within 100 ranks)
+            prSummaryData = prSummaryData.filter(s => s.targetRank !== null && s.targetRank <= 100);
+
+            if (serverStatus) serverStatus.textContent = "로컬 백엔드 서버 연결됨 (3888)";
             if (serverDot) serverDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
 
             const countEl = document.getElementById("pr-total-records-count");
             if (countEl) countEl.textContent = `${prHistoryData.length}건`;
+
+            const kwCountEl = document.getElementById("pr-active-kw-count");
+            if (kwCountEl) kwCountEl.textContent = `${prSummaryData.length}개`;
 
             const lastRunEl = document.getElementById("pr-last-run-time");
             if (lastRunEl && prHistoryData.length > 0) {
@@ -14810,10 +14823,22 @@
               lastRunEl.textContent = `${latest.date} ${latest.time || ''}`;
             }
 
+            // Populate Filter Dropdown
+            if (filterKw) {
+              const currentVal = filterKw.value;
+              filterKw.innerHTML = '<option value="all">전체 키워드</option>';
+              prSummaryData.forEach(s => {
+                const opt = document.createElement("option");
+                opt.value = s.keyword;
+                opt.textContent = `${s.keyword} (${s.targetRank}위)`;
+                filterKw.appendChild(opt);
+              });
+              filterKw.value = currentVal;
+            }
+
             renderKPICards(prSummaryData);
+            renderAccordionCalendars(prSummaryData);
             renderHistoryTable();
-            renderTrendChart(activeChartKw);
-            renderCompetitorsBreakdown(prSummaryData);
           }
         } catch (err) {
           console.error("플레이스 순위 데이터 로드 실패:", err);
@@ -14822,43 +14847,40 @@
         }
       }
 
-      // 2. Render Top KPI Cards
+      // 2. Render Top KPI Summary Cards
       function renderKPICards(summaryList) {
         const container = document.getElementById("pr-kpi-cards-container");
         if (!container) return;
 
-        const defaultKeywords = [
-          "부산사무실인테리어",
-          "부산상가인테리어",
-          "부산병원인테리어",
-          "부산학원인테리어"
-        ];
+        if (summaryList.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full py-8 text-center text-gray-400 bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-150 dark-mode:border-gray-700 text-xs font-semibold">
+              100위 내 포함된 순위 데이터가 없습니다.
+            </div>
+          `;
+          return;
+        }
 
         let html = "";
-        defaultKeywords.forEach(kw => {
-          const item = summaryList.find(s => s.keyword === kw) || {
-            keyword: kw,
-            targetRank: null,
-            diffText: "-",
-            totalOrganicCount: 0,
-            targetInfo: { name: "인디컴퍼니", address: "-" }
-          };
-
+        summaryList.forEach(item => {
           const rank = item.targetRank;
-          const rankDisplay = rank ? `${rank}위` : "순위 밖";
           const isTop1 = rank === 1;
           const isTop3 = rank && rank <= 3;
           
-          let badgeColor = "bg-gray-100 text-gray-700 dark-mode:bg-gray-700 dark-mode:text-gray-300";
+          let cardBorder = "border-gray-150 dark-mode:border-gray-700";
+          let badgeBg = "bg-slate-700 text-white";
           let medal = "";
+
           if (isTop1) {
-            badgeColor = "bg-amber-500 text-white font-black shadow-sm";
+            cardBorder = "border-amber-300 dark-mode:border-amber-800/60 shadow-amber-500/5";
+            badgeBg = "bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-black shadow-sm";
             medal = "🥇 ";
           } else if (isTop3) {
-            badgeColor = "bg-orange-500 text-white font-black shadow-sm";
+            cardBorder = "border-orange-300 dark-mode:border-orange-800/60 shadow-orange-500/5";
+            badgeBg = "bg-gradient-to-r from-orange-500 to-amber-600 text-white font-black shadow-sm";
             medal = "🥉 ";
-          } else if (rank) {
-            badgeColor = "bg-blue-600 text-white font-bold";
+          } else if (rank <= 10) {
+            badgeBg = "bg-blue-600 text-white font-black";
           }
 
           let diffBadge = `<span class="text-xs font-bold text-gray-400 font-mono">-</span>`;
@@ -14869,31 +14891,31 @@
           }
 
           html += `
-            <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-150 dark-mode:border-gray-700 flex flex-col justify-between space-y-4 hover:shadow-md transition-all">
+            <div class="bg-white dark-mode:bg-gray-800/95 rounded-2xl p-5 shadow-sm border ${cardBorder} flex flex-col justify-between space-y-3.5 hover:shadow-md transition-all group">
               <div>
-                <div class="flex items-center justify-between gap-2 mb-2">
-                  <span class="text-xs font-black text-gray-600 dark-mode:text-gray-300 truncate">${kw}</span>
+                <div class="flex items-center justify-between gap-2 mb-1.5">
+                  <span class="text-xs font-black text-gray-700 dark-mode:text-gray-200 truncate group-hover:text-orange-600 transition-colors">${item.keyword}</span>
                   ${diffBadge}
                 </div>
                 <div class="flex items-baseline gap-2">
-                  <span class="text-3xl font-black font-mono text-gray-900 dark-mode:text-white tracking-tight">${medal}${rankDisplay}</span>
-                  <span class="text-[11px] text-gray-400 font-medium">/ ${item.totalOrganicCount || 70}개</span>
+                  <span class="text-3xl font-black font-mono text-gray-900 dark-mode:text-white tracking-tight">${medal}${rank}위</span>
+                  <span class="text-[11px] text-gray-400 font-medium font-mono">/ ${item.totalOrganicCount || 70}개</span>
                 </div>
               </div>
 
-              <div class="pt-3 border-t border-gray-100 dark-mode:border-gray-700/60 text-[11px] space-y-1">
+              <div class="pt-2.5 border-t border-gray-100 dark-mode:border-gray-700/60 text-[11px] space-y-1">
                 <div class="text-gray-500 dark-mode:text-gray-400 flex items-center justify-between">
                   <span class="font-bold text-gray-800 dark-mode:text-gray-200 truncate">${(item.targetInfo && item.targetInfo.name) || '인디컴퍼니'}</span>
-                  <span class="px-1.5 py-0.5 rounded text-[9px] ${badgeColor}">광고제외</span>
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-black ${badgeBg}">광고제외</span>
                 </div>
-                <div class="text-gray-400 truncate text-[10px]">
-                  ${(item.targetInfo && (item.targetInfo.address || item.targetInfo.fullAddress)) || '주소 정보 확인 중'}
+                <div class="text-gray-400 truncate text-[10px] font-medium">
+                  ${(item.targetInfo && (item.targetInfo.address || item.targetInfo.fullAddress)) || '-'}
                 </div>
               </div>
 
-              <a href="https://map.naver.com/p/search/${encodeURIComponent(kw)}" target="_blank" class="w-full py-1.5 bg-gray-50 hover:bg-orange-50 dark-mode:bg-gray-700 dark-mode:hover:bg-orange-950/40 text-gray-700 hover:text-orange-600 dark-mode:text-gray-200 text-center text-[11px] font-black rounded-lg border border-gray-200 dark-mode:border-gray-600 transition-all flex items-center justify-center gap-1">
-                플레이스 검색결과 보기 ↗
-              </a>
+              <button onclick="document.getElementById('pr-acc-${encodeURIComponent(item.keyword)}')?.scrollIntoView({behavior: 'smooth'})" class="w-full py-1.5 bg-gray-50 hover:bg-orange-50 dark-mode:bg-gray-700/60 dark-mode:hover:bg-orange-950/40 text-gray-700 hover:text-orange-600 dark-mode:text-gray-200 text-center text-[11px] font-black rounded-xl border border-gray-200/80 dark-mode:border-gray-650 transition-all flex items-center justify-center gap-1">
+                📅 달력 기록 보기
+              </button>
             </div>
           `;
         });
@@ -14901,7 +14923,231 @@
         container.innerHTML = html;
       }
 
-      // 3. Render Historical Table
+      // 3. Render Collapsible Accordion with Monthly Calendar View
+      function renderAccordionCalendars(summaryList) {
+        const container = document.getElementById("pr-accordion-container");
+        if (!container) return;
+
+        if (summaryList.length === 0) {
+          container.innerHTML = `
+            <div class="py-10 text-center text-gray-400 bg-white dark-mode:bg-gray-800 rounded-2xl border border-gray-150 dark-mode:border-gray-700 text-xs font-semibold">
+              추적 중인 키워드가 없습니다.
+            </div>
+          `;
+          return;
+        }
+
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1; // 1-12
+
+        let html = "";
+        summaryList.forEach((item, idx) => {
+          const kw = item.keyword;
+          const isExpanded = expandedKeywords.has(kw);
+          const rank = item.targetRank;
+          const kwHistory = prHistoryData.filter(h => h.keyword === kw);
+
+          // Medal / Badge
+          let rankBadge = `<span class="px-2.5 py-1 rounded-lg text-xs font-black bg-slate-800 text-slate-100 font-mono">${rank}위</span>`;
+          if (rank === 1) {
+            rankBadge = `<span class="px-3 py-1 rounded-lg text-xs font-black bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-mono shadow-md">🥇 1위</span>`;
+          } else if (rank <= 3) {
+            rankBadge = `<span class="px-3 py-1 rounded-lg text-xs font-black bg-gradient-to-r from-orange-500 to-amber-600 text-white font-mono shadow-md">🥉 ${rank}위</span>`;
+          } else if (rank <= 10) {
+            rankBadge = `<span class="px-3 py-1 rounded-lg text-xs font-black bg-blue-600 text-white font-mono shadow-sm">${rank}위</span>`;
+          }
+
+          // Generate Monthly Calendar Cells
+          const calendarCellsHtml = generateCalendarCells(currentYear, currentMonth, kwHistory);
+
+          html += `
+            <div id="pr-acc-${encodeURIComponent(kw)}" class="bg-white dark-mode:bg-gray-800/95 rounded-2xl shadow-sm border border-gray-150 dark-mode:border-gray-700 overflow-hidden transition-all">
+              <!-- Accordion Header (Click to toggle) -->
+              <div class="pr-acc-header flex items-center justify-between p-4 md:p-5 cursor-pointer select-none hover:bg-gray-50/80 dark-mode:hover:bg-gray-750/40 transition-colors" data-kw="${kw}">
+                <div class="flex items-center gap-3.5">
+                  <span class="w-7 h-7 rounded-xl bg-orange-100 dark-mode:bg-orange-950/60 text-orange-600 dark-mode:text-orange-400 flex items-center justify-center font-black text-xs">
+                    ${idx + 1}
+                  </span>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-sm md:text-base font-black text-gray-900 dark-mode:text-white tracking-tight">${kw}</h3>
+                      ${rankBadge}
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-0.5">
+                      매칭 상호: <strong class="text-gray-700 dark-mode:text-gray-300">${(item.targetInfo && item.targetInfo.name) || '인디컴퍼니'}</strong>
+                      ${item.targetInfo && item.targetInfo.address ? ` (${item.targetInfo.address})` : ''}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-orange-600 dark-mode:text-orange-400 hidden sm:inline">
+                    ${isExpanded ? '▲ 달력 접기' : '▼ 달력형 일별 순위 보기'}
+                  </span>
+                  <div class="w-8 h-8 rounded-xl bg-gray-100 dark-mode:bg-gray-700 flex items-center justify-center text-gray-500 dark-mode:text-gray-300 text-xs font-bold transition-transform ${isExpanded ? 'rotate-180 bg-orange-100 text-orange-600' : ''}">
+                    ▼
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accordion Body (Calendar View) -->
+              <div class="pr-acc-body ${isExpanded ? '' : 'hidden'} p-5 md:p-6 border-t border-gray-100 dark-mode:border-gray-700/80 bg-slate-50/50 dark-mode:bg-gray-900/40 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-black text-gray-800 dark-mode:text-gray-100">
+                      📅 ${currentYear}년 ${currentMonth}월 일별 순위 기록표
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300 font-mono">
+                      총 ${kwHistory.length}회 기록됨
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-400 font-medium">
+                    매일 오전 09:00 정기 순위가 각 날짜 칸에 자동으로 기록됩니다.
+                  </div>
+                </div>
+
+                <!-- Calendar Grid Component -->
+                <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-4 md:p-5 border border-gray-150 dark-mode:border-gray-700 shadow-sm">
+                  <!-- Weekday Headers -->
+                  <div class="grid grid-cols-7 gap-1.5 md:gap-2 mb-2 text-center text-[11px] font-black uppercase">
+                    <div class="py-1 text-red-500">일</div>
+                    <div class="py-1 text-gray-500 dark-mode:text-gray-400">월</div>
+                    <div class="py-1 text-gray-500 dark-mode:text-gray-400">화</div>
+                    <div class="py-1 text-gray-500 dark-mode:text-gray-400">수</div>
+                    <div class="py-1 text-gray-500 dark-mode:text-gray-400">목</div>
+                    <div class="py-1 text-gray-500 dark-mode:text-gray-400">금</div>
+                    <div class="py-1 text-blue-500">토</div>
+                  </div>
+
+                  <!-- Calendar Days Grid -->
+                  <div class="grid grid-cols-7 gap-1.5 md:gap-2">
+                    ${calendarCellsHtml}
+                  </div>
+                </div>
+
+                <!-- Top 5 Competitors in this Keyword -->
+                ${item.topCompetitors && item.topCompetitors.length > 0 ? `
+                  <div class="bg-white dark-mode:bg-gray-800 rounded-2xl p-4 border border-gray-150 dark-mode:border-gray-700 space-y-2.5">
+                    <div class="text-xs font-black text-gray-700 dark-mode:text-gray-200 flex items-center justify-between">
+                      <span>📌 최상위 경쟁사 TOP 5 (실시간 기준)</span>
+                      <span class="text-[10px] text-gray-400 font-medium">광고 제외 순위</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2">
+                      ${item.topCompetitors.map(c => `
+                        <div class="p-2.5 rounded-xl border text-xs flex flex-col justify-between space-y-1 ${c.name.includes('인디') ? 'bg-orange-50/80 border-orange-300 dark-mode:bg-orange-950/30 dark-mode:border-orange-800' : 'bg-gray-50/60 border-gray-150 dark-mode:bg-gray-900/30 dark-mode:border-gray-700'}">
+                          <div class="flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-md flex items-center justify-center font-mono font-black text-[10px] ${c.name.includes('인디') ? 'bg-orange-600 text-white' : 'bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300'}">${c.rank}</span>
+                            <span class="font-bold truncate ${c.name.includes('인디') ? 'text-orange-600 dark-mode:text-orange-400 font-black' : 'text-gray-800 dark-mode:text-gray-200'}">${c.name}</span>
+                          </div>
+                          <div class="text-[10px] text-gray-400 truncate">${c.address || '-'}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+
+        // Add Click Listener to Accordion Headers
+        container.querySelectorAll(".pr-acc-header").forEach(hdr => {
+          hdr.addEventListener("click", () => {
+            const kw = hdr.dataset.kw;
+            if (expandedKeywords.has(kw)) {
+              expandedKeywords.delete(kw);
+            } else {
+              expandedKeywords.add(kw);
+            }
+            renderAccordionCalendars(prSummaryData);
+          });
+        });
+      }
+
+      // Helper: Generate Monthly Calendar Day Cells
+      function generateCalendarCells(year, month, historyList) {
+        const dateMap = {};
+        historyList.forEach(h => {
+          if (!dateMap[h.date] || (h.time && h.time > (dateMap[h.date].time || ''))) {
+            dateMap[h.date] = h;
+          }
+        });
+
+        const firstDay = new Date(year, month - 1, 1).getDay(); // 0 (Sun) - 6 (Sat)
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        let cellsHtml = "";
+        for (let i = 0; i < firstDay; i++) {
+          cellsHtml += '<div class="h-16 md:h-20 bg-gray-50/40 dark-mode:bg-gray-900/20 rounded-xl border border-transparent"></div>';
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dStr = String(d).padStart(2, '0');
+          const mStr = String(month).padStart(2, '0');
+          const fullDate = `${year}-${mStr}-${dStr}`;
+          const record = dateMap[fullDate];
+
+          let contentHtml = "";
+          let cellBg = "bg-white dark-mode:bg-gray-800/90 border-gray-150 dark-mode:border-gray-700/60";
+
+          if (record && record.targetRank) {
+            const rank = record.targetRank;
+            let badgeClass = "bg-slate-700 text-white";
+            let icon = "";
+
+            if (rank === 1) {
+              badgeClass = "bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-black shadow-md ring-2 ring-amber-300 dark-mode:ring-amber-700";
+              icon = "🥇 ";
+              cellBg = "bg-amber-50/60 dark-mode:bg-amber-950/20 border-amber-200 dark-mode:border-amber-900/50";
+            } else if (rank <= 3) {
+              badgeClass = "bg-gradient-to-r from-orange-500 to-amber-600 text-white font-black shadow-md ring-1 ring-orange-300 dark-mode:ring-orange-700";
+              icon = "🥉 ";
+              cellBg = "bg-orange-50/50 dark-mode:bg-orange-950/20 border-orange-200 dark-mode:border-orange-900/50";
+            } else if (rank <= 10) {
+              badgeClass = "bg-blue-600 text-white font-black shadow-sm";
+              cellBg = "bg-blue-50/40 dark-mode:bg-blue-950/20 border-blue-200 dark-mode:border-blue-900/50";
+            } else {
+              badgeClass = "bg-slate-800 dark-mode:bg-slate-700 text-slate-100 font-bold";
+            }
+
+            contentHtml = `
+              <div class="mt-1 flex flex-col items-center justify-center">
+                <span class="px-2 py-0.5 rounded-lg text-[11px] md:text-xs font-black font-mono ${badgeClass} transition-transform hover:scale-105 select-none" title="${record.targetInfo && record.targetInfo.name ? record.targetInfo.name : '인디컴퍼니'} (${rank}위)">
+                  ${icon}${rank}위
+                </span>
+                <span class="text-[9px] text-gray-400 font-mono mt-0.5 hidden md:block truncate max-w-[70px]">
+                  ${record.time || ''}
+                </span>
+              </div>
+            `;
+          } else {
+            contentHtml = `
+              <div class="mt-2 flex items-center justify-center">
+                <span class="text-[10px] text-gray-300 dark-mode:text-gray-600 font-mono">-</span>
+              </div>
+            `;
+          }
+
+          cellsHtml += `
+            <div class="h-16 md:h-20 p-1.5 md:p-2 rounded-xl border ${cellBg} flex flex-col justify-between transition-all hover:border-orange-400/80 group">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-mono font-black ${record && record.targetRank ? 'text-gray-900 dark-mode:text-white' : 'text-gray-400 dark-mode:text-gray-500'}">
+                  ${d}
+                </span>
+                ${record && record.targetRank ? '<span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>' : ''}
+              </div>
+              ${contentHtml}
+            </div>
+          `;
+        }
+
+        return cellsHtml;
+      }
+
+      // 4. Render Historical Audit Table
       function renderHistoryTable() {
         const tbody = document.getElementById("pr-history-tbody");
         if (!tbody) return;
@@ -14910,6 +15156,7 @@
         const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : "";
 
         const filtered = prHistoryData.filter(item => {
+          if (item.targetRank === null || item.targetRank > 100) return false;
           if (kwFilterVal !== "all" && item.keyword !== kwFilterVal) return false;
           if (searchVal) {
             const str = `${item.date} ${item.keyword} ${(item.targetInfo && item.targetInfo.name) || ''} ${(item.targetInfo && item.targetInfo.address) || ''}`.toLowerCase();
@@ -14934,27 +15181,27 @@
           const rank = item.targetRank;
           let rankBadge = `<span class="px-2 py-0.5 rounded text-xs font-black bg-gray-100 text-gray-500">순위 밖</span>`;
           if (rank === 1) {
-            rankBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-black bg-amber-500 text-white shadow-sm">🥇 1위</span>`;
+            rankBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-black bg-amber-500 text-white shadow-sm font-mono">🥇 1위</span>`;
           } else if (rank && rank <= 3) {
-            rankBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-black bg-orange-500 text-white shadow-sm">🥉 ${rank}위</span>`;
+            rankBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-black bg-orange-500 text-white shadow-sm font-mono">🥉 ${rank}위</span>`;
           } else if (rank) {
-            rankBadge = `<span class="px-2 py-0.5 rounded text-xs font-black bg-blue-50 text-blue-600 border border-blue-200 dark-mode:bg-blue-900/40 dark-mode:text-blue-300">${rank}위</span>`;
+            rankBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-black bg-blue-50 text-blue-600 border border-blue-200 dark-mode:bg-blue-900/40 dark-mode:text-blue-300 font-mono">${rank}위</span>`;
           }
 
           const targetName = (item.targetInfo && item.targetInfo.name) || item.targetName || "인디컴퍼니";
           const targetAddr = (item.targetInfo && (item.targetInfo.address || item.targetInfo.fullAddress)) || "-";
 
           html += `
-            <tr class="hover:bg-gray-50 dark-mode:hover:bg-gray-750 transition-colors">
-              <td class="py-3 px-3 text-center font-mono font-bold text-gray-800 dark-mode:text-gray-200">${item.date}</td>
+            <tr class="hover:bg-gray-50 dark-mode:hover:bg-gray-750/50 transition-colors">
+              <td class="py-3 px-4 text-center font-mono font-bold text-gray-800 dark-mode:text-gray-200">${item.date}</td>
               <td class="py-3 px-3 text-center font-mono text-gray-400 text-[11px]">${item.time || '-'}</td>
-              <td class="py-3 px-3 font-bold text-gray-900 dark-mode:text-white">${item.keyword}</td>
+              <td class="py-3 px-4 font-bold text-gray-900 dark-mode:text-white">${item.keyword}</td>
               <td class="py-3 px-3 text-center font-mono">${rankBadge}</td>
               <td class="py-3 px-3 text-center font-mono font-bold text-gray-400">-</td>
-              <td class="py-3 px-3 font-bold text-gray-800 dark-mode:text-gray-200">${targetName}</td>
-              <td class="py-3 px-3 text-gray-500 dark-mode:text-gray-400 text-[11px] truncate max-w-xs" title="${targetAddr}">${targetAddr}</td>
-              <td class="py-3 px-3 text-center">
-                <a href="https://map.naver.com/p/search/${encodeURIComponent(item.keyword)}" target="_blank" class="px-2.5 py-1 rounded bg-gray-100 hover:bg-orange-600 hover:text-white dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300 text-[10px] font-bold transition-all inline-block">
+              <td class="py-3 px-4 font-bold text-gray-800 dark-mode:text-gray-200">${targetName}</td>
+              <td class="py-3 px-4 text-gray-500 dark-mode:text-gray-400 text-[11px] truncate max-w-xs" title="${targetAddr}">${targetAddr}</td>
+              <td class="py-3 px-4 text-center">
+                <a href="https://map.naver.com/p/search/${encodeURIComponent(item.keyword)}" target="_blank" class="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-orange-600 hover:text-white dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300 text-[10px] font-bold transition-all inline-block">
                   검색결과 ↗
                 </a>
               </td>
@@ -14965,106 +15212,22 @@
         tbody.innerHTML = html;
       }
 
-      // 4. Render Trend Chart
-      function renderTrendChart(kw) {
-        const container = document.getElementById("pr-trend-chart-container");
-        if (!container) return;
+      // 5. Event Listeners
+      refreshBtn.addEventListener("click", () => loadPlaceRankData());
 
-        const kwItems = prHistoryData.filter(h => h.keyword === kw);
-        // Sort chronologically ascending
-        const sorted = [...kwItems].sort((a, b) => new Date(a.timestamp || a.date).getTime() - new Date(b.timestamp || b.date).getTime());
-
-        if (sorted.length === 0) {
-          container.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-xs text-gray-400 font-bold">[${kw}]에 대한 순위 기록이 아직 없습니다.</div>`;
-          return;
-        }
-
-        const width = container.clientWidth || 700;
-        const height = 220;
-        const padding = 35;
-
-        // Invert Y axis so rank 1 is at top, rank 100 is at bottom
-        const maxRank = Math.max(...sorted.map(s => s.targetRank || 70), 50);
-        const minRank = 1;
-
-        const points = [];
-        const stepX = (width - padding * 2) / Math.max(sorted.length - 1, 1);
-
-        sorted.forEach((d, idx) => {
-          const x = padding + idx * stepX;
-          const rank = d.targetRank || maxRank;
-          // Inverted ratio (rank 1 is at ratio 1, maxRank is at ratio 0)
-          const ratio = (maxRank - rank) / Math.max(maxRank - minRank, 1);
-          const y = height - padding - ratio * (height - padding * 2);
-          points.push({ x, y, date: d.date.substring(5), rank: d.targetRank ? `${d.targetRank}위` : '순위밖', val: d.targetRank });
+      if (expandAllBtn) {
+        expandAllBtn.addEventListener("click", () => {
+          prSummaryData.forEach(s => expandedKeywords.add(s.keyword));
+          renderAccordionCalendars(prSummaryData);
         });
-
-        let pathD = `M ${points[0].x} ${points[0].y}`;
-        points.forEach((p, idx) => {
-          if (idx > 0) pathD += ` L ${p.x} ${p.y}`;
-        });
-
-        let pointsHtml = "";
-        points.forEach(p => {
-          pointsHtml += `
-            <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#ea580c" stroke="#ffffff" stroke-width="2" />
-            <text x="${p.x}" y="${p.y - 8}" fill="#ea580c" font-size="9" text-anchor="middle" font-weight="900" class="font-mono">${p.rank}</text>
-            <text x="${p.x}" y="${height - 12}" fill="#9CA3AF" font-size="8" text-anchor="middle" font-weight="bold" class="font-mono">${p.date}</text>
-          `;
-        });
-
-        container.innerHTML = `
-          <svg width="${width}" height="${height}" class="w-full h-full select-none">
-            <!-- Grid Lines -->
-            <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="#E5E7EB" stroke-dasharray="4,4" class="dark-mode:stroke-gray-700" />
-            <text x="${padding - 6}" y="${padding + 4}" fill="#10B981" font-size="9" text-anchor="end" font-weight="black" class="font-mono">1위</text>
-            
-            <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#E5E7EB" stroke-dasharray="4,4" class="dark-mode:stroke-gray-700" />
-            <text x="${padding - 6}" y="${height - padding + 4}" fill="#9CA3AF" font-size="8" text-anchor="end" font-weight="bold" class="font-mono">${maxRank}위</text>
-
-            <!-- Line Path -->
-            <path d="${pathD}" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-            ${pointsHtml}
-          </svg>
-        `;
       }
 
-      // 5. Render Competitors Breakdown
-      function renderCompetitorsBreakdown(summaryList) {
-        const container = document.getElementById("pr-competitors-breakdown");
-        if (!container) return;
-
-        let html = "";
-        summaryList.forEach(item => {
-          const comps = item.topCompetitors || [];
-          html += `
-            <div class="p-4 bg-gray-50/70 dark-mode:bg-gray-900/50 rounded-xl border border-gray-150 dark-mode:border-gray-750 space-y-2.5">
-              <div class="flex items-center justify-between border-b border-gray-200 dark-mode:border-gray-700 pb-2">
-                <span class="font-black text-xs text-gray-800 dark-mode:text-gray-200">📌 ${item.keyword}</span>
-                <span class="text-[10px] font-bold text-orange-600">인디컴퍼니: ${item.targetRank ? item.targetRank + '위' : '순위밖'}</span>
-              </div>
-              <div class="space-y-1.5 text-xs">
-                ${comps.map(c => `
-                  <div class="flex items-center justify-between text-[11px]">
-                    <div class="flex items-center gap-1.5 truncate">
-                      <span class="w-5 h-5 rounded flex items-center justify-center font-mono font-black text-[10px] ${c.name.includes('인디') ? 'bg-orange-600 text-white' : 'bg-gray-200 dark-mode:bg-gray-700 text-gray-700 dark-mode:text-gray-300'}">${c.rank}</span>
-                      <span class="font-bold truncate ${c.name.includes('인디') ? 'text-orange-600 dark-mode:text-orange-400 font-black' : 'text-gray-800 dark-mode:text-gray-200'}">${c.name}</span>
-                    </div>
-                    <span class="text-gray-400 text-[10px] truncate max-w-[120px]">${c.address || ''}</span>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `;
+      if (collapseAllBtn) {
+        collapseAllBtn.addEventListener("click", () => {
+          expandedKeywords.clear();
+          renderAccordionCalendars(prSummaryData);
         });
-
-        container.innerHTML = html;
       }
-
-      // 6. Event Listeners
-      refreshBtn.addEventListener("click", () => {
-        loadPlaceRankData();
-      });
 
       if (filterKw) {
         filterKw.addEventListener("change", () => renderHistoryTable());
@@ -15072,18 +15235,6 @@
       if (searchInput) {
         searchInput.addEventListener("input", () => renderHistoryTable());
       }
-
-      // Chart Tabs
-      document.querySelectorAll(".pr-chart-tab").forEach(tab => {
-        tab.addEventListener("click", () => {
-          document.querySelectorAll(".pr-chart-tab").forEach(t => {
-            t.className = "pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark-mode:bg-gray-700 text-gray-600 dark-mode:text-gray-300";
-          });
-          tab.className = "pr-chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-600 text-white shadow-sm";
-          activeChartKw = tab.dataset.kw;
-          renderTrendChart(activeChartKw);
-        });
-      });
 
       // Manual Run Now Button
       runNowBtn.addEventListener("click", async () => {
@@ -15093,7 +15244,7 @@
         if (runNowBtn.disabled) return;
         runNowBtn.disabled = true;
         if (icon) icon.textContent = "⏳";
-        if (text) text.textContent = "네이버 플레이스 순위 측정 중... (약 15~20초 소요)";
+        if (text) text.textContent = "10개 키워드 네이버 플레이스 100위 전수 조사 중... (약 20~30초 소요)";
 
         try {
           const url = getLocalServerUrl("/api/place-rank/check");
@@ -15103,7 +15254,7 @@
           });
           const result = await res.json();
           if (result.success) {
-            alert(`✅ 순위 측정이 완료되었습니다! (총 ${result.count}개 키워드 최신 순위 영구 기록 완료)`);
+            alert(`✅ 순위 조사가 완료되었습니다! (100위 내 인디컴퍼니가 포함된 ${result.count}개 키워드 최신 순위 영구 기록 완료)`);
             await loadPlaceRankData();
           } else {
             alert(`❌ 순위 측정 실패: ${result.error || '알 수 없는 오류'}`);
@@ -15130,12 +15281,12 @@
             return;
           }
 
-          const exportRows = prHistoryData.map((h, i) => ({
+          const exportRows = prHistoryData.filter(h => h.targetRank && h.targetRank <= 100).map((h, i) => ({
             "번호": i + 1,
             "측정일자": h.date,
             "측정시각": h.time || "",
             "키워드": h.keyword,
-            "순위(광고제외)": h.targetRank ? `${h.targetRank}위` : "순위권 외",
+            "순위(광고제외)": `${h.targetRank}위`,
             "대상업체명": (h.targetInfo && h.targetInfo.name) || h.targetName || "인디컴퍼니",
             "등록주소": (h.targetInfo && (h.targetInfo.fullAddress || h.targetInfo.address)) || "",
             "연락처": (h.targetInfo && h.targetInfo.phone) || "",
@@ -15147,7 +15298,7 @@
           XLSX.utils.book_append_sheet(wb, ws, "플레이스순위기록");
 
           const now = new Date();
-          const filename = `네이버플레이스_순위기록_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.xlsx`;
+          const filename = `네이버플레이스_100위내_순위기록_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.xlsx`;
           XLSX.writeFile(wb, filename);
         });
       }

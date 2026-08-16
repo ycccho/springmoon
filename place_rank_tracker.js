@@ -1,8 +1,8 @@
 /**
  * 네이버 플레이스 키워드 순위 추적 & 영구 기록 모듈 (Place Rank Tracker)
  * - 매일 아침 09:00 (KST) 자동 실행
- * - 지정된 키워드별 네이버 지도/플레이스 전체 순위(광고 제외) 측정
- * - 인디컴퍼니 및 타겟 업체 순위 영구 기록 (place_rank_history.json)
+ * - 지정된 키워드별 네이버 지도/플레이스 전체 순위(광고 제외, 100위 이내) 측정
+ * - 인디컴퍼니 포함 키워드만 엄선하여 영구 기록 (place_rank_history.json)
  */
 
 const fs = require('fs');
@@ -13,13 +13,35 @@ const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const HISTORY_FILE = path.join(__dirname, 'place_rank_history.json');
 const BACKUP_FILE = path.join(__dirname, 'place_rank_history_backup.json');
 
-// 기본 추적 키워드 및 타겟 업체
+// 검증된 100위 이내 인디컴퍼니 노출 키워드 목록
 const DEFAULT_KEYWORDS = [
   "부산사무실인테리어",
   "부산상가인테리어",
+  "부산학원인테리어",
   "부산병원인테리어",
-  "부산학원인테리어"
+  "해운대 병원인테리어",
+  "연제구 병원인테리어",
+  "연제구 사무실인테리어"
 ];
+
+// 검사 대상 후보 키워드 전체 (100위 이내 인디컴퍼니 발견 시 자동 편입)
+const CANDIDATE_KEYWORDS = [
+  "부산사무실인테리어",
+  "부산상가인테리어",
+  "부산학원인테리어",
+  "부산병원인테리어",
+  "부산 사무실인테리어",
+  "부산 병원인테리어",
+  "센텀 병원인테리어",
+  "센텀 사무실인테리어",
+  "명지 병원인테리어",
+  "명지 사무실인테리어",
+  "해운대 병원인테리어",
+  "해운대 사무실인테리어",
+  "연제구 병원인테리어",
+  "연제구 사무실인테리어"
+];
+
 const DEFAULT_TARGET_NAME = "인디컴퍼니";
 
 // 1. 히스토리 로드 (영구 저장 보장)
@@ -61,7 +83,7 @@ function saveHistory(history) {
   }
 }
 
-// 3. 단일 키워드 순위 체크 함수
+// 3. 단일 키워드 순위 체크 함수 (최대 100위까지 탐색)
 async function scrapeKeywordPlace(browser, keyword, targetName = DEFAULT_TARGET_NAME) {
   console.log(`[플레이스 순위] 키워드 검색 시작: [${keyword}]`);
   const page = await browser.newPage();
@@ -139,20 +161,22 @@ async function scrapeKeywordPlace(browser, keyword, targetName = DEFAULT_TARGET_
         if (organicRank <= 5) {
           topCompetitors.push({ rank: organicRank, name, category, address });
         }
-        if (name.includes(targetName) || name.includes('인디')) {
-          if (!targetRank) {
-            targetRank = organicRank;
-            targetInfo = {
-              rank: organicRank,
-              name,
-              category,
-              address,
-              phone,
-              fullAddress: item.fullAddress || address,
-              bookingUrl: item.bookingUrl || null,
-              talktalkUrl: item.talktalkUrl || null,
-              imageUrl: item.imageUrl || null
-            };
+        if (organicRank <= 100) {
+          if (name.includes(targetName) || name.includes('인디')) {
+            if (!targetRank) {
+              targetRank = organicRank;
+              targetInfo = {
+                rank: organicRank,
+                name,
+                category,
+                address,
+                phone,
+                fullAddress: item.fullAddress || address,
+                bookingUrl: item.bookingUrl || null,
+                talktalkUrl: item.talktalkUrl || null,
+                imageUrl: item.imageUrl || null
+              };
+            }
           }
         }
       }
@@ -163,6 +187,8 @@ async function scrapeKeywordPlace(browser, keyword, targetName = DEFAULT_TARGET_
     const dateStr = `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
     const timeStr = `${String(kst.getUTCHours()).padStart(2, '0')}:${String(kst.getUTCMinutes()).padStart(2, '0')}:${String(kst.getUTCSeconds()).padStart(2, '0')}`;
 
+    const isIncluded = (targetRank !== null && targetRank <= 100);
+
     const record = {
       id: `rank_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       date: dateStr,
@@ -171,14 +197,15 @@ async function scrapeKeywordPlace(browser, keyword, targetName = DEFAULT_TARGET_
       keyword,
       targetName,
       targetRank: targetRank || null,
-      targetFound: !!targetRank,
+      targetFound: isIncluded,
+      isIncluded,
       totalOrganicCount: organicRank,
       totalItemsCount: orderedIds.length,
       targetInfo: targetInfo || {
         rank: null,
         name: targetName,
         category: "인테리어디자인",
-        address: "순위권 외",
+        address: "100위권 외",
         phone: "-"
       },
       topCompetitors,
@@ -186,7 +213,7 @@ async function scrapeKeywordPlace(browser, keyword, targetName = DEFAULT_TARGET_
       adsList
     };
 
-    console.log(`[플레이스 순위] ✅ [${keyword}] 측정 완료: ${targetRank ? targetRank + '위' : '순위 밖 (전체 ' + organicRank + '개 중)'}`);
+    console.log(`[플레이스 순위] ✅ [${keyword}] 측정 완료: ${targetRank ? targetRank + '위' : '100위 내 없음 (전체 ' + organicRank + '개 중)'}`);
     return record;
   } catch (err) {
     console.error(`[플레이스 순위] ❌ [${keyword}] 측정 실패:`, err.message);
@@ -201,6 +228,7 @@ async function scrapeKeywordPlace(browser, keyword, targetName = DEFAULT_TARGET_
       targetName,
       targetRank: null,
       targetFound: false,
+      isIncluded: false,
       error: err.message,
       totalOrganicCount: 0,
       targetInfo: null,
@@ -211,8 +239,8 @@ async function scrapeKeywordPlace(browser, keyword, targetName = DEFAULT_TARGET_
   }
 }
 
-// 4. 전체 키워드 일괄 순위 체크 실행
-async function runPlaceRankCheck(keywords = DEFAULT_KEYWORDS, targetName = DEFAULT_TARGET_NAME) {
+// 4. 일괄 순위 체크 실행 (100위 내 인디컴퍼니 포함된 키워드만 누적 기록)
+async function runPlaceRankCheck(keywords = DEFAULT_KEYWORDS, targetName = DEFAULT_TARGET_NAME, onlyIncluded = true) {
   console.log(`\n==================================================`);
   console.log(`[플레이스 순위] 일괄 순위 체크 시작 (키워드 ${keywords.length}개, 대상: ${targetName})`);
   console.log(`==================================================`);
@@ -234,7 +262,12 @@ async function runPlaceRankCheck(keywords = DEFAULT_KEYWORDS, targetName = DEFAU
     for (const kw of keywords) {
       if (!kw || !kw.trim()) continue;
       const res = await scrapeKeywordPlace(browser, kw.trim(), targetName);
-      results.push(res);
+      // If onlyIncluded is true, only save keywords that were found within 100 ranks
+      if (!onlyIncluded || res.isIncluded) {
+        results.push(res);
+      } else {
+        console.log(`[플레이스 순위] ⚠️ [${kw}] 100위 내 인디컴퍼니 미노출로 순위체크 목록에서 제외(패스)되었습니다.`);
+      }
       await new Promise(r => setTimeout(r, 1200));
     }
   } finally {
@@ -304,10 +337,13 @@ function setupPlaceRankRoutes(app) {
         };
       });
 
+      // All active monitored keywords (from latestMap)
+      const activeKeywords = Object.keys(latestMap);
+
       res.json({
         success: true,
         totalRecords: history.length,
-        monitoredKeywords: DEFAULT_KEYWORDS,
+        monitoredKeywords: activeKeywords.length > 0 ? activeKeywords : DEFAULT_KEYWORDS,
         targetName: DEFAULT_TARGET_NAME,
         summary: summaryList,
         latestMap,
@@ -324,11 +360,11 @@ function setupPlaceRankRoutes(app) {
     try {
       const keywords = (req.body && Array.isArray(req.body.keywords) && req.body.keywords.length > 0)
         ? req.body.keywords
-        : DEFAULT_KEYWORDS;
+        : CANDIDATE_KEYWORDS;
       const targetName = (req.body && req.body.targetName) ? req.body.targetName : DEFAULT_TARGET_NAME;
 
-      console.log(`[플레이스 순위] 사용자 요청에 의한 수동 순위 체크 시작...`);
-      const results = await runPlaceRankCheck(keywords, targetName);
+      console.log(`[플레이스 순위] 사용자 요청에 의한 수동 순위 체크 시작 (후보 ${keywords.length}개)...`);
+      const results = await runPlaceRankCheck(keywords, targetName, true);
       
       res.json({
         success: true,
@@ -355,7 +391,7 @@ function setupPlaceRankRoutes(app) {
       lastScheduledDate = currentDate;
       console.log(`[플레이스 정기 스케줄러] ⏰ 오전 09:00 정기 플레이스 순위 자동 측정을 시작합니다.`);
       try {
-        await runPlaceRankCheck(DEFAULT_KEYWORDS, DEFAULT_TARGET_NAME);
+        await runPlaceRankCheck(CANDIDATE_KEYWORDS, DEFAULT_TARGET_NAME, true);
         console.log(`[플레이스 정기 스케줄러] ✅ 오전 09:00 정기 순위 측정 및 저장이 성공적으로 완료되었습니다.`);
       } catch (e) {
         console.error(`[플레이스 정기 스케줄러] ❌ 정기 순위 측정 실패:`, e.message);
@@ -370,5 +406,6 @@ module.exports = {
   runPlaceRankCheck,
   setupPlaceRankRoutes,
   DEFAULT_KEYWORDS,
+  CANDIDATE_KEYWORDS,
   DEFAULT_TARGET_NAME
 };
