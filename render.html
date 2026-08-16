@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPOK PHOTOREAL | 스케치업 → 실사 사진 변환기</title>
+  <meta name="description" content="스케치업 캡처 및 CAD 뷰포트를 천장 설비와 기존 재질을 100% 고정한 채 최고급 실사 건축 사진으로 변환하는 전문 AI 렌더러">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0c0e12;
+      --bg-card: #15181f;
+      --bg-card-hover: #1c212b;
+      --bg-input: #0f1217;
+      --border-subtle: #262c37;
+      --border-focus: #3b82f6;
+      --accent-primary: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.25);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-full: 9999px;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Header */
+    header {
+      background: rgba(21, 24, 31, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 24px;
+    }
+
+    .header-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: #1e293b;
+      color: #93c5fd;
+      border: 1px solid #3b82f644;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      margin-left: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: #4b5563;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed #374151;
+      border-radius: var(--radius-md);
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--bg-input);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent-primary);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      background: #1e293b;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--accent-primary);
+    }
+
+    .upload-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .upload-sub {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .file-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* Image Preview List */
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .preview-chip {
+      position: relative;
+      width: 80px;
+      height: 60px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .preview-chip img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-chip .btn-remove {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Options Form */
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+
+    .option-item:hover {
+      border-color: #374151;
+      background: #12161d;
+    }
+
+    .option-item input[type="checkbox"] {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-primary);
+      cursor: pointer;
+    }
+
+    .option-content {
+      flex: 1;
+    }
+
+    .option-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .option-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .select-input, .text-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      margin-top: 6px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .select-input:focus, .text-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      background: linear-gradient(135deg, var(--accent-primary), #2563eb);
+      color: #fff;
+      border: none;
+      padding: 15px 24px;
+      border-radius: var(--radius-md);
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      transition: var(--transition);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Right Panel (Results) */
+    .results-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .empty-state {
+      flex: 1;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 14px;
+      color: var(--text-dim);
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 40px 20px;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      opacity: 0.4;
+    }
+
+    /* Progress Indicator */
+    .progress-container {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      padding: 24px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #1f2937;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      border-radius: var(--radius-full);
+      transition: width 0.4s ease;
+    }
+
+    .progress-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .progress-step {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-step.active {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .progress-step.done {
+      color: var(--success);
+    }
+
+    /* Before & After Slider */
+    .slider-wrapper {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .comparison-slider {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      user-select: none;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .comparison-slider img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .image-after {
+      z-index: 1;
+    }
+
+    .image-before-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .image-before-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      max-width: none;
+    }
+
+    .slider-handle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      background: #fff;
+      z-index: 10;
+      cursor: ew-resize;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    }
+
+    .slider-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px;
+      height: 36px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .badge-label {
+      position: absolute;
+      bottom: 12px;
+      padding: 4px 10px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      z-index: 5;
+    }
+
+    .badge-before {
+      left: 12px;
+    }
+
+    .badge-after {
+      right: 12px;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-download {
+      flex: 1;
+      background: var(--success);
+      color: #fff;
+      border: none;
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .btn-download:hover {
+      background: #059669;
+    }
+
+    /* JSON Viewer Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      max-width: 750px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    pre {
+      background: #0a0c10;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      color: #e5e7eb;
+      font-size: 0.82rem;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f2937;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: var(--transition);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="/" class="brand">
+        <div class="brand-logo">P</div>
+        <div>
+          <span class="brand-title">PPOK PHOTOREAL</span>
+          <span class="brand-badge">v3.4 Engine</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button class="btn-secondary" id="btnApiKeyModal">
+          🔑 <span>API 키 설정</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main>
+    <!-- Left: Upload & Config -->
+    <div class="card">
+      <div class="card-title">
+        <span>📸 스케치업 도면 업로드</span>
+      </div>
+
+      <!-- Drag & Drop Zone -->
+      <div class="upload-zone" id="dropZone">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">스케치업 캡처 이미지를 여기에 드래그하세요</div>
+        <div class="upload-sub">또는 클릭하여 파일 선택 (JPG, PNG, WEBP)</div>
+        <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/webp">
+      </div>
+
+      <!-- Preview Chips -->
+      <div class="preview-container" id="previewContainer"></div>
+
+      <!-- Smart Options -->
+      <div class="card-title" style="margin-top: 8px;">
+        <span>⚙️ 실사화 옵션 설정</span>
+      </div>
+
+      <div class="options-grid">
+        <label class="option-item">
+          <input type="checkbox" id="optLockCeiling" checked>
+          <div class="option-content">
+            <div class="option-label">천장 설비 & 조명 위치 100% 고정</div>
+            <div class="option-desc">에어컨 기종(1-way/4-way), 펜던트, 다운라이트 위치를 도면 그대로 유지</div>
+          </div>
+        </label>
+
+        <label class="option-item">
+          <input type="checkbox" id="optAnchorMaterials" checked>
+          <div class="option-content">
+            <div class="option-label">원본 마감재 100% 계승 (Material Anchoring)</div>
+            <div class="option-desc">우드 수종(월넛/오크), 타일, 가죽 색상을 유지하고 물리적 질감만 실사화</div>
+          </div>
+        </label>
+
+        <label class="option-item">
+          <input type="checkbox" id="optPreserveExposure" checked>
+          <div class="option-content">
+            <div class="option-label">원본 조도 & 어두운 무드 보존</div>
+            <div class="option-desc">과도한 인위적 밝기 상승을 방지하고 설계자의 의도된 명암비 유지</div>
+          </div>
+        </label>
+
+        <div class="option-item" style="flex-direction: column; gap: 4px;">
+          <div class="option-label">조명 색온도 밸런스</div>
+          <select id="optColorTemp" class="select-input">
+            <option value="auto" selected>✨ 원본 자동 추종 (권장)</option>
+            <option value="neutral">💡 주백색 (4000K 깔끔한 화이트)</option>
+            <option value="warm">🕯️ 전구색 (3000K 아늑한 웜톤 코브)</option>
+            <option value="cool">❄️ 주광색 (6000K 시원한 쿨톤)</option>
+          </select>
+        </div>
+
+        <div class="option-item" style="flex-direction: column; gap: 4px;">
+          <div class="option-label">추가 요청사항 (선택)</div>
+          <input type="text" id="optCustomNotes" class="text-input" placeholder="예: 바닥 타일 광택을 더 은은하게, 창밖 풍경 선명하게">
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button class="btn-submit" id="btnSubmit">
+        <span>🚀 실사 렌더링 변환 시작</span>
+      </button>
+    </div>
+
+    <!-- Right: Results & Live Viewer -->
+    <div class="card results-card">
+      <div class="card-title">
+        <span>🖼️ 실사 변환 결과 (Before & After)</span>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🎨</div>
+        <p>왼쪽에서 스케치업 이미지를 업로드하고<br><strong>[실사 렌더링 변환 시작]</strong> 버튼을 누르세요.</p>
+      </div>
+
+      <!-- Progress Box -->
+      <div class="progress-container" id="progressBox">
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 600;">
+          <span id="progressStatusText">변환 준비 중...</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+        <div class="progress-steps">
+          <div class="progress-step" id="step1">⏳ 1단계: 스케치업 도면 및 천장 설비/조명 분석</div>
+          <div class="progress-step" id="step2">⏳ 2단계: PPOK_PHOTOREAL 6대 원칙 물리 프롬프트 조립</div>
+          <div class="progress-step" id="step3">⏳ 3단계: 초고화질 건축 사진 렌더링 및 디테일링</div>
+        </div>
+      </div>
+
+      <!-- Comparison Slider -->
+      <div class="slider-wrapper" id="sliderWrapper">
+        <div class="comparison-slider" id="compSlider">
+          <img src="" id="imgAfter" class="image-after" alt="Rendered">
+          <div class="image-before-wrapper" id="beforeWrapper">
+            <img src="" id="imgBefore" alt="SketchUp Original">
+          </div>
+          <div class="slider-handle" id="sliderHandle">
+            <div class="slider-button">↔</div>
+          </div>
+          <span class="badge-label badge-before">스케치업 원본</span>
+          <span class="badge-label badge-after">완성 실사 사진</span>
+        </div>
+
+        <div class="result-actions">
+          <a href="#" class="btn-download" id="btnDownload" download="ppok_photoreal_render.jpg">
+            💾 고화질 사진 다운로드
+          </a>
+          <button class="btn-secondary" id="btnViewPrompt">
+            📋 JSON 프롬프트 보기
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Prompt Modal -->
+  <div class="modal-overlay" id="promptModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 700;">📋 PPOK_PHOTOREAL 생성 프롬프트 (JSON)</h3>
+        <button class="btn-secondary" id="btnCloseModal" style="padding: 4px 8px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <pre id="jsonPromptCode">{}</pre>
+      </div>
+      <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-secondary" id="btnCopyJson">복사하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Key Modal -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 700;">🔑 Google Gemini API 키 설정</h3>
+        <button class="btn-secondary" id="btnCloseApiKeyModal" style="padding: 4px 8px;">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          기본 서버 키를 사용하지 않고 본인의 개인 무료 API 키를 사용하시려면 입력해 주세요. (브라우저 로컬 저장)
+        </p>
+        <input type="password" id="inputApiKey" class="text-input" placeholder="AIzaSy...">
+      </div>
+      <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-submit" id="btnSaveApiKey" style="padding: 8px 16px; font-size: 0.9rem;">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toastMsg">알림 메시지</div>
+
+  <script>
+    // State
+    let currentOriginalBase64 = null;
+    let currentRenderedBase64 = null;
+    let currentJsonPrompt = null;
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const btnSubmit = document.getElementById('btnSubmit');
+
+    const emptyState = document.getElementById('emptyState');
+    const progressBox = document.getElementById('progressBox');
+    const sliderWrapper = document.getElementById('sliderWrapper');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatusText = document.getElementById('progressStatusText');
+
+    const imgBefore = document.getElementById('imgBefore');
+    const imgAfter = document.getElementById('imgAfter');
+    const beforeWrapper = document.getElementById('beforeWrapper');
+    const sliderHandle = document.getElementById('sliderHandle');
+    const compSlider = document.getElementById('compSlider');
+    const btnDownload = document.getElementById('btnDownload');
+
+    // Drag & Drop
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+      });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('이미지 파일(JPG, PNG, WEBP)만 업로드할 수 있습니다.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentOriginalBase64 = e.target.result;
+        renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderPreviews() {
+      previewContainer.innerHTML = '';
+      if (!currentOriginalBase64) return;
+
+      const chip = document.createElement('div');
+      chip.className = 'preview-chip';
+      chip.innerHTML = `
+        <img src="${currentOriginalBase64}">
+        <button class="btn-remove" onclick="removeImage()">✕</button>
+      `;
+      previewContainer.appendChild(chip);
+    }
+
+    window.removeImage = function() {
+      currentOriginalBase64 = null;
+      fileInput.value = '';
+      renderPreviews();
+    };
+
+    // Before & After Slider Logic
+    let isSliding = false;
+
+    function setSliderPosition(x) {
+      const rect = compSlider.getBoundingClientRect();
+      let pos = (x - rect.left) / rect.width;
+      pos = Math.max(0, Math.min(1, pos));
+      beforeWrapper.style.width = `${pos * 100}%`;
+      sliderHandle.style.left = `${pos * 100}%`;
+    }
+
+    compSlider.addEventListener('mousedown', (e) => {
+      isSliding = true;
+      setSliderPosition(e.clientX);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isSliding) return;
+      setSliderPosition(e.clientX);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isSliding = false;
+    });
+
+    compSlider.addEventListener('touchstart', (e) => {
+      isSliding = true;
+      setSliderPosition(e.touches[0].clientX);
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isSliding) return;
+      setSliderPosition(e.touches[0].clientX);
+    });
+
+    window.addEventListener('touchend', () => {
+      isSliding = false;
+    });
+
+    // Submit Process
+    btnSubmit.addEventListener('click', async () => {
+      if (!currentOriginalBase64) {
+        showToast('스케치업 이미지를 먼저 업로드해 주세요.');
+        return;
+      }
+
+      btnSubmit.disabled = true;
+      emptyState.style.display = 'none';
+      sliderWrapper.style.display = 'none';
+      progressBox.style.display = 'flex';
+
+      // Step 1
+      updateProgress(25, '1단계: 스케치업 도면 및 천장 설비/조명 분석 중...', 1);
+
+      const options = {
+        lockCeiling: document.getElementById('optLockCeiling').checked,
+        anchorMaterials: document.getElementById('optAnchorMaterials').checked,
+        preserveExposure: document.getElementById('optPreserveExposure').checked,
+        colorTemp: document.getElementById('optColorTemp').value,
+        customNotes: document.getElementById('optCustomNotes').value
+      };
+
+      const savedApiKey = localStorage.getItem('ppok_gemini_api_key') || '';
+
+      try {
+        // Step 2
+        setTimeout(() => {
+          updateProgress(55, '2단계: PPOK_PHOTOREAL 6대 원칙 물리 프롬프트 조립 중...', 2);
+        }, 1200);
+
+        // Step 3
+        setTimeout(() => {
+          updateProgress(80, '3단계: 초고화질 건축 사진 렌더링 중...', 3);
+        }, 3000);
+
+        const response = await fetch('/api/photoreal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: currentOriginalBase64,
+            apiKey: savedApiKey,
+            options: options,
+            action: 'render'
+          })
+        });
+
+        const resData = await response.json();
+        if (!resData.success) {
+          throw new Error(resData.error || '변환 중 오류가 발생했습니다.');
+        }
+
+        updateProgress(100, '🎉 실사 변환 완료!', 3);
+        currentJsonPrompt = resData.jsonPrompt;
+        currentRenderedBase64 = resData.renderedImage || currentOriginalBase64;
+
+        setTimeout(() => {
+          progressBox.style.display = 'none';
+          sliderWrapper.style.display = 'flex';
+          imgBefore.src = currentOriginalBase64;
+          imgAfter.src = currentRenderedBase64;
+          btnDownload.href = currentRenderedBase64;
+          setSliderPosition(compSlider.getBoundingClientRect().left + (compSlider.offsetWidth / 2));
+        }, 600);
+
+      } catch (err) {
+        alert('오류: ' + err.message);
+        progressBox.style.display = 'none';
+        emptyState.style.display = 'flex';
+      } finally {
+        btnSubmit.disabled = false;
+      }
+    });
+
+    function updateProgress(percent, text, stepNum) {
+      progressBarFill.style.width = `${percent}%`;
+      progressPercent.innerText = `${percent}%`;
+      progressStatusText.innerText = text;
+
+      for (let i = 1; i <= 3; i++) {
+        const stepEl = document.getElementById(`step${i}`);
+        stepEl.classList.remove('active', 'done');
+        if (i < stepNum) {
+          stepEl.classList.add('done');
+          stepEl.innerHTML = `✅ ${stepEl.innerText.substring(2)}`;
+        } else if (i === stepNum) {
+          stepEl.classList.add('active');
+        }
+      }
+    }
+
+    // Modal
+    const promptModal = document.getElementById('promptModal');
+    document.getElementById('btnViewPrompt').addEventListener('click', () => {
+      document.getElementById('jsonPromptCode').innerText = JSON.stringify(currentJsonPrompt, null, 2);
+      promptModal.style.display = 'flex';
+    });
+
+    document.getElementById('btnCloseModal').addEventListener('click', () => {
+      promptModal.style.display = 'none';
+    });
+
+    document.getElementById('btnCopyJson').addEventListener('click', () => {
+      navigator.clipboard.writeText(JSON.stringify(currentJsonPrompt, null, 2));
+      showToast('JSON 프롬프트가 클립보드에 복사되었습니다.');
+    });
+
+    // API Key Modal
+    const apiKeyModal = document.getElementById('apiKeyModal');
+    const inputApiKey = document.getElementById('inputApiKey');
+    document.getElementById('btnApiKeyModal').addEventListener('click', () => {
+      inputApiKey.value = localStorage.getItem('ppok_gemini_api_key') || '';
+      apiKeyModal.style.display = 'flex';
+    });
+    document.getElementById('btnCloseApiKeyModal').addEventListener('click', () => {
+      apiKeyModal.style.display = 'none';
+    });
+    document.getElementById('btnSaveApiKey').addEventListener('click', () => {
+      localStorage.setItem('ppok_gemini_api_key', inputApiKey.value.trim());
+      apiKeyModal.style.display = 'none';
+      showToast('API 키가 저장되었습니다.');
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
