@@ -527,6 +527,12 @@
       if (!menus.some(m => m.id === "place-rank-check")) {
         menus.unshift({ id: "place-rank-check", name: "플레이스순위체크", categoryId: "cat-rank", protected: true });
         changed = true;
+      } else {
+        const pr = menus.find(m => m.id === "place-rank-check");
+        if (pr && pr.categoryId !== "cat-rank") {
+          pr.categoryId = "cat-rank";
+          changed = true;
+        }
       }
       if (!menus.some(m => m.id === "competitor-blog")) {
         menus.push({ id: "competitor-blog", name: "7.경쟁 블로그 탐색", protected: true });
@@ -574,31 +580,33 @@
     function loadCategories() { 
       let cats = JSON.parse(localStorage.getItem("categories") || "[]");
       let changed = false;
-      // Ensure cat-interior exists and default it to collapsed
-      if (!cats.some(c => c.id === "cat-rank")) {
+      
+      // Ensure cat-rank is ALWAYS first
+      const rankIdx = cats.findIndex(c => c.id === "cat-rank");
+      if (rankIdx === -1) {
         cats.unshift({ id: "cat-rank", name: "순위확인", collapsed: false });
+        changed = true;
+      } else if (rankIdx > 0) {
+        // Move cat-rank to top
+        const [rCat] = cats.splice(rankIdx, 1);
+        rCat.collapsed = false;
+        cats.unshift(rCat);
+        changed = true;
+      }
+
+      if (!cats.some(c => c.id === "cat-stats")) {
+        cats.push({ id: "cat-stats", name: "통계확인", collapsed: false });
+        changed = true;
+      }
+      if (!cats.some(c => c.id === "cat-homepage")) {
+        cats.push({ id: "cat-homepage", name: "홈페이지 관련", collapsed: false });
         changed = true;
       }
       if (!cats.some(c => c.id === "cat-interior")) {
         cats.push({ id: "cat-interior", name: "인테리어", collapsed: true });
         changed = true;
       }
-      if (!cats.some(c => c.id === "cat-stats")) {
-        cats.push({ id: "cat-stats", name: "통계확인", collapsed: false });
-        changed = true;
-      }
-      if (!cats.some(c => c.id === "cat-homepage")) {
-        cats.push({ id: "cat-homepage", name: "홈페이지 관련", collapsed: false });
-        changed = true;
-      }
-      if (!cats.some(c => c.id === "cat-stats")) {
-        cats.push({ id: "cat-stats", name: "통계확인", collapsed: false });
-        changed = true;
-      }
-      if (!cats.some(c => c.id === "cat-homepage")) {
-        cats.push({ id: "cat-homepage", name: "홈페이지 관련", collapsed: false });
-        changed = true;
-      }
+
       // Filter out invalid categories
       const lenBefore = cats.length;
       cats = cats.filter(c => c.name !== "1" && c.id !== "1");
