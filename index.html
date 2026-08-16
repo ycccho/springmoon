@@ -5298,6 +5298,13 @@
       if (!cleanMenus.some(m => m.id === "gfa-statistics")) {
         cleanMenus.push({ id: "gfa-statistics", name: "6. gfa 통계", categoryId: "cat-stats", protected: true });
       }
+      
+      if (!cleanMenus.some(m => m.id === "place-rank-check")) {
+        cleanMenus.unshift({ id: "place-rank-check", name: "플레이스순위체크", categoryId: "cat-rank", protected: true });
+      } else {
+        const pr = cleanMenus.find(m => m.id === "place-rank-check");
+        if (pr) pr.categoryId = "cat-rank";
+      }
       return cleanMenus;
     }
 
@@ -5308,6 +5315,9 @@
         if (data.success && data.menus && data.menus.length > 0) {
           currentMenus = sanitizeFetchedMenus(data.menus);
           currentCategories = data.categories || [];
+          if (!currentCategories.some(c => c.id === "cat-rank")) {
+            currentCategories.unshift({ id: "cat-rank", name: "순위확인", collapsed: false });
+          }
           localStorage.setItem("menuOrder", JSON.stringify(currentMenus));
           localStorage.setItem("categories", JSON.stringify(currentCategories));
           return true;

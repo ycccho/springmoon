@@ -8,7 +8,7 @@ export async function onRequestGet(context) {
   }
 
   try {
-    const dataStr = await kv.get("dashboard_menu_settings");
+    let dataStr = await kv.get("dashboard_menu_settings");
     if (!dataStr) {
       return new Response(JSON.stringify({ success: true, menus: [], categories: [] }), {
         status: 200,
@@ -16,6 +16,23 @@ export async function onRequestGet(context) {
       });
     }
     
+    try {
+      const parsed = JSON.parse(dataStr);
+      if (parsed && Array.isArray(parsed.categories)) {
+        if (!parsed.categories.some(c => c.id === "cat-rank")) {
+          parsed.categories.unshift({ id: "cat-rank", name: "순위확인", collapsed: false });
+        }
+      }
+      if (parsed && Array.isArray(parsed.menus)) {
+        if (!parsed.menus.some(m => m.id === "place-rank-check")) {
+          parsed.menus.unshift({ id: "place-rank-check", name: "플레이스순위체크", categoryId: "cat-rank", protected: true });
+        } else {
+          const pr = parsed.menus.find(m => m.id === "place-rank-check");
+          if (pr) pr.categoryId = "cat-rank";
+        }
+      }
+      dataStr = JSON.stringify(parsed);
+    } catch(e){}
     return new Response(dataStr, {
       status: 200,
       headers: { 
