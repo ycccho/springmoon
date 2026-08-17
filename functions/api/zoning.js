@@ -34,41 +34,35 @@ export async function onRequestPost(context) {
       specialty = '피부과 / 성형외과',
       officeType = 'IT / 테크 / 스타트업',
       headcount = '12명',
-      requireCleanZone = true,
-      requireXray = false,
-      focusRooms = '회의실 1개, 탕비실 1개',
       customRequirements = ''
     } = config;
 
-    // Step 1: Realistic Architectural Zoning Analysis with Strict Boundary & Realistic Room Count
-    const systemPrompt = `You are a licensed Senior Architectural Space Planner specializing in Medical Clinics and Commercial Offices in Korea.
+    // Step 1: Architectural Analysis using INDE_RENDER Anchoring Principles
+    const systemPrompt = `You are the specialized SPACE_ZONING Master AI (utilizing INDE_RENDER architectural anchoring principles).
 
-CRITICAL ARCHITECTURAL REALISM RULES:
-1. STRICT GEOMETRIC WALL & BOUNDARY LOCK (100%):
-   - You MUST identify the EXACT outer perimeter polygon of the attached floor plan (e.g. rectangular slab with diagonal chamfered corner, entrance at bottom).
-   - NEVER invent external wings, notches, indentations, or extra exterior walls.
-   - All rooms MUST fit strictly inside this exact outer boundary.
-2. EXCLUDE PUBLIC CORES:
-   - Exclude external stairs, elevator shafts, and public corridors.
-3. REALISTIC SPACE PROGRAM & ROOM COUNT BY AREA:
-   - 30평형 (approx 99㎡ / Net usable 22~25평):
-     * MAXIMUM 4 to 5 rooms TOTAL! It is PHYSICALLY IMPOSSIBLE to put 10 rooms in 30평.
-     * Typical 30평 Hospital Clinic: Reception/Waiting (8~10평), 1 Consultation/Doctor Room (3.5~4평), 1 Counseling Room (2.5~3평), 1 Treatment/Skin Care (4~5평), 1 Staff/Sterilization/Pantry (2.5~3평), Corridors/Powder (3평).
-     * Typical 30평 Office: Entrance/Lounge (3~4평), Open Workstation 8~12 seats (10~12평), 1 Meeting Room 4~6 seats (4~5평), 1 Executive Room or Focus Room (3~4평), Pantry/OA (1.5~2평).
-   - 50평형 (approx 165㎡): 6 to 7 rooms total.
-   - 70평형 (approx 231㎡): 8 to 10 rooms total.
-   - 100평형 (approx 330㎡): 12 to 15 rooms total.
-4. PRODUCE 4 DISTINCT ARCHITECTURAL LAYOUT CONCEPTS:
-   - Concept 1 [안 A]: 전면 라운지 개방형 (Front Open Lounge / Wide Reception)
-   - Concept 2 [안 B]: 중앙 통로 분할형 (Central Corridor / Efficient Linear Division)
-   - Concept 3 [안 C]: 창가 조망/진료실 우선형 (Window-Side Daylight Priority)
-   - Concept 4 [안 D]: 고객-스태프 동선 분리형 (Dual Circulation Loop / Privacy Focused)
+ABSOLUTE 4 RULES OF ARCHITECTURAL ZONING:
+1. ABSOLUTE CAD BOUNDARY & WALL LOCK (100%):
+   - The attached image contains the EXACT black CAD outline/slab boundary of the tenant space.
+   - You MUST 100% preserve and freeze the exact outer black lines, perimeter geometry, corners, and entrance location.
+   - ZERO outer expansion, ZERO external wings, ZERO outside indentations. All partitions and room zones are strictly drawn INSIDE the existing white canvas area of the attached drawing.
+2. EXCLUDE EXTERIOR SERVICE CORES:
+   - Exclude any exterior stairs, elevator cores, and public corridors.
+3. REALISTIC DOMAIN SPACE PROGRAM (30평 = MAX 4~5 ROOMS):
+   - 30평 (약 99㎡ / 실면적 22~25평): Exactly 4 to 5 realistic rooms total!
+     * 30평 병원: 접수 및 대기실(8~10평), 원장 진료실(3.5~4평), 상담실(2.5~3평), 처치/피부관리실(4~5평), 직원/소독준비실(2.5~3평), 복도/파우더(3평).
+     * 30평 오피스: 엔트런스 라운지(3~4평), 오픈 워크스테이션 8~12석(10~12평), 회의실(4~5평), 대표/포커스룸(3~4평), 탕비/OA(1.5~2평).
+   - 50평: 6~7개 실
+   - 70평: 8~10개 실
+4. 4 DISTINCT ARCHITECTURAL PROPOSALS FOR THE EXACT SAME BOUNDARY:
+   - Concept 1 [안 A]: 전면 라운지 개방형 (Wide Front Reception & Waiting)
+   - Concept 2 [안 B]: 중앙 통로 분할형 (Efficient Central Spine Corridor)
+   - Concept 3 [안 C]: 창가 조망 우선형 (Perimeter Window-Side Room Alignment)
+   - Concept 4 [안 D]: 고객-스태프 동선 분리형 (Dual Circulation Loop / Staff Privacy)
 
-Return ONLY valid JSON matching this exact schema:
+Return ONLY valid JSON matching this schema:
 {
   "spaceType": "${spaceType}",
   "totalAreaPyung": "${targetArea}",
-  "boundaryDescription": "string (e.g. 5각형 외곽선 슬래브 - 직사각형에 상단 좌측 사선 꺾임)",
   "concepts": [
     {
       "id": 1,
@@ -77,8 +71,8 @@ Return ONLY valid JSON matching this exact schema:
       "promptGuidance": "string",
       "zones": [
         {
-          "zoneName": "string (공용 대기구역 / 진료 및 상담 / 처치 및 관리 / 직원 지원구역 / 공용 복도)",
-          "color": "HEX (Blue, Green, Orange, Purple, Grey)",
+          "zoneName": "string",
+          "color": "HEX",
           "rooms": [
             { "roomName": "string", "areaM2": number, "areaPyung": number, "percentage": number, "description": "string" }
           ]
@@ -124,7 +118,7 @@ Return ONLY valid JSON matching this exact schema:
         {
           role: "user",
           parts: [
-            { text: systemPrompt + "\n\nAnalyze the attached floor plan and return the 4 realistic architectural concepts in JSON." },
+            { text: systemPrompt + "\n\nAnalyze the attached floor plan drawing and return the 4 realistic concepts in JSON." },
             {
               inline_data: {
                 mime_type: mimeType,
@@ -148,7 +142,7 @@ Return ONLY valid JSON matching this exact schema:
 
     if (!visionRes.ok) {
       const errText = await visionRes.text();
-      throw new Error(`도면 조닝 분석 API 오류 (${visionRes.status}): ${errText}`);
+      throw new Error(`도면 분석 API 오류 (${visionRes.status}): ${errText}`);
     }
 
     const visionData = await visionRes.json();
@@ -163,26 +157,28 @@ Return ONLY valid JSON matching this exact schema:
 
     const concepts = zoningResult.concepts || [];
 
-    // Step 2: Generate 4 Distinct Diagrams with Strict Exterior Silhouette Inpainting Prompt
+    // Step 2: INDE_RENDER Direct Inpainting Style Overlay on the EXACT Base Image
     const imageApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
 
     async function generateConceptDiagram(concept, index) {
-      const prompt = `Architectural 2D top-down floor plan zoning blueprint for ${concept.name || `Option ${index + 1}`}.
-CRITICAL BOUNDARY ANCHORING (100%):
-- The attached image has an exact outer perimeter wall geometry. DO NOT ALTER, DO NOT ADD OUTER ROOMS, DO NOT BUMP OR INDENT EXTERIOR WALLS.
-- Keep the EXACT same boundary silhouette as the attached drawing.
-- Subdivide the INTERIOR with realistic partition walls for ${targetArea}.
-ROOM PROGRAM (Realistic 4~5 rooms):
-${concept.conceptDescription || ''}
-${(concept.zones || []).map(z => `- ${z.zoneName}: ${(z.rooms || []).map(r => r.roomName).join(', ')}`).join('\n')}
-VISUAL STYLE: Clean CAD architectural 2D blueprint, soft pastel color fills (Blue: Waiting, Green: Doctor/Office, Orange: Care/Treatment, Grey: Corridor), crisp black interior partition lines, clear Korean room labels, pure white background.`;
+      const roomsList = (concept.zones || [])
+        .flatMap(z => (z.rooms || []).map(r => `${r.roomName}(${r.areaPyung}평)`))
+        .join(', ');
+
+      const inpaintPrompt = `Masterpiece 2D architectural CAD floor plan zoning overlay directly on the attached reference drawing.
+ABSOLUTE STRICT DIRECTIVE:
+1. The black outer walls and geometry of the attached drawing are 100% FIXED CAD ANCHORS. Keep the exact outer black perimeter lines in their exact pixel positions without modifying or moving them.
+2. Inside the white space bounded by these outer black lines, draw crisp internal partition walls and fill each functional room with distinct soft architectural pastel colors.
+3. ROOMS TO SUBDIVIDE INSIDE: ${roomsList || concept.conceptDescription || ''}
+4. Add clear Korean text labels with room names and door swing lines inside each room.
+5. ZERO external building additions, ZERO drawing outside the black boundary box. Pure 2D top-down orthographic architectural floor plan presentation sheet.`;
 
       const imgPayload = {
         contents: [
           {
             role: "user",
             parts: [
-              { text: prompt },
+              { text: inpaintPrompt },
               {
                 inline_data: {
                   mime_type: mimeType,
@@ -213,7 +209,7 @@ VISUAL STYLE: Clean CAD architectural 2D blueprint, soft pastel color fills (Blu
           }
         }
       } catch (e) {
-        console.error(`Concept ${index + 1} diagram generation error:`, e);
+        console.error(`Concept ${index + 1} diagram error:`, e);
       }
       return image;
     }
