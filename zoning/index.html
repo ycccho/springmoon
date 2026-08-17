@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SPACE ZONING AI | 병원 및 오피스 도면 조닝 시스템</title>
-  <meta name="description" content="병원·의원 및 상업용 사무실 평면도를 분석하여 기능별 공간 조닝 다이어그램, 실별 면적 산출표, 소방/청결 동선 분석 보고서를 자동 생성하는 건축 AI">
+  <title>SPACE ZONING AI | 병원 및 오피스 4대안 도면 조닝 시스템</title>
+  <meta name="description" content="업로드된 도면의 외곽 벽체와 골조를 100% 고정하고 공용부를 제외한 채 병원 및 사무실 4가지 각기 다른 현실적 공간 조닝 대안을 산출하는 AI 시스템">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,8 +26,7 @@
       /* Refined Brand & Action Tokens */
       --brand-primary: #111827;
       --brand-primary-hover: #000000;
-      --accent-medical: #0284c7;
-      --accent-office: #059669;
+      --accent-active: #2563eb;
       --success: #059669;
       --warning: #d97706;
       
@@ -190,7 +189,7 @@
       border-color: var(--border-strong);
     }
 
-    /* Main Console Grid */
+    /* Main Grid */
     main {
       flex: 1;
       max-width: 1440px;
@@ -198,7 +197,7 @@
       margin: 0 auto;
       padding: 28px 32px 64px;
       display: grid;
-      grid-template-columns: 480px 1fr;
+      grid-template-columns: 460px 1fr;
       gap: 28px;
     }
 
@@ -242,7 +241,7 @@
       color: var(--text-muted);
     }
 
-    /* Segmented Space Type Tabs */
+    /* Segmented Tabs */
     .segmented-control {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -319,7 +318,6 @@
       cursor: pointer;
     }
 
-    /* Thumbnail Preview */
     .preview-box {
       display: none;
       position: relative;
@@ -328,13 +326,15 @@
       border-radius: var(--radius-md);
       overflow: hidden;
       border: 1px solid var(--border-default);
-      background: #000;
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
     }
 
     .preview-box img {
       width: 100%;
       height: 100%;
       object-fit: contain;
+      padding: 6px;
     }
 
     .preview-box .btn-remove {
@@ -359,37 +359,7 @@
       background: #ef4444;
     }
 
-    /* Form Fields */
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .select-input, .text-input {
-      width: 100%;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-sm);
-      color: var(--text-main);
-      padding: 9px 12px;
-      font-size: 0.86rem;
-      outline: none;
-      transition: var(--transition);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .select-input:focus, .text-input:focus {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
-    }
-
+    /* Options */
     .options-grid {
       display: flex;
       flex-direction: column;
@@ -439,6 +409,36 @@
       line-height: 1.4;
     }
 
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .select-input, .text-input {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 9px 12px;
+      font-size: 0.86rem;
+      outline: none;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .select-input:focus, .text-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+    }
+
     /* Submit Button */
     .btn-submit {
       background: var(--brand-primary);
@@ -470,12 +470,12 @@
       transform: none;
     }
 
-    /* Results Layout */
+    /* Right Results Layout */
     .results-card {
       display: flex;
       flex-direction: column;
-      min-height: 560px;
-      gap: 24px;
+      min-height: 580px;
+      gap: 20px;
     }
 
     .empty-state {
@@ -566,20 +566,97 @@
       font-weight: 600;
     }
 
-    /* Zoning Result Content */
-    .zoning-content {
-      display: none;
-      flex-direction: column;
-      gap: 24px;
+    /* 4-Concept Tabs Bar */
+    .concepts-nav-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      border-bottom: 1.5px solid var(--border-default);
+      padding-bottom: 8px;
     }
 
+    .concept-tab {
+      padding: 8px 16px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface-subtle);
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .concept-tab:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+    }
+
+    .concept-tab.active {
+      background: var(--brand-primary);
+      color: #ffffff;
+      border-color: var(--brand-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 4-Thumbnail Quick Grid */
+    .concept-thumb-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .concept-thumb-card {
+      border: 1.5px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      background: #000;
+      aspect-ratio: 16 / 10;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .concept-thumb-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .concept-thumb-card.active {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.25);
+    }
+
+    .concept-thumb-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .concept-thumb-badge {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: rgba(17, 24, 39, 0.85);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Main Diagram View */
     .diagram-view-box {
       width: 100%;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 16 / 10;
       border-radius: var(--radius-md);
       overflow: hidden;
       border: 1px solid var(--border-default);
-      background: #000;
+      background: #ffffff;
       box-shadow: var(--shadow-elevated);
       position: relative;
     }
@@ -588,9 +665,10 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+      padding: 8px;
     }
 
-    /* Area Table */
+    /* Table */
     .table-container {
       width: 100%;
       overflow-x: auto;
@@ -638,7 +716,7 @@
     }
 
     .percent-bar-container {
-      width: 80px;
+      width: 70px;
       height: 6px;
       background: var(--border-subtle);
       border-radius: var(--radius-full);
@@ -653,20 +731,8 @@
       border-radius: var(--radius-full);
     }
 
-    /* Report Section */
-    .report-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .report-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .report-card {
+    /* Concept Feature Card */
+    .concept-info-card {
       background: var(--bg-surface-subtle);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
@@ -676,14 +742,20 @@
       gap: 8px;
     }
 
-    .report-title {
-      font-size: 0.86rem;
-      font-weight: 700;
+    .concept-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .concept-title-text {
+      font-size: 0.95rem;
+      font-weight: 800;
       color: var(--text-main);
     }
 
-    .report-desc {
-      font-size: 0.8rem;
+    .concept-desc-text {
+      font-size: 0.84rem;
       color: var(--text-secondary);
       line-height: 1.5;
     }
@@ -718,7 +790,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
 
-    /* Toast Notification */
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -751,15 +823,12 @@
         <a href="/zoning" class="brand">
           <div class="brand-mark">ZN</div>
           <span class="brand-title">SPACE ZONING AI</span>
-          <span class="brand-badge">HOSPITAL & OFFICE</span>
+          <span class="brand-badge">4-CONCEPT STUDIO</span>
         </a>
         <nav class="nav-links">
           <a href="/render" class="nav-link">3D 실사 렌더링</a>
-          <a href="/zoning" class="nav-link active">도면 조닝 AI (신규)</a>
+          <a href="/zoning" class="nav-link active">도면 조닝 AI</a>
         </nav>
-      </div>
-      <div class="header-actions">
-        <button class="btn-secondary" id="btnHelpModal">도움말 및 가이드</button>
       </div>
     </div>
   </header>
@@ -769,8 +838,8 @@
     <!-- Left Control Panel -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">공간 유형 및 평면도 입력</div>
-        <div class="card-subtext">병원·의원 및 상업 오피스 전용 건축 조닝 플래너</div>
+        <div class="card-title">도면 업로드 및 조닝 조건 설정</div>
+        <div class="card-subtext">외곽 벽체 100% 고정 및 공용부(계단/EV/복도) 자동 제외</div>
       </div>
 
       <!-- Space Type Toggle -->
@@ -785,8 +854,8 @@
 
       <!-- Floor Plan Upload Zone -->
       <div class="upload-zone" id="dropZone">
-        <div class="upload-text">2D 평면도 이미지를 여기에 끌어다 놓으세요</div>
-        <div class="upload-sub">CAD 도면 캡처, 건축 슬래브, 스케치 이미지 (JPG, PNG, WEBP)</div>
+        <div class="upload-text">2D 평면도 이미지를 끌어다 놓으세요</div>
+        <div class="upload-sub">외곽 벽체와 입구를 감지하여 내부 구역 4대안을 자동 생성합니다</div>
         <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/webp">
       </div>
 
@@ -795,13 +864,32 @@
         <button class="btn-remove" onclick="removeFloorplan()">✕</button>
       </div>
 
+      <!-- Fixed Structural Options -->
+      <div class="options-grid">
+        <label class="option-card">
+          <input type="checkbox" id="chkLockWalls" checked disabled>
+          <div class="option-text-group">
+            <div class="option-label">외곽 벽체 및 골조 형상 100% 고정 (Wall Lock)</div>
+            <div class="option-desc">업로드한 평면도의 외곽선/기둥/출입구를 임의 확장하지 않고 내부만 구획</div>
+          </div>
+        </label>
+
+        <label class="option-card">
+          <input type="checkbox" id="chkExcludeCore" checked disabled>
+          <div class="option-text-group">
+            <div class="option-label">공용부(계단실, EV, 외부복도) 자동 제외</div>
+            <div class="option-desc">건물 공용 코어는 조닝 면적에서 제외하고 전용 내부 면적만 계산</div>
+          </div>
+        </label>
+      </div>
+
       <!-- Common Settings -->
       <div class="form-group">
         <label class="form-label" for="inputArea">예상 전용 면적</label>
         <select id="inputArea" class="select-input">
           <option value="30평 (약 99㎡)">30평 (약 99㎡ - 소형 의원 / 15인 오피스)</option>
-          <option value="50평 (약 165㎡)">50평 (약 165㎡ - 표준 의원 / 25인 오피스)</option>
-          <option value="70평 (약 231㎡)" selected>70평 (약 231㎡ - 중형 클리닉 / 35인 오피스)</option>
+          <option value="50평 (약 165㎡)" selected>50평 (약 165㎡ - 표준 의원 / 25인 오피스)</option>
+          <option value="70평 (약 231㎡)">70평 (약 231㎡ - 중형 클리닉 / 35인 오피스)</option>
           <option value="100평 (약 330㎡)">100평 (약 330㎡ - 수술실/복합 오피스)</option>
           <option value="150평 이상 (약 495㎡+)">150평 이상 (약 495㎡+ - 대형 병원/사옥)</option>
         </select>
@@ -867,21 +955,21 @@
       </div>
 
       <button class="btn-submit" id="btnSubmitZoning">
-        공간 조닝 및 동선 분석 시작
+        4가지 조닝 대안 일괄 생성 시작
       </button>
     </div>
 
     <!-- Right Results Panel -->
     <div class="card results-card">
       <div class="card-header">
-        <div class="card-title">공간 조닝 다이어그램 & 분석 보고서</div>
-        <div class="card-subtext">기능별 컬러 조닝, 실별 면적 산출표, 소방/동선 적합성 검토</div>
+        <div class="card-title">4가지 조닝 대안 비교 뷰어</div>
+        <div class="card-subtext">외곽 벽체 고정 기반 각기 다른 4가지 공간 레이아웃 및 면적 산출표</div>
       </div>
 
       <!-- Empty State -->
       <div class="empty-state" id="emptyState">
         <div class="upload-text">왼쪽에서 평면도 이미지를 업로드하세요</div>
-        <div class="upload-sub">병원 또는 사무실 용도에 최적화된 공간 조닝과 분석 리포트가 생성됩니다.</div>
+        <div class="upload-sub">도면의 외곽 벽체를 고정한 채 4가지 각기 다른 배치 대안이 즉시 산출됩니다.</div>
       </div>
 
       <!-- Progress Box -->
@@ -894,22 +982,37 @@
           <div class="progress-fill" id="progressBarFill"></div>
         </div>
         <div class="progress-steps">
-          <div class="progress-step" id="step1">1단계: 평면도 외곽 기둥, 코어, 출입구 및 채광면 구조 분석</div>
-          <div class="progress-step" id="step2">2단계: 기능별 면적 배분 및 법규/소방 피난 동선 시뮬레이션</div>
-          <div class="progress-step" id="step3">3단계: 컬러 조닝 다이어그램 및 실별 면적표 생성</div>
+          <div class="progress-step" id="step1">1단계: 평면도 외곽 벽체/기둥 스캔 및 공용부(계단/EV) 제외</div>
+          <div class="progress-step" id="step2">2단계: 4가지 공간 조닝 대안(안 A, B, C, D) 동선/면적 산출</div>
+          <div class="progress-step" id="step3">3단계: 4컷 컬러 조닝 다이어그램 생성 및 도면 완성</div>
         </div>
       </div>
 
-      <!-- Zoning Results Content -->
-      <div class="zoning-content" id="zoningContent">
-        <!-- Diagram View Box -->
+      <!-- 4-Concept Result Section -->
+      <div id="zoningResultSection" style="display: none; flex-direction: column; gap: 18px;">
+        
+        <!-- 4-Concept Tabs -->
+        <div class="concepts-nav-bar" id="conceptsNavBar"></div>
+
+        <!-- 4-Thumbnails Selector Grid -->
+        <div class="concept-thumb-grid" id="conceptThumbGrid"></div>
+
+        <!-- Concept Info Card -->
+        <div class="concept-info-card" id="conceptInfoCard">
+          <div class="concept-title-row">
+            <span class="concept-title-text" id="conceptTitleText">안 1: 전면 라운지 개방형</span>
+          </div>
+          <p class="concept-desc-text" id="conceptDescText"></p>
+        </div>
+
+        <!-- Main Diagram View -->
         <div class="diagram-view-box">
-          <img src="" id="zoningDiagramImg" alt="Color Coded Zoning Diagram">
+          <img src="" id="mainDiagramImg" alt="Zoning Diagram">
         </div>
 
         <div class="result-actions">
-          <a href="#" class="btn-download" id="btnDownloadDiagram" download="spatial_zoning_diagram.jpg">
-            컬러 조닝 다이어그램 다운로드
+          <a href="#" class="btn-download" id="btnDownloadSelected" download="zoning_concept.jpg">
+            선택된 조닝 다이어그램 다운로드
           </a>
         </div>
 
@@ -934,13 +1037,6 @@
           </div>
         </div>
 
-        <!-- Circulation & Code Report -->
-        <div>
-          <div style="font-size: 0.92rem; font-weight: 700; margin-bottom: 10px; color: var(--text-main);">
-            동선 및 인허가 적합성 검토 보고서
-          </div>
-          <div class="report-grid" id="reportGrid"></div>
-        </div>
       </div>
     </div>
   </main>
@@ -951,7 +1047,8 @@
   <script>
     let currentSpaceType = 'hospital';
     let currentFloorPlanBase64 = null;
-    let currentZoningResult = null;
+    let conceptsData = [];
+    let selectedConceptIndex = 0;
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -961,15 +1058,18 @@
 
     const emptyState = document.getElementById('emptyState');
     const progressBox = document.getElementById('progressBox');
-    const zoningContent = document.getElementById('zoningContent');
+    const zoningResultSection = document.getElementById('zoningResultSection');
     const progressBarFill = document.getElementById('progressBarFill');
     const progressPercent = document.getElementById('progressPercent');
     const progressStatusText = document.getElementById('progressStatusText');
 
-    const zoningDiagramImg = document.getElementById('zoningDiagramImg');
-    const btnDownloadDiagram = document.getElementById('btnDownloadDiagram');
+    const conceptsNavBar = document.getElementById('conceptsNavBar');
+    const conceptThumbGrid = document.getElementById('conceptThumbGrid');
+    const conceptTitleText = document.getElementById('conceptTitleText');
+    const conceptDescText = document.getElementById('conceptDescText');
+    const mainDiagramImg = document.getElementById('mainDiagramImg');
+    const btnDownloadSelected = document.getElementById('btnDownloadSelected');
     const areaTableBody = document.getElementById('areaTableBody');
-    const reportGrid = document.getElementById('reportGrid');
 
     function switchSpaceType(type) {
       currentSpaceType = type;
@@ -1023,6 +1123,8 @@
       fileInput.value = '';
       previewBox.style.display = 'none';
       dropZone.style.display = 'flex';
+      zoningResultSection.style.display = 'none';
+      emptyState.style.display = 'flex';
     };
 
     // Submit Process
@@ -1034,10 +1136,10 @@
 
       btnSubmitZoning.disabled = true;
       emptyState.style.display = 'none';
-      zoningContent.style.display = 'none';
+      zoningResultSection.style.display = 'none';
       progressBox.style.display = 'flex';
 
-      updateProgress(20, '1단계: 평면도 기둥, 코어, 출입구 분석 중...', 1);
+      updateProgress(15, '1단계: 평면도 외곽 벽체 고정 및 공용부(계단/EV) 제외 분석 중...', 1);
 
       const config = {
         targetArea: document.getElementById('inputArea').value,
@@ -1054,12 +1156,12 @@
 
       try {
         const step2Timer = setTimeout(() => {
-          updateProgress(50, '2단계: 기능별 면적 산출 및 동선 시뮬레이션 중...', 2);
-        }, 1500);
+          updateProgress(45, '2단계: 4가지 조닝 대안(안 A, B, C, D) 동선/면적 산출 중...', 2);
+        }, 1800);
 
         const step3Timer = setTimeout(() => {
-          updateProgress(80, '3단계: 컬러 조닝 다이어그램 생성 중...', 3);
-        }, 3500);
+          updateProgress(75, '3단계: 4컷 컬러 조닝 다이어그램 병렬 렌더링 중...', 3);
+        }, 4000);
 
         const response = await fetch('/api/zoning', {
           method: 'POST',
@@ -1080,13 +1182,14 @@
           throw new Error(resData.error || '조닝 분석 중 오류가 발생했습니다.');
         }
 
-        updateProgress(100, '공간 조닝 및 분석 완료', 3);
-        currentZoningResult = resData;
+        updateProgress(100, '4가지 조닝 대안 생성 완료', 3);
+        conceptsData = resData.zoningResult?.concepts || [];
+        selectedConceptIndex = 0;
 
         setTimeout(() => {
           progressBox.style.display = 'none';
-          zoningContent.style.display = 'flex';
-          renderZoningResults(resData);
+          zoningResultSection.style.display = 'flex';
+          renderConceptsView();
         }, 600);
 
       } catch (err) {
@@ -1115,16 +1218,51 @@
       }
     }
 
-    function renderZoningResults(data) {
-      zoningDiagramImg.src = data.zoningDiagram;
-      btnDownloadDiagram.href = data.zoningDiagram;
+    function renderConceptsView() {
+      if (!conceptsData || conceptsData.length === 0) return;
 
-      const zData = data.zoningData || {};
+      // 1. Render Top Tabs
+      conceptsNavBar.innerHTML = '';
+      conceptsData.forEach((concept, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `concept-tab ${idx === selectedConceptIndex ? 'active' : ''}`;
+        btn.innerText = concept.name || `대안 ${idx + 1}`;
+        btn.addEventListener('click', () => {
+          selectedConceptIndex = idx;
+          renderConceptsView();
+        });
+        conceptsNavBar.appendChild(btn);
+      });
+
+      // 2. Render 4-Thumbnails Grid
+      conceptThumbGrid.innerHTML = '';
+      conceptsData.forEach((concept, idx) => {
+        const thumb = document.createElement('div');
+        thumb.className = `concept-thumb-card ${idx === selectedConceptIndex ? 'active' : ''}`;
+        thumb.innerHTML = `
+          <img src="${concept.diagramImage || currentFloorPlanBase64}">
+          <span class="concept-thumb-badge">대안 ${idx + 1}</span>
+        `;
+        thumb.addEventListener('click', () => {
+          selectedConceptIndex = idx;
+          renderConceptsView();
+        });
+        conceptThumbGrid.appendChild(thumb);
+      });
+
+      // 3. Render Active Concept Details
+      const cur = conceptsData[selectedConceptIndex];
+      conceptTitleText.innerText = cur.name || `대안 ${selectedConceptIndex + 1}`;
+      conceptDescText.innerHTML = `<strong>설계 컨셉:</strong> ${cur.conceptDescription || '-'}<br><strong>동선 및 특징:</strong> ${cur.circulationSummary || '-'}`;
       
-      // Table
+      mainDiagramImg.src = cur.diagramImage || currentFloorPlanBase64;
+      btnDownloadSelected.href = cur.diagramImage || currentFloorPlanBase64;
+      btnDownloadSelected.download = `zoning_concept_${selectedConceptIndex + 1}.jpg`;
+
+      // 4. Render Area Table
       areaTableBody.innerHTML = '';
-      if (zData.zones && Array.isArray(zData.zones)) {
-        zData.zones.forEach(z => {
+      if (cur.zones && Array.isArray(cur.zones)) {
+        cur.zones.forEach(z => {
           const zoneColor = z.color || '#3b82f6';
           if (z.rooms && Array.isArray(z.rooms)) {
             z.rooms.forEach(r => {
@@ -1151,27 +1289,6 @@
           }
         });
       }
-
-      // Reports
-      reportGrid.innerHTML = '';
-      const circ = zData.circulationAnalysis || {};
-      
-      const reports = [
-        { title: '환자 / 방문객 메인 동선', desc: circ.patientFlow || '진입 로비에서 접수대로 직결되며 대기실에서 진료실로의 접근성이 우수합니다.' },
-        { title: '의료진 / 임직원 전용 동선', desc: circ.staffFlow || '오염물 및 의료 폐기물 분리 배출 동선과 독립된 직원 휴게 공간이 확보되었습니다.' },
-        { title: '소방 피난 및 복도 규격 검토', desc: circ.fireEgress || '주요 복도 유효폭 1.2m 이상 확보 및 2방향 피난 통로가 안정적으로 배치되었습니다.' },
-        { title: '설계 전문가 종합 의견', desc: zData.architecturalAdvice || '채광과 코어 환기 덕트 위치를 고려하여 장기적인 유지보수 및 공간 확장성이 우수합니다.' }
-      ];
-
-      reports.forEach(rp => {
-        const div = document.createElement('div');
-        div.className = 'report-card';
-        div.innerHTML = `
-          <div class="report-title">${rp.title}</div>
-          <div class="report-desc">${rp.desc}</div>
-        `;
-        reportGrid.appendChild(div);
-      });
     }
 
     function showToast(msg) {
