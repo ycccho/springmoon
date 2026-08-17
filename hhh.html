@@ -2244,24 +2244,42 @@
         return;
       }
 
-      // 1. 하단 KISCON 섹션으로 부드럽게 스크롤
-      const targetSec = document.getElementById("kiscon-tool");
-      if (targetSec) {
-        targetSec.scrollIntoView({ behavior: 'smooth' });
-      }
-
-      // 2. 하단 필터 인풋에 검색어 주입
+      // 1. 하단 필터 인풋에 검색어 즉시 동기화
       const nameFilter = document.getElementById("nameFilterInput");
       if (nameFilter) {
         nameFilter.value = query;
       }
 
-      // 3. 실제 KISCON API 호출 실행 (기존 데이터가 없거나 재검색 시)
-      if (!loadedCompanies || loadedCompanies.length === 0) {
-        await performKisPreview();
-      } else {
-        renderFilteredList();
+      // 2. 하단 KISCON 섹션으로 부드럽게 스크롤
+      const targetSec = document.getElementById("kiscon-tool");
+      if (targetSec) {
+        targetSec.scrollIntoView({ behavior: 'smooth' });
       }
+
+      // 3. 로딩 상태 표시
+      if (statusContainer) {
+        statusContainer.innerHTML = `
+          <div class="loader"></div>
+          <div id="loading-txt" style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">
+            국토교통부 KISCON 공공데이터에서 '<strong>${escapeHtml(query)}</strong>' 면허 정보를 실시간 검증 중입니다...
+          </div>
+        `;
+        statusContainer.style.display = "block";
+      }
+      if (tableContainer) tableContainer.style.display = "none";
+      if (summarySection) summarySection.style.display = "none";
+
+      // 4. 데이터가 이미 로드되어 있으면 즉시 렌더링, 없으면 실제 API 수집 후 즉시 렌더링
+      if (!loadedCompanies || loadedCompanies.length === 0) {
+        await fetchAllKisconData();
+      }
+
+      // 5. 검색 결과 즉시 렌더링 (하단 버튼을 다시 누를 필요 없음!)
+      renderFilteredList();
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     // -------------------------------------------------------------
@@ -2315,6 +2333,7 @@
     let currentYearRange = 3;
     let loadedCompanies = [];
     let currentFilteredList = [];
+    let isFetchingKiscon = false;
 
     // Region Button Switcher
     document.querySelectorAll(".btn-region").forEach(btn => {
@@ -2412,6 +2431,7 @@
         document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
         this.classList.add("active");
         currentYearRange = parseInt(this.dataset.years);
+        performKisPreview();
       });
     });
 
@@ -2419,10 +2439,8 @@
       searchKisBtn.addEventListener("click", () => performKisPreview());
     }
 
-    // 실제 국토교통부 KISCON 공공데이터 API 호출 함수
+    // 하단 KISCON 데이터 조회 버튼 핸들러
     async function performKisPreview() {
-      const area = kisAreaSelect ? kisAreaSelect.value : "";
-
       if (statusContainer) {
         statusContainer.innerHTML = `
           <div class="loader"></div>
@@ -2433,6 +2451,16 @@
       if (tableContainer) tableContainer.style.display = "none";
       if (summarySection) summarySection.style.display = "none";
 
+      await fetchAllKisconData();
+      renderFilteredList();
+    }
+
+    // 실제 국토교통부 KISCON 공공데이터 API 병렬 고속 수집 함수
+    async function fetchAllKisconData() {
+      if (isFetchingKiscon) return;
+      isFetchingKiscon = true;
+
+      const area = kisAreaSelect ? kisAreaSelect.value : "";
       const today = new Date();
       const formatDigit = (n) => String(n).padStart(2, '0');
       const eDate = `${today.getFullYear()}${formatDigit(today.getMonth() + 1)}${formatDigit(today.getDate())}`;
@@ -2441,76 +2469,46 @@
       past.setFullYear(today.getFullYear() - currentYearRange);
       const sDate = `${past.getFullYear()}${formatDigit(past.getMonth() + 1)}${formatDigit(past.getDate())}`;
 
-      const areasToQuery = area ? [area] : ["부산", "울산", "경남", "경북"];
+      const areasToQuery = area ? [area] : ["부산", "울산", "경남", "경북", "서울", "경기"];
 
       try {
-        let fetchedData = [];
-        for (const targetArea of areasToQuery) {
-          const loadingTxt = document.getElementById("loading-txt");
-          if (loadingTxt) {
-            loadingTxt.textContent = `국토교통부 KISCON [${targetArea}] 실제 공시 데이터를 수집 중입니다...`;
-          }
-
-          let pageNo = 1;
-          const numOfRows = 1000;
-          let totalCount = 0;
-          let loadedForArea = [];
-
-          do {
-            const url = `/api/kiscon?ncrAreaName=${encodeURIComponent(targetArea)}&sDate=${sDate}&eDate=${eDate}&pageNo=${pageNo}&numOfRows=${numOfRows}`;
+        const fetchPromises = areasToQuery.map(async (targetArea) => {
+          let areaItems = [];
+          try {
+            const url = `/api/kiscon?ncrAreaName=${encodeURIComponent(targetArea)}&sDate=${sDate}&eDate=${eDate}&pageNo=1&numOfRows=1000`;
             const res = await fetch(url);
-            
-            if (!res.ok) break;
+            if (res.ok) {
+              const rawText = await res.text();
+              let parsed = null;
+              if (rawText.trim().startsWith("<")) {
+                parsed = parseXMLResponse(rawText);
+              } else {
+                try { parsed = JSON.parse(rawText); } catch(e) {}
+              }
 
-            const rawText = await res.text();
-            let parsed = null;
-
-            if (rawText.trim().startsWith("<")) {
-              parsed = parseXMLResponse(rawText);
-            } else {
-              try {
-                parsed = JSON.parse(rawText);
-              } catch(e) {
-                break;
+              if (parsed && !parsed.error) {
+                let items = extractItemsFromParsed(parsed);
+                items.forEach(it => { it.ncrAreaName = targetArea; });
+                areaItems = items;
               }
             }
+          } catch (e) {
+            console.warn(`KISCON fetch error for ${targetArea}:`, e);
+          }
+          return areaItems;
+        });
 
-            if (!parsed || parsed.error) break;
+        const results = await Promise.all(fetchPromises);
+        let allItems = [];
+        results.forEach(arr => { allItems = allItems.concat(arr); });
 
-            if (parsed.response && parsed.response.body && parsed.response.body.totalCount !== undefined) {
-              totalCount = parseInt(parsed.response.body.totalCount) || 0;
-            }
-
-            let items = extractItemsFromParsed(parsed);
-            if (items.length === 0) break;
-
-            items.forEach(it => {
-              it.ncrAreaName = targetArea;
-            });
-
-            loadedForArea = loadedForArea.concat(items);
-
-            if (items.length < numOfRows || loadedForArea.length >= totalCount) {
-              break;
-            }
-
-            pageNo++;
-          } while (pageNo <= 3);
-
-          fetchedData = fetchedData.concat(loadedForArea);
+        if (allItems.length > 0) {
+          loadedCompanies = allItems;
         }
-
-        if (fetchedData.length > 0) {
-          loadedCompanies = fetchedData;
-        }
-
-        renderFilteredList();
-
       } catch (err) {
-        console.error("KISCON API Error:", err);
-        if (statusContainer) {
-          statusContainer.innerHTML = `<div style="color: #dc2626; font-weight: 700;">KISCON 공공데이터 연동 오류: ${err.message}</div>`;
-        }
+        console.error("KISCON API Batch Error:", err);
+      } finally {
+        isFetchingKiscon = false;
       }
     }
 
