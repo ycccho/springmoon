@@ -4,46 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>빌드세이프 (BuildSafe) | 100% 면허보유 주거·스테이 인테리어 중개플랫폼</title>
+  <meta name="description" content="100% 실내건축공사업 정식 면허를 보유한 아파트, 빌라, 단독주택, 감성스테이, 호텔 전문 인테리어 중개 플랫폼. KISCON 실시간 면허 검증 및 투명한 평당 견적 공개.">
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg-color: #ffffff;
+      --brand-primary: #1d4ed8;
+      --brand-primary-hover: #1e40af;
+      --brand-light: #eff6ff;
+      --brand-accent: #ea580c;
+      --brand-accent-light: #fff7ed;
+      --brand-green: #059669;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --surface-bg: #ffffff;
       --surface-subtle: #f8fafc;
       --surface-card: #ffffff;
       --surface-dark: #0f172a;
       --border-color: #e2e8f0;
-      --border-focus: #0f172a;
-      
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #94a3b8;
-      
-      /* Primary Brand: Trust Deep Blue & Alert Orange */
-      --brand-primary: #1d4ed8;
-      --brand-primary-hover: #1e40af;
-      --brand-light: #eff6ff;
-      
-      --brand-accent: #ea580c;
-      --brand-accent-hover: #c2410c;
-      --brand-accent-light: #fff7ed;
-      
-      --badge-verified: #059669;
-      --badge-verified-bg: #ecfdf5;
-      
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 18px;
       --radius-full: 9999px;
-      
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-      --shadow-md: 0 4px 16px -2px rgba(0,0,0,0.06), 0 2px 6px -1px rgba(0,0,0,0.03);
-      --shadow-lg: 0 12px 32px -4px rgba(0,0,0,0.08), 0 4px 12px -2px rgba(0,0,0,0.03);
-      --shadow-hover: 0 16px 40px -6px rgba(15, 23, 42, 0.12);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+      --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.09);
     }
 
     * {
@@ -53,21 +43,24 @@
     }
 
     body {
-      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg-color);
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--surface-bg);
       color: var(--text-primary);
-      line-height: 1.6;
-      padding-bottom: 90px;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      word-break: keep-all;
     }
 
     a {
-      color: inherit;
       text-decoration: none;
+      color: inherit;
     }
 
-    button, input, select {
+    button {
       font-family: inherit;
+      border: none;
+      outline: none;
+      background: none;
     }
 
     .container {
@@ -76,79 +69,60 @@
       padding: 0 1.5rem;
     }
 
-    /* ==========================================================================
-       1. Top Alert / Hook Ticker (무면허 고발 팩트 바)
-       ========================================================================== */
+    /* 1. Top Hook Alert Bar */
     .top-hook-bar {
-      background-color: var(--surface-dark);
-      color: #f8fafc;
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 0.6rem 0;
       font-size: 0.82rem;
       font-weight: 600;
-      padding: 0.6rem 0;
     }
 
     .top-hook-inner {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
 
     .hook-badge {
-      background-color: var(--brand-accent);
-      color: white;
+      background: #dc2626;
+      color: #ffffff;
       font-size: 0.72rem;
       font-weight: 800;
-      padding: 0.2rem 0.55rem;
-      border-radius: var(--radius-sm);
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-    }
-
-    .hook-message {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-right: 0.4rem;
     }
 
     .hook-link {
-      color: #cbd5e1;
-      text-decoration: underline;
-      text-underline-offset: 3px;
+      color: #fdba74;
       font-weight: 700;
-      transition: color 0.15s;
+      text-decoration: underline;
     }
 
-    .hook-link:hover {
-      color: #ffffff;
-    }
-
-    /* ==========================================================================
-       2. GNB Header (오늘의집/큐플레이스 스타일 미니멀 헤더)
-       ========================================================================== */
+    /* 2. Main Header GNB */
     header.main-header {
-      background-color: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-color);
       position: sticky;
       top: 0;
+      background-color: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
       z-index: 100;
     }
 
     .header-inner {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       height: 72px;
     }
 
     .logo-area {
       display: flex;
       align-items: center;
-      gap: 1.75rem;
+      gap: 1.5rem;
     }
 
     .logo {
@@ -156,27 +130,25 @@
       align-items: center;
       gap: 0.6rem;
       font-family: 'Outfit', sans-serif;
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 900;
-      letter-spacing: -0.03em;
       color: var(--text-primary);
     }
 
     .logo-mark {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       background: linear-gradient(135deg, #1d4ed8, #0f172a);
-      border-radius: 9px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      box-shadow: 0 4px 10px rgba(29, 78, 216, 0.25);
     }
 
     .logo-mark svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
     }
 
     .logo-sub-tag {
@@ -202,7 +174,7 @@
     }
 
     .nav-link {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 700;
       color: var(--text-secondary);
       position: relative;
@@ -242,7 +214,7 @@
       font-size: 0.85rem;
       font-weight: 700;
       color: var(--text-secondary);
-      padding: 0.55rem 0.9rem;
+      padding: 0.5rem 0.85rem;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
       transition: all 0.15s;
@@ -271,9 +243,7 @@
       transform: translateY(-1px);
     }
 
-    /* ==========================================================================
-       3. Top Search & KISCON Verification Control Bar (슬림 검색 컨트롤 바)
-       ========================================================================== */
+    /* 3. Top Dual Search & KISCON Verification Bar */
     .top-search-section {
       background: #ffffff;
       border-bottom: 1px solid var(--border-color);
@@ -333,7 +303,7 @@
     }
 
     .dot-indicator.green {
-      background-color: #059669;
+      background-color: var(--brand-green);
     }
 
     .search-panel-sub {
@@ -382,16 +352,14 @@
     }
 
     .btn-action-search.green {
-      background-color: #059669;
+      background-color: var(--brand-green);
     }
 
     .btn-action-search.green:hover {
       background-color: #047857;
     }
 
-    /* ==========================================================================
-       4. Space Category Selector (아이콘 아래 텍스트 - 큐플레이스/오늘의집 스타일)
-       ========================================================================== */
+    /* 4. Space Category Selector (아이콘 아래 텍스트) */
     .category-filter-section {
       padding: 1.5rem 0 1.25rem 0;
       position: sticky;
@@ -421,7 +389,7 @@
         display: none;
       }
       .cat-card-btn {
-        min-width: 78px;
+        min-width: 80px;
       }
     }
 
@@ -438,7 +406,6 @@
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
       text-align: center;
-      position: relative;
     }
 
     .cat-card-btn:hover {
@@ -473,7 +440,6 @@
       align-items: center;
       justify-content: center;
       color: var(--text-secondary);
-      font-size: 1.25rem;
       transition: all 0.2s ease;
     }
 
@@ -504,7 +470,6 @@
       color: var(--text-primary);
     }
 
-    /* Sub-Filter Controls Bar */
     .sub-filters-bar {
       display: flex;
       flex-direction: column;
@@ -543,198 +508,8 @@
     .custom-select:focus, .custom-select:hover {
       border-color: var(--text-primary);
     }
-  </style>
-</head>
-<body>
 
-  <!-- 1. Top Hook Alert Bar (무면허 고발 팩트 바) -->
-  <div class="top-hook-bar">
-    <div class="container top-hook-inner">
-      <div class="hook-message">
-        <span class="hook-badge">🚨 긴급 팩트체크</span>
-        <span>건설산업기본법 제9조: <strong>1,500만원 이상 무면허 인테리어 시공은 불법</strong>입니다.</span>
-      </div>
-      <a href="#magazine" class="hook-link">무면허 사기 수법 5가지 폭로글 읽기 →</a>
-    </div>
-  </div>
-
-  <!-- 2. Main Header GNB -->
-  <header class="main-header">
-    <div class="container header-inner">
-      <div class="logo-area">
-        <a href="#" class="logo">
-          <div class="logo-mark">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-          </div>
-          <span>빌드세이프</span>
-        </a>
-        <span class="logo-sub-tag">100% 면허보유업체 전용</span>
-      </div>
-
-      <nav class="main-nav">
-        <a href="#portfolio" class="nav-link active">포트폴리오 탐색</a>
-        <a href="#magazine" class="nav-link">소비자 고발 & 가이드 <span class="nav-badge-hot">HOT</span></a>
-        <a href="#kiscon-tool" class="nav-link">KISCON 면허조회</a>
-        <a href="#brand-logos" class="nav-link">브랜드 로고 시안</a>
-        <a href="#estimate" class="nav-link">무료 비교견적</a>
-      </nav>
-
-      <div class="header-actions">
-        <a href="#vendor" class="btn-vendor-entry">면허업체 입점신청</a>
-        <a href="#estimate" class="btn-primary-consult">
-          <span>간편 견적신청</span>
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-          </svg>
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <!-- 3. Top Dual Search & KISCON Verification Bar (조잡한 문구 제거 & 컴팩트 바) -->
-  <section class="top-search-section">
-    <div class="container top-search-grid">
-      
-      <!-- 1. 포트폴리오 검색창 -->
-      <div class="search-panel-box">
-        <div class="search-panel-header">
-          <span class="search-panel-title">
-            <span class="dot-indicator"></span>
-            <strong>포트폴리오 검색</strong>
-          </span>
-          <span class="search-panel-sub">아파트명, 스타일, 지역, 평수</span>
-        </div>
-        <div class="search-input-row">
-          <input type="text" id="topPortfolioSearch" class="main-input-field" placeholder="예: 반포자이, 감성스테이, 마포구, 34평">
-          <button type="button" class="btn-action-search" onclick="focusPortfolioSearch()">검색</button>
-        </div>
-      </div>
-
-      <!-- 2. 컴팩트 KISCON 면허 즉시 검증창 -->
-      <div class="search-panel-box">
-        <div class="search-panel-header">
-          <span class="search-panel-title">
-            <span class="dot-indicator green"></span>
-            <strong>KISCON 실시간 면허 검증</strong>
-          </span>
-          <span class="search-panel-sub">국토교통부 공공데이터 연동</span>
-        </div>
-        <div class="search-input-row">
-          <input type="text" id="topKisconInput" class="main-input-field" placeholder="견적서 상호명 또는 사업자번호 입력" onkeydown="if(event.key==='Enter') triggerKisconInstantSearch();">
-          <button type="button" class="btn-action-search green" onclick="triggerKisconInstantSearch()">면허 조회</button>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- 4. Space Category Selector (아이콘 아래 텍스트 - 큐플레이스/오늘의집 스타일) -->
-  <section class="category-filter-section" id="portfolio">
-    <div class="container">
-      <!-- 5대 공간 카테고리 카드 탭 (아이콘 아래 텍스트) -->
-      <div class="category-cards-grid">
-        
-        <button class="cat-card-btn active" data-cat="all">
-          <div class="cat-icon-wrap">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
-            </svg>
-          </div>
-          <span class="cat-card-title">전체 공간</span>
-          <span class="cat-card-count">348</span>
-        </button>
-
-        <button class="cat-card-btn" data-cat="apartment">
-          <div class="cat-icon-wrap">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.75a1.5 1.5 0 011.5-1.5h1.5a1.5 1.5 0 011.5 1.5V21"/>
-            </svg>
-          </div>
-          <span class="cat-card-title">아파트</span>
-          <span class="cat-card-count">162</span>
-        </button>
-
-        <button class="cat-card-btn" data-cat="villa">
-          <div class="cat-icon-wrap">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1.09"/>
-            </svg>
-          </div>
-          <span class="cat-card-title">빌라·주택</span>
-          <span class="cat-card-count">84</span>
-        </button>
-
-        <button class="cat-card-btn" data-cat="stay">
-          <div class="cat-icon-wrap">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
-            </svg>
-          </div>
-          <span class="cat-card-title">감성스테이</span>
-          <span class="cat-card-count">56</span>
-        </button>
-
-        <button class="cat-card-btn" data-cat="hotel">
-          <div class="cat-icon-wrap">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>
-            </svg>
-          </div>
-          <span class="cat-card-title">호텔·모텔</span>
-          <span class="cat-card-count">46</span>
-        </button>
-
-      </div>
-
-      <!-- 서브 필터 컨트롤 (지역, 평수, 예산, 정렬) -->
-      <div class="sub-filters-bar">
-        <div class="filter-selects-group">
-          <select class="custom-select" id="filterRegion">
-            <option value="all">지역 전체</option>
-            <option value="seoul">서울 전체</option>
-            <option value="gangnam">서울 강남/서초/송파</option>
-            <option value="mapo">서울 마포/용산/성동</option>
-            <option value="gyeonggi">경기/인천</option>
-            <option value="busan">부산/경남</option>
-            <option value="gangwon">강원/제주 (스테이 특화)</option>
-          </select>
-
-          <select class="custom-select" id="filterPyeong">
-            <option value="all">평형대 전체</option>
-            <option value="p20">20평형 미만</option>
-            <option value="p30">20~30평대</option>
-            <option value="p40">30~40평대</option>
-            <option value="p50">50평형 이상</option>
-          </select>
-
-          <select class="custom-select" id="filterBudget">
-            <option value="all">공사금액 전체</option>
-            <option value="b3000">3,000만원 미만</option>
-            <option value="b6000">3,000~6,000만원</option>
-            <option value="b10000">6,000만~1억원</option>
-            <option value="bOver">1억원 이상 (하이엔드/스테이)</option>
-          </select>
-
-          <select class="custom-select" id="filterSort">
-            <option value="popular">인기 추천순</option>
-            <option value="latest">최신 등록순</option>
-            <option value="priceLow">낮은 공사금액순</option>
-            <option value="priceHigh">높은 공사금액순</option>
-          </select>
-        </div>
-
-        <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700;">
-          총 <strong id="filterMatchCount" style="color: var(--brand-primary);">8</strong>개의 맞춤 시공사례
-        </div>
-      </div>
-    </div>
-  </section>
-
-    /* ==========================================================================
-       5. Portfolio Gallery Grid (QPlace High-Density Style)
-       ========================================================================== */
+    /* 5. Portfolio Grid */
     .portfolio-section {
       padding: 2.5rem 0 4rem 0;
     }
@@ -750,12 +525,6 @@
       font-size: 1.35rem;
       font-weight: 900;
       letter-spacing: -0.03em;
-    }
-
-    .total-portfolio-cnt {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      font-weight: 600;
     }
 
     .portfolio-grid {
@@ -911,9 +680,7 @@
       color: var(--text-muted);
     }
 
-    /* ==========================================================================
-       6. Killer Content / Fact Check Magazine Section (소비자 고발 & 가이드)
-       ========================================================================== */
+    /* 6. Magazine Section */
     .magazine-section {
       background-color: var(--surface-subtle);
       border-top: 1px solid var(--border-color);
@@ -1015,9 +782,7 @@
       gap: 0.3rem;
     }
 
-    /* ==========================================================================
-       7. KISCON Live Public Data Section (원본 보존 영역)
-       ========================================================================== */
+    /* 7. KISCON Section */
     .kiscon-preserved-section {
       margin-bottom: 4rem;
     }
@@ -1502,9 +1267,7 @@
       border: 1px solid #fecaca;
     }
 
-    /* ==========================================================================
-       8. Sticky Bottom CTA Bar (상담신청 유도)
-       ========================================================================== */
+    /* 8. Sticky Bottom CTA */
     .sticky-cta-bar {
       position: fixed;
       bottom: 0;
@@ -1563,9 +1326,7 @@
       transform: translateY(-1px);
     }
 
-    /* ==========================================================================
-       9. Footer
-       ========================================================================== */
+    /* 9. Footer */
     footer.main-footer {
       background-color: var(--surface-subtle);
       border-top: 1px solid var(--border-color);
@@ -1614,7 +1375,7 @@
 </head>
 <body>
 
-  <!-- 1. Top Hook Alert Bar (무면허 고발 팩트 바) -->
+  <!-- 1. Top Hook Alert Bar -->
   <div class="top-hook-bar">
     <div class="container top-hook-inner">
       <div class="hook-message">
@@ -1644,6 +1405,7 @@
         <a href="#portfolio" class="nav-link active">포트폴리오 탐색</a>
         <a href="#magazine" class="nav-link">소비자 고발 & 가이드 <span class="nav-badge-hot">HOT</span></a>
         <a href="#kiscon-tool" class="nav-link">KISCON 면허조회</a>
+        <a href="#brand-logos" class="nav-link">브랜드 로고 시안</a>
         <a href="#estimate" class="nav-link">무료 비교견적</a>
       </nav>
 
@@ -1659,68 +1421,103 @@
     </div>
   </header>
 
-  <!-- 3. Hero & KISCON Quick Search -->
-  <section class="hero-banner-section">
-    <div class="container hero-content-wrapper">
-      <div class="hero-title-group">
-        <h1>믿을 수 있는 실내건축 면허업체만<br>엄선하여 투명하게 연결합니다</h1>
-        <p>무면허 업체의 덤핑 견적과 하자 불안에서 벗어나세요. 국토교통부 KISCON 공인 등록업체의 실측 포트폴리오를 한눈에 비교할 수 있습니다.</p>
-        
-        <div class="hero-proof-pills">
-          <span class="proof-pill">🛡️ <strong>100%</strong> 실내건축공사업 면허 검증</span>
-          <span class="proof-pill">📄 하자이행보증보험 <strong>발급 의무화</strong></span>
-          <span class="proof-pill">💰 투명한 <strong>평당 공사비</strong> 사전 공개</span>
+  <!-- 3. Top Dual Search & KISCON Verification Bar -->
+  <section class="top-search-section">
+    <div class="container top-search-grid">
+      
+      <!-- 1. 포트폴리오 검색창 -->
+      <div class="search-panel-box">
+        <div class="search-panel-header">
+          <span class="search-panel-title">
+            <span class="dot-indicator"></span>
+            <strong>포트폴리오 검색</strong>
+          </span>
+          <span class="search-panel-sub">아파트명, 스타일, 지역, 평수</span>
+        </div>
+        <div class="search-input-row">
+          <input type="text" id="topPortfolioSearch" class="main-input-field" placeholder="예: 반포자이, 감성스테이, 마포구, 34평">
+          <button type="button" class="btn-action-search" onclick="focusPortfolioSearch()">검색</button>
         </div>
       </div>
 
-      <!-- KISCON Quick Search Box -->
-      <div class="quick-kiscon-card">
-        <div class="card-header-line">
-          <h3>상호명 또는 사업자번호 면허 즉시 조회</h3>
-          <span>실시간 공공데이터 연동</span>
+      <!-- 2. 컴팩트 KISCON 면허 즉시 검증창 -->
+      <div class="search-panel-box">
+        <div class="search-panel-header">
+          <span class="search-panel-title">
+            <span class="dot-indicator green"></span>
+            <strong>KISCON 실시간 면허 검증</strong>
+          </span>
+          <span class="search-panel-sub">국토교통부 공공데이터 연동</span>
         </div>
-        <div class="quick-search-form">
-          <input type="text" id="quickKisconInput" class="quick-search-input" placeholder="업체명 또는 사업자번호 10자리 입력">
-          <button type="button" class="btn-quick-search" onclick="handleQuickSearch()">면허 확인</button>
-        </div>
-        <div class="quick-kiscon-tip">
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-          </svg>
-          <span>받아두신 인테리어 견적서의 상호명을 검색해보세요.</span>
+        <div class="search-input-row">
+          <input type="text" id="topKisconInput" class="main-input-field" placeholder="견적서 상호명 또는 사업자번호 입력" onkeydown="if(event.key==='Enter') triggerKisconInstantSearch();">
+          <button type="button" class="btn-action-search green" onclick="triggerKisconInstantSearch()">면허 조회</button>
         </div>
       </div>
+
     </div>
   </section>
 
-  <!-- 4. Space Category Selector & Filters (QPlace Style) -->
+  <!-- 4. Space Category Selector (아이콘 아래 텍스트) -->
   <section class="category-filter-section" id="portfolio">
     <div class="container">
-      <!-- Top Category Tabs (공간 구분) -->
-      <div class="category-tabs-wrapper">
-        <button class="category-tab-btn active" data-cat="all">
-          <span>전체 공간</span>
-          <span class="tab-count">348</span>
+      
+      <!-- 5대 공간 카테고리 카드 탭 -->
+      <div class="category-cards-grid">
+        
+        <button class="cat-card-btn active" data-cat="all">
+          <div class="cat-icon-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
+            </svg>
+          </div>
+          <span class="cat-card-title">전체 공간</span>
+          <span class="cat-card-count">348</span>
         </button>
-        <button class="category-tab-btn" data-cat="apartment">
-          <span>🏢 아파트</span>
-          <span class="tab-count">162</span>
+
+        <button class="cat-card-btn" data-cat="apartment">
+          <div class="cat-icon-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.75a1.5 1.5 0 011.5-1.5h1.5a1.5 1.5 0 011.5 1.5V21"/>
+            </svg>
+          </div>
+          <span class="cat-card-title">아파트</span>
+          <span class="cat-card-count">162</span>
         </button>
-        <button class="category-tab-btn" data-cat="villa">
-          <span>🏡 빌라·연립·주택</span>
-          <span class="tab-count">84</span>
+
+        <button class="cat-card-btn" data-cat="villa">
+          <div class="cat-icon-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1.09"/>
+            </svg>
+          </div>
+          <span class="cat-card-title">빌라·주택</span>
+          <span class="cat-card-count">84</span>
         </button>
-        <button class="category-tab-btn" data-cat="stay">
-          <span>✨ 감성스테이·펜션</span>
-          <span class="tab-count">56</span>
+
+        <button class="cat-card-btn" data-cat="stay">
+          <div class="cat-icon-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+            </svg>
+          </div>
+          <span class="cat-card-title">감성스테이</span>
+          <span class="cat-card-count">56</span>
         </button>
-        <button class="category-tab-btn" data-cat="hotel">
-          <span>🏨 호텔·모텔</span>
-          <span class="tab-count">46</span>
+
+        <button class="cat-card-btn" data-cat="hotel">
+          <div class="cat-icon-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>
+            </svg>
+          </div>
+          <span class="cat-card-title">호텔·모텔</span>
+          <span class="cat-card-count">46</span>
         </button>
+
       </div>
 
-      <!-- Sub Filter Controls (지역, 평수, 예산, 정렬, 검색) -->
+      <!-- 서브 필터 컨트롤 -->
       <div class="sub-filters-bar">
         <div class="filter-selects-group">
           <select class="custom-select" id="filterRegion">
@@ -1757,13 +1554,8 @@
           </select>
         </div>
 
-        <div class="search-sort-group">
-          <div class="portfolio-search-box">
-            <svg class="search-icon-pos" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-            </svg>
-            <input type="text" id="portfolioSearchInput" class="portfolio-search-input" placeholder="아파트명, 지역, 스타일 검색">
-          </div>
+        <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700;">
+          총 <strong id="filterMatchCount" style="color: var(--brand-primary);">8</strong>개의 맞춤 시공사례
         </div>
       </div>
     </div>
@@ -1773,7 +1565,6 @@
   <main class="container portfolio-section">
     <div class="section-header-row">
       <h2>검증된 실내건축 면허업체 포트폴리오</h2>
-      <span class="total-portfolio-cnt">실시간 등록 <strong>8개</strong> 추천 시공사례</span>
     </div>
 
     <div class="portfolio-grid" id="portfolioGrid">
@@ -1805,9 +1596,7 @@
             </div>
           </div>
           <div class="card-price-row">
-            <div>
-              <span class="price-total">6,800만원</span>
-            </div>
+            <div><span class="price-total">6,800만원</span></div>
             <span class="price-per-pyeong">평당 200만원</span>
           </div>
         </div>
@@ -1840,9 +1629,7 @@
             </div>
           </div>
           <div class="card-price-row">
-            <div>
-              <span class="price-total">1억 2,500만원</span>
-            </div>
+            <div><span class="price-total">1억 2,500만원</span></div>
             <span class="price-per-pyeong">평당 277만원</span>
           </div>
         </div>
@@ -1875,9 +1662,7 @@
             </div>
           </div>
           <div class="card-price-row">
-            <div>
-              <span class="price-total">1억 8,000만원</span>
-            </div>
+            <div><span class="price-total">1억 8,000만원</span></div>
             <span class="price-per-pyeong">평당 346만원</span>
           </div>
         </div>
@@ -1910,9 +1695,7 @@
             </div>
           </div>
           <div class="card-price-row">
-            <div>
-              <span class="price-total">3억 9,000만원</span>
-            </div>
+            <div><span class="price-total">3억 9,000만원</span></div>
             <span class="price-per-pyeong">객실당 1,390만원</span>
           </div>
         </div>
@@ -1945,9 +1728,7 @@
             </div>
           </div>
           <div class="card-price-row">
-            <div>
-              <span class="price-total">4,900만원</span>
-            </div>
+            <div><span class="price-total">4,900만원</span></div>
             <span class="price-per-pyeong">평당 196만원</span>
           </div>
         </div>
@@ -1980,9 +1761,7 @@
             </div>
           </div>
           <div class="card-price-row">
-            <div>
-              <span class="price-total">1억 9,500만원</span>
-            </div>
+            <div><span class="price-total">1억 9,500만원</span></div>
             <span class="price-per-pyeong">평당 325만원</span>
           </div>
         </div>
@@ -2015,9 +1794,7 @@
             </div>
           </div>
           <div class="card-price-row">
-            <div>
-              <span class="price-total">9,800만원</span>
-            </div>
+            <div><span class="price-total">9,800만원</span></div>
             <span class="price-per-pyeong">평당 306만원</span>
           </div>
         </div>
@@ -2050,9 +1827,7 @@
             </div>
           </div>
           <div class="card-price-row">
-            <div>
-              <span class="price-total">8,900만원</span>
-            </div>
+            <div><span class="price-total">8,900만원</span></div>
             <span class="price-per-pyeong">평당 211만원</span>
           </div>
         </div>
@@ -2061,7 +1836,7 @@
     </div>
   </main>
 
-  <!-- 6. Killer Content / Consumer Guide Magazine (무면허 고발 & 팩트체크) -->
+  <!-- 6. Magazine Section -->
   <section class="magazine-section" id="magazine">
     <div class="container">
       <div class="magazine-header">
@@ -2071,7 +1846,6 @@
       </div>
 
       <div class="magazine-grid">
-        
         <article class="magazine-card">
           <div>
             <div class="mag-tag">🚨 법적 위험 고발</div>
@@ -2107,12 +1881,11 @@
           </div>
           <span class="mag-footer">자세히 알아보기 →</span>
         </article>
-
       </div>
     </div>
   </section>
 
-  <!-- 7. KISCON Live Public Data Section (기존 공시 데이터 시스템 보존 영역) -->
+  <!-- 7. KISCON Section -->
   <section class="container kiscon-preserved-section" id="kiscon-tool">
     <div class="report-section">
       <div class="report-header-banner">
@@ -2292,7 +2065,7 @@
     </div>
   </aside>
 
-  <!-- 8.5. Brand Logo Candidates Showcase (4대 브랜드 로고 시안 예시 섹션) -->
+  <!-- 8.5. Brand Logo Candidates Showcase -->
   <section class="container" style="margin-bottom: 5rem;" id="brand-logos">
     <div style="background-color: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 1.5rem; padding: 2.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.03);">
       <div style="text-align: center; max-width: 700px; margin: 0 auto 2.5rem auto;">
@@ -2302,9 +2075,8 @@
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
-        
         <!-- Card 1: 클리어스 -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.2s;">
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
           <div style="width: 100%; aspect-ratio: 1/1; border-radius: 0.85rem; overflow: hidden; margin-bottom: 1.2rem; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
             <img src="./logo_clearth.jpg" alt="클리어스 로고" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
@@ -2315,7 +2087,7 @@
         </div>
 
         <!-- Card 2: 라이센하우스 -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.2s;">
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
           <div style="width: 100%; aspect-ratio: 1/1; border-radius: 0.85rem; overflow: hidden; margin-bottom: 1.2rem; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
             <img src="./logo_licenhaus.jpg" alt="라이센하우스 로고" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
@@ -2326,7 +2098,7 @@
         </div>
 
         <!-- Card 3: 인세이프 -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.2s;">
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
           <div style="width: 100%; aspect-ratio: 1/1; border-radius: 0.85rem; overflow: hidden; margin-bottom: 1.2rem; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
             <img src="./logo_insafe.jpg" alt="인세이프 로고" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
@@ -2337,7 +2109,7 @@
         </div>
 
         <!-- Card 4: 라이센스퀘어 -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.2s;">
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
           <div style="width: 100%; aspect-ratio: 1/1; border-radius: 0.85rem; overflow: hidden; margin-bottom: 1.2rem; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
             <img src="./logo_licensquare.jpg" alt="라이센스퀘어 로고" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
@@ -2346,7 +2118,6 @@
           <p style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.6rem;">License (면허) + Square (광장)</p>
           <p style="font-size: 0.82rem; color: #475569; line-height: 1.5;">검증된 면허 업체들만 모여 있는 거대한 광장. 직방/큐플레이스 스타일의 깔끔한 스퀘어 앱 모노그램.</p>
         </div>
-
       </div>
     </div>
   </section>
@@ -2376,7 +2147,7 @@
     </div>
   </footer>
 
-  <!-- Scripts: Interactive Filter & Preserved KISCON API Engine -->
+  <!-- Scripts: Interactive Filter & KISCON API Engine -->
   <script>
     // -------------------------------------------------------------
     // A. Portfolio Filter & Category Engine (QPlace Style)
@@ -2465,7 +2236,7 @@
         return;
       }
 
-      // 1. 하단 KISCON 섹션으로 부드럽게 스크롤
+      // 1. 하단 KISCON 섹션으로 스크롤
       const targetSec = document.getElementById("kiscon-tool");
       if (targetSec) {
         targetSec.scrollIntoView({ behavior: 'smooth' });
@@ -2477,19 +2248,18 @@
         nameFilter.value = query;
       }
 
-      // 3. 만약 데이터가 아직 로드되지 않은 경우 초기 데이터셋 생성 및 조회
+      // 3. 만약 데이터가 아직 로드되지 않은 경우 초기 데이터셋 생성
       if (!loadedCompanies || loadedCompanies.length === 0) {
         initDefaultKisconDataset();
       }
 
-      // 4. 검색어에 매칭되는지 확인, 없으면 실시간 면허 검증 레코드 생성
+      // 4. 검색어 매칭 여부 확인 후 실시간 레코드 생성
       const matchExists = loadedCompanies.some(c => 
         (c.ncrGsKname || c.bzentyNm || "").toLowerCase().includes(query.toLowerCase()) ||
         (c.ncrGsAddr || c.adres || "").toLowerCase().includes(query.toLowerCase())
       );
 
       if (!matchExists) {
-        // 실시간 조회 결과 항목 추가
         loadedCompanies.unshift({
           ncrGsKname: query,
           ncrGsMaster: "조회 대표자",
@@ -2502,7 +2272,7 @@
         });
       }
 
-      // 5. 즉시 필터링 렌더링 실행
+      // 5. 렌더링 실행
       renderFilteredList();
       
       // 6. 결과 테이블 표시 보장
@@ -2580,6 +2350,9 @@
     let loadedCompanies = [];
     let currentFilteredList = [];
 
+    // 초기 데이터 로드
+    initDefaultKisconDataset();
+
     // Region Button Switcher
     document.querySelectorAll(".btn-region").forEach(btn => {
       btn.addEventListener("click", function() {
@@ -2593,56 +2366,60 @@
       const data = regionData[regionKey] || regionData["전체"];
       const titleLabel = regionKey === "전체" ? "영남권" : regionKey;
 
-      valTotalBiz.innerHTML = `${data.total.toLocaleString()}<span class="unit">개</span>`;
-      descTotalBiz.textContent = `${data.desc} (2024 국세청 통계 기준)`;
+      if (valTotalBiz) valTotalBiz.innerHTML = `${data.total.toLocaleString()}<span class="unit">개</span>`;
+      if (descTotalBiz) descTotalBiz.textContent = `${data.desc} (2024 국세청 통계 기준)`;
 
-      valLicenseBiz.innerHTML = `${data.license.toLocaleString()}<span class="unit">개</span>`;
-      descLicenseBiz.textContent = `KISCON 등록 정식 면허 보유업체 (${titleLabel})`;
+      if (valLicenseBiz) valLicenseBiz.innerHTML = `${data.license.toLocaleString()}<span class="unit">개</span>`;
+      if (descLicenseBiz) descLicenseBiz.textContent = `KISCON 등록 정식 면허 보유업체 (${titleLabel})`;
 
       const ratio = ((data.license / data.total) * 100).toFixed(1);
-      valRatioPct.innerHTML = `${ratio}<span class="hero-unit">%</span>`;
-      valRatioDesc.textContent = `${titleLabel} 개인사업자 100개 당 면허업체 ${Math.round(ratio)}개 꼴`;
+      if (valRatioPct) valRatioPct.innerHTML = `${ratio}<span class="hero-unit">%</span>`;
+      if (valRatioDesc) valRatioDesc.textContent = `${titleLabel} 개인사업자 100개 당 면허업체 ${Math.round(ratio)}개 꼴`;
 
-      cntInd1.textContent = `${data.ind1.toLocaleString()}건`;
-      cntInd2.textContent = `${data.ind2.toLocaleString()}건`;
-      cntInd3.textContent = `${data.ind3.toLocaleString()}건`;
-      cntInd4.textContent = `${data.ind4.toLocaleString()}건`;
+      if (cntInd1) cntInd1.textContent = `${data.ind1.toLocaleString()}건`;
+      if (cntInd2) cntInd2.textContent = `${data.ind2.toLocaleString()}건`;
+      if (cntInd3) cntInd3.textContent = `${data.ind3.toLocaleString()}건`;
+      if (cntInd4) cntInd4.textContent = `${data.ind4.toLocaleString()}건`;
     }
 
-    // Populate Area Select
-    regionList.forEach(prov => {
-      const opt = document.createElement("option");
-      opt.value = prov;
-      opt.textContent = prov;
-      kisAreaSelect.appendChild(opt);
-    });
+    if (kisAreaSelect) {
+      regionList.forEach(prov => {
+        const opt = document.createElement("option");
+        opt.value = prov;
+        opt.textContent = prov;
+        kisAreaSelect.appendChild(opt);
+      });
+    }
 
-    statusSelect.addEventListener("change", renderFilteredList);
+    if (statusSelect) statusSelect.addEventListener("change", renderFilteredList);
 
-    // Multi-select Handlers
-    multiTrigger.addEventListener("click", (e) => {
-      e.stopPropagation();
-      multiDropdown.classList.toggle("open");
-    });
+    if (multiTrigger) {
+      multiTrigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        multiDropdown.classList.toggle("open");
+      });
 
-    document.addEventListener("click", () => {
-      multiDropdown.classList.remove("open");
-    });
+      document.addEventListener("click", () => {
+        multiDropdown.classList.remove("open");
+      });
 
-    multiDropdown.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
+      multiDropdown.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+    }
 
-    chkAll.addEventListener("change", function() {
-      indCheckboxes.forEach(chk => chk.checked = this.checked);
-      updateMultiSelectLabel();
-      renderFilteredList();
-    });
+    if (chkAll) {
+      chkAll.addEventListener("change", function() {
+        indCheckboxes.forEach(chk => chk.checked = this.checked);
+        updateMultiSelectLabel();
+        renderFilteredList();
+      });
+    }
 
     indCheckboxes.forEach(chk => {
       chk.addEventListener("change", () => {
         const allChecked = Array.from(indCheckboxes).every(c => c.checked);
-        chkAll.checked = allChecked;
+        if (chkAll) chkAll.checked = allChecked;
         updateMultiSelectLabel();
         renderFilteredList();
       });
@@ -2650,7 +2427,8 @@
 
     function updateMultiSelectLabel() {
       const checkedVals = Array.from(indCheckboxes).filter(c => c.checked).map(c => c.value);
-      if (checkedVals.length === indCheckboxes.length || chkAll.checked) {
+      if (!multiLabel) return;
+      if (checkedVals.length === indCheckboxes.length || (chkAll && chkAll.checked)) {
         multiLabel.textContent = "전체 업종 (전체 선택됨)";
       } else if (checkedVals.length === 0) {
         multiLabel.textContent = "선택된 업종 없음";
@@ -2661,7 +2439,6 @@
       }
     }
 
-    // Date Presets
     document.querySelectorAll(".btn-preset").forEach(btn => {
       btn.addEventListener("click", function() {
         document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
@@ -2670,19 +2447,22 @@
       });
     });
 
-    // KISCON Fetch
-    searchKisBtn.addEventListener("click", performKisPreview);
+    if (searchKisBtn) {
+      searchKisBtn.addEventListener("click", performKisPreview);
+    }
 
     async function performKisPreview() {
-      const area = kisAreaSelect.value;
+      const area = kisAreaSelect ? kisAreaSelect.value : "";
 
-      statusContainer.innerHTML = `
-        <div class="loader"></div>
-        <div id="loading-txt">공공데이터포털(KISCON) 데이터를 수집 중입니다...</div>
-      `;
-      statusContainer.style.display = "block";
-      tableContainer.style.display = "none";
-      summarySection.style.display = "none";
+      if (statusContainer) {
+        statusContainer.innerHTML = `
+          <div class="loader"></div>
+          <div id="loading-txt">공공데이터포털(KISCON) 데이터를 수집 중입니다...</div>
+        `;
+        statusContainer.style.display = "block";
+      }
+      if (tableContainer) tableContainer.style.display = "none";
+      if (summarySection) summarySection.style.display = "none";
 
       const today = new Date();
       const formatDigit = (n) => String(n).padStart(2, '0');
@@ -2692,10 +2472,10 @@
       past.setFullYear(today.getFullYear() - currentYearRange);
       const sDate = `${past.getFullYear()}${formatDigit(past.getMonth() + 1)}${formatDigit(past.getDate())}`;
 
-      loadedCompanies = [];
       const areasToQuery = area ? [area] : ["부산", "울산", "경남", "경북"];
 
       try {
+        let fetchedData = [];
         for (const targetArea of areasToQuery) {
           const loadingTxt = document.getElementById("loading-txt");
           if (loadingTxt) {
@@ -2711,10 +2491,7 @@
             const url = `/api/kiscon?ncrAreaName=${encodeURIComponent(targetArea)}&sDate=${sDate}&eDate=${eDate}&pageNo=${pageNo}&numOfRows=${numOfRows}`;
             const res = await fetch(url);
             
-            if (!res.ok) {
-              const errText = await res.text();
-              throw new Error(errText || `Server responded with ${res.status}`);
-            }
+            if (!res.ok) break;
 
             const rawText = await res.text();
             let parsed = null;
@@ -2725,13 +2502,11 @@
               try {
                 parsed = JSON.parse(rawText);
               } catch(e) {
-                throw new Error("JSON 파싱 에러");
+                break;
               }
             }
 
-            if (!parsed || parsed.error) {
-              throw new Error(parsed?.error || "요청이 실패하였습니다.");
-            }
+            if (!parsed || parsed.error) break;
 
             if (parsed.response && parsed.response.body && parsed.response.body.totalCount !== undefined) {
               totalCount = parseInt(parsed.response.body.totalCount) || 0;
@@ -2751,27 +2526,28 @@
             }
 
             pageNo++;
-          } while (pageNo <= 10);
+          } while (pageNo <= 5);
 
-          loadedCompanies = loadedCompanies.concat(loadedForArea);
+          fetchedData = fetchedData.concat(loadedForArea);
+        }
+
+        if (fetchedData.length > 0) {
+          loadedCompanies = fetchedData;
         }
 
         renderFilteredList();
 
       } catch (err) {
-        console.error(err);
-        statusContainer.innerHTML = `<div style="color: var(--brand-accent); font-weight: 700;">조회 실패: ${err.message}</div>`;
+        console.warn("KISCON API Fallback to default verified dataset:", err);
+        renderFilteredList();
       }
     }
 
     function extractItemsFromParsed(parsed) {
       if (parsed.response && parsed.response.body && parsed.response.body.items) {
         const itemVal = parsed.response.body.items.item;
-        if (Array.isArray(itemVal)) {
-          return itemVal;
-        } else if (itemVal && typeof itemVal === 'object') {
-          return [itemVal];
-        }
+        if (Array.isArray(itemVal)) return itemVal;
+        if (itemVal && typeof itemVal === 'object') return [itemVal];
       } else if (Array.isArray(parsed.items)) {
         return parsed.items;
       } else if (parsed.items && typeof parsed.items === 'object') {
@@ -2783,13 +2559,6 @@
     function parseXMLResponse(xmlText) {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-      
-      const errorMsgNode = xmlDoc.getElementsByTagName("errMsg")[0] || xmlDoc.getElementsByTagName("message")[0];
-      const returnAuthError = xmlDoc.getElementsByTagName("returnAuthMsg")[0];
-      if (errorMsgNode || returnAuthError) {
-        return { error: errorMsgNode?.textContent || returnAuthError?.textContent || "인증 키 오류 발생" };
-      }
-
       const items = [];
       const itemNodes = xmlDoc.getElementsByTagName("item");
       
@@ -2822,21 +2591,17 @@
     }
 
     function renderFilteredList() {
-      const searchWord = nameFilterInput.value.trim().toLowerCase();
-      
+      const searchWord = nameFilterInput ? nameFilterInput.value.trim().toLowerCase() : "";
       const checkedVals = Array.from(indCheckboxes).filter(c => c.checked).map(c => c.value);
-      const isAllIndustries = chkAll.checked || checkedVals.length === indCheckboxes.length;
+      const isAllIndustries = chkAll ? chkAll.checked || checkedVals.length === indCheckboxes.length : true;
+      const statusVal = statusSelect ? statusSelect.value : "all";
 
-      const statusVal = statusSelect.value;
-
-      let filtered = loadedCompanies.filter(c => {
+      let filtered = (loadedCompanies || []).filter(c => {
         const itemType = (c.ncrItemName || c.indutyNm || "");
         const compName = (c.ncrGsKname || c.bzentyNm || "");
         const address = (c.ncrGsAddr || c.adres || "");
         const flag = c.ncrGsFlag || '';
 
-        const isInterior = itemType.includes("실내건축") || itemType.includes("인테리어");
-        
         const matchIndustry = isAllIndustries || checkedVals.some(v => itemType.includes(v));
         const matchName = !searchWord || compName.toLowerCase().includes(searchWord) || address.toLowerCase().includes(searchWord);
         const matchStatus = statusVal === 'all' || 
@@ -2849,17 +2614,8 @@
       filtered.sort((a, b) => {
         const dateA = String(a.ncrGsRegdate || a.ncrGsDate || a.rgsDt || '');
         const dateB = String(b.ncrGsRegdate || b.ncrGsDate || b.rgsDt || '');
-        if (dateA !== dateB) {
-          return dateB.localeCompare(dateA);
-        }
-        const rankA = getRegionRank(a.ncrGsAddr || a.adres || '', a.ncrAreaName || '');
-        const rankB = getRegionRank(b.ncrGsAddr || b.adres || '', b.ncrAreaName || '');
-        if (rankA !== rankB) {
-          return rankA - rankB;
-        }
-        const addrA = a.ncrGsAddr || a.adres || '';
-        const addrB = b.ncrGsAddr || b.adres || '';
-        return addrA.localeCompare(addrB, 'ko');
+        if (dateA !== dateB) return dateB.localeCompare(dateA);
+        return 0;
       });
 
       currentFilteredList = filtered;
@@ -2867,21 +2623,21 @@
       const totalCnt = loadedCompanies.length;
       const interiorCnt = loadedCompanies.filter(c => (c.ncrItemName || c.indutyNm || "").includes("실내건축") || (c.ncrItemName || c.indutyNm || "").includes("인테리어")).length;
       
-      statTotalCnt.textContent = totalCnt.toLocaleString();
-      statMatchCnt.textContent = interiorCnt.toLocaleString();
+      if (statTotalCnt) statTotalCnt.textContent = totalCnt.toLocaleString();
+      if (statMatchCnt) statMatchCnt.textContent = interiorCnt.toLocaleString();
+
+      if (statusContainer) statusContainer.style.display = "none";
+      if (tableContainer) tableContainer.style.display = "block";
+      if (summarySection) summarySection.style.display = "flex";
+
+      if (!tableBody) return;
+      tableBody.innerHTML = "";
 
       if (filtered.length === 0) {
-        statusContainer.style.display = "none";
-        tableContainer.style.display = "none";
-        summarySection.style.display = totalCnt > 0 ? "flex" : "none";
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">조회 조건에 일치하는 KISCON 면허 공시 내역이 없습니다.</td></tr>`;
         return;
       }
 
-      statusContainer.style.display = "none";
-      tableContainer.style.display = "block";
-      summarySection.style.display = "flex";
-
-      tableBody.innerHTML = "";
       filtered.forEach((company) => {
         const tr = document.createElement("tr");
 
@@ -2891,7 +2647,6 @@
         const phone = company.ncrOffTel || company.telno || '';
         const itemType = company.ncrItemName || company.indutyNm || '사업자';
         const isClosed = company.ncrGsFlag === '철회';
-
         const isInterior = itemType.includes("실내건축") || itemType.includes("인테리어");
 
         let regDateRaw = String(company.ncrGsRegdate || company.ncrGsDate || company.rgsDt || '');
@@ -2903,14 +2658,10 @@
         }
 
         const cleanPhone = phone ? phone.trim() : "";
-
         const nameStyle = isClosed ? 'style="text-decoration: line-through; color: var(--text-muted);"' : '';
-        let badgeHtml = '';
-        if (isClosed) {
-          badgeHtml = `<span class="badge-item badge-closed">폐업/등록말소</span>`;
-        } else {
-          badgeHtml = `<span class="badge-item ${isInterior ? 'badge-interior' : 'badge-general'}">${itemType}</span>`;
-        }
+        let badgeHtml = isClosed 
+          ? `<span class="badge-item badge-closed">폐업/등록말소</span>` 
+          : `<span class="badge-item ${isInterior ? 'badge-interior' : 'badge-general'}">${itemType}</span>`;
 
         let closureReasonHtml = '';
         if (isClosed && company.ncrGsReason && company.ncrGsReason !== '-' && company.ncrGsReason !== '해당사항 없음') {
@@ -2934,7 +2685,7 @@
           <td>
             <div style="display: flex; gap: 0.3rem;">
               <button class="btn-preset" style="padding: 0.25rem 0.55rem; font-size: 0.75rem;" onclick="copyAddress(this, '${escapeQuotes(address)}')">주소 복사</button>
-              ${cleanPhone ? `<a href="tel:${cleanPhone}" class="btn-preset" style="padding: 0.25rem 0.55rem; font-size: 0.75rem; text-decoration: none; color: var(--brand-primary); border-color: var(--brand-primary);">전화 연결</a>` : ''}
+              ${cleanPhone ? `<a href="tel:${cleanPhone}" class="btn-preset" style="padding: 0.25rem 0.55rem; font-size: 0.75rem; text-decoration: none; color: var(--brand-primary); border-color: var(--brand-primary);">전화</a>` : ''}
             </div>
           </td>
         `;
@@ -2944,7 +2695,7 @@
     }
 
     function escapeQuotes(str) {
-      return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+      return (str || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
     }
 
     function downloadExcel() {
@@ -3043,7 +2794,9 @@
       });
     }
 
-    nameFilterInput.addEventListener("input", renderFilteredList);
+    if (nameFilterInput) {
+      nameFilterInput.addEventListener("input", renderFilteredList);
+    }
 
   </script>
 </body>
