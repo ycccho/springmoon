@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SPACE ZONING AI | 병원 및 오피스 4대안 현실 조닝 시스템</title>
-  <meta name="description" content="업로드된 도면의 외곽 벽체를 100% 고정하고 30평/50평 실제 시공 가능한 실별 평수로 4가지 현실적 조닝 대안을 산출하는 전문 건축 AI">
+  <meta name="description" content="업로드된 도면의 외곽 벽체를 100% 고정하고 병원 및 사무실 용도에 따라 각기 다른 4가지 현실적 공간 조닝 대안을 산출하는 전문 건축 AI">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -241,8 +241,8 @@
     }
 
     .segment-btn.active {
-      background: var(--bg-surface);
-      color: var(--text-main);
+      background: var(--brand-primary);
+      color: #ffffff;
       box-shadow: var(--shadow-sm);
       font-weight: 700;
     }
@@ -780,7 +780,7 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title">도면 업로드 및 조닝 조건 설정</div>
-        <div class="card-subtext">외곽 벽체 100% 고정 및 현실적 실별 면적(30평 4~5개실 기준) 적용</div>
+        <div class="card-subtext">외곽 벽체 100% 고정 및 현실적 실별 면적 적용</div>
       </div>
 
       <!-- Space Type Toggle -->
@@ -814,9 +814,10 @@
       <div class="form-group">
         <label class="form-label" for="inputArea">예상 전용 면적</label>
         <select id="inputArea" class="select-input" onchange="updateAreaRuleText()">
-          <option value="30평 (약 99㎡)" selected>30평 (약 99㎡ - 소형 의원 / 4~5개실 / 12인 오피스)</option>
+          <option value="30평 (약 99㎡)">30평 (약 99㎡ - 소형 의원 / 4~5개실 / 12인 오피스)</option>
           <option value="50평 (약 165㎡)">50평 (약 165㎡ - 표준 의원 / 6~7개실 / 20인 오피스)</option>
-          <option value="70평 (약 231㎡)">70평 (약 231㎡ - 중형 클리닉 / 8~10개실 / 30인 오피스)</option>
+          <option value="60평 (약 198㎡)" selected>60평 (약 198㎡ - 중형 클리닉 / 6~8개실 / 15~25인 오피스)</option>
+          <option value="70평 (약 231㎡)">70평 (약 231㎡ - 중대형 클리닉 / 8~10개실 / 30인 오피스)</option>
           <option value="100평 (약 330㎡)">100평 (약 330㎡ - 수술실/복합 클리닉 / 12~15개실)</option>
           <option value="150평 이상 (약 495㎡+)">150평 이상 (약 495㎡+ - 대형 병원/사옥)</option>
         </select>
@@ -842,22 +843,22 @@
         <div class="form-group">
           <label class="form-label" for="selectOfficeType">업무 조직 유형</label>
           <select id="selectOfficeType" class="select-input">
-            <option value="IT / 테크 / 스타트업" selected>IT / 테크 / 스타트업 (워크스테이션·회의실·대표실·탕비실)</option>
+            <option value="일반 기업 본사 / 지사" selected>일반 기업 본사 / 지사 (부서별 고정석·임원실·회의실)</option>
+            <option value="IT / 테크 / 스타트업">IT / 테크 / 스타트업 (워크스테이션·회의실·대표실·탕비실)</option>
             <option value="전문직 / 금융 / 법무">전문직 / 금융 / 법무 (개인 독립실·기밀 상담실)</option>
             <option value="크리에이티브 / 에이전시">크리에이티브 / 에이전시 (협업 라운지·스튜디오)</option>
-            <option value="일반 기업 본사 / 지사">일반 기업 본사 / 지사 (부서별 고정석·임원실·회의실)</option>
           </select>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="inputHeadcount">상주 인원 수</label>
-          <input type="text" id="inputHeadcount" class="text-input" value="12명">
+          <input type="text" id="inputHeadcount" class="text-input" value="10명">
         </div>
       </div>
 
       <div class="form-group">
         <label class="form-label" for="inputCustomReq">추가 요청사항 (선택)</label>
-        <input type="text" id="inputCustomReq" class="text-input" placeholder="예: 입구 대기 공간을 넓게, 창가 쪽에 진료실/회의실 배치">
+        <input type="text" id="inputCustomReq" class="text-input" placeholder="예: 60평이고 메인입구는 9시방향, 회의실 1개와 대표실 필요">
       </div>
 
       <button class="btn-submit" id="btnSubmitZoning">
@@ -906,7 +907,7 @@
         <!-- Concept Info Card -->
         <div class="concept-info-card" id="conceptInfoCard">
           <div class="concept-title-row">
-            <span class="concept-title-text" id="conceptTitleText">안 A: 전면 라운지 개방형</span>
+            <span class="concept-title-text" id="conceptTitleText">안 A</span>
           </div>
           <p class="concept-desc-text" id="conceptDescText"></p>
         </div>
@@ -980,10 +981,11 @@
 
     function updateAreaRuleText() {
       const val = document.getElementById('inputArea').value;
+      const isOff = currentSpaceType === 'office';
       if (val.includes('30평')) {
-        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 30평 기준 복도/벽체를 제외한 실면적(약 22~25평)에 맞춰 <strong>핵심 4~5개 실</strong>(대기실, 진료실, 상담실, 처치관리실, 직원실)로 최적화 구획됩니다.`;
-      } else if (val.includes('50평')) {
-        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 50평 기준 실면적(약 38~42평)에 맞춰 <strong>핵심 6~7개 실</strong>(대기실, 진료실 2개, 상담실, 수술/처치실, 피부관리실, 직원실)로 구획됩니다.`;
+        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 30평 기준 복도/벽체를 제외한 실면적(약 22~25평)에 맞춰 ${isOff ? '<strong>오피스 핵심 4~5개 실</strong>(엔트런스, 워크스테이션, 회의실, 대표실, 탕비/OA)' : '<strong>병원 핵심 4~5개 실</strong>(대기실, 진료실, 상담실, 처치관리실, 직원실)'}로 최적화 구획됩니다.`;
+      } else if (val.includes('60평') || val.includes('50평')) {
+        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 50~60평 기준 실면적(약 42~50평)에 맞춰 ${isOff ? '<strong>오피스 핵심 6~7개 실</strong>(접견 라운지, 오픈 워크스테이션, 대회의실, 대표실, 1인 포커스룸, 탕비/팬트리, OA실)' : '<strong>병원 핵심 6~7개 실</strong>(대기실, 진료실 2개, 상담실, 처치실, 관리실, 직원실)'}로 구획됩니다.`;
       } else {
         ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 선택하신 면적 규모에 맞추어 건축 법규 및 이동 동선 유효폭을 충족하는 실별 적정 평수가 배분됩니다.`;
       }
@@ -995,6 +997,7 @@
       document.getElementById('tabOffice').classList.toggle('active', type === 'office');
       document.getElementById('hospitalForm').style.display = type === 'hospital' ? 'flex' : 'none';
       document.getElementById('officeForm').style.display = type === 'office' ? 'flex' : 'none';
+      updateAreaRuleText();
     }
 
     // Drag and drop
@@ -1057,7 +1060,8 @@
       zoningResultSection.style.display = 'none';
       progressBox.style.display = 'flex';
 
-      updateProgress(15, '1단계: 평면도 외곽 벽체 고정 및 공용부 제외 분석 중...', 1);
+      const typeLabel = currentSpaceType === 'office' ? '사무실 / 오피스' : '병원 / 의원';
+      updateProgress(15, `1단계: 평면도 외곽 벽체 고정 및 ${typeLabel} 공간 분석 중...`, 1);
 
       const config = {
         targetArea: document.getElementById('inputArea').value,
@@ -1071,11 +1075,11 @@
 
       try {
         const step2Timer = setTimeout(() => {
-          updateProgress(45, '2단계: 30평 적정 4~5개실 면적 배분 및 4대안 산출 중...', 2);
+          updateProgress(45, `2단계: ${typeLabel} 4대안(안 A, B, C, D) 동선/면적 산출 중...`, 2);
         }, 1800);
 
         const step3Timer = setTimeout(() => {
-          updateProgress(75, '3단계: 4컷 컬러 조닝 다이어그램 병렬 렌더링 중...', 3);
+          updateProgress(75, `3단계: 4컷 컬러 조닝 다이어그램 병렬 렌더링 중...`, 3);
         }, 4000);
 
         const response = await fetch('/api/zoning', {
@@ -1097,7 +1101,7 @@
           throw new Error(resData.error || '조닝 분석 중 오류가 발생했습니다.');
         }
 
-        updateProgress(100, '4가지 현실 조닝 대안 생성 완료', 3);
+        updateProgress(100, `4가지 ${typeLabel} 조닝 대안 생성 완료`, 3);
         conceptsData = resData.zoningResult?.concepts || [];
         selectedConceptIndex = 0;
 
