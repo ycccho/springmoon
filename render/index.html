@@ -28,6 +28,7 @@
       --brand-primary-hover: #000000;
       --accent-highlight: #2563eb;
       --success: #059669;
+      --warning: #d97706;
       
       /* High Contrast Clean Typography */
       --text-main: #111827;
@@ -81,11 +82,17 @@
     }
 
     .header-container {
-      max-width: 1400px;
+      max-width: 1440px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
 
     .brand {
@@ -127,6 +134,33 @@
       letter-spacing: 0.02em;
     }
 
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-link {
+      padding: 6px 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+
+    .nav-link:hover {
+      color: var(--text-main);
+      background: var(--bg-surface-subtle);
+    }
+
+    .nav-link.active {
+      color: var(--text-main);
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-default);
+    }
+
     .header-actions {
       display: flex;
       align-items: center;
@@ -158,13 +192,13 @@
     /* Main Console Grid */
     main {
       flex: 1;
-      max-width: 1400px;
+      max-width: 1440px;
       width: 100%;
       margin: 0 auto;
-      padding: 32px 32px 64px;
+      padding: 28px 32px 64px;
       display: grid;
-      grid-template-columns: 460px 1fr;
-      gap: 32px;
+      grid-template-columns: 480px 1fr;
+      gap: 28px;
     }
 
     @media (max-width: 1080px) {
@@ -189,8 +223,8 @@
 
     .card-header {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      align-items: center;
+      justify-content: space-between;
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 14px;
     }
@@ -205,13 +239,14 @@
     .card-subtext {
       font-size: 0.8rem;
       color: var(--text-muted);
+      margin-top: 2px;
     }
 
     /* Clean Upload Zone */
     .upload-zone {
       border: 1.5px dashed var(--border-strong);
       border-radius: var(--radius-md);
-      padding: 36px 20px;
+      padding: 32px 20px;
       text-align: center;
       cursor: pointer;
       background: var(--bg-surface-subtle);
@@ -220,7 +255,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       position: relative;
     }
 
@@ -250,31 +285,74 @@
       cursor: pointer;
     }
 
-    /* Image Preview */
-    .preview-container {
+    /* Multi-Image Gallery Container */
+    .gallery-header {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
     }
 
-    .preview-chip {
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 4px 2px;
+    }
+
+    .preview-card {
       position: relative;
-      width: 90px;
-      height: 64px;
+      aspect-ratio: 4 / 3;
       border-radius: var(--radius-sm);
       overflow: hidden;
-      border: 1px solid var(--border-default);
+      border: 1.5px solid var(--border-default);
       background: var(--bg-surface-subtle);
+      cursor: pointer;
+      transition: var(--transition);
       box-shadow: var(--shadow-sm);
     }
 
-    .preview-chip img {
+    .preview-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .preview-card.selected {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.2);
+    }
+
+    .preview-card img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .preview-chip .btn-remove {
+    .preview-card .status-indicator {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: var(--radius-sm);
+      background: rgba(17, 24, 39, 0.85);
+      color: #ffffff;
+    }
+
+    .preview-card .status-indicator.done {
+      background: var(--success);
+    }
+
+    .preview-card .status-indicator.rendering {
+      background: var(--warning);
+    }
+
+    .preview-card .btn-remove-item {
       position: absolute;
       top: 4px;
       right: 4px;
@@ -284,15 +362,16 @@
       border-radius: 50%;
       width: 18px;
       height: 18px;
-      font-size: 11px;
+      font-size: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: var(--transition);
+      z-index: 5;
     }
 
-    .preview-chip .btn-remove:hover {
+    .preview-card .btn-remove-item:hover {
       background: #ef4444;
     }
 
@@ -441,7 +520,7 @@
       color: var(--text-muted);
     }
 
-    /* Clean Progress Panel */
+    /* Progress Panel */
     .progress-container {
       display: none;
       flex-direction: column;
@@ -512,6 +591,40 @@
     .progress-step.done {
       color: var(--success);
       font-weight: 600;
+    }
+
+    /* Batch Selection Bar above Slider */
+    .batch-selector-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .batch-tab {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .batch-tab:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+    }
+
+    .batch-tab.active {
+      background: var(--brand-primary);
+      color: #ffffff;
+      border-color: var(--brand-primary);
     }
 
     /* Comparison Slider */
@@ -729,11 +842,17 @@
   <!-- Top Header -->
   <header>
     <div class="header-container">
-      <a href="/" class="brand">
-        <div class="brand-mark">IN</div>
-        <span class="brand-title">INDE RENDER</span>
-        <span class="brand-badge">STUDIO v3.5</span>
-      </a>
+      <div class="brand-group">
+        <a href="/render" class="brand">
+          <div class="brand-mark">IN</div>
+          <span class="brand-title">INDE RENDER</span>
+          <span class="brand-badge">STUDIO v3.5</span>
+        </a>
+        <nav class="nav-links">
+          <a href="/render" class="nav-link active">3D 실사 렌더링</a>
+          <a href="/zoning" class="nav-link">도면 조닝 AI (신규)</a>
+        </nav>
+      </div>
       <div class="header-actions">
         <button class="btn-secondary" id="btnApiKeyModal">
           API 키 설정
@@ -747,24 +866,34 @@
     <!-- Left Panel: Input & Control -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">스케치업 도면 업로드</div>
-        <div class="card-subtext">3D 뷰포트 캡처 또는 CAD 투시도 이미지 파일</div>
+        <div>
+          <div class="card-title">스케치업 도면 다중 업로드</div>
+          <div class="card-subtext">여러 장의 3D 뷰포트 캡처 또는 투시도를 한 번에 업로드</div>
+        </div>
       </div>
 
-      <!-- Upload Zone -->
+      <!-- Upload Zone (Multiple Files Supported) -->
       <div class="upload-zone" id="dropZone">
-        <div class="upload-text">스케치업 캡처 이미지를 여기에 끌어다 놓으세요</div>
-        <div class="upload-sub">또는 클릭하여 파일 선택 (JPG, PNG, WEBP)</div>
-        <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/webp">
+        <div class="upload-text">스케치업 캡처 이미지를 여러 장 끌어다 놓으세요</div>
+        <div class="upload-sub">또는 클릭하여 다중 선택 (JPG, PNG, WEBP 지원)</div>
+        <input type="file" id="fileInput" class="file-input" multiple accept="image/png, image/jpeg, image/webp">
       </div>
 
-      <!-- Preview Chips -->
-      <div class="preview-container" id="previewContainer"></div>
+      <!-- Multi-Image Preview Gallery -->
+      <div id="gallerySection" style="display: none; flex-direction: column; gap: 8px;">
+        <div class="gallery-header">
+          <span id="galleryCount">업로드된 이미지 (0장)</span>
+          <button class="btn-secondary" id="btnClearAll" style="padding: 4px 8px; font-size: 0.75rem;">전체 비우기</button>
+        </div>
+        <div class="preview-grid" id="previewGrid"></div>
+      </div>
 
       <!-- Options -->
       <div class="card-header" style="margin-top: 4px;">
-        <div class="card-title">실사화 정밀 설정</div>
-        <div class="card-subtext">설계 도면 고정 및 표면 PBR 물성 계승</div>
+        <div>
+          <div class="card-title">실사화 정밀 설정</div>
+          <div class="card-subtext">설계 도면 고정 및 표면 PBR 물성 계승</div>
+        </div>
       </div>
 
       <div class="options-grid">
@@ -810,21 +939,23 @@
 
       <!-- Submit Button -->
       <button class="btn-submit" id="btnSubmit">
-        실사 렌더링 변환 시작
+        <span id="btnSubmitText">실사 렌더링 변환 시작</span>
       </button>
     </div>
 
     <!-- Right Panel: Live Results Viewer -->
     <div class="card results-card">
       <div class="card-header">
-        <div class="card-title">실사 렌더링 결과 (Before & After)</div>
-        <div class="card-subtext">전문 건축 사진 틸트시프트 렌더링 뷰어</div>
+        <div>
+          <div class="card-title">실사 렌더링 결과 (Before & After)</div>
+          <div class="card-subtext">전문 건축 사진 틸트시프트 렌더링 뷰어</div>
+        </div>
       </div>
 
       <!-- Empty State -->
       <div class="empty-state" id="emptyState">
         <div class="empty-text">왼쪽에서 스케치업 도면을 업로드하세요</div>
-        <div class="empty-sub">PPOK/INDE 6대 원칙이 적용된 초고화질 실사 사진이 생성됩니다.</div>
+        <div class="empty-sub">여러 장 업로드 시 일괄 실사 변환 후 클릭하여 비교할 수 있습니다.</div>
       </div>
 
       <!-- Progress Box -->
@@ -843,8 +974,11 @@
         </div>
       </div>
 
-      <!-- Comparison Slider -->
+      <!-- Comparison Slider & Batch Tabs -->
       <div class="slider-wrapper" id="sliderWrapper">
+        <!-- Batch Selector Tabs -->
+        <div class="batch-selector-bar" id="batchSelectorBar"></div>
+
         <div class="comparison-slider" id="compSlider">
           <img src="" id="imgAfter" class="image-after" alt="Rendered Photoreal">
           <div class="image-before-wrapper" id="beforeWrapper">
@@ -859,7 +993,7 @@
 
         <div class="result-actions">
           <a href="#" class="btn-download" id="btnDownload" download="inde_render_photoreal.jpg">
-            고화질 사진 다운로드
+            선택 사진 고화질 다운로드
           </a>
           <button class="btn-secondary" id="btnViewPrompt">
             JSON 프롬프트 보기
@@ -894,7 +1028,7 @@
       </div>
       <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
         <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
-          기본 서버 키 대신 본인의 개인 무료 API 키를 등록하여 사용하시려면 입력해 주세요. (브라우저 로컬 저장)
+          기본 서버 키 대신 본인의 개인 API 키를 등록하여 사용하시려면 입력해 주세요. (브라우저 로컬 저장)
         </p>
         <input type="password" id="inputApiKey" class="text-input" placeholder="AQ...">
       </div>
@@ -908,15 +1042,18 @@
   <div class="toast" id="toastMsg">알림 메시지</div>
 
   <script>
-    // State
-    let currentOriginalBase64 = null;
-    let currentRenderedBase64 = null;
-    let currentJsonPrompt = null;
+    // Multi-Image State
+    let imageQueue = []; // [{ id, name, originalBase64, renderedBase64, jsonPrompt, status: 'ready'|'rendering'|'done'|'error' }]
+    let selectedIndex = 0;
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
-    const previewContainer = document.getElementById('previewContainer');
+    const gallerySection = document.getElementById('gallerySection');
+    const previewGrid = document.getElementById('previewGrid');
+    const galleryCount = document.getElementById('galleryCount');
+    const btnClearAll = document.getElementById('btnClearAll');
     const btnSubmit = document.getElementById('btnSubmit');
+    const btnSubmitText = document.getElementById('btnSubmitText');
 
     const emptyState = document.getElementById('emptyState');
     const progressBox = document.getElementById('progressBox');
@@ -924,6 +1061,7 @@
     const progressBarFill = document.getElementById('progressBarFill');
     const progressPercent = document.getElementById('progressPercent');
     const progressStatusText = document.getElementById('progressStatusText');
+    const batchSelectorBar = document.getElementById('batchSelectorBar');
 
     const imgBefore = document.getElementById('imgBefore');
     const imgAfter = document.getElementById('imgAfter');
@@ -948,46 +1086,147 @@
     });
 
     dropZone.addEventListener('drop', (e) => {
-      const files = e.dataTransfer.files;
-      if (files.length > 0) handleFile(files[0]);
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) handleFiles(files);
     });
 
     fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+      const files = Array.from(e.target.files);
+      if (files.length > 0) handleFiles(files);
+      fileInput.value = '';
     });
 
-    function handleFile(file) {
-      if (!file.type.startsWith('image/')) {
+    btnClearAll.addEventListener('click', () => {
+      imageQueue = [];
+      selectedIndex = 0;
+      renderGallery();
+      sliderWrapper.style.display = 'none';
+      emptyState.style.display = 'flex';
+    });
+
+    async function handleFiles(files) {
+      const validFiles = files.filter(f => f.type.startsWith('image/'));
+      if (validFiles.length === 0) {
         showToast('이미지 파일(JPG, PNG, WEBP)만 업로드할 수 있습니다.');
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        currentOriginalBase64 = e.target.result;
-        renderPreviews();
-      };
-      reader.readAsDataURL(file);
+      for (const file of validFiles) {
+        const base64 = await readFileAsBase64(file);
+        imageQueue.push({
+          id: Date.now() + Math.random().toString(36).substr(2, 9),
+          name: file.name,
+          originalBase64: base64,
+          renderedBase64: null,
+          jsonPrompt: null,
+          status: 'ready'
+        });
+      }
+
+      renderGallery();
+      showToast(`${validFiles.length}장의 이미지가 추가되었습니다.`);
     }
 
-    function renderPreviews() {
-      previewContainer.innerHTML = '';
-      if (!currentOriginalBase64) return;
-
-      const chip = document.createElement('div');
-      chip.className = 'preview-chip';
-      chip.innerHTML = `
-        <img src="${currentOriginalBase64}">
-        <button class="btn-remove" onclick="removeImage()">✕</button>
-      `;
-      previewContainer.appendChild(chip);
+    function readFileAsBase64(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
     }
 
-    window.removeImage = function() {
-      currentOriginalBase64 = null;
-      fileInput.value = '';
-      renderPreviews();
+    function renderGallery() {
+      if (imageQueue.length === 0) {
+        gallerySection.style.display = 'none';
+        btnSubmitText.innerText = '실사 렌더링 변환 시작';
+        return;
+      }
+
+      gallerySection.style.display = 'flex';
+      galleryCount.innerText = `업로드된 이미지 (${imageQueue.length}장)`;
+      btnSubmitText.innerText = `${imageQueue.length}장 일괄 실사 변환 시작`;
+      previewGrid.innerHTML = '';
+
+      imageQueue.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = `preview-card ${index === selectedIndex ? 'selected' : ''}`;
+        
+        let statusLabel = '대기';
+        let statusClass = '';
+        if (item.status === 'done') {
+          statusLabel = '완료';
+          statusClass = 'done';
+        } else if (item.status === 'rendering') {
+          statusLabel = '변환중';
+          statusClass = 'rendering';
+        }
+
+        card.innerHTML = `
+          <img src="${item.renderedBase64 || item.originalBase64}" alt="${item.name}">
+          <span class="status-indicator ${statusClass}">${statusLabel}</span>
+          <button class="btn-remove-item" onclick="removeItem(${index}, event)">✕</button>
+        `;
+
+        card.addEventListener('click', () => {
+          selectedIndex = index;
+          renderGallery();
+          displaySelectedItem();
+        });
+
+        previewGrid.appendChild(card);
+      });
+
+      renderBatchTabs();
+    }
+
+    window.removeItem = function(index, e) {
+      e.stopPropagation();
+      imageQueue.splice(index, 1);
+      if (selectedIndex >= imageQueue.length) selectedIndex = Math.max(0, imageQueue.length - 1);
+      renderGallery();
+      displaySelectedItem();
     };
+
+    function renderBatchTabs() {
+      batchSelectorBar.innerHTML = '';
+      if (imageQueue.length <= 1) {
+        batchSelectorBar.style.display = 'none';
+        return;
+      }
+
+      batchSelectorBar.style.display = 'flex';
+      imageQueue.forEach((item, index) => {
+        const tab = document.createElement('button');
+        tab.className = `batch-tab ${index === selectedIndex ? 'active' : ''}`;
+        tab.innerText = `${index + 1}번 뷰 ${item.status === 'done' ? '✓' : ''}`;
+        tab.addEventListener('click', () => {
+          selectedIndex = index;
+          renderGallery();
+          displaySelectedItem();
+        });
+        batchSelectorBar.appendChild(tab);
+      });
+    }
+
+    function displaySelectedItem() {
+      const item = imageQueue[selectedIndex];
+      if (!item) {
+        sliderWrapper.style.display = 'none';
+        emptyState.style.display = 'flex';
+        return;
+      }
+
+      if (item.status === 'done' && item.renderedBase64) {
+        emptyState.style.display = 'none';
+        progressBox.style.display = 'none';
+        sliderWrapper.style.display = 'flex';
+        imgBefore.src = item.originalBase64;
+        imgAfter.src = item.renderedBase64;
+        btnDownload.href = item.renderedBase64;
+        btnDownload.download = `inde_render_${selectedIndex + 1}_${item.name || 'render.jpg'}`;
+        setSliderPosition(compSlider.getBoundingClientRect().left + (compSlider.offsetWidth / 2));
+      }
+    }
 
     // Before & After Slider Logic
     let isSliding = false;
@@ -1028,9 +1267,9 @@
       isSliding = false;
     });
 
-    // Submit Process
+    // Batch Submit Process
     btnSubmit.addEventListener('click', async () => {
-      if (!currentOriginalBase64) {
+      if (imageQueue.length === 0) {
         showToast('스케치업 이미지를 먼저 업로드해 주세요.');
         return;
       }
@@ -1039,8 +1278,6 @@
       emptyState.style.display = 'none';
       sliderWrapper.style.display = 'none';
       progressBox.style.display = 'flex';
-
-      updateProgress(20, '1단계: 스케치업 도면 및 천장 설비/조명 분석 중...', 1);
 
       const options = {
         lockCeiling: document.getElementById('optLockCeiling').checked,
@@ -1052,58 +1289,52 @@
 
       const savedApiKey = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
 
-      try {
-        const step2Timer = setTimeout(() => {
-          updateProgress(50, '2단계: INDE RENDER 6대 원칙 물리 프롬프트 조립 중...', 2);
-        }, 1500);
+      const total = imageQueue.length;
+      let successCount = 0;
 
-        const step3Timer = setTimeout(() => {
-          updateProgress(80, '3단계: 초고화질 건축 사진 렌더링 중...', 3);
-        }, 3500);
+      for (let i = 0; i < total; i++) {
+        const item = imageQueue[i];
+        item.status = 'rendering';
+        renderGallery();
 
-        const response = await fetch('/api/photoreal', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            image: currentOriginalBase64,
-            apiKey: savedApiKey,
-            options: options,
-            action: 'render'
-          })
-        });
+        const basePct = Math.round((i / total) * 100);
+        updateProgress(basePct + 10, `[${i + 1}/${total}] 도면 분석 및 천장 설비 고정 중...`, 1);
 
-        clearTimeout(step2Timer);
-        clearTimeout(step3Timer);
+        try {
+          const response = await fetch('/api/photoreal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image: item.originalBase64,
+              apiKey: savedApiKey,
+              options: options,
+              action: 'render'
+            })
+          });
 
-        const resData = await response.json();
-        if (!resData.success) {
-          throw new Error(resData.error || '변환 중 오류가 발생했습니다.');
+          const resData = await response.json();
+          if (!resData.success) {
+            throw new Error(resData.error || '변환 오류');
+          }
+
+          item.renderedBase64 = resData.renderedImage;
+          item.jsonPrompt = resData.jsonPrompt;
+          item.status = 'done';
+          successCount++;
+        } catch (err) {
+          item.status = 'error';
+          console.error(err);
         }
 
-        if (!resData.renderedImage) {
-          throw new Error('실사 이미지 생성 결과가 없습니다. 다시 시도해 주세요.');
-        }
-
-        updateProgress(100, '실사 변환 완료', 3);
-        currentJsonPrompt = resData.jsonPrompt;
-        currentRenderedBase64 = resData.renderedImage;
-
-        setTimeout(() => {
-          progressBox.style.display = 'none';
-          sliderWrapper.style.display = 'flex';
-          imgBefore.src = currentOriginalBase64;
-          imgAfter.src = currentRenderedBase64;
-          btnDownload.href = currentRenderedBase64;
-          setSliderPosition(compSlider.getBoundingClientRect().left + (compSlider.offsetWidth / 2));
-        }, 600);
-
-      } catch (err) {
-        alert('오류: ' + err.message);
-        progressBox.style.display = 'none';
-        emptyState.style.display = 'flex';
-      } finally {
-        btnSubmit.disabled = false;
+        renderGallery();
+        updateProgress(Math.round(((i + 1) / total) * 100), `[${i + 1}/${total}] 실사 변환 완료`, 3);
       }
+
+      btnSubmit.disabled = false;
+      showToast(`${successCount}/${total}장의 실사 렌더링이 완료되었습니다!`);
+      selectedIndex = 0;
+      renderGallery();
+      displaySelectedItem();
     });
 
     function updateProgress(percent, text, stepNum) {
@@ -1126,7 +1357,9 @@
     // Modal
     const promptModal = document.getElementById('promptModal');
     document.getElementById('btnViewPrompt').addEventListener('click', () => {
-      document.getElementById('jsonPromptCode').innerText = JSON.stringify(currentJsonPrompt, null, 2);
+      const item = imageQueue[selectedIndex];
+      const promptObj = item ? item.jsonPrompt : {};
+      document.getElementById('jsonPromptCode').innerText = JSON.stringify(promptObj || {}, null, 2);
       promptModal.style.display = 'flex';
     });
 
@@ -1135,7 +1368,9 @@
     });
 
     document.getElementById('btnCopyJson').addEventListener('click', () => {
-      navigator.clipboard.writeText(JSON.stringify(currentJsonPrompt, null, 2));
+      const item = imageQueue[selectedIndex];
+      const promptObj = item ? item.jsonPrompt : {};
+      navigator.clipboard.writeText(JSON.stringify(promptObj || {}, null, 2));
       showToast('JSON 프롬프트가 클립보드에 복사되었습니다.');
     });
 

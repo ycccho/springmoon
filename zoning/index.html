@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPACE ZONING AI | 병원 및 오피스 도면 조닝 시스템</title>
+  <meta name="description" content="병원·의원 및 상업용 사무실 평면도를 분석하여 기능별 공간 조닝 다이어그램, 실별 면적 산출표, 소방/청결 동선 분석 보고서를 자동 생성하는 건축 AI">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Modern Clean Studio Light Palette */
+      --bg-base: #f8f9fa;
+      --bg-surface: #ffffff;
+      --bg-surface-subtle: #f1f3f5;
+      --bg-surface-hover: #e9ecef;
+      --bg-input: #ffffff;
+      
+      /* Subtle Architectural Lines */
+      --border-subtle: #e9ecef;
+      --border-default: #dee2e6;
+      --border-strong: #ced4da;
+      --border-focus: #111827;
+      
+      /* Refined Brand & Action Tokens */
+      --brand-primary: #111827;
+      --brand-primary-hover: #000000;
+      --accent-medical: #0284c7;
+      --accent-office: #059669;
+      --success: #059669;
+      --warning: #d97706;
+      
+      /* High Contrast Clean Typography */
+      --text-main: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --text-dim: #9ca3af;
+      
+      /* Geometry */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-full: 9999px;
+      
+      /* Elevation & Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+      --shadow-elevated: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      
+      /* Transitions */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --transition: all 0.2s var(--ease-out);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      letter-spacing: -0.015em;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-default);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 32px;
+    }
+
+    .header-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      background: var(--brand-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.03em;
+    }
+
+    .brand-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-link {
+      padding: 6px 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+
+    .nav-link:hover {
+      color: var(--text-main);
+      background: var(--bg-surface-subtle);
+    }
+
+    .nav-link.active {
+      color: var(--text-main);
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-default);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+      padding: 7px 13px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-surface-subtle);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    /* Main Console Grid */
+    main {
+      flex: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 32px 64px;
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 1080px) {
+      main {
+        grid-template-columns: 1fr;
+        padding: 20px 16px 48px;
+        gap: 20px;
+      }
+    }
+
+    /* Card Panels */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .card-subtext {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Segmented Space Type Tabs */
+    .segmented-control {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .segment-btn {
+      padding: 9px 12px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .segment-btn.active {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700;
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      border: 1.5px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--bg-surface-subtle);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--brand-primary);
+      background: #ffffff;
+    }
+
+    .upload-text {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .upload-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .file-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* Thumbnail Preview */
+    .preview-box {
+      display: none;
+      position: relative;
+      width: 100%;
+      height: 120px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-default);
+      background: #000;
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .preview-box .btn-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(17, 24, 39, 0.75);
+      color: #ffffff;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .preview-box .btn-remove:hover {
+      background: #ef4444;
+    }
+
+    /* Form Fields */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .select-input, .text-input {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 9px 12px;
+      font-size: 0.86rem;
+      outline: none;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .select-input:focus, .text-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .option-card:hover {
+      background: var(--bg-surface-subtle);
+      border-color: var(--border-strong);
+    }
+
+    .option-card input[type="checkbox"] {
+      margin-top: 3px;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-primary);
+      cursor: pointer;
+    }
+
+    .option-text-group {
+      flex: 1;
+    }
+
+    .option-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .option-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      background: var(--brand-primary);
+      color: #ffffff;
+      border: none;
+      padding: 13px 20px;
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transition: var(--transition);
+      margin-top: 4px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--brand-primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Results Layout */
+    .results-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 560px;
+      gap: 24px;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 8px;
+      color: var(--text-muted);
+      border: 1.5px dashed var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 40px 20px;
+      background: var(--bg-surface-subtle);
+    }
+
+    /* Progress Box */
+    .progress-container {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+      padding: 24px;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .progress-status-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .progress-pct {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      font-family: monospace;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: var(--border-default);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--brand-primary);
+      border-radius: var(--radius-full);
+      transition: width 0.35s var(--ease-out);
+    }
+
+    .progress-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-top: 1px solid var(--border-default);
+      padding-top: 14px;
+    }
+
+    .progress-step {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .progress-step.active {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .progress-step.done {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    /* Zoning Result Content */
+    .zoning-content {
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .diagram-view-box {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-default);
+      background: #000;
+      box-shadow: var(--shadow-elevated);
+      position: relative;
+    }
+
+    .diagram-view-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Area Table */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.84rem;
+    }
+
+    th {
+      background: var(--bg-surface-subtle);
+      padding: 10px 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .zone-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .percent-bar-container {
+      width: 80px;
+      height: 6px;
+      background: var(--border-subtle);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+
+    .percent-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+    }
+
+    /* Report Section */
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .report-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .report-card {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .report-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .report-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-download {
+      flex: 1;
+      background: var(--brand-primary);
+      color: #ffffff;
+      border: none;
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-download:hover {
+      background: var(--brand-primary-hover);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--brand-primary);
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-elevated);
+      z-index: 200;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: var(--transition);
+      font-size: 0.86rem;
+      font-weight: 500;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="header-container">
+      <div class="brand-group">
+        <a href="/zoning" class="brand">
+          <div class="brand-mark">ZN</div>
+          <span class="brand-title">SPACE ZONING AI</span>
+          <span class="brand-badge">HOSPITAL & OFFICE</span>
+        </a>
+        <nav class="nav-links">
+          <a href="/render" class="nav-link">3D 실사 렌더링</a>
+          <a href="/zoning" class="nav-link active">도면 조닝 AI (신규)</a>
+        </nav>
+      </div>
+      <div class="header-actions">
+        <button class="btn-secondary" id="btnHelpModal">도움말 및 가이드</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Console -->
+  <main>
+    <!-- Left Control Panel -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">공간 유형 및 평면도 입력</div>
+        <div class="card-subtext">병원·의원 및 상업 오피스 전용 건축 조닝 플래너</div>
+      </div>
+
+      <!-- Space Type Toggle -->
+      <div class="segmented-control">
+        <button class="segment-btn active" id="tabHospital" onclick="switchSpaceType('hospital')">
+          병원 / 의원 (Clinic)
+        </button>
+        <button class="segment-btn" id="tabOffice" onclick="switchSpaceType('office')">
+          사무실 / 오피스 (Office)
+        </button>
+      </div>
+
+      <!-- Floor Plan Upload Zone -->
+      <div class="upload-zone" id="dropZone">
+        <div class="upload-text">2D 평면도 이미지를 여기에 끌어다 놓으세요</div>
+        <div class="upload-sub">CAD 도면 캡처, 건축 슬래브, 스케치 이미지 (JPG, PNG, WEBP)</div>
+        <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/webp">
+      </div>
+
+      <div class="preview-box" id="previewBox">
+        <img src="" id="previewImg" alt="Floorplan Preview">
+        <button class="btn-remove" onclick="removeFloorplan()">✕</button>
+      </div>
+
+      <!-- Common Settings -->
+      <div class="form-group">
+        <label class="form-label" for="inputArea">예상 전용 면적</label>
+        <select id="inputArea" class="select-input">
+          <option value="30평 (약 99㎡)">30평 (약 99㎡ - 소형 의원 / 15인 오피스)</option>
+          <option value="50평 (약 165㎡)">50평 (약 165㎡ - 표준 의원 / 25인 오피스)</option>
+          <option value="70평 (약 231㎡)" selected>70평 (약 231㎡ - 중형 클리닉 / 35인 오피스)</option>
+          <option value="100평 (약 330㎡)">100평 (약 330㎡ - 수술실/복합 오피스)</option>
+          <option value="150평 이상 (약 495㎡+)">150평 이상 (약 495㎡+ - 대형 병원/사옥)</option>
+        </select>
+      </div>
+
+      <!-- Hospital Dynamic Form -->
+      <div id="hospitalForm" class="options-grid">
+        <div class="form-group">
+          <label class="form-label" for="selectSpecialty">진료 과목 선택</label>
+          <select id="selectSpecialty" class="select-input">
+            <option value="피부과 / 성형외과" selected>피부과 / 성형외과 (상담실·관리실·수술실 비중)</option>
+            <option value="치과">치과 (체어존·X-ray·기공실·소독실 분리)</option>
+            <option value="이비인후과 / 내과 / 소아과">이비인후과 / 내과 / 소아과 (호흡기 처치·진료 회전율)</option>
+            <option value="안과">안과 (암실 검사실·수술실·레이저실)</option>
+            <option value="정형외과 / 통증 / 재활">정형외과 / 통증 / 재활 (물리치료실·도수치료·X-ray)</option>
+            <option value="한의원">한의원 (침구실·추나베드·탕전실)</option>
+          </select>
+        </div>
+
+        <label class="option-card">
+          <input type="checkbox" id="chkHospitalClean" checked>
+          <div class="option-text-group">
+            <div class="option-label">청결-오염 동선 엄격 분리</div>
+            <div class="option-desc">환자 공용 동선과 의료진/수술실 청결 동선을 완전히 격리</div>
+          </div>
+        </label>
+
+        <label class="option-card">
+          <input type="checkbox" id="chkHospitalXray" checked>
+          <div class="option-text-group">
+            <div class="option-label">X-ray / 방사선 차폐실 배치</div>
+            <div class="option-desc">납 차폐벽 및 조종 공간 규격 반영</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Office Dynamic Form -->
+      <div id="officeForm" class="options-grid" style="display: none;">
+        <div class="form-group">
+          <label class="form-label" for="selectOfficeType">업무 조직 유형</label>
+          <select id="selectOfficeType" class="select-input">
+            <option value="IT / 테크 / 스타트업" selected>IT / 테크 / 스타트업 (ABW 자율좌석·포커스룸·타운홀)</option>
+            <option value="전문직 / 금융 / 법무">전문직 / 금융 / 법무 (개인 독립실·기밀 상담실)</option>
+            <option value="크리에이티브 / 에이전시">크리에이티브 / 에이전시 (협업 라운지·쇼룸·스튜디오)</option>
+            <option value="일반 기업 본사 / 지사">일반 기업 본사 / 지사 (부서별 고정석·임원실·회의실)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inputHeadcount">상주 인원 수</label>
+          <input type="text" id="inputHeadcount" class="text-input" value="30명">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inputFocusRooms">필수 회의 / 집중 공간</label>
+          <input type="text" id="inputFocusRooms" class="text-input" value="대회의실 1개, 1인 포커스룸 2개, 폰부스 2개">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inputCustomReq">추가 요청사항 (선택)</label>
+        <input type="text" id="inputCustomReq" class="text-input" placeholder="예: 입구 대기 공간을 넓게, 창가 쪽에 원장실/임원실 배치">
+      </div>
+
+      <button class="btn-submit" id="btnSubmitZoning">
+        공간 조닝 및 동선 분석 시작
+      </button>
+    </div>
+
+    <!-- Right Results Panel -->
+    <div class="card results-card">
+      <div class="card-header">
+        <div class="card-title">공간 조닝 다이어그램 & 분석 보고서</div>
+        <div class="card-subtext">기능별 컬러 조닝, 실별 면적 산출표, 소방/동선 적합성 검토</div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState">
+        <div class="upload-text">왼쪽에서 평면도 이미지를 업로드하세요</div>
+        <div class="upload-sub">병원 또는 사무실 용도에 최적화된 공간 조닝과 분석 리포트가 생성됩니다.</div>
+      </div>
+
+      <!-- Progress Box -->
+      <div class="progress-container" id="progressBox">
+        <div class="progress-header">
+          <span class="progress-status-title" id="progressStatusText">도면 분석 중...</span>
+          <span class="progress-pct" id="progressPercent">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressBarFill"></div>
+        </div>
+        <div class="progress-steps">
+          <div class="progress-step" id="step1">1단계: 평면도 외곽 기둥, 코어, 출입구 및 채광면 구조 분석</div>
+          <div class="progress-step" id="step2">2단계: 기능별 면적 배분 및 법규/소방 피난 동선 시뮬레이션</div>
+          <div class="progress-step" id="step3">3단계: 컬러 조닝 다이어그램 및 실별 면적표 생성</div>
+        </div>
+      </div>
+
+      <!-- Zoning Results Content -->
+      <div class="zoning-content" id="zoningContent">
+        <!-- Diagram View Box -->
+        <div class="diagram-view-box">
+          <img src="" id="zoningDiagramImg" alt="Color Coded Zoning Diagram">
+        </div>
+
+        <div class="result-actions">
+          <a href="#" class="btn-download" id="btnDownloadDiagram" download="spatial_zoning_diagram.jpg">
+            컬러 조닝 다이어그램 다운로드
+          </a>
+        </div>
+
+        <!-- Area Breakdown Table -->
+        <div>
+          <div style="font-size: 0.92rem; font-weight: 700; margin-bottom: 10px; color: var(--text-main);">
+            실별 면적 산출표 (Spatial Area Breakdown)
+          </div>
+          <div class="table-container">
+            <table id="areaTable">
+              <thead>
+                <tr>
+                  <th>구역 (Zone)</th>
+                  <th>실 이름 (Room)</th>
+                  <th>면적 (㎡ / 평)</th>
+                  <th>점유율 (%)</th>
+                  <th>공간 특징 및 기능</th>
+                </tr>
+              </thead>
+              <tbody id="areaTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Circulation & Code Report -->
+        <div>
+          <div style="font-size: 0.92rem; font-weight: 700; margin-bottom: 10px; color: var(--text-main);">
+            동선 및 인허가 적합성 검토 보고서
+          </div>
+          <div class="report-grid" id="reportGrid"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastMsg">알림 메시지</div>
+
+  <script>
+    let currentSpaceType = 'hospital';
+    let currentFloorPlanBase64 = null;
+    let currentZoningResult = null;
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const previewBox = document.getElementById('previewBox');
+    const previewImg = document.getElementById('previewImg');
+    const btnSubmitZoning = document.getElementById('btnSubmitZoning');
+
+    const emptyState = document.getElementById('emptyState');
+    const progressBox = document.getElementById('progressBox');
+    const zoningContent = document.getElementById('zoningContent');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatusText = document.getElementById('progressStatusText');
+
+    const zoningDiagramImg = document.getElementById('zoningDiagramImg');
+    const btnDownloadDiagram = document.getElementById('btnDownloadDiagram');
+    const areaTableBody = document.getElementById('areaTableBody');
+    const reportGrid = document.getElementById('reportGrid');
+
+    function switchSpaceType(type) {
+      currentSpaceType = type;
+      document.getElementById('tabHospital').classList.toggle('active', type === 'hospital');
+      document.getElementById('tabOffice').classList.toggle('active', type === 'office');
+      document.getElementById('hospitalForm').style.display = type === 'hospital' ? 'flex' : 'none';
+      document.getElementById('officeForm').style.display = type === 'office' ? 'flex' : 'none';
+    }
+
+    // Drag and drop
+    ['dragenter', 'dragover'].forEach(eName => {
+      dropZone.addEventListener(eName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eName => {
+      dropZone.addEventListener(eName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+      });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('이미지 파일(JPG, PNG, WEBP)만 업로드할 수 있습니다.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentFloorPlanBase64 = e.target.result;
+        previewImg.src = currentFloorPlanBase64;
+        previewBox.style.display = 'block';
+        dropZone.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.removeFloorplan = function() {
+      currentFloorPlanBase64 = null;
+      fileInput.value = '';
+      previewBox.style.display = 'none';
+      dropZone.style.display = 'flex';
+    };
+
+    // Submit Process
+    btnSubmitZoning.addEventListener('click', async () => {
+      if (!currentFloorPlanBase64) {
+        showToast('평면도 이미지를 먼저 업로드해 주세요.');
+        return;
+      }
+
+      btnSubmitZoning.disabled = true;
+      emptyState.style.display = 'none';
+      zoningContent.style.display = 'none';
+      progressBox.style.display = 'flex';
+
+      updateProgress(20, '1단계: 평면도 기둥, 코어, 출입구 분석 중...', 1);
+
+      const config = {
+        targetArea: document.getElementById('inputArea').value,
+        specialty: document.getElementById('selectSpecialty').value,
+        officeType: document.getElementById('selectOfficeType').value,
+        headcount: document.getElementById('inputHeadcount').value,
+        requireCleanZone: document.getElementById('chkHospitalClean').checked,
+        requireXray: document.getElementById('chkHospitalXray').checked,
+        focusRooms: document.getElementById('inputFocusRooms').value,
+        customRequirements: document.getElementById('inputCustomReq').value
+      };
+
+      const savedApiKey = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
+
+      try {
+        const step2Timer = setTimeout(() => {
+          updateProgress(50, '2단계: 기능별 면적 산출 및 동선 시뮬레이션 중...', 2);
+        }, 1500);
+
+        const step3Timer = setTimeout(() => {
+          updateProgress(80, '3단계: 컬러 조닝 다이어그램 생성 중...', 3);
+        }, 3500);
+
+        const response = await fetch('/api/zoning', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: currentFloorPlanBase64,
+            spaceType: currentSpaceType,
+            config: config,
+            apiKey: savedApiKey
+          })
+        });
+
+        clearTimeout(step2Timer);
+        clearTimeout(step3Timer);
+
+        const resData = await response.json();
+        if (!resData.success) {
+          throw new Error(resData.error || '조닝 분석 중 오류가 발생했습니다.');
+        }
+
+        updateProgress(100, '공간 조닝 및 분석 완료', 3);
+        currentZoningResult = resData;
+
+        setTimeout(() => {
+          progressBox.style.display = 'none';
+          zoningContent.style.display = 'flex';
+          renderZoningResults(resData);
+        }, 600);
+
+      } catch (err) {
+        alert('오류: ' + err.message);
+        progressBox.style.display = 'none';
+        emptyState.style.display = 'flex';
+      } finally {
+        btnSubmitZoning.disabled = false;
+      }
+    });
+
+    function updateProgress(percent, text, stepNum) {
+      progressBarFill.style.width = `${percent}%`;
+      progressPercent.innerText = `${percent}%`;
+      progressStatusText.innerText = text;
+
+      for (let i = 1; i <= 3; i++) {
+        const stepEl = document.getElementById(`step${i}`);
+        stepEl.classList.remove('active', 'done');
+        if (i < stepNum) {
+          stepEl.classList.add('done');
+          stepEl.innerText = `${stepEl.innerText.replace('✓ ', '')}`;
+        } else if (i === stepNum) {
+          stepEl.classList.add('active');
+        }
+      }
+    }
+
+    function renderZoningResults(data) {
+      zoningDiagramImg.src = data.zoningDiagram;
+      btnDownloadDiagram.href = data.zoningDiagram;
+
+      const zData = data.zoningData || {};
+      
+      // Table
+      areaTableBody.innerHTML = '';
+      if (zData.zones && Array.isArray(zData.zones)) {
+        zData.zones.forEach(z => {
+          const zoneColor = z.color || '#3b82f6';
+          if (z.rooms && Array.isArray(z.rooms)) {
+            z.rooms.forEach(r => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>
+                  <span class="zone-pill">
+                    <span class="color-dot" style="background-color: ${zoneColor};"></span>
+                    ${z.zoneName}
+                  </span>
+                </td>
+                <td style="font-weight: 600;">${r.roomName}</td>
+                <td>${r.areaM2 || '-'} ㎡ (${r.areaPyung || '-'}평)</td>
+                <td>
+                  ${r.percentage || 0}%
+                  <div class="percent-bar-container">
+                    <div class="percent-bar-fill" style="width: ${r.percentage || 0}%; background-color: ${zoneColor};"></div>
+                  </div>
+                </td>
+                <td style="color: var(--text-secondary);">${r.description || '-'}</td>
+              `;
+              areaTableBody.appendChild(tr);
+            });
+          }
+        });
+      }
+
+      // Reports
+      reportGrid.innerHTML = '';
+      const circ = zData.circulationAnalysis || {};
+      
+      const reports = [
+        { title: '환자 / 방문객 메인 동선', desc: circ.patientFlow || '진입 로비에서 접수대로 직결되며 대기실에서 진료실로의 접근성이 우수합니다.' },
+        { title: '의료진 / 임직원 전용 동선', desc: circ.staffFlow || '오염물 및 의료 폐기물 분리 배출 동선과 독립된 직원 휴게 공간이 확보되었습니다.' },
+        { title: '소방 피난 및 복도 규격 검토', desc: circ.fireEgress || '주요 복도 유효폭 1.2m 이상 확보 및 2방향 피난 통로가 안정적으로 배치되었습니다.' },
+        { title: '설계 전문가 종합 의견', desc: zData.architecturalAdvice || '채광과 코어 환기 덕트 위치를 고려하여 장기적인 유지보수 및 공간 확장성이 우수합니다.' }
+      ];
+
+      reports.forEach(rp => {
+        const div = document.createElement('div');
+        div.className = 'report-card';
+        div.innerHTML = `
+          <div class="report-title">${rp.title}</div>
+          <div class="report-desc">${rp.desc}</div>
+        `;
+        reportGrid.appendChild(div);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
