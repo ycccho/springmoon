@@ -2223,8 +2223,12 @@
       }
     }
 
+
+
+
+
     // -------------------------------------------------------------
-    // KISCON Instant Verification & Search Trigger
+    // KISCON Instant Verification & Search Trigger (실제 공공데이터 실시간 연동)
     // -------------------------------------------------------------
     async function triggerKisconInstantSearch() {
       const input = document.getElementById("topKisconInput");
@@ -2236,7 +2240,7 @@
         return;
       }
 
-      // 1. 하단 KISCON 섹션으로 스크롤
+      // 1. 하단 KISCON 섹션으로 부드럽게 스크롤
       const targetSec = document.getElementById("kiscon-tool");
       if (targetSec) {
         targetSec.scrollIntoView({ behavior: 'smooth' });
@@ -2248,58 +2252,16 @@
         nameFilter.value = query;
       }
 
-      // 3. 만약 데이터가 아직 로드되지 않은 경우 초기 데이터셋 생성
+      // 3. 실제 KISCON API 호출 실행 (기존 데이터가 없거나 재검색 시)
       if (!loadedCompanies || loadedCompanies.length === 0) {
-        initDefaultKisconDataset();
+        await performKisPreview();
+      } else {
+        renderFilteredList();
       }
-
-      // 4. 검색어 매칭 여부 확인 후 실시간 레코드 생성
-      const matchExists = loadedCompanies.some(c => 
-        (c.ncrGsKname || c.bzentyNm || "").toLowerCase().includes(query.toLowerCase()) ||
-        (c.ncrGsAddr || c.adres || "").toLowerCase().includes(query.toLowerCase())
-      );
-
-      if (!matchExists) {
-        loadedCompanies.unshift({
-          ncrGsKname: query,
-          ncrGsMaster: "조회 대표자",
-          ncrItemName: "실내건축공사업 (정식면허)",
-          ncrGsAddr: "서울특별시 강남구 테헤란로 123 (국토부 KISCON 공시)",
-          ncrOffTel: "02-555-0199",
-          ncrGsRegdate: "20230515",
-          ncrGsFlag: "신규",
-          ncrGsReason: "실시간 면허 유효 상태 확인됨"
-        });
-      }
-
-      // 5. 렌더링 실행
-      renderFilteredList();
-      
-      // 6. 결과 테이블 표시 보장
-      const statusBox = document.getElementById("statusContainer");
-      const tblBox = document.getElementById("tableContainer");
-      const sumBox = document.getElementById("summarySection");
-      if (statusBox) statusBox.style.display = "none";
-      if (tblBox) tblBox.style.display = "block";
-      if (sumBox) sumBox.style.display = "flex";
-    }
-
-    function initDefaultKisconDataset() {
-      loadedCompanies = [
-        { ncrGsKname: "디자인스튜디오 아르케", ncrGsMaster: "김성진", ncrItemName: "실내건축공사업", ncrGsAddr: "서울특별시 서초구 반포대로 45", ncrOffTel: "02-521-8840", ncrGsRegdate: "20210315", ncrGsFlag: "신규" },
-        { ncrGsKname: "스테이빌드 건축디자인", ncrGsMaster: "이준호", ncrItemName: "실내건축공사업", ncrGsAddr: "강원특별자치도 강릉시 경포로 102", ncrOffTel: "033-644-2201", ncrGsRegdate: "20190820", ncrGsFlag: "신규" },
-        { ncrGsKname: "플랜에이치 실내건축", ncrGsMaster: "박현우", ncrItemName: "실내건축공사업", ncrGsAddr: "서울특별시 용산구 한남대로 88", ncrOffTel: "02-790-1145", ncrGsRegdate: "20181105", ncrGsFlag: "신규" },
-        { ncrGsKname: "비스타 종합건설디자인", ncrGsMaster: "정민규", ncrItemName: "실내건축공사업", ncrGsAddr: "부산광역시 해운대구 센텀중앙로 90", ncrOffTel: "051-747-9930", ncrGsRegdate: "20150612", ncrGsFlag: "신규" },
-        { ncrGsKname: "공간의 가치 인테리어", ncrGsMaster: "최우식", ncrItemName: "실내건축공사업", ncrGsAddr: "서울특별시 마포구 독막로 70", ncrOffTel: "02-332-6071", ncrGsRegdate: "20220418", ncrGsFlag: "신규" },
-        { ncrGsKname: "하우스아키 실내건축", ncrGsMaster: "강동원", ncrItemName: "실내건축공사업", ncrGsAddr: "경기도 성남시 분당구 판교역로 14", ncrOffTel: "031-8016-5520", ncrGsRegdate: "20170928", ncrGsFlag: "신규" },
-        { ncrGsKname: "제주아틀리에 건축", ncrGsMaster: "윤서연", ncrItemName: "실내건축공사업", ncrGsAddr: "제주특별자치도 제주시 애월읍 애월로 55", ncrOffTel: "064-799-3100", ncrGsRegdate: "20200214", ncrGsFlag: "신규" },
-        { ncrGsKname: "모던하우스 디자인랩", ncrGsMaster: "송지훈", ncrItemName: "실내건축공사업", ncrGsAddr: "경기도 수원시 영통구 광교중앙로 170", ncrOffTel: "031-215-8822", ncrGsRegdate: "20211025", ncrGsFlag: "신규" },
-        { ncrGsKname: "한빛종합인테리어 (말소)", ncrGsMaster: "홍길동", ncrItemName: "실내장식공사", ncrGsAddr: "부산광역시 동래구 온천장로 33", ncrOffTel: "051-555-1234", ncrGsRegdate: "20160210", ncrGsFlag: "철회", ncrGsReason: "영업정지 후 자진폐업 및 면허 등록말소" }
-      ];
     }
 
     // -------------------------------------------------------------
-    // B. Preserved KISCON API & Analytics Engine (원본 로직 보존)
+    // B. Preserved KISCON API & Analytics Engine (실제 국토부 공공데이터 수집)
     // -------------------------------------------------------------
     const regionRankOrder = [
       "해운대구", "수영구", "남구", "연제구", "동래구", "부산진구", "금정구", "사하구", "강서구", "북구", "사상구", "기장군",
@@ -2350,15 +2312,17 @@
     let loadedCompanies = [];
     let currentFilteredList = [];
 
-    // 초기 데이터 로드
-    initDefaultKisconDataset();
-
     // Region Button Switcher
     document.querySelectorAll(".btn-region").forEach(btn => {
       btn.addEventListener("click", function() {
         document.querySelectorAll(".btn-region").forEach(b => b.classList.remove("active"));
         this.classList.add("active");
-        updateRegionStats(this.dataset.region);
+        const reg = this.dataset.region;
+        if (kisAreaSelect) {
+          kisAreaSelect.value = reg === "전체" ? "" : reg;
+        }
+        updateRegionStats(reg);
+        performKisPreview();
       });
     });
 
@@ -2448,16 +2412,17 @@
     });
 
     if (searchKisBtn) {
-      searchKisBtn.addEventListener("click", performKisPreview);
+      searchKisBtn.addEventListener("click", () => performKisPreview());
     }
 
+    // 실제 국토교통부 KISCON 공공데이터 API 호출 함수
     async function performKisPreview() {
       const area = kisAreaSelect ? kisAreaSelect.value : "";
 
       if (statusContainer) {
         statusContainer.innerHTML = `
           <div class="loader"></div>
-          <div id="loading-txt">공공데이터포털(KISCON) 데이터를 수집 중입니다...</div>
+          <div id="loading-txt" style="font-weight: 700; color: var(--text-primary);">국토교통부 공공데이터포털(KISCON)에서 실제 면허 공시 데이터를 수집 중입니다...</div>
         `;
         statusContainer.style.display = "block";
       }
@@ -2479,7 +2444,7 @@
         for (const targetArea of areasToQuery) {
           const loadingTxt = document.getElementById("loading-txt");
           if (loadingTxt) {
-            loadingTxt.textContent = `공공데이터포털(KISCON) [${targetArea}] 데이터를 수집 중입니다...`;
+            loadingTxt.textContent = `국토교통부 KISCON [${targetArea}] 실제 공시 데이터를 수집 중입니다...`;
           }
 
           let pageNo = 1;
@@ -2526,7 +2491,7 @@
             }
 
             pageNo++;
-          } while (pageNo <= 5);
+          } while (pageNo <= 3);
 
           fetchedData = fetchedData.concat(loadedForArea);
         }
@@ -2538,8 +2503,10 @@
         renderFilteredList();
 
       } catch (err) {
-        console.warn("KISCON API Fallback to default verified dataset:", err);
-        renderFilteredList();
+        console.error("KISCON API Error:", err);
+        if (statusContainer) {
+          statusContainer.innerHTML = `<div style="color: #dc2626; font-weight: 700;">KISCON 공공데이터 연동 오류: ${err.message}</div>`;
+        }
       }
     }
 
@@ -2574,7 +2541,8 @@
           ncrOffTel: getVal("ncrOffTel") || getVal("telno"),
           ncrGsRegdate: getVal("ncrGsRegdate") || getVal("rgsDt"),
           ncrGsFlag: getVal("ncrGsFlag"),
-          ncrGsReason: getVal("ncrGsReason")
+          ncrGsReason: getVal("ncrGsReason"),
+          ncrMasterNum: getVal("ncrMasterNum") || getVal("bizrno")
         });
       }
       return { items };
@@ -2600,10 +2568,17 @@
         const itemType = (c.ncrItemName || c.indutyNm || "");
         const compName = (c.ncrGsKname || c.bzentyNm || "");
         const address = (c.ncrGsAddr || c.adres || "");
+        const masterName = (c.ncrGsMaster || c.reprsntativeNm || "");
+        const masterNum = String(c.ncrMasterNum || "");
         const flag = c.ncrGsFlag || '';
 
         const matchIndustry = isAllIndustries || checkedVals.some(v => itemType.includes(v));
-        const matchName = !searchWord || compName.toLowerCase().includes(searchWord) || address.toLowerCase().includes(searchWord);
+        const matchName = !searchWord || 
+                          compName.toLowerCase().includes(searchWord) || 
+                          address.toLowerCase().includes(searchWord) ||
+                          masterName.toLowerCase().includes(searchWord) ||
+                          masterNum.includes(searchWord);
+
         const matchStatus = statusVal === 'all' || 
                             (statusVal === '신규' && (flag === '신규' || flag === '')) || 
                             (statusVal === '철회' && flag === '철회');
@@ -2634,7 +2609,24 @@
       tableBody.innerHTML = "";
 
       if (filtered.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">조회 조건에 일치하는 KISCON 면허 공시 내역이 없습니다.</td></tr>`;
+        if (searchWord) {
+          // 검색 결과가 없는 경우: 명확한 무면허/공시 미등록 주의 안내 (할루시네이션 방지)
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 3rem 1.5rem; background-color: #fffaf0;">
+                <div style="font-size: 1.1rem; font-weight: 900; color: #dc2626; margin-bottom: 0.5rem;">
+                  🚨 국토교통부 KISCON 공시 내역에 '${searchWord}' 검색 결과가 없습니다.
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+                  해당 업체는 국토교통부에 정식 등록된 <strong>실내건축공사업 면허 보유 업체가 아닐 가능성(무면허 시공)</strong>이 매우 높습니다.<br>
+                  건설산업기본법상 1,500만원 이상 공사는 면허 업체만 시공 가능하며, 무면허 업체와 계약 시 하자보증보험 발급이 불가합니다.
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">조회 조건에 일치하는 KISCON 면허 공시 내역이 없습니다.</td></tr>`;
+        }
         return;
       }
 
@@ -2685,7 +2677,7 @@
           <td>
             <div style="display: flex; gap: 0.3rem;">
               <button class="btn-preset" style="padding: 0.25rem 0.55rem; font-size: 0.75rem;" onclick="copyAddress(this, '${escapeQuotes(address)}')">주소 복사</button>
-              ${cleanPhone ? `<a href="tel:${cleanPhone}" class="btn-preset" style="padding: 0.25rem 0.55rem; font-size: 0.75rem; text-decoration: none; color: var(--brand-primary); border-color: var(--brand-primary);">전화</a>` : ''}
+              ${cleanPhone && cleanPhone !== '051-000-0000' && cleanPhone !== '-' ? `<a href="tel:${cleanPhone}" class="btn-preset" style="padding: 0.25rem 0.55rem; font-size: 0.75rem; text-decoration: none; color: var(--brand-primary); border-color: var(--brand-primary);">전화</a>` : ''}
             </div>
           </td>
         `;
@@ -2797,6 +2789,11 @@
     if (nameFilterInput) {
       nameFilterInput.addEventListener("input", renderFilteredList);
     }
+
+    // 페이지 진입 시 국토교통부 실시간 공공데이터 초기 1회 자동 로드
+    window.addEventListener("DOMContentLoaded", () => {
+      performKisPreview();
+    });
 
   </script>
 </body>
