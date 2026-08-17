@@ -806,21 +806,12 @@
       </div>
 
       <!-- Realistic Space Standards Banner -->
-      <div class="rule-banner" id="ruleBanner">
-        <strong>현실적 평수 기준 엄격 적용</strong>: 30평 기준 복도/벽체를 제외한 실면적(약 22~25평)에 맞춰 <strong>핵심 4~5개 실</strong>(대기실, 진료실, 상담실, 처치관리실, 직원실)로 최적화 구획됩니다.
-      </div>
+      <div class="rule-banner" id="ruleBanner"></div>
 
       <!-- Common Settings -->
       <div class="form-group">
         <label class="form-label" for="inputArea">예상 전용 면적</label>
-        <select id="inputArea" class="select-input" onchange="updateAreaRuleText()">
-          <option value="30평 (약 99㎡)">30평 (약 99㎡ - 소형 의원 / 4~5개실 / 12인 오피스)</option>
-          <option value="50평 (약 165㎡)">50평 (약 165㎡ - 표준 의원 / 6~7개실 / 20인 오피스)</option>
-          <option value="60평 (약 198㎡)" selected>60평 (약 198㎡ - 중형 클리닉 / 6~8개실 / 15~25인 오피스)</option>
-          <option value="70평 (약 231㎡)">70평 (약 231㎡ - 중대형 클리닉 / 8~10개실 / 30인 오피스)</option>
-          <option value="100평 (약 330㎡)">100평 (약 330㎡ - 수술실/복합 클리닉 / 12~15개실)</option>
-          <option value="150평 이상 (약 495㎡+)">150평 이상 (약 495㎡+ - 대형 병원/사옥)</option>
-        </select>
+        <select id="inputArea" class="select-input" onchange="updateAreaRuleText()"></select>
       </div>
 
       <!-- Hospital Dynamic Form -->
@@ -858,7 +849,7 @@
 
       <div class="form-group">
         <label class="form-label" for="inputCustomReq">추가 요청사항 (선택)</label>
-        <input type="text" id="inputCustomReq" class="text-input" placeholder="예: 60평이고 메인입구는 9시방향, 회의실 1개와 대표실 필요">
+        <input type="text" id="inputCustomReq" class="text-input" placeholder="예: 메인입구는 9시방향, 대회의실 1개와 대표실 필요">
       </div>
 
       <button class="btn-submit" id="btnSubmitZoning">
@@ -963,6 +954,8 @@
     const previewImg = document.getElementById('previewImg');
     const btnSubmitZoning = document.getElementById('btnSubmitZoning');
     const ruleBanner = document.getElementById('ruleBanner');
+    const inputArea = document.getElementById('inputArea');
+    const inputCustomReq = document.getElementById('inputCustomReq');
 
     const emptyState = document.getElementById('emptyState');
     const progressBox = document.getElementById('progressBox');
@@ -979,15 +972,50 @@
     const btnDownloadSelected = document.getElementById('btnDownloadSelected');
     const areaTableBody = document.getElementById('areaTableBody');
 
+    const areaOptionsData = {
+      hospital: [
+        { value: "30평 (약 99㎡)", text: "30평 (약 99㎡ - 소형 의원 / 4~5개실)" },
+        { value: "50평 (약 165㎡)", text: "50평 (약 165㎡ - 표준 의원 / 6~7개실)" },
+        { value: "60평 (약 198㎡)", text: "60평 (약 198㎡ - 중형 클리닉 / 6~8개실)", selected: true },
+        { value: "70평 (약 231㎡)", text: "70평 (약 231㎡ - 중대형 클리닉 / 8~10개실)" },
+        { value: "100평 (약 330㎡)", text: "100평 (약 330㎡ - 수술실/복합 클리닉 / 12~15개실)" },
+        { value: "150평 이상 (약 495㎡+)", text: "150평 이상 (약 495㎡+ - 대형 병원 / 15개실 이상)" }
+      ],
+      office: [
+        { value: "30평 (약 99㎡)", text: "30평 (약 99㎡ - 소형 오피스 / 8~12인 / 4~5개실)" },
+        { value: "50평 (약 165㎡)", text: "50평 (약 165㎡ - 표준 오피스 / 15~20인 / 5~6개실)" },
+        { value: "60평 (약 198㎡)", text: "60평 (약 198㎡ - 중형 오피스 / 20~25인 / 6~7개실)", selected: true },
+        { value: "70평 (약 231㎡)", text: "70평 (약 231㎡ - 중대형 오피스 / 25~35인 / 7~9개실)" },
+        { value: "100평 (약 330㎡)", text: "100평 (약 330㎡ - 대형 오피스 / 35~50인 / 10~12개실)" },
+        { value: "150평 이상 (약 495㎡+)", text: "150평 이상 (약 495㎡+ - 전사 사옥 / 50인 이상 / 12개실 이상)" }
+      ]
+    };
+
+    function renderAreaOptions() {
+      const options = areaOptionsData[currentSpaceType] || areaOptionsData.hospital;
+      const currentSelectedVal = inputArea.value || "60평 (약 198㎡)";
+      inputArea.innerHTML = '';
+      options.forEach(opt => {
+        const optionEl = document.createElement('option');
+        optionEl.value = opt.value;
+        optionEl.textContent = opt.text;
+        if (opt.value === currentSelectedVal || (opt.selected && !inputArea.value)) {
+          optionEl.selected = true;
+        }
+        inputArea.appendChild(optionEl);
+      });
+      updateAreaRuleText();
+    }
+
     function updateAreaRuleText() {
-      const val = document.getElementById('inputArea').value;
+      const val = inputArea.value || '';
       const isOff = currentSpaceType === 'office';
       if (val.includes('30평')) {
         ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 30평 기준 복도/벽체를 제외한 실면적(약 22~25평)에 맞춰 ${isOff ? '<strong>오피스 핵심 4~5개 실</strong>(엔트런스, 워크스테이션, 회의실, 대표실, 탕비/OA)' : '<strong>병원 핵심 4~5개 실</strong>(대기실, 진료실, 상담실, 처치관리실, 직원실)'}로 최적화 구획됩니다.`;
       } else if (val.includes('60평') || val.includes('50평')) {
         ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 50~60평 기준 실면적(약 42~50평)에 맞춰 ${isOff ? '<strong>오피스 핵심 6~7개 실</strong>(접견 라운지, 오픈 워크스테이션, 대회의실, 대표실, 1인 포커스룸, 탕비/팬트리, OA실)' : '<strong>병원 핵심 6~7개 실</strong>(대기실, 진료실 2개, 상담실, 처치실, 관리실, 직원실)'}로 구획됩니다.`;
       } else {
-        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 선택하신 면적 규모에 맞추어 건축 법규 및 이동 동선 유효폭을 충족하는 실별 적정 평수가 배분됩니다.`;
+        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 선택하신 ${isOff ? '사무실' : '병원'} 면적 규모에 맞추어 건축 법규 및 이동 동선 유효폭을 충족하는 실별 적정 평수가 배분됩니다.`;
       }
     }
 
@@ -997,8 +1025,18 @@
       document.getElementById('tabOffice').classList.toggle('active', type === 'office');
       document.getElementById('hospitalForm').style.display = type === 'hospital' ? 'flex' : 'none';
       document.getElementById('officeForm').style.display = type === 'office' ? 'flex' : 'none';
-      updateAreaRuleText();
+
+      if (type === 'office') {
+        inputCustomReq.placeholder = "예: 60평이고 메인입구는 9시방향, 대회의실 1개와 대표실 필요";
+      } else {
+        inputCustomReq.placeholder = "예: 60평이고 메인입구는 9시방향, 대기실을 넓게 하고 원장실 1개 배치";
+      }
+
+      renderAreaOptions();
     }
+
+    // Init
+    renderAreaOptions();
 
     // Drag and drop
     ['dragenter', 'dragover'].forEach(eName => {
@@ -1064,11 +1102,11 @@
       updateProgress(15, `1단계: 평면도 외곽 벽체 고정 및 ${typeLabel} 공간 분석 중...`, 1);
 
       const config = {
-        targetArea: document.getElementById('inputArea').value,
+        targetArea: inputArea.value,
         specialty: document.getElementById('selectSpecialty').value,
         officeType: document.getElementById('selectOfficeType').value,
         headcount: document.getElementById('inputHeadcount').value,
-        customRequirements: document.getElementById('inputCustomReq').value
+        customRequirements: inputCustomReq.value
       };
 
       const savedApiKey = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
