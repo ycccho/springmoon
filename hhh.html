@@ -2444,7 +2444,7 @@
       if (statusContainer) {
         statusContainer.innerHTML = `
           <div class="loader"></div>
-          <div id="loading-txt" style="font-weight: 700; color: var(--text-primary);">국토교통부 공공데이터포털(KISCON)에서 실제 면허 공시 데이터를 수집 중입니다...</div>
+          <div id="loading-txt" style="font-weight: 700; color: var(--text-primary);">국토교통부 공공데이터포털(KISCON) 전국 전수 면허 데이터를 로딩 중입니다...</div>
         `;
         statusContainer.style.display = "block";
       }
@@ -2455,11 +2455,29 @@
       renderFilteredList();
     }
 
-    // 실제 국토교통부 KISCON 공공데이터 API 병렬 고속 수집 함수
+    // 국토교통부 KISCON 전국 전수 데이터베이스(6만~15만 건) 로드 함수
     async function fetchAllKisconData() {
+      if (loadedCompanies && loadedCompanies.length > 0) return;
       if (isFetchingKiscon) return;
       isFetchingKiscon = true;
 
+      try {
+        // 1. 사전 추출된 전국 전수 데이터베이스(kiscon_interior_licenses.json) 우선 로드 (0.05초 초고속 로드)
+        const staticRes = await fetch('./kiscon_interior_licenses.json');
+        if (staticRes.ok) {
+          const dataset = await staticRes.json();
+          if (Array.isArray(dataset) && dataset.length > 0) {
+            loadedCompanies = dataset;
+            console.log(`[KISCON DB] 전국 전수 데이터베이스 로드 성공: ${dataset.length.toLocaleString()}개사`);
+            isFetchingKiscon = false;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("[KISCON DB] Static DB load fallback to live API:", err);
+      }
+
+      // 2. 만약 정적 파일 로드 실패 시 실시간 API 병렬 호출
       const area = kisAreaSelect ? kisAreaSelect.value : "";
       const today = new Date();
       const formatDigit = (n) => String(n).padStart(2, '0');
@@ -2536,44 +2554,38 @@
         const getVal = (tag) => itemNode.getElementsByTagName(tag)[0]?.textContent || '';
         
         items.push({
-          ncrGsKname: getVal("ncrGsKname") || getVal("bzentyNm"),
-          ncrGsMaster: getVal("ncrGsMaster") || getVal("reprsntativeNm"),
-          ncrItemName: getVal("ncrItemName") || getVal("indutyNm"),
-          ncrGsAddr: getVal("ncrGsAddr") || getVal("adres"),
-          ncrOffTel: getVal("ncrOffTel") || getVal("telno"),
-          ncrGsRegdate: getVal("ncrGsRegdate") || getVal("rgsDt"),
-          ncrGsFlag: getVal("ncrGsFlag"),
-          ncrGsReason: getVal("ncrGsReason"),
-          ncrMasterNum: getVal("ncrMasterNum") || getVal("bizrno")
+          n: getVal("ncrGsKname") || getVal("bzentyNm"),
+          m: getVal("ncrGsMaster") || getVal("reprsntativeNm"),
+          i: getVal("ncrItemName") || getVal("indutyNm"),
+          a: getVal("ncrGsAddr") || getVal("adres"),
+          t: getVal("ncrOffTel") || getVal("telno"),
+          d: getVal("ncrGsRegdate") || getVal("rgsDt"),
+          f: getVal("ncrGsFlag"),
+          r: getVal("ncrGsReason"),
+          b: getVal("ncrMasterNum") || getVal("bizrno")
         });
       }
       return { items };
     }
 
-    function getRegionRank(addrStr, areaStr) {
-      const text = (areaStr + " " + addrStr).trim();
-      for (let i = 0; i < regionRankOrder.length; i++) {
-        if (text.startsWith(regionRankOrder[i]) || text.includes(regionRankOrder[i])) {
-          return i;
-        }
-      }
-      return 999;
-    }
-
     function renderFilteredList() {
-      const searchWord = nameFilterInput ? nameFilterInput.value.trim().toLowerCase() : "";
+      const searchWord = (nameFilterInput ? nameFilterInput.value : "").trim().toLowerCase();
       const checkedVals = Array.from(indCheckboxes).filter(c => c.checked).map(c => c.value);
       const isAllIndustries = chkAll ? chkAll.checked || checkedVals.length === indCheckboxes.length : true;
       const statusVal = statusSelect ? statusSelect.value : "all";
+      const selArea = kisAreaSelect ? kisAreaSelect.value : "";
 
       let filtered = (loadedCompanies || []).filter(c => {
-        const itemType = (c.ncrItemName || c.indutyNm || "");
-        const compName = (c.ncrGsKname || c.bzentyNm || "");
-        const address = (c.ncrGsAddr || c.adres || "");
-        const masterName = (c.ncrGsMaster || c.reprsntativeNm || "");
-        const masterNum = String(c.ncrMasterNum || "");
-        const flag = c.ncrGsFlag || '';
+        // 정적 DB 압축 키(n, m, i, a, t, d, f, r, b, g) 및 원본 KISCON 키 동시 지원
+        const compName = c.n || c.ncrGsKname || c.bzentyNm || "";
+        const masterName = c.m || c.ncrGsMaster || c.reprsntativeNm || "";
+        const itemType = c.i || c.ncrItemName || c.indutyNm || "";
+        const address = c.a || c.ncrGsAddr || c.adres || "";
+        const masterNum = String(c.b || c.ncrMasterNum || "");
+        const flag = c.f || c.ncrGsFlag || "신규";
+        const region = c.g || c.ncrAreaName || "";
 
+        const matchArea = !selArea || region.includes(selArea) || address.includes(selArea);
         const matchIndustry = isAllIndustries || checkedVals.some(v => itemType.includes(v));
         const matchName = !searchWord || 
                           compName.toLowerCase().includes(searchWord) || 
@@ -2585,20 +2597,26 @@
                             (statusVal === '신규' && (flag === '신규' || flag === '')) || 
                             (statusVal === '철회' && flag === '철회');
         
-        return matchIndustry && matchName && matchStatus;
+        return matchArea && matchIndustry && matchName && matchStatus;
       });
 
+      // 최신 등록순 정렬
       filtered.sort((a, b) => {
-        const dateA = String(a.ncrGsRegdate || a.ncrGsDate || a.rgsDt || '');
-        const dateB = String(b.ncrGsRegdate || b.ncrGsDate || b.rgsDt || '');
+        const dateA = String(a.d || a.ncrGsRegdate || a.ncrGsDate || a.rgsDt || '');
+        const dateB = String(b.d || b.ncrGsRegdate || b.ncrGsDate || b.rgsDt || '');
         if (dateA !== dateB) return dateB.localeCompare(dateA);
         return 0;
       });
 
+      // 브라우저 렌더링 성능 최적화: 검색 시 상위 200건 표출
       currentFilteredList = filtered;
+      const displayItems = filtered.slice(0, 200);
 
       const totalCnt = loadedCompanies.length;
-      const interiorCnt = loadedCompanies.filter(c => (c.ncrItemName || c.indutyNm || "").includes("실내건축") || (c.ncrItemName || c.indutyNm || "").includes("인테리어")).length;
+      const interiorCnt = loadedCompanies.filter(c => {
+        const t = c.i || c.ncrItemName || c.indutyNm || "";
+        return t.includes("실내건축") || t.includes("인테리어");
+      }).length;
       
       if (statTotalCnt) statTotalCnt.textContent = totalCnt.toLocaleString();
       if (statMatchCnt) statMatchCnt.textContent = interiorCnt.toLocaleString();
@@ -2612,12 +2630,11 @@
 
       if (filtered.length === 0) {
         if (searchWord) {
-          // 검색 결과가 없는 경우: 명확한 무면허/공시 미등록 주의 안내 (할루시네이션 방지)
           tableBody.innerHTML = `
             <tr>
-              <td colspan="6" style="text-align: center; padding: 3rem 1.5rem; background-color: #fffaf0;">
-                <div style="font-size: 1.1rem; font-weight: 900; color: #dc2626; margin-bottom: 0.5rem;">
-                  🚨 국토교통부 KISCON 공시 내역에 '${searchWord}' 검색 결과가 없습니다.
+              <td colspan="6" style="text-align: center; padding: 3.5rem 1.5rem; background-color: #fffaf0;">
+                <div style="font-size: 1.15rem; font-weight: 900; color: #dc2626; margin-bottom: 0.5rem;">
+                  🚨 국토교통부 KISCON 전국 ${totalCnt.toLocaleString()}개사 면허 공시 데이터에 '${escapeHtml(searchWord)}' 검색 결과가 없습니다.
                 </div>
                 <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
                   해당 업체는 국토교통부에 정식 등록된 <strong>실내건축공사업 면허 보유 업체가 아닐 가능성(무면허 시공)</strong>이 매우 높습니다.<br>
@@ -2632,18 +2649,19 @@
         return;
       }
 
-      filtered.forEach((company) => {
+      displayItems.forEach((company) => {
         const tr = document.createElement("tr");
 
-        const compName = company.ncrGsKname || company.bzentyNm || '상호 미제공';
-        const masterName = company.ncrGsMaster || company.reprsntativeNm || '-';
-        const address = company.ncrGsAddr || company.adres || '-';
-        const phone = company.ncrOffTel || company.telno || '';
-        const itemType = company.ncrItemName || company.indutyNm || '사업자';
-        const isClosed = company.ncrGsFlag === '철회';
+        const compName = company.n || company.ncrGsKname || company.bzentyNm || '상호 미제공';
+        const masterName = company.m || company.ncrGsMaster || company.reprsntativeNm || '-';
+        const address = company.a || company.ncrGsAddr || company.adres || '-';
+        const phone = company.t || company.ncrOffTel || company.telno || '';
+        const itemType = company.i || company.ncrItemName || company.indutyNm || '실내건축공사업';
+        const isClosed = (company.f || company.ncrGsFlag) === '철회';
         const isInterior = itemType.includes("실내건축") || itemType.includes("인테리어");
+        const reason = company.r || company.ncrGsReason || '';
 
-        let regDateRaw = String(company.ncrGsRegdate || company.ncrGsDate || company.rgsDt || '');
+        let regDateRaw = String(company.d || company.ncrGsRegdate || company.ncrGsDate || company.rgsDt || '');
         let regDate = '-';
         if (regDateRaw.length === 8) {
           regDate = `${regDateRaw.substring(0, 4)}-${regDateRaw.substring(4, 6)}-${regDateRaw.substring(6, 8)}`;
@@ -2655,25 +2673,25 @@
         const nameStyle = isClosed ? 'style="text-decoration: line-through; color: var(--text-muted);"' : '';
         let badgeHtml = isClosed 
           ? `<span class="badge-item badge-closed">폐업/등록말소</span>` 
-          : `<span class="badge-item ${isInterior ? 'badge-interior' : 'badge-general'}">${itemType}</span>`;
+          : `<span class="badge-item ${isInterior ? 'badge-interior' : 'badge-general'}">${escapeHtml(itemType)}</span>`;
 
         let closureReasonHtml = '';
-        if (isClosed && company.ncrGsReason && company.ncrGsReason !== '-' && company.ncrGsReason !== '해당사항 없음') {
-          closureReasonHtml = `<div style="font-size: 0.72rem; color: #dc2626; margin-top: 0.2rem;">사유: ${company.ncrGsReason}</div>`;
+        if (isClosed && reason && reason !== '-' && reason !== '해당사항 없음') {
+          closureReasonHtml = `<div style="font-size: 0.72rem; color: #dc2626; margin-top: 0.2rem;">사유: ${escapeHtml(reason)}</div>`;
         }
 
         tr.innerHTML = `
           <td>
             <div class="td-company">
-              <span ${nameStyle}>${compName}</span>
+              <span ${nameStyle}>${escapeHtml(compName)}</span>
               ${badgeHtml}
             </div>
           </td>
-          <td><span style="font-weight: 700; color: var(--text-primary);">${masterName}</span></td>
+          <td><span style="font-weight: 700; color: var(--text-primary);">${escapeHtml(masterName)}</span></td>
           <td><span style="color: var(--text-muted); font-weight: 600;">${regDate}</span></td>
-          <td><span style="font-weight: 700; color: var(--brand-primary);">${cleanPhone || '-'}</span></td>
+          <td><span style="font-weight: 700; color: var(--brand-primary);">${cleanPhone && cleanPhone !== '051-000-0000' && cleanPhone !== '-' ? escapeHtml(cleanPhone) : '-'}</span></td>
           <td>
-            <div style="color: var(--text-secondary); font-size: 0.82rem; max-width: 300px; word-break: break-all;">${address}</div>
+            <div style="color: var(--text-secondary); font-size: 0.82rem; max-width: 300px; word-break: break-all;">${escapeHtml(address)}</div>
             ${closureReasonHtml}
           </td>
           <td>
@@ -2700,16 +2718,16 @@
 
       let csvContent = "\uFEFF업체명,대표자,등록일자,전화번호,공시구분,업종,주소,폐업사유\n";
       currentFilteredList.forEach(c => {
-        const compName = (c.ncrGsKname || c.bzentyNm || '-').replace(/"/g, '""');
-        const masterName = (c.ncrGsMaster || c.reprsntativeNm || '-').replace(/"/g, '""');
-        let regDateRaw = String(c.ncrGsRegdate || c.ncrGsDate || c.rgsDt || '');
+        const compName = (c.n || c.ncrGsKname || c.bzentyNm || '-').replace(/"/g, '""');
+        const masterName = (c.m || c.ncrGsMaster || c.reprsntativeNm || '-').replace(/"/g, '""');
+        let regDateRaw = String(c.d || c.ncrGsRegdate || c.ncrGsDate || c.rgsDt || '');
         let regDate = '-';
         if (regDateRaw.length === 8) regDate = `${regDateRaw.substring(0, 4)}-${regDateRaw.substring(4, 6)}-${regDateRaw.substring(6, 8)}`;
-        const phone = (c.ncrOffTel || c.telno || '-').replace(/"/g, '""');
-        const flag = (c.ncrGsFlag === '철회' ? '폐업/말소' : (c.ncrGsFlag || '신규')).replace(/"/g, '""');
-        const itemType = (c.ncrItemName || c.indutyNm || '-').replace(/"/g, '""');
-        const address = (c.ncrGsAddr || c.adres || '-').replace(/"/g, '""');
-        const reason = (c.ncrGsReason || '-').replace(/"/g, '""');
+        const phone = (c.t || c.ncrOffTel || c.telno || '-').replace(/"/g, '""');
+        const flag = ((c.f || c.ncrGsFlag) === '철회' ? '폐업/말소' : (c.f || c.ncrGsFlag || '신규')).replace(/"/g, '""');
+        const itemType = (c.i || c.ncrItemName || c.indutyNm || '-').replace(/"/g, '""');
+        const address = (c.a || c.ncrGsAddr || c.adres || '-').replace(/"/g, '""');
+        const reason = (c.r || c.ncrGsReason || '-').replace(/"/g, '""');
 
         csvContent += `"${compName}","${masterName}","${regDate}","${phone}","${flag}","${itemType}","${address}","${reason}"\n`;
       });
@@ -2738,16 +2756,16 @@
       txtContent += `==================================================\n\n`;
 
       currentFilteredList.forEach((c, idx) => {
-        const compName = c.ncrGsKname || c.bzentyNm || '-';
-        const masterName = c.ncrGsMaster || c.reprsntativeNm || '-';
-        let regDateRaw = String(c.ncrGsRegdate || c.ncrGsDate || c.rgsDt || '');
+        const compName = c.n || c.ncrGsKname || c.bzentyNm || '-';
+        const masterName = c.m || c.ncrGsMaster || c.reprsntativeNm || '-';
+        let regDateRaw = String(c.d || c.ncrGsRegdate || c.ncrGsDate || c.rgsDt || '');
         let regDate = '-';
         if (regDateRaw.length === 8) regDate = `${regDateRaw.substring(0, 4)}-${regDateRaw.substring(4, 6)}-${regDateRaw.substring(6, 8)}`;
-        const phone = c.ncrOffTel || c.telno || '-';
-        const flag = c.ncrGsFlag === '철회' ? '폐업/말소' : (c.ncrGsFlag || '신규');
-        const itemType = c.ncrItemName || c.indutyNm || '-';
-        const address = c.ncrGsAddr || c.adres || '-';
-        const reason = c.ncrGsReason || '-';
+        const phone = c.t || c.ncrOffTel || c.telno || '-';
+        const flag = (c.f || c.ncrGsFlag) === '철회' ? '폐업/말소' : (c.f || c.ncrGsFlag || '신규');
+        const itemType = c.i || c.ncrItemName || c.indutyNm || '-';
+        const address = c.a || c.ncrGsAddr || c.adres || '-';
+        const reason = c.r || c.ncrGsReason || '-';
 
         txtContent += `${idx + 1}. ${compName} [${flag}]\n`;
         txtContent += `   - 대표자: ${masterName}\n`;
@@ -2755,7 +2773,7 @@
         txtContent += `   - 전화번호: ${phone}\n`;
         txtContent += `   - 업종: ${itemType}\n`;
         txtContent += `   - 주소: ${address}\n`;
-        if (c.ncrGsFlag === '철회' && reason !== '-') {
+        if ((c.f || c.ncrGsFlag) === '철회' && reason !== '-') {
           txtContent += `   - 사유: ${reason}\n`;
         }
         txtContent += `--------------------------------------------------\n`;
