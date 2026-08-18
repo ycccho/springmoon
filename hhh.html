@@ -2244,24 +2244,30 @@
         return;
       }
 
-      // 1. 하단 필터 인풋에 검색어 즉시 동기화
+      // 1. 전국 검색을 위해 지역 필터 리셋
+      if (kisAreaSelect) kisAreaSelect.value = "";
+      document.querySelectorAll(".btn-region").forEach(b => b.classList.remove("active"));
+      const allBtn = document.querySelector(".btn-region[data-region='전체']");
+      if (allBtn) allBtn.classList.add("active");
+
+      // 2. 하단 필터 인풋에 검색어 즉시 동기화
       const nameFilter = document.getElementById("nameFilterInput");
       if (nameFilter) {
         nameFilter.value = query;
       }
 
-      // 2. 하단 KISCON 섹션으로 부드럽게 스크롤
+      // 3. 하단 KISCON 섹션으로 부드럽게 스크롤
       const targetSec = document.getElementById("kiscon-tool");
       if (targetSec) {
         targetSec.scrollIntoView({ behavior: 'smooth' });
       }
 
-      // 3. 로딩 상태 표시
+      // 4. 로딩 상태 표시
       if (statusContainer) {
         statusContainer.innerHTML = `
           <div class="loader"></div>
           <div id="loading-txt" style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">
-            국토교통부 KISCON 공공데이터에서 '<strong>${escapeHtml(query)}</strong>' 면허 정보를 실시간 검증 중입니다...
+            국토교통부 KISCON 전국 전수 데이터베이스에서 '<strong>${escapeHtml(query)}</strong>' 면허 정보를 검증 중입니다...
           </div>
         `;
         statusContainer.style.display = "block";
@@ -2269,12 +2275,12 @@
       if (tableContainer) tableContainer.style.display = "none";
       if (summarySection) summarySection.style.display = "none";
 
-      // 4. 데이터가 이미 로드되어 있으면 즉시 렌더링, 없으면 실제 API 수집 후 즉시 렌더링
+      // 5. 데이터베이스 로드 확인
       if (!loadedCompanies || loadedCompanies.length === 0) {
         await fetchAllKisconData();
       }
 
-      // 5. 검색 결과 즉시 렌더링 (하단 버튼을 다시 누를 필요 없음!)
+      // 6. 검색 결과 즉시 렌더링
       renderFilteredList();
     }
 
@@ -2345,7 +2351,7 @@
           kisAreaSelect.value = reg === "전체" ? "" : reg;
         }
         updateRegionStats(reg);
-        performKisPreview();
+        renderFilteredList();
       });
     });
 
@@ -2376,6 +2382,7 @@
         opt.textContent = prov;
         kisAreaSelect.appendChild(opt);
       });
+      kisAreaSelect.addEventListener("change", renderFilteredList);
     }
 
     if (statusSelect) statusSelect.addEventListener("change", renderFilteredList);
@@ -2431,12 +2438,12 @@
         document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
         this.classList.add("active");
         currentYearRange = parseInt(this.dataset.years);
-        performKisPreview();
+        renderFilteredList();
       });
     });
 
     if (searchKisBtn) {
-      searchKisBtn.addEventListener("click", () => performKisPreview());
+      searchKisBtn.addEventListener("click", () => renderFilteredList());
     }
 
     // 하단 KISCON 데이터 조회 버튼 핸들러
@@ -2462,8 +2469,8 @@
       isFetchingKiscon = true;
 
       try {
-        // 1. 사전 추출된 전국 전수 데이터베이스(kiscon_interior_licenses.json) 우선 로드 (0.05초 초고속 로드)
-        const staticRes = await fetch('./kiscon_interior_licenses.json');
+        // 1. 사전 추출된 전국 전수 데이터베이스(kiscon_interior_licenses.json) 우선 로드
+        const staticRes = await fetch('/kiscon_interior_licenses.json');
         if (staticRes.ok) {
           const dataset = await staticRes.json();
           if (Array.isArray(dataset) && dataset.length > 0) {
@@ -2477,7 +2484,7 @@
         console.warn("[KISCON DB] Static DB load fallback to live API:", err);
       }
 
-      // 2. 만약 정적 파일 로드 실패 시 실시간 API 병렬 호출
+      // 2. 만약 정적 파일 로드 실패 시 실시간 API 병렬 호출 폴백
       const area = kisAreaSelect ? kisAreaSelect.value : "";
       const today = new Date();
       const formatDigit = (n) => String(n).padStart(2, '0');
