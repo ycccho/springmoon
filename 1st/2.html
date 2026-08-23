@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로열티 부과 및 납부 전수 내역표 (총 415만 원) | Springmoon Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+
+    :root {
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-sub: #f1f5f9;
+      --bg-card-hover: #f8fafc;
+      --border-color: #e2e8f0;
+      --border-accent: #2563eb;
+      --border-focus: #3b82f6;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+      --accent-blue: #2563eb;
+      --accent-cyan: #0284c7;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --accent-emerald: #059669;
+      --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Menlo', 'Consolas', monospace;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 100px;
+    }
+    .container { max-width: 1240px; margin: 0 auto; padding: 0 1.5rem; }
+    
+    /* Sticky Top Header */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-title-group h1 { font-size: 1.45rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+    .page-title-group p { font-size: 0.85rem; color: var(--text-dim); margin-top: 0.2rem; }
+    
+    /* Navigation Bar */
+    .top-nav { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .top-nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      background: var(--bg-card-sub);
+      border: 1px solid var(--border-color);
+      transition: all 0.15s ease;
+    }
+    .top-nav a:hover { color: var(--accent-blue); background: #ffffff; border-color: var(--accent-blue); box-shadow: var(--shadow-sm); }
+    .top-nav a.active { color: #ffffff; background: var(--accent-blue); border-color: var(--accent-blue); }
+    .top-nav a.highlight-nav { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
+    .top-nav a.highlight-nav:hover { background: #059669; color: #fff; }
+
+    /* Directory Cards */
+    .dir-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .dir-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+    .dir-card:hover { transform: translateY(-2px); border-color: var(--accent-blue); box-shadow: var(--shadow-md); }
+    .dir-card.active { border-left: 4px solid var(--accent-blue); background: #f8fafc; }
+    .dir-title { font-weight: 700; font-size: 0.95rem; color: #0f172a; display: flex; align-items: center; gap: 0.4rem; }
+    .dir-desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.5; }
+
+    /* Content Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-top: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      letter-spacing: -0.01em;
+      border-bottom: 2px solid var(--bg-card-sub);
+      padding-bottom: 0.75rem;
+    }
+    
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .badge-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .badge-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .badge-red { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-emerald { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+
+    /* Tables */
+    .table-container { overflow-x: auto; margin-top: 1rem; border-radius: 8px; border: 1px solid var(--border-color); }
+    .custom-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; background: #ffffff; }
+    .custom-table th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      text-align: left;
+      padding: 0.75rem 0.9rem;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .custom-table td {
+      padding: 0.75rem 0.9rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+    .custom-table tr:last-child td { border-bottom: none; }
+    .custom-table tr:hover td { background-color: #f8fafc; }
+    .mono { font-family: var(--font-mono); }
+    
+    /* Chat Bubbles */
+    .chat-bubble {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .avatar-user { background: #2563eb; color: #ffffff; }
+    .avatar-ai { background: #059669; color: #ffffff; }
+    .bubble-content {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .bubble-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    .bubble-meta span:first-child { font-weight: 700; color: #0f172a; }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="page-title-group">
+        <span class="badge badge-amber">서브 아카이브 /1st/2</span>
+        <h1 style="margin-top: 0.25rem;">가맹점 로열티(월 10만 원) 납부 전수 내역표 (총 4,150,000원)</h1>
+        <p>1번지옛날통닭 장안점(215만 원) 및 발곡점(200만 원)의 피고 계좌이체 & 발주프로그램 자동 합산 납부 내역</p>
+      </div>
+      <div class="top-nav">
+        <a href="../index.html">← 1심 종합 리포트 메인</a>
+        <a href="../1/index.html">/1st/1 계산서·사업자 타임라인</a>
+        <a href="./index.html" class="active">/1st/2 로열티 납부 상세내역</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Directory Quick Nav -->
+    <div class="dir-grid">
+      <a href="../index.html" class="dir-card">
+        <div class="dir-title">📌 /1st 메인 리포트</div>
+        <div class="dir-desc">1심 판결문 분석, 쟁점별 법리, 4단계 논리 사슬 및 항소이유서 초안</div>
+      </a>
+      <a href="../1/index.html" class="dir-card">
+        <div class="dir-title" style="color: var(--accent-blue);">📄 /1st/1 계산서 & 사업자 타임라인</div>
+        <div class="dir-desc">피고 사업자·계좌 변천 타임라인 및 전자계산서 32건 전수 내역표</div>
+      </a>
+      <a href="./index.html" class="dir-card active">
+        <div class="dir-title" style="color: var(--accent-amber);">💰 /1st/2 로열티 납부 전수 내역</div>
+        <div class="dir-desc">장안점·발곡점 월 10만 원 로열티 납부일자별 전수 정리표 (415만 원)</div>
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="justify-content: space-between; flex-wrap: wrap;">
+        <span>가맹점별 로열티 납부 및 부당 징수 내역 (갑 제20호증 증빙)</span>
+        <span class="badge badge-amber" style="font-size: 0.85rem;">총 납부액: 4,150,000원</span>
+      </div>
+
+      <div style="background: #f8fafc; border: 1px solid var(--border-color); padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.65;">
+        • <strong>일방적 부과 통보:</strong> 2020. 02. 10. 피고가 "매월 10일 10만 원씩 추가 입금하라"는 문자를 일방 발송함.<br>
+        • <strong>지급 형태 1 (피고 개인계좌 이체):</strong> 2020. 03. 10 ~ 2020. 06. 10 피고 개인 명의(김성훈) 계좌로 매월 직접 송금.<br>
+        • <strong>지급 형태 2 (발주프로그램 강제 차감):</strong> 2020. 07. 10부터 발주프로그램에서 닭 발주대금과 함께 월 10만 원씩 자동 인출/결제.<br>
+        • <strong>피고의 깜깜이 징수 실태:</strong> 법원의 문서제출명령에 대해 피고는 <em>"로열티 징수 및 사용 관련 장부 또는 회계자료를 일체 소지하고 있지 않다"</em>고 공식 회신함.
+      </div>
+
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>가맹점명</th>
+              <th>납부 기간</th>
+              <th>납부 방식</th>
+              <th>월 부과액</th>
+              <th>납부 횟수</th>
+              <th>총 납부액 (원)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1번지 옛날통닭 장안점 (28호점)</strong></td>
+              <td class="mono">2020. 03. 10. ~ 2022. 01. 10.</td>
+              <td>개인계좌 이체 ➔ 발주프로그램 합산</td>
+              <td class="mono">100,000원 / 월</td>
+              <td>총 21.5회</td>
+              <td class="mono" style="font-weight: 800; color: var(--accent-blue); font-size: 1rem;">2,150,000</td>
+            </tr>
+            <tr>
+              <td><strong>1번지 옛날통닭 의정부 발곡점</strong></td>
+              <td class="mono">2021. 04. 10. ~ 2022. 11. 10.</td>
+              <td>발주프로그램 자동 합산</td>
+              <td class="mono">100,000원 / 월</td>
+              <td>총 20회</td>
+              <td class="mono" style="font-weight: 800; color: var(--accent-blue); font-size: 1rem;">2,000,000</td>
+            </tr>
+            <tr style="background: #f1f5f9; font-weight: 800;">
+              <td colspan="5" style="text-align: center; font-size: 0.95rem;">로열티 총 청구액 (1심 부당이득 청구)</td>
+              <td class="mono" style="color: var(--accent-amber); font-size: 1.15rem;">4,150,000원</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  
+    <!-- 피고 주장 vs 실제 타임라인 시차 모순 완벽 분해 -->
+    <div class="card" style="border-left: 5px solid var(--accent-red);">
+      <div class="card-title" style="color: var(--accent-red);">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 22px; height: 22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <span>피고의 로열티 사용처 주장 vs 실제 타임라인의 결정적 모순 (팩트 분해)</span>
+      </div>
+
+      <div style="font-size: 0.92rem; color: var(--text-main); line-height: 1.75;">
+        <p><strong>1. 1심 판결문의 오판 (판결문 4~5쪽):</strong><br>
+        1심 판사는 피고의 주장을 그대로 인용하여 <em>"피고는 수취한 로열티를 발주프로그램 변경, 가맹본부 홈페이지 제작, 광고, 가맹점 앞치마 제작 등으로 사용한 것으로 보인다"</em>라며 기각하였습니다.</p>
+
+        <p style="margin-top: 0.75rem;"><strong>2. 타임라인 대조 시 드러나는 명백한 거짓말 (시점상 모순):</strong></p>
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.1rem; margin-top: 0.5rem;">
+          • <strong>[2020. 03. ~ 2021. 01. (위장기 110만 원 징수)]:</strong> 피고는 이 시기 동안 피고 <strong>개인통장으로 매월 10만 원씩 총 110만 원을 직접 송금</strong>받았습니다. 그러나 이 시기에는 <strong style="color: var(--accent-red);">발주GO 프로그램이 아예 존재하지도 않았고(2021년 2월 이후 도입), 홈페이지 제작이나 체계적 앞치마 공급도 전혀 없었습니다.</strong><br>
+          • <strong>[2021. 02. 이후 (법인 원쓰푸드 전환 후)]:</strong> 발주GO 도입 및 홈페이지 견적이 이뤄진 것은 2021년 이후의 일입니다.<br>
+          • <strong>[결론]:</strong> 피고는 2020년 내내 아무런 서비스나 프로그램 제공 없이 <strong>명목 없는 '깜깜이 로열티'를 개인통장으로 갈취(부정수급)</strong>하였음이 타임라인상 명백히 입증됩니다.
+        </div>
+      </div>
+    </div>
+
+</main>
+</body>
+</html>

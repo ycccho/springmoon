@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta charset="UTF-8">
+  <title>고발장 표지 인쇄용</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 210mm;
+      height: 297mm;
+      margin: 0 auto;
+      padding: 40mm 30mm 35mm 30mm;
+      font-family: "Batang", "바탕", "BatangChe", "바탕체", "Times New Roman", serif;
+      color: #000000;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #ffffff;
+    }
+    .title-area {
+      text-align: center;
+      margin-top: 15mm;
+    }
+    .main-title {
+      font-size: 42pt;
+      font-weight: bold;
+      letter-spacing: 28px;
+      margin-left: 28px;
+    }
+    .sub-title {
+      font-size: 16pt;
+      margin-top: 15px;
+      color: #333333;
+      letter-spacing: 2px;
+    }
+    .info-box {
+      margin: 15mm auto;
+      width: 100%;
+      max-width: 135mm;
+      border-top: 2px solid #000;
+      border-bottom: 2px solid #000;
+      padding: 18mm 15mm;
+    }
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .info-table td {
+      font-size: 18pt;
+      line-height: 2.2;
+    }
+    .info-label {
+      width: 45%;
+      font-weight: bold;
+      letter-spacing: 4px;
+    }
+    .info-val {
+      width: 55%;
+      font-weight: 500;
+    }
+    .bottom-area {
+      text-align: center;
+      margin-bottom: 15mm;
+    }
+    .date-str {
+      font-size: 17pt;
+      letter-spacing: 4px;
+      margin-bottom: 22mm;
+    }
+    .court-title {
+      font-size: 25pt;
+      font-weight: bold;
+      letter-spacing: 8px;
+      margin-left: 8px;
+    }
+    @media print {
+      body {
+        width: 100%;
+        height: 100%;
+        padding: 40mm 30mm 35mm 30mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title-area">
+    <h1 class="main-title">고 발 장</h1>
+    <div class="sub-title">(건설산업기본법 위반)</div>
+  </div>
+
+  <div class="info-box">
+    <table class="info-table">
+      <tr>
+        <td class="info-label">• 사 &nbsp; 건 &nbsp; 명</td>
+        <td class="info-val">: &nbsp;건설산업기본법 위반</td>
+      </tr>
+      <tr>
+        <td class="info-label">• 고 &nbsp; 발 &nbsp; 인</td>
+        <td class="info-val">: &nbsp;조 &nbsp;용 &nbsp;철</td>
+      </tr>
+      <tr>
+        <td class="info-label">• 피 고 발 인</td>
+        <td class="info-val">: &nbsp;백 &nbsp;운 &nbsp;진</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="bottom-area">
+    <div class="date-str">2026. &nbsp; 8. &nbsp; &nbsp; .</div>
+    <div class="court-title">서울동대문경찰서장 귀중</div>
+  </div>
+
+</body>
+</html>

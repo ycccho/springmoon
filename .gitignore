@@ -17,3 +17,9 @@ chrome_naver_session/
 *.bak
 tmp_*
 config.json
+
+1st/*.m4a
+1st/*.pdf
+*.zip
+chrome_naver_session/
+scratch/

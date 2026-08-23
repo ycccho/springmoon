@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>갑 제21호증 전자계산서 34건 전수 내역 (일번지유통 21건 + 원쓰푸드 13건)</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --accent-blue: #2563eb;
+      --accent-indigo: #4f46e5;
+      --accent-red: #dc2626;
+      --accent-emerald: #059669;
+      --accent-amber: #d97706;
+      --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-secondary);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding-bottom: 5rem;
+    }
+    .header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-main);
+    }
+    .nav-btn:hover { background: #f1f5f9; }
+    .nav-btn.active { background: var(--accent-blue); color: #ffffff; border-color: var(--accent-blue); }
+    
+    .container {
+      max-width: 1280px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 0.75rem;
+    }
+    
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.1rem;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+    .stat-val { font-size: 1.35rem; font-weight: 900; font-family: var(--font-mono); margin-top: 0.25rem; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+    .badge-amber { background: #fef3c7; color: #92400e; }
+    .badge-emerald { background: #d1fae5; color: #065f46; }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 700;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.8rem;
+    }
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-main);
+    }
+    tr:hover td {
+      background-color: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div>
+        <div style="font-size: 0.8rem; font-weight: 800; color: var(--accent-blue); text-transform: uppercase;">MASTER DOSSIER 1ST / SUB 1</div>
+        <h1 style="font-size: 1.3rem; font-weight: 900; color: #0f172a;">갑 제21호증 전자계산서 34건 전수 내역표 (소송기록 p.355 실물)</h1>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="../index.html" class="nav-btn">⬅️ 메인 리포트</a>
+        <a href="./index.html" class="nav-btn active">📄 /1st/1 계산서 34건 전수</a>
+        <a href="../2/index.html" class="nav-btn">💰 /1st/2 로열티 내역</a>
+        <a href="../3/index.html" class="nav-btn">🏦 /1st/3 발주입금 내역</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- KPI Summary Card -->
+    <div class="card">
+      <div class="card-title">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 22px; height: 22px; color: var(--accent-blue);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <span>법원 제출 갑 제21호증(전자계산서 정리내역) 총괄 집계표 (소송기록 p.355)</span>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        원고가 소송 과정에서 홈택스 조회를 통해 법원에 제출한 <strong>갑 제21호증 실물 표 전체(총 34건, 97,377,000원)</strong> 내역입니다. 특히 <strong>일번지유통(최미혜) 명의로 2019년 10월부터 2021년 6월까지 매월 발행된 21건(87,852,500원)</strong>이 핵심 면세 위장 피해 내역입니다.
+      </p>
+
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-label">총 전자계산서 건수</div>
+          <div class="stat-val" style="color: var(--accent-blue);">34 건</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">총 계산서 공급가액</div>
+          <div class="stat-val">97,377,000 원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">부가세법상 공급가액 (100/110)</div>
+          <div class="stat-val" style="color: var(--accent-indigo);">88,524,543 원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">원고 매입세액 손해액 (10/110)</div>
+          <div class="stat-val" style="color: var(--accent-red);">8,852,457 원</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: 일번지유통 최미혜 면세 전자계산서 21건 전수 -->
+    <div class="card" style="border-left: 5px solid var(--accent-red);">
+      <div class="card-title" style="color: var(--accent-red); justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 22px; height: 22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          <span>[1] 일번지유통 (최미혜) 전자계산서 전수 내역 — 총 21건 (갑 제21호증 No 1~21)</span>
+        </div>
+        <span class="badge badge-red">합계: 86,862,000 원</span>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        공급자: <strong>일번지유통 (대표 최미혜 / 759-96-00672 면세사업자)</strong> ➔ 100% 과세 재화인 삼계 염장닭(양념육)을 공급하면서 면세 계산서로 위장 발행하여 매입세액 공제를 박탈한 핵심 불법행위 내역입니다.
+      </p>
+
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-label">일번지유통 발행 건수</div>
+          <div class="stat-val" style="color: var(--accent-red);">21 건</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">일번지유통 공급가액 소계</div>
+          <div class="stat-val" style="color: var(--accent-red);">86,862,000 원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">부가세 손해액 (10%)</div>
+          <div class="stat-val" style="color: var(--accent-red);">7,896,547 원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">발행 기간</div>
+          <div class="stat-val" style="font-size: 1.05rem; margin-top: 0.4rem;">2019.10 ~ 2021.06</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 45px; text-align: center;">순번</th>
+              <th>발행일시</th>
+              <th>구분</th>
+              <th>공급자 (대표)</th>
+              <th>사업자등록번호</th>
+              <th style="text-align: right;">전자계산서 기재금액 (원)</th>
+              <th style="text-align: right;">부가세법상 공급가액 (원)</th>
+              <th style="text-align: right;">매입세액 손해액 (원)</th>
+              <th>품목 비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">01</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2019-10-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">3,404,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">3,095,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">309,500원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">02</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2019-11-30</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">6,016,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">5,469,545원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">546,955원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">03</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2019-12-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">5,713,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">5,194,091원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">519,409원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">04</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-01-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">5,838,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">5,307,273원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">530,727원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">05</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-02-29</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">5,208,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">4,734,545원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">473,455원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">06</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-03-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">5,601,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">5,092,273원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">509,227원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">07</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-04-30</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">4,805,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">4,368,636원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">436,864원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">08</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-05-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">5,203,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">4,730,455원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">473,045원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">09</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-06-30</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">4,706,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">4,278,636원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">427,864원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">10</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-07-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">5,200,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">4,727,727원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">472,773원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">11</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-08-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">4,009,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">3,645,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">364,500원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">12</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-09-30</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">5,011,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">4,555,909원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">455,591원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">13</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-10-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">3,609,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">3,280,909원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">328,091원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">14</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-11-30</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">4,001,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">3,637,727원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">363,773원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">15</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2020-12-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">3,602,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">3,274,545원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">327,455원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">16</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-01-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">3,005,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">2,731,818원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">273,182원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">17</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-02-28</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">2,305,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">2,095,455원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">209,545원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">18</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-03-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">2,407,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">2,188,636원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">218,864원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">19</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-04-30</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">2,600,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">2,364,091원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">236,409원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">20</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-05-31</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">2,305,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">2,095,455원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">209,545원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">21</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-06-30</td>
+          <td><span class="badge badge-red">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-red);">일번지유통 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(최미혜)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">759-96-00672</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">2,307,500원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">2,097,727원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">209,773원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재(면세위장)</td>
+        </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 2: (주)원쓰푸드 김성훈 전자계산서 13건 전수 -->
+    <div class="card" style="border-left: 5px solid var(--accent-amber);">
+      <div class="card-title" style="color: var(--accent-amber); justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 22px; height: 22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+          <span>[2] (주)원쓰푸드 (김성훈) 전자계산서 전수 내역 — 총 13건 (갑 제21호증 No 22~34)</span>
+        </div>
+        <span class="badge badge-amber">합계: 10,515,000 원</span>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        공급자: <strong>(주)원쓰푸드 (대표 김성훈 / 652-86-02142)</strong> ➔ 2021년 7월부터 2022년 11월까지 법인 명의로 발행된 전자계산서 내역입니다.
+      </p>
+
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-label">원쓰푸드 계산서 건수</div>
+          <div class="stat-val" style="color: var(--accent-amber);">13 건</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">원쓰푸드 공급가액 소계</div>
+          <div class="stat-val">10,515,000 원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">부가세 손해액 (10%)</div>
+          <div class="stat-val" style="color: var(--accent-amber);">955,910 원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">발행 기간</div>
+          <div class="stat-val" style="font-size: 1.05rem; margin-top: 0.4rem;">2021.07 ~ 2022.11</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 45px; text-align: center;">순번</th>
+              <th>발행일시</th>
+              <th>구분</th>
+              <th>공급자 (대표)</th>
+              <th>사업자등록번호</th>
+              <th style="text-align: right;">전자계산서 기재금액 (원)</th>
+              <th style="text-align: right;">부가세법상 공급가액 (원)</th>
+              <th style="text-align: right;">매입세액 손해액 (원)</th>
+              <th>품목 비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">22</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-07-31</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">2,300,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">2,090,909원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">209,091원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">23</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-08-31</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">2,400,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">2,181,818원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">218,182원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">24</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-09-30</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">2,000,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">1,818,182원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">181,818원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">25</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-11-30</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">1,700,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">1,545,455원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">154,545원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">26</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-12-31</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">1,300,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">1,181,818원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">118,182원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">27</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2022-01-31</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">10,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">9,091원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">909원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">28</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2022-04-30</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">10,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">9,091원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">909원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">29</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2022-05-31</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">25,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">22,727원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">2,273원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">30</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2022-06-30</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">25,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">22,727원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">2,273원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">31</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2022-08-31</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">170,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">154,545원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">15,455원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">32</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2022-09-30</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">95,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">86,364원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">8,636원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">33</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2022-10-31</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">258,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">234,545원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">23,455원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">34</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2022-11-30</td>
+          <td><span class="badge badge-amber">전자계산서</span></td>
+          <td style="font-weight: 700; color: var(--accent-amber);">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.95rem;">222,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.85rem;">201,818원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-red); font-size: 0.95rem;">20,182원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">식자재</td>
+        </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  
+    <!-- Section 3: 2019~2021년 12월말 전자세금계산서 전수 내역 (을 제2호증) -->
+    <div class="card" style="border-left: 5px solid var(--accent-blue);">
+      <div class="card-title" style="color: var(--accent-blue); justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 22px; height: 22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>[3] 19년~21년 12월말 전자세금계산서(과세 10%) 전수 내역 — 총 10건 (을 제2호증)</span>
+        </div>
+        <span class="badge badge-blue">합계: 8,360,500 원 (공급가액 7,600,454원 + 세액 760,046원)</span>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        공급자: <strong>(주)원쓰푸드 (대표 김성훈 / 652-86-02142 일반과세자)</strong> ➔ 2019~2020년에는 전자세금계산서 발행이 전무(0건)하였으며, <strong>2021년 2월부터 2021년 12월 말까지 총 10건</strong>의 전자세금계산서(부가세 10% 별도 가산)가 발행되었습니다.
+      </p>
+
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-label">19~21년 세금계산서 건수</div>
+          <div class="stat-val" style="color: var(--accent-blue);">10 건</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">총 공급가액 합계</div>
+          <div class="stat-val" style="color: var(--accent-blue);">7,600,454 원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">총 세액 (부가세 10%)</div>
+          <div class="stat-val" style="color: var(--accent-indigo);">760,046 원</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">총 합계금액 (공급가+세액)</div>
+          <div class="stat-val" style="color: #0f172a;">8,360,500 원</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 45px; text-align: center;">순번</th>
+              <th>작성일자</th>
+              <th>구분</th>
+              <th>국세청 승인번호</th>
+              <th>공급자 (대표)</th>
+              <th>사업자등록번호</th>
+              <th style="text-align: right;">공급가액 (원)</th>
+              <th style="text-align: right;">세액 (10%)</th>
+              <th style="text-align: right;">합계금액 (원)</th>
+              <th>소송기록 위치</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">01</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-02-28</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20210228-10000000-76334646</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">935,455원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">93,545원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">1,029,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.81</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">02</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-04-30</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20210430-10000000-36642309</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">748,182원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">74,818원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">823,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.80</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">03</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-06-30</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20210630-10000000-88425305</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">942,727원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">94,273원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">1,037,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.78</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">04</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-06-30</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20210630-10000000-88209335</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">3,467,727원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">346,773원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">3,814,500원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.79</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">05</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-07-31</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20210731-10000000-81934777</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">90,909원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">9,091원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">100,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.77</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">06</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-08-31</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20210831-10000000-81934345</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">90,909원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">9,091원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">100,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.76</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">07</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-09-30</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20210930-10000000-81932390</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">90,909원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">9,091원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">100,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.75</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">08</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-10-31</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20211031-10000000-12725151</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">90,909원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">9,091원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">100,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.74</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">09</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-11-30</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20211130-10000000-37455894</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">622,727원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">62,273원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">685,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.73</td>
+        </tr>
+        
+        <tr>
+          <td style="text-align: center; font-weight: 700; color: var(--text-dim);">10</td>
+          <td style="font-family: var(--font-mono); font-weight: 800; color: #0f172a;">2021-12-31</td>
+          <td><span class="badge badge-blue">전자세금계산서</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">20211231-10000000-66903977</td>
+          <td style="font-weight: 700;">(주)원쓰푸드 <span style="font-weight:400; color:var(--text-dim); font-size:0.8rem;">(김성훈)</span></td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem;">652-86-02142</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-blue); font-size: 0.92rem;">520,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--accent-indigo); font-size: 0.92rem;">52,000원</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 800; color: #0f172a; font-size: 0.92rem;">572,000원</td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">소송기록 p.72</td>
+        </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>
