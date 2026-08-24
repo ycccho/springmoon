@@ -1,357 +1,265 @@
 <!DOCTYPE html>
-<html lang="ko" class="dark">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-  <title>BB 백링크 분석기 | Common Crawl & OpenPageRank</title>
+  <title>BB Backlink Explorer</title>
   
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Fonts -->
+  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;600&display=swap" rel="stylesheet">
   
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <style>
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #fafafa;
+      color: #18181b;
     }
     .font-mono {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Geist Mono', monospace;
     }
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #020617;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 9999px;
+    input:focus {
+      outline: none;
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="min-h-screen flex flex-col justify-between p-4 sm:p-8 md:p-12 selection:bg-neutral-900 selection:text-white">
 
-  <!-- Navbar -->
-  <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-          <i data-lucide="link-2" class="w-5 h-5 text-white"></i>
-        </div>
-        <div>
-          <h1 class="font-bold text-sm tracking-tight text-white">BB Backlink Analyzer</h1>
-          <p class="text-[10px] text-slate-400 font-mono">Common Crawl & OpenPageRank Engine</p>
-        </div>
-      </div>
-      <div class="text-xs text-slate-400 font-mono">
-        <span class="px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800">
-          Open-Source Web Graph
-        </span>
-      </div>
+  <!-- Header -->
+  <header class="max-w-5xl w-full mx-auto flex items-center justify-between py-2 border-b border-neutral-200">
+    <div class="flex items-center gap-2.5">
+      <span class="w-2.5 h-2.5 rounded-full bg-neutral-900"></span>
+      <span class="font-bold text-sm tracking-tight text-neutral-900">BB Backlink Explorer</span>
+    </div>
+    <div class="text-xs text-neutral-400 font-mono">
+      Common Crawl & Open Web Graph
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
-
-    <!-- Search Section -->
-    <section class="bg-slate-900/70 p-6 sm:p-8 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+  <!-- Main Content -->
+  <main class="max-w-5xl w-full mx-auto my-auto py-12 space-y-8 flex-1">
+    
+    <!-- Search Box -->
+    <div class="space-y-4">
       <div class="space-y-1">
-        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">외부 백링크 실시간 조회</h2>
-        <p class="text-xs text-slate-400">
-          분석할 웹사이트의 URL 또는 도메인을 입력하세요. Common Crawl 오픈 데이터셋 및 실시간 웹 그래프를 통해 대상 사이트로 연결된 외부 백링크 목록을 추출합니다.
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">외부 백링크 검색</h1>
+        <p class="text-xs sm:text-sm text-neutral-500">
+          분석할 웹사이트 URL 또는 도메인을 입력하면 연결된 외부 백링크 목록을 추출합니다.
         </p>
       </div>
 
-      <!-- Search Input -->
-      <form id="searchForm" class="flex flex-col sm:flex-row gap-2 pt-2">
+      <form id="searchForm" class="flex gap-2 pt-2">
         <div class="relative flex-1">
-          <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
           <input
             type="text"
             id="domainInput"
-            placeholder="도메인 또는 URL 입력 (예: naver.com, busaninterior.kr, coupang.com)"
-            class="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none font-mono shadow-inner"
+            placeholder="도메인 또는 URL 입력 (예: busaninterior.kr, naver.com, inde.co.kr)"
+            class="w-full bg-white border border-neutral-300 rounded-lg px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 font-mono shadow-sm transition-all"
             required
+            autofocus
           >
         </div>
         <button
           type="submit"
           id="searchBtn"
-          class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 flex-shrink-0"
+          class="px-6 py-3 bg-neutral-900 hover:bg-neutral-800 active:scale-[0.98] text-white font-medium text-sm rounded-lg shadow-sm transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer disabled:opacity-50"
         >
-          <span id="btnText">백링크 분석</span>
+          <span id="btnText">조회</span>
         </button>
       </form>
-    </section>
+    </div>
 
-    <!-- Metrics Cards -->
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
-        <span class="text-[11px] font-semibold text-slate-400 block">발견된 총 백링크</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="totalBacklinks" class="text-2xl font-bold text-white">0</span>
-          <span class="text-[11px] text-slate-400 font-mono">건</span>
-        </div>
-      </div>
-
-      <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
-        <span class="text-[11px] font-semibold text-slate-400 block">참조 도메인 (Ref Domains)</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="referringDomains" class="text-2xl font-bold text-cyan-400">0</span>
-          <span class="text-[11px] text-slate-400 font-mono">개</span>
-        </div>
-      </div>
-
-      <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
-        <span class="text-[11px] font-semibold text-slate-400 block">Dofollow 링크</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="dofollowCount" class="text-2xl font-bold text-emerald-400">0</span>
-          <span class="text-[11px] text-slate-400 font-mono">건</span>
-        </div>
-      </div>
-
-      <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
-        <span class="text-[11px] font-semibold text-slate-400 block">OpenPageRank 신뢰 지수</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="pageRankScore" class="text-2xl font-bold text-purple-400">0.00</span>
-          <span class="text-[11px] text-slate-400 font-mono">/ 10</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Results Table Section -->
-    <section class="bg-slate-900/80 rounded-2xl border border-slate-800 shadow-xl overflow-hidden p-5 space-y-4">
+    <!-- Results Container (Hidden until search) -->
+    <div id="resultsWrapper" class="hidden space-y-4 pt-4 border-t border-neutral-200">
       
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-        <div>
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>백링크 목록</span>
-            <span id="tableCountBadge" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-[11px] font-mono">
-              0건
-            </span>
-          </h3>
-          <p class="text-[11px] text-slate-400 font-mono mt-0.5">
-            대상 도메인: <strong id="targetDomainText" class="text-indigo-400">-</strong>
-          </p>
+      <!-- Meta Header & Action -->
+      <div class="flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-3 font-mono text-neutral-600">
+          <span>도메인: <strong id="targetDomainText" class="text-neutral-900 font-semibold">-</strong></span>
+          <span class="text-neutral-300">|</span>
+          <span>발견된 백링크: <strong id="countText" class="text-neutral-900 font-semibold">0</strong>개</span>
+          <span class="text-neutral-300">|</span>
+          <span>참조 도메인: <strong id="refCountText" class="text-neutral-900 font-semibold">0</strong>개</span>
         </div>
 
         <div class="flex items-center gap-2">
-          <input
-            type="text"
-            id="tableFilter"
-            placeholder="결과 내 검색..."
-            class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1 text-xs text-white placeholder:text-slate-500 focus:outline-none w-36 sm:w-48 font-mono"
-          >
           <button
-            onclick="exportCSV()"
-            class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors"
+            onclick="downloadCSV()"
+            class="px-3 py-1.5 rounded-md border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 font-medium text-xs flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
           >
-            <i data-lucide="download" class="w-3 h-3"></i>
+            <i class="ph ph-download-simple"></i>
             <span>CSV 저장</span>
           </button>
         </div>
       </div>
 
-      <!-- Data Table -->
-      <div class="overflow-x-auto rounded-xl border border-slate-800">
-        <table class="w-full text-left text-xs text-slate-300">
-          <thead class="bg-slate-950 text-slate-400 font-semibold border-b border-slate-800 text-[11px]">
-            <tr>
-              <th class="py-3 px-3 w-10 text-center">#</th>
-              <th class="py-3 px-3">출처 도메인 (Source Domain)</th>
-              <th class="py-3 px-3">백링크 페이지 URL</th>
-              <th class="py-3 px-3">앵커 텍스트 / 설명</th>
-              <th class="py-3 px-3">상태</th>
-              <th class="py-3 px-3">데이터 소스</th>
-              <th class="py-3 px-3 text-center">링크 열기</th>
-            </tr>
-          </thead>
-          <tbody id="backlinkBody" class="divide-y divide-slate-800/60 bg-slate-900/40">
-            <tr>
-              <td colspan="7" class="py-12 text-center text-slate-500 text-xs">
-                도메인을 입력하고 [백링크 분석] 버튼을 눌러주세요.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Table Card -->
+      <div class="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-neutral-700 border-collapse">
+            <thead class="bg-neutral-50 text-neutral-500 font-semibold border-b border-neutral-200 text-[11px] uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4 w-12 text-center">#</th>
+                <th class="py-3 px-4 w-44">출처 도메인</th>
+                <th class="py-3 px-4">백링크 걸린 페이지 URL</th>
+                <th class="py-3 px-4">앵커 텍스트</th>
+                <th class="py-3 px-4 w-24">링크 속성</th>
+                <th class="py-3 px-4 w-32">수집 소스</th>
+                <th class="py-3 px-4 w-16 text-center">열기</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-neutral-100 font-normal">
+              <!-- Rendered rows -->
+            </tbody>
+          </table>
+        </div>
       </div>
-
-    </section>
+    </div>
 
   </main>
 
-  <footer class="border-t border-slate-800 py-4 text-center text-xs text-slate-500 font-mono">
-    © 2026 BB Backlink Analyzer • Powered by Common Crawl Index & OpenPageRank Engine
+  <!-- Footer -->
+  <footer class="max-w-5xl w-full mx-auto py-4 border-t border-neutral-200 text-center text-xs text-neutral-400 font-mono">
+    BB Backlink Explorer • Common Crawl & Open Web Graph Intelligence
   </footer>
 
   <script>
-    let currentResults = [];
-    lucide.createIcons();
+    let backlinkList = [];
 
     document.getElementById('searchForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const val = document.getElementById('domainInput').value.trim();
-      if (val) runAnalysis(val);
+      const query = document.getElementById('domainInput').value.trim();
+      if (query) executeSearch(query);
     });
 
-    document.getElementById('tableFilter').addEventListener('input', renderTable);
-
-    async function runAnalysis(domain) {
+    async function executeSearch(inputDomain) {
       const searchBtn = document.getElementById('searchBtn');
       const btnText = document.getElementById('btnText');
-      const cleanDomain = domain.replace(/^(https?:\\/\\/)?(www\\.)?/, '').split('/')[0].toLowerCase();
+      const resultsWrapper = document.getElementById('resultsWrapper');
+      const tbody = document.getElementById('tableBody');
+      const cleanDomain = inputDomain.replace(/^(https?:\\/\\/)?(www\\.)?/, '').split('/')[0].toLowerCase();
+
+      searchBtn.disabled = true;
+      btnText.textContent = '조회 중...';
+      resultsWrapper.classList.remove('hidden');
 
       document.getElementById('targetDomainText').textContent = cleanDomain;
-      searchBtn.disabled = true;
-      btnText.textContent = '데이터 수집 중...';
+      document.getElementById('countText').textContent = '...';
+      document.getElementById('refCountText').textContent = '...';
 
-      const tbody = document.getElementById('backlinkBody');
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" class="py-10 text-center text-slate-400 text-xs">
-            <div class="flex items-center justify-center gap-2 font-mono">
-              <svg class="animate-spin h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Common Crawl Web Graph & 인바운드 링크 인덱스 탐색 중...</span>
-            </div>
+          <td colspan="7" class="py-12 text-center text-neutral-400 text-xs font-mono">
+            Common Crawl 및 웹 그래프에서 ${cleanDomain} 관련 백링크를 실시간 검색 중입니다...
           </td>
         </tr>
       `;
 
       try {
         const res = await fetch(\`/api/bb_backlink?domain=\${encodeURIComponent(cleanDomain)}\`);
-        if (!res.ok) throw new Error(\`HTTP \${res.status}\`);
+        if (!res.ok) throw new Error(\`서버 응답 오류 (HTTP \${res.status})\`);
         const data = await res.json();
-        if (!data.success) throw new Error(data.error || '분석 실패');
+        if (!data.success) throw new Error(data.error || '백링크 조회에 실패했습니다.');
 
-        currentResults = data.backlinks || [];
+        backlinkList = data.backlinks || [];
 
-        // Update stats
-        document.getElementById('totalBacklinks').textContent = data.summary?.totalBacklinks || 0;
-        document.getElementById('referringDomains').textContent = data.summary?.referringDomainsCount || 0;
-        document.getElementById('dofollowCount').textContent = data.summary?.dofollowCount || 0;
-        document.getElementById('pageRankScore').textContent = data.summary?.pageRank?.pageRankDecimal || '0.00';
+        document.getElementById('countText').textContent = backlinkList.length;
+        document.getElementById('refCountText').textContent = data.summary?.referringDomainsCount || 0;
 
         renderTable();
 
       } catch (err) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" class="py-8 text-center text-rose-400 text-xs font-mono">
-              ❌ 조회 오류: \${err.message}
+            <td colspan="7" class="py-10 text-center text-red-500 text-xs font-mono">
+              오류: \${err.message}
             </td>
           </tr>
         `;
       } finally {
         searchBtn.disabled = false;
-        btnText.textContent = '백링크 분석';
-        lucide.createIcons();
+        btnText.textContent = '조회';
       }
     }
 
     function renderTable() {
-      const tbody = document.getElementById('backlinkBody');
-      const filterText = document.getElementById('tableFilter').value.toLowerCase().trim();
+      const tbody = document.getElementById('tableBody');
 
-      if (!currentResults || currentResults.length === 0) {
+      if (!backlinkList || backlinkList.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" class="py-10 text-center text-slate-500 text-xs">
+            <td colspan="7" class="py-12 text-center text-neutral-400 text-xs font-mono">
               발견된 백링크 레코드가 없습니다.
             </td>
           </tr>
         `;
-        document.getElementById('tableCountBadge').textContent = '0건';
         return;
       }
 
-      const filtered = currentResults.filter(item => {
-        return !filterText ||
-          item.sourceDomain.toLowerCase().includes(filterText) ||
-          item.sourceUrl.toLowerCase().includes(filterText) ||
-          (item.anchorText && item.anchorText.toLowerCase().includes(filterText));
-      });
-
-      document.getElementById('tableCountBadge').textContent = `\${filtered.length}건`;
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" class="py-8 text-center text-slate-500 text-xs">
-              검색 필터와 일치하는 결과가 없습니다.
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = filtered.map((b, idx) => {
+      tbody.innerHTML = backlinkList.map((item, idx) => {
         return `
-          <tr class="hover:bg-slate-800/40 transition-colors text-xs">
-            <td class="py-3 px-3 font-mono text-slate-500 text-center text-[11px]">\${idx + 1}</td>
-            <td class="py-3 px-3 whitespace-nowrap">
-              <span class="font-mono font-bold text-slate-200">\${b.sourceDomain}</span>
+          <tr class="hover:bg-neutral-50/80 transition-colors text-xs">
+            <td class="py-3 px-4 font-mono text-neutral-400 text-center text-[11px]">\${idx + 1}</td>
+            <td class="py-3 px-4 font-mono font-medium text-neutral-900 whitespace-nowrap">
+              \${item.sourceDomain}
             </td>
-            <td class="py-3 px-3 max-w-[260px]">
-              <span class="truncate block font-mono text-slate-400 select-all" title="\${b.sourceUrl}">
-                \${b.sourceUrl}
+            <td class="py-3 px-4 max-w-[280px]">
+              <span class="truncate block font-mono text-neutral-600 select-all" title="\${item.sourceUrl}">
+                \${item.sourceUrl}
               </span>
             </td>
-            <td class="py-3 px-3 max-w-[200px]">
-              <span class="truncate block font-medium text-slate-300" title="\${b.anchorText}">
-                \${b.anchorText}
+            <td class="py-3 px-4 max-w-[220px]">
+              <span class="truncate block text-neutral-800" title="\${item.anchorText}">
+                \${item.anchorText || '-'}
               </span>
             </td>
-            <td class="py-3 px-3 whitespace-nowrap">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                \${b.rel || 'dofollow'} (\${b.statusCode || 200})
+            <td class="py-3 px-4 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded text-[11px] font-mono font-medium \${item.rel === 'dofollow' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-neutral-100 text-neutral-600'}">
+                \${item.rel || 'dofollow'}
               </span>
             </td>
-            <td class="py-3 px-3 whitespace-nowrap">
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">
-                \${b.engine}
-              </span>
+            <td class="py-3 px-4 font-mono text-[11px] text-neutral-500 whitespace-nowrap">
+              \${item.engine}
             </td>
-            <td class="py-3 px-3 text-center whitespace-nowrap">
-              <a href="\${b.sourceUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex p-1 rounded bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white transition-colors">
-                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <td class="py-3 px-4 text-center whitespace-nowrap">
+              <a href="\${item.sourceUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex p-1.5 rounded hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 transition-colors">
+                <i class="ph ph-arrow-square-out text-sm"></i>
               </a>
             </td>
           </tr>
         `;
       }).join('');
-
-      lucide.createIcons();
     }
 
-    function exportCSV() {
-      if (!currentResults || currentResults.length === 0) {
-        alert('내보낼 데이터가 없습니다.');
+    function downloadCSV() {
+      if (!backlinkList || backlinkList.length === 0) {
+        alert('저장할 백링크 데이터가 없습니다.');
         return;
       }
+
       let csv = 'data:text/csv;charset=utf-8,\uFEFF';
-      csv += '번호,출처도메인,백링크URL,앵커텍스트,상태,수집엔진\n';
-      currentResults.forEach((b, i) => {
+      csv += '번호,출처도메인,백링크페이지URL,앵커텍스트,링크유형,수집소스,타겟URL\n';
+
+      backlinkList.forEach((b, i) => {
         csv += [
           i + 1,
           `"\${b.sourceDomain}"`,
           `"\${b.sourceUrl}"`,
           `"\${(b.anchorText || '').replace(/"/g, '""')}"`,
           `"\${b.rel || 'dofollow'}"`,
-          `"\${b.engine}"`
+          `"\${b.engine}"`,
+          `"\${b.targetUrl}"`
         ].join(',') + '\n';
       });
+
       const uri = encodeURI(csv);
       const link = document.createElement('a');
       link.setAttribute('href', uri);
