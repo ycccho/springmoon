@@ -5,27 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <title>백링크 실시간 조회기 | Backlink Explorer Pro</title>
-  <meta name="description" content="Cybokron / CrawlSEO 및 OpenPageRank 기반 오픈소스 실시간 인바운드 백링크 전수 조회기">
+  <meta name="description" content="Cybokron / CrawlSEO & OpenPageRank 기반 독립형 실시간 인바운드 백링크 전수 조회기">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#f5f3ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-            }
-          }
-        }
-      }
-    }
-  </script>
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -71,17 +54,17 @@
           <div class="flex items-center gap-2">
             <h1 class="font-black text-base tracking-tight text-white">Backlink Explorer Pro</h1>
             <span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/40">
-              Open-Source Engine
+              Open-Source Live Engine
             </span>
           </div>
-          <p class="text-[11px] text-slate-400 font-mono">Cybokron / CrawlSEO & OpenPageRank Powered</p>
+          <p class="text-[11px] text-slate-400 font-mono">Cybokron / CrawlSEO & OpenPageRank Engine</p>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          실시간 엔진 가동 중
+          실시간 크롤링 엔진 가동 중
         </span>
       </div>
     </div>
@@ -90,12 +73,12 @@
   <!-- Main Content Container -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
 
-    <!-- 1. Hero Search Section -->
+    <!-- 1. Hero Search Box -->
     <section class="bg-gradient-to-b from-slate-900/90 via-slate-900/50 to-slate-950 p-6 sm:p-10 rounded-3xl border border-indigo-500/30 shadow-2xl space-y-6 text-center">
       <div class="max-w-3xl mx-auto space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
           <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-          <span>인터넷 상의 모든 인바운드 백링크 전수 추적</span>
+          <span>인터넷 상의 모든 인바운드 백링크 실시간 전수 추적</span>
         </div>
         <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
           웹사이트 백링크 실시간 조회
@@ -113,8 +96,8 @@
             <input
               type="text"
               id="domainInput"
-              value="https://busaninterior.kr"
-              placeholder="예: https://busaninterior.kr 또는 inde.co.kr"
+              value="https://inde.co.kr"
+              placeholder="예: https://inde.co.kr 또는 busaninterior.kr"
               class="w-full bg-transparent pl-11 pr-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none font-mono"
               required
             >
@@ -136,17 +119,17 @@
           <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
           빠른 조회:
         </span>
-        <button onclick="setQueryAndSearch('https://busaninterior.kr')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-indigo-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 font-mono transition-colors cursor-pointer">
-          🥇 busaninterior.kr
-        </button>
         <button onclick="setQueryAndSearch('https://inde.co.kr')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-indigo-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 font-mono transition-colors cursor-pointer">
-          👑 inde.co.kr
+          👑 inde.co.kr (머니사이트)
+        </button>
+        <button onclick="setQueryAndSearch('https://busaninterior.kr')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-indigo-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 font-mono transition-colors cursor-pointer">
+          🥇 busaninterior.kr (PBN 1)
         </button>
         <button onclick="setQueryAndSearch('https://pbn-1.pages.dev')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-indigo-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 font-mono transition-colors cursor-pointer">
-          🥇 pbn-1.pages.dev
+          🥇 pbn-1.pages.dev (PBN 2)
         </button>
         <button onclick="setQueryAndSearch('https://pbn-2.pages.dev')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-indigo-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 font-mono transition-colors cursor-pointer">
-          🥈 pbn-2.pages.dev
+          🥈 pbn-2.pages.dev (PBN 3)
         </button>
         <button onclick="setQueryAndSearch('https://academyinteriors.pages.dev')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-indigo-950 border border-slate-800 hover:border-indigo-500/50 text-slate-300 font-mono transition-colors cursor-pointer">
           🥈 academyinteriors.pages.dev
@@ -157,274 +140,311 @@
       </div>
     </section>
 
-    <!-- Error Alert Box (Hidden by default) -->
-    <div id="errorAlert" class="hidden p-4 bg-rose-950/70 border border-rose-800/80 rounded-2xl text-rose-200 text-xs sm:text-sm flex items-center gap-3 shadow-lg animate-in fade-in">
-      <i data-lucide="alert-circle" class="w-5 h-5 text-rose-400 flex-shrink-0"></i>
-      <span id="errorMessage"></span>
-    </div>
-
-    <!-- 2. Results Section (Visible after search) -->
-    <section id="resultsSection" class="space-y-6">
-
-      <!-- Summary Stat Cards Grid -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Card 1: Total Backlinks -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-indigo-500/30 shadow-xl space-y-1">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-xs font-bold">발견된 인바운드 백링크</span>
-            <i data-lucide="link" class="w-4 h-4 text-amber-400"></i>
-          </div>
-          <div class="flex items-baseline gap-2 pt-1">
-            <span id="totalBacklinks" class="text-3xl font-black text-amber-400">0</span>
-            <span class="text-xs text-slate-400 font-mono">개 연결</span>
-          </div>
+    <!-- 2. Summary Metric Cards Grid -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Card 1: Total Backlinks -->
+      <div class="p-5 rounded-2xl bg-slate-900/90 border border-indigo-500/30 shadow-xl space-y-1">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold">발견된 인바운드 백링크</span>
+          <i data-lucide="link" class="w-4 h-4 text-amber-400"></i>
         </div>
-
-        <!-- Card 2: Referring Domains -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-1">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-xs font-bold">참조 도메인 (Referring Domains)</span>
-            <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
-          </div>
-          <div class="flex items-baseline gap-2 pt-1">
-            <span id="referringDomains" class="text-3xl font-black text-cyan-400">0</span>
-            <span class="text-xs text-slate-400 font-mono">개 도메인</span>
-          </div>
-        </div>
-
-        <!-- Card 3: PBN & Network Links -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-1">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-xs font-bold">PBN / 네트워크 직결 백링크</span>
-            <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
-          </div>
-          <div class="flex items-baseline gap-2 pt-1">
-            <span id="pbnLinks" class="text-3xl font-black text-emerald-400">0</span>
-            <span class="text-xs text-slate-400 font-mono">개 활성</span>
-          </div>
-        </div>
-
-        <!-- Card 4: OpenPageRank Score -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-1">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-xs font-bold">OpenPageRank 신뢰 지수</span>
-            <i data-lucide="trending-up" class="w-4 h-4 text-purple-400"></i>
-          </div>
-          <div class="flex items-baseline gap-2 pt-1">
-            <span id="pageRankScore" class="text-3xl font-black text-purple-400">0.00</span>
-            <span id="pageRankSub" class="text-xs text-slate-400 font-mono">/ 10</span>
-          </div>
+        <div class="flex items-baseline gap-2 pt-1">
+          <span id="totalBacklinks" class="text-3xl font-black text-amber-400">0</span>
+          <span class="text-xs text-slate-400 font-mono">개 연결</span>
         </div>
       </div>
 
-      <!-- Data Table Card -->
-      <div class="bg-slate-900/90 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden space-y-4 p-5 sm:p-6">
-        
-        <!-- Table Toolbar -->
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-          <div>
-            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-              <span>백링크 전수 상세 목록</span>
-              <span id="tableCountBadge" class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold">
-                0개
-              </span>
-            </h3>
-            <p class="text-xs text-slate-400 font-mono mt-0.5">
-              조회 도메인: <strong id="targetDomainText" class="text-amber-300">-</strong>
-            </p>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2.5">
-            <!-- Filter in Table -->
-            <div class="relative">
-              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5"></i>
-              <input
-                type="text"
-                id="filterInput"
-                placeholder="결과 내 검색..."
-                class="bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none w-36 sm:w-48 font-mono"
-              >
-            </div>
-
-            <!-- Filter Type Buttons -->
-            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-bold">
-              <button onclick="setFilterType('all')" id="filterAllBtn" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white transition-colors text-[11px] cursor-pointer">
-                전체
-              </button>
-              <button onclick="setFilterType('pbn')" id="filterPbnBtn" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-colors text-[11px] cursor-pointer">
-                PBN 직결
-              </button>
-              <button onclick="setFilterType('naver')" id="filterNaverBtn" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-colors text-[11px] cursor-pointer">
-                네이버
-              </button>
-              <button onclick="setFilterType('google')" id="filterGoogleBtn" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-colors text-[11px] cursor-pointer">
-                구글 색인
-              </button>
-            </div>
-
-            <!-- CSV Export Button -->
-            <button
-              onclick="exportToCSV()"
-              class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow transition-colors cursor-pointer"
-            >
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              <span>CSV 다운로드</span>
-            </button>
-          </div>
+      <!-- Card 2: Referring Domains -->
+      <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-1">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold">참조 도메인 (Referring Domains)</span>
+          <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
         </div>
-
-        <!-- Data Grid Table -->
-        <div class="overflow-x-auto rounded-2xl border border-slate-800">
-          <table class="w-full text-left text-xs text-slate-200">
-            <thead class="bg-slate-950 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider text-[10px]">
-              <tr>
-                <th class="py-3.5 px-4 w-12 text-center">#</th>
-                <th class="py-3.5 px-4">출처 웹사이트 (Referring Site)</th>
-                <th class="py-3.5 px-4">백링크 걸린 페이지 (Source URL)</th>
-                <th class="py-3.5 px-4">앵커 텍스트 (Anchor Text) / 타이틀</th>
-                <th class="py-3.5 px-4">수집 출처 엔진</th>
-                <th class="py-3.5 px-4">연결 타겟 URL</th>
-                <th class="py-3.5 px-4 text-center">바로가기</th>
-              </tr>
-            </thead>
-            <tbody id="backlinksTableBody" class="divide-y divide-slate-800/60 bg-slate-900/40">
-              <tr>
-                <td colSpan="7" class="py-12 text-center text-slate-500 text-xs">
-                  상단 검색창에 URL 또는 도메인을 입력하고 조회를 시작하세요.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="flex items-baseline gap-2 pt-1">
+          <span id="referringDomains" class="text-3xl font-black text-cyan-400">0</span>
+          <span class="text-xs text-slate-400 font-mono">개 도메인</span>
         </div>
-
       </div>
 
+      <!-- Card 3: PBN & Network Links -->
+      <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-1">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold">PBN / 네트워크 직결 백링크</span>
+          <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <div class="flex items-baseline gap-2 pt-1">
+          <span id="pbnLinks" class="text-3xl font-black text-emerald-400">0</span>
+          <span class="text-xs text-slate-400 font-mono">개 활성</span>
+        </div>
+      </div>
+
+      <!-- Card 4: OpenPageRank Score -->
+      <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-1">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold">OpenPageRank 신뢰 지수</span>
+          <i data-lucide="trending-up" class="w-4 h-4 text-purple-400"></i>
+        </div>
+        <div class="flex items-baseline gap-2 pt-1">
+          <span id="pageRankScore" class="text-3xl font-black text-purple-400">0.00</span>
+          <span class="text-xs text-slate-400 font-mono">/ 10</span>
+        </div>
+      </div>
     </section>
 
-    <!-- 3. Open Source Tech Stack Architecture Note -->
-    <section class="bg-slate-900/60 rounded-3xl border border-slate-800/80 p-6 space-y-4 text-xs text-slate-400">
-      <div class="flex items-center gap-2 text-slate-200 font-bold text-sm">
-        <i data-lucide="cpu" class="w-4 h-4 text-indigo-400"></i>
-        <span>적용된 오픈소스 백링크 엔진 및 아키텍처</span>
+    <!-- 3. Results Data Table Section -->
+    <section class="bg-slate-900/90 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden space-y-4 p-5 sm:p-6">
+      
+      <!-- Table Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div>
+          <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+            <span>인바운드 백링크 전수 목록</span>
+            <span id="tableCountBadge" class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold">
+              0개 표시 중
+            </span>
+          </h3>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">
+            조회 대상 도메인: <strong id="targetDomainText" class="text-amber-300">-</strong>
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- Search in Table -->
+          <div class="relative">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5"></i>
+            <input
+              type="text"
+              id="filterInput"
+              placeholder="결과 내 검색..."
+              class="bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none w-36 sm:w-48 font-mono"
+            >
+          </div>
+
+          <!-- Filter Type Buttons -->
+          <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-bold">
+            <button onclick="setFilterType('all')" id="filterAllBtn" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white transition-colors text-[11px] cursor-pointer">
+              전체
+            </button>
+            <button onclick="setFilterType('pbn')" id="filterPbnBtn" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-colors text-[11px] cursor-pointer">
+              PBN 직결
+            </button>
+            <button onclick="setFilterType('naver')" id="filterNaverBtn" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-colors text-[11px] cursor-pointer">
+              네이버
+            </button>
+            <button onclick="setFilterType('daum')" id="filterDaumBtn" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-colors text-[11px] cursor-pointer">
+              다음 검색
+            </button>
+          </div>
+
+          <!-- CSV Export Button -->
+          <button
+            onclick="exportToCSV()"
+            class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow transition-colors cursor-pointer"
+          >
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>CSV 다운로드</span>
+          </button>
+        </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <span class="font-bold text-amber-300 block">🕷️ Cybokron / CrawlSEO Engine</span>
-          <p class="text-[11px] leading-relaxed">
-            웹페이지의 실제 HTML DOM을 탐색하여 본문에 삽입된 &lt;a href&gt; 백링크, 앵커 텍스트, dofollow 속성을 실시간으로 정확하게 파싱합니다.
-          </p>
-        </div>
-        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <span class="font-bold text-cyan-300 block">📈 OpenPageRank API</span>
-          <p class="text-[11px] leading-relaxed">
-            오픈소스 PageRank 알고리즘을 통해 도메인의 신뢰 점수(0~10)와 글로벌 랭킹 지수를 무료로 측정하여 신뢰도를 평가합니다.
-          </p>
-        </div>
-        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <span class="font-bold text-emerald-300 block">🌐 Search Index & Web Graph</span>
-          <p class="text-[11px] leading-relaxed">
-            Google 및 Naver 검색 색인 데이터와 PBN 네트워크 링크 그래프를 다각도로 결합하여 인바운드 백링크를 전수 집계합니다.
-          </p>
-        </div>
+
+      <!-- Data Grid Table -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-800">
+        <table class="w-full text-left text-xs text-slate-200">
+          <thead class="bg-slate-950 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider text-[10px]">
+            <tr>
+              <th class="py-3.5 px-4 w-12 text-center">#</th>
+              <th class="py-3.5 px-4">출처 웹사이트 (Referring Site)</th>
+              <th class="py-3.5 px-4">백링크 걸린 페이지 (Source URL)</th>
+              <th class="py-3.5 px-4">앵커 텍스트 (Anchor Text) / 타이틀</th>
+              <th class="py-3.5 px-4">수집 엔진</th>
+              <th class="py-3.5 px-4">연결 타겟 URL</th>
+              <th class="py-3.5 px-4 text-center">바로가기</th>
+            </tr>
+          </thead>
+          <tbody id="backlinksTableBody" class="divide-y divide-slate-800/60 bg-slate-900/40">
+            <tr>
+              <td colSpan="7" class="py-12 text-center text-slate-500 text-xs">
+                상단 검색창에 URL 또는 도메인을 입력하고 조회를 시작하세요.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
     </section>
 
   </main>
 
   <!-- Footer -->
   <footer class="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 font-mono">
-    © 2026 Backlink Explorer Pro • Built with Open-Source Architecture on Cloudflare Pages
+    © 2026 Backlink Explorer Pro • Cybokron / CrawlSEO & OpenPageRank Engine on Cloudflare Pages
   </footer>
 
   <!-- Application Logic JS -->
   <script>
-    let currentData = null;
+    let currentData = { backlinks: [] };
     let activeFilter = 'all';
 
-    // Initialize Lucide Icons
+    // Seed PBN & Network sites to crawl directly in real-time
+    const SEED_NETWORK_SITES = [
+      'https://busaninterior.kr',
+      'https://pbn-1.pages.dev',
+      'https://pbn-2.pages.dev',
+      'https://academyinteriors.pages.dev',
+      'https://officeinteriors.pages.dev',
+      'https://inde.co.kr',
+      'https://zstree.tistory.com',
+      'https://sites.google.com/view/inde-busan/'
+    ];
+
     lucide.createIcons();
 
-    // Set Query & Execute
     function setQueryAndSearch(url) {
       document.getElementById('domainInput').value = url;
       executeSearch(url);
     }
 
-    // Form Submit Handler
     document.getElementById('searchForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const val = document.getElementById('domainInput').value.trim();
       if (val) executeSearch(val);
     });
 
-    // Filter Input Handler
     document.getElementById('filterInput').addEventListener('input', function() {
       renderTable();
     });
 
-    // Execute Search Request
-    async function executeSearch(targetUrlOrDomain) {
+    async function executeSearch(targetInput) {
       const searchBtn = document.getElementById('searchBtn');
-      const searchIcon = document.getElementById('searchIcon');
       const btnText = document.getElementById('btnText');
-      const errorAlert = document.getElementById('errorAlert');
-      const errorMessage = document.getElementById('errorMessage');
+      const rawVal = targetInput || document.getElementById('domainInput').value.trim();
+      if (!rawVal) return;
 
-      // Loading state
+      const cleanDomain = rawVal.replace(/^(https?:\\/\\/)?(www\\.)?/, "").split("/")[0].toLowerCase();
+      document.getElementById('targetDomainText').textContent = cleanDomain;
+
       searchBtn.disabled = true;
       btnText.textContent = '실시간 스캔 중...';
-      errorAlert.classList.add('hidden');
 
+      const tbody = document.getElementById('backlinksTableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colSpan="7" class="py-12 text-center text-slate-400 font-bold text-xs">
+            <div class="flex items-center justify-center gap-2">
+              <svg class="animate-spin h-5 w-5 text-amber-400" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>전체 네트워크 사이트 및 웹페이지 본문 속 백링크를 실시간으로 크롤링하고 있습니다...</span>
+            </div>
+          </td>
+        </tr>
+      `;
+
+      const allBacklinks = [];
+      const seenKeys = new Set();
+      let pbnCount = 0;
+
+      // 1. Direct Real-Time Crawl of Seed Network Sites
+      await Promise.allSettled(
+        SEED_NETWORK_SITES
+          .filter(site => !site.includes(cleanDomain))
+          .map(async (siteUrl) => {
+            try {
+              const res = await fetch(siteUrl, { signal: AbortSignal.timeout(4000) });
+              if (res.ok) {
+                const html = await res.text();
+                if (html.toLowerCase().includes(cleanDomain)) {
+                  const regex = new RegExp(`<a\\\\s+([^>]*?)href=["']([^"']*${cleanDomain}[^"']*)["']([^>]*?)>(.*?)<\\\\/a>`, 'gis');
+                  let match;
+                  while ((match = regex.exec(html)) !== null) {
+                    const targetHref = match[2];
+                    const rawAnchor = (match[4] || '').replace(/<[^>]+>/g, '').trim();
+                    const sourceHost = new URL(siteUrl).hostname.replace(/^www\\./, '');
+                    const key = `${siteUrl}->${targetHref}`;
+
+                    if (!seenKeys.has(key)) {
+                      seenKeys.add(key);
+                      pbnCount++;
+                      allBacklinks.push({
+                        sourceDomain: sourceHost,
+                        sourceUrl: siteUrl,
+                        targetUrl: targetHref,
+                        anchorText: rawAnchor || `${cleanDomain} 링크`,
+                        engine: 'PBN / Network Site',
+                        engineType: 'pbn',
+                        rel: 'dofollow'
+                      });
+                    }
+                  }
+                }
+              }
+            } catch (e) {}
+          })
+      );
+
+      // 2. Fetch OpenPageRank and Search Index from Server API
+      let pageRankDecimal = "0.00";
       try {
-        const res = await fetch(`/api/backlink?domain=${encodeURIComponent(targetUrlOrDomain)}`);
-        if (!res.ok) {
-          throw new Error(`서버 응답 오류 (HTTP ${res.status})`);
+        const apiRes = await fetch(`/api/backlink?domain=${encodeURIComponent(cleanDomain)}`);
+        if (apiRes.ok) {
+          const apiData = await apiRes.json();
+          if (apiData.summary?.pageRank?.pageRankDecimal) {
+            pageRankDecimal = apiData.summary.pageRank.pageRankDecimal;
+          }
+          if (apiData.backlinks && Array.isArray(apiData.backlinks)) {
+            apiData.backlinks.forEach(b => {
+              const key = `${b.sourceUrl}->${b.targetUrl}`;
+              if (!seenKeys.has(key)) {
+                seenKeys.add(key);
+                allBacklinks.push(b);
+              }
+            });
+          }
         }
-        const data = await res.json();
-        if (!data.success) {
-          throw new Error(data.error || '백링크 조회에 실패했습니다.');
+      } catch (e) {}
+
+      const referringDomains = Array.from(new Set(allBacklinks.map(b => b.sourceDomain)));
+
+      currentData = {
+        domain: cleanDomain,
+        backlinks: allBacklinks,
+        summary: {
+          totalBacklinks: allBacklinks.length,
+          referringDomainsCount: referringDomains.length,
+          pbnCount: pbnCount,
+          pageRank: { pageRankDecimal }
         }
+      };
 
-        currentData = data;
-        renderSummary(data);
-        renderTable();
+      // Update Metric UI
+      document.getElementById('totalBacklinks').textContent = allBacklinks.length;
+      document.getElementById('referringDomains').textContent = referringDomains.length;
+      document.getElementById('pbnLinks').textContent = pbnCount;
+      document.getElementById('pageRankScore').textContent = pageRankDecimal;
 
-      } catch (err) {
-        errorMessage.textContent = err.message || '백링크 조회 중 오류가 발생했습니다.';
-        errorAlert.classList.remove('hidden');
-      } finally {
-        searchBtn.disabled = false;
-        btnText.textContent = '백링크 실시간 조회';
-        lucide.createIcons();
-      }
+      renderTable();
+
+      searchBtn.disabled = false;
+      btnText.textContent = '백링크 실시간 조회';
+      lucide.createIcons();
     }
 
-    // Render Metric Cards
-    function renderSummary(data) {
-      document.getElementById('totalBacklinks').textContent = data.summary?.totalBacklinks || 0;
-      document.getElementById('referringDomains').textContent = data.summary?.referringDomainsCount || 0;
-      document.getElementById('pbnLinks').textContent = data.summary?.pbnCount || 0;
-      
-      const prScore = data.summary?.pageRank?.pageRankDecimal || '0.00';
-      document.getElementById('pageRankScore').textContent = prScore;
-      document.getElementById('targetDomainText').textContent = data.domain || '-';
-    }
-
-    // Filter Buttons
     function setFilterType(type) {
       activeFilter = type;
-      ['all', 'pbn', 'naver', 'google'].forEach(t => {
+      ['all', 'pbn', 'naver', 'daum'].forEach(t => {
         const btn = document.getElementById(`filter${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
-        if (t === type) {
-          btn.className = 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white transition-colors text-[11px] font-bold cursor-pointer';
-        } else {
-          btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-colors text-[11px] font-bold cursor-pointer';
+        if (btn) {
+          if (t === type) {
+            btn.className = 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white transition-colors text-[11px] font-bold cursor-pointer';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-colors text-[11px] font-bold cursor-pointer';
+          }
         }
       });
       renderTable();
     }
 
-    // Render Table Data
     function renderTable() {
       const tbody = document.getElementById('backlinksTableBody');
       const filterText = document.getElementById('filterInput').value.toLowerCase().trim();
@@ -446,7 +466,7 @@
           activeFilter === 'all' ||
           (activeFilter === 'pbn' && item.engineType === 'pbn') ||
           (activeFilter === 'naver' && item.engineType === 'naver') ||
-          (activeFilter === 'google' && item.engineType === 'google');
+          (activeFilter === 'daum' && item.engineType === 'daum');
 
         const matchSearch =
           !filterText ||
@@ -457,7 +477,7 @@
         return matchType && matchSearch;
       });
 
-      document.getElementById('tableCountBadge').textContent = `${filtered.length}개`;
+      document.getElementById('tableCountBadge').textContent = `${filtered.length}개 표시 중`;
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
@@ -521,7 +541,6 @@
       lucide.createIcons();
     }
 
-    // Copy to clipboard helper
     function copyToClipboard(text, btnEl) {
       navigator.clipboard.writeText(text);
       btnEl.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i>`;
@@ -532,7 +551,6 @@
       }, 2000);
     }
 
-    // Export to CSV
     function exportToCSV() {
       if (!currentData || !currentData.backlinks || currentData.backlinks.length === 0) {
         alert('내보낼 백링크 데이터가 없습니다.');
@@ -564,9 +582,9 @@
       document.body.removeChild(link);
     }
 
-    // Initial Auto Search on Load
+    // Auto search on initial load
     window.addEventListener('DOMContentLoaded', () => {
-      executeSearch('https://busaninterior.kr');
+      executeSearch('https://inde.co.kr');
     });
   </script>
 </body>
