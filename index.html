@@ -15,11 +15,6 @@
   <meta name="twitter:title" content="개인 포트폴리오" />
   <meta name="twitter:description" content="webP 이미지 최적화, 키워드 조합기, 방문자 통계 등 다양한 도구를 제공합니다." />
   <meta name="twitter:image" content="https://postfiles.pstatic.net/MjAyMzAyMDVfMjE5/MDAxNjc1NTgzNzc1NjIy.tp4jWdSCOsJ_jnbG2n2t6Px8a18tTAo-kiCzee6Ejfsg.MeWoKTInJaRI6E336xXWJqSlANleK0uD6gWnmYn3cC0g.JPEG.babolang/DD241D85-98E1-4FC2-91D9-EFF6CBBBD441.jpeg?type=w966" />
-  <script>
-    if (window.location.pathname === '/back2' || window.location.pathname === '/back2/') {
-      window.location.replace('/back2.html');
-    }
-  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -1089,13 +1084,15 @@
         main.appendChild(section);
       });
 
-      // Default: show the first unprotected panel (or first panel if authenticated), or pre-selected menu from query param
+      // Default: show backlink-check if URL is /back or /back2, or query menu, or first panel
+      const isBacklinkPath = window.location.pathname.includes("back2") || window.location.pathname.includes("back") || window.location.hash.includes("back");
+      const backlinkMenu = isBacklinkPath ? currentMenus.find(m => m.id === "backlink-check") : null;
       const urlParams = new URLSearchParams(window.location.search);
       const queryMenuId = urlParams.get("menu");
       const queryMenu = queryMenuId ? currentMenus.find(m => m.id === queryMenuId) : null;
       const savedMenuId = localStorage.getItem("activeMenuId");
       const savedMenu = savedMenuId ? currentMenus.find(m => m.id === savedMenuId) : null;
-      const defaultMenu = queryMenu || savedMenu || currentMenus.find(m => isAuthenticated || !m.protected) || currentMenus[0];
+      const defaultMenu = backlinkMenu || queryMenu || savedMenu || currentMenus.find(m => isAuthenticated || !m.protected) || currentMenus[0];
       if (defaultMenu) {
         selectMenu(defaultMenu);
       }
