@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "echo 'No build needed'"
+    "build": "cd back_src && npm install && npm run build"
   },
   "dependencies": {
     "cors": "^2.8.6",
