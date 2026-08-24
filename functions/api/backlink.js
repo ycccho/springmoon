@@ -1,3 +1,4 @@
+// Live Backlink Engine v2.5 - OpenSource Powered
 export async function onRequestGet(context) {
   const { searchParams } = new URL(context.request.url);
   const rawInput = searchParams.get('domain') || searchParams.get('url') || '';
