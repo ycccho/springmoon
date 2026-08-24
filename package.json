@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "cd back_src && npm install && npm run build"
+    "build": "echo 'Deploying static files'"
   },
   "dependencies": {
     "cors": "^2.8.6",
