@@ -162,12 +162,33 @@ export function buildGraphFromSites(sites, direction = 'TB') {
 
   dagre.layout(g);
 
-  // Map to React Flow nodes
+  // Map to React Flow nodes with dynamic inbound/outbound site lists
   const nodes = sites.map(s => {
     const dagreNode = g.node(s.id);
     const inCount = inboundMap.get(s.id) || 0;
     const outCount = outboundMap.get(s.id) || 0;
     const tier = nodeTiers.get(s.id) || 0;
+
+    // Find all sites pointing to this site (Inbound sites)
+    const inboundSites = sites.filter(otherSite => {
+      if (!otherSite.targets || !Array.isArray(otherSite.targets)) return false;
+      return otherSite.targets.some(tUrl => {
+        const tId = urlToIdMap.get(normalizeUrl(tUrl)) || tUrl;
+        return tId === s.id;
+      });
+    });
+
+    // Find all target sites this site points to (Outbound sites)
+    const outboundSites = (s.targets || []).map(tUrl => {
+      const tId = urlToIdMap.get(normalizeUrl(tUrl)) || tUrl;
+      const targetObj = sites.find(item => item.id === tId);
+      return {
+        url: tUrl,
+        id: tId,
+        title: targetObj ? targetObj.title : tId,
+        type: targetObj ? targetObj.type : 'target'
+      };
+    });
 
     return {
       id: s.id,
@@ -180,6 +201,8 @@ export function buildGraphFromSites(sites, direction = 'TB') {
         ...s,
         inboundCount: inCount,
         outboundCount: outCount,
+        inboundSites: inboundSites,
+        outboundSites: outboundSites,
         tier: tier,
         color: s.color || '#6366f1'
       }

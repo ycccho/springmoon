@@ -18,6 +18,9 @@ import TargetNode from './components/TargetNode';
 import TopMemo from './components/TopMemo';
 import SidePanel from './components/SidePanel';
 import CanvasHeader from './components/CanvasHeader';
+import LiveBacklinkChecker from './components/LiveBacklinkChecker';
+import BacklinkTable from './components/BacklinkTable';
+import StrategyGuide from './components/StrategyGuide';
 
 const STORAGE_KEY_SITES = 'backlink_visualizer_sites_v4';
 const STORAGE_KEY_MEMO = 'backlink_visualizer_memo_v4';
@@ -30,6 +33,9 @@ const nodeTypes = {
 };
 
 function FlowApp() {
+  // Active View Mode: 'live_search' (Default) | 'graph' | 'table' | 'guide'
+  const [activeView, setActiveView] = useState('live_search');
+
   // Load initial sites from localStorage or preset
   const [sites, setSites] = useState(() => {
     try {
@@ -170,7 +176,7 @@ function FlowApp() {
       {/* 1. Top Collapsible Memo Pad */}
       <TopMemo memo={memo} setMemo={setMemo} />
 
-      {/* 2. Canvas Header & Toolbar & Beginners Guide */}
+      {/* 2. Canvas Header & View Mode Navigation */}
       <CanvasHeader
         sites={sites}
         searchTerm={searchTerm}
@@ -180,68 +186,101 @@ function FlowApp() {
         onRelayout={handleRelayout}
         isPanelOpen={isPanelOpen}
         setIsPanelOpen={setIsPanelOpen}
+        activeView={activeView}
+        setActiveView={setActiveView}
       />
 
-      {/* 3. Central Visualization Canvas */}
-      <div className="flex-1 w-full relative">
-        {/* Tier Level Background Floating Banners */}
-        {direction === 'TB' && (
-          <div className="absolute left-6 top-6 z-10 flex flex-col gap-32 pointer-events-none opacity-50">
-            <div className="flex items-center gap-2 bg-amber-500/20 text-amber-300 px-3.5 py-1.5 rounded-xl border border-amber-500/50 text-xs font-black shadow-lg">
-              <span>👑 [티어 0] 최상단 머니사이트 & 목표 사이트 (최종 백링크 집결지)</span>
-            </div>
-            <div className="flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3.5 py-1.5 rounded-xl border border-rose-500/50 text-xs font-black shadow-lg">
-              <span>🥇 [티어 1] 1차 직결 PBN 백링크 사이트</span>
-            </div>
-            <div className="flex items-center gap-2 bg-cyan-500/20 text-cyan-300 px-3.5 py-1.5 rounded-xl border border-cyan-500/50 text-xs font-black shadow-lg">
-              <span>🥈 [티어 2] 2차 지원 PBN 백링크 사이트</span>
-            </div>
-            <div className="flex items-center gap-2 bg-pink-500/20 text-pink-300 px-3.5 py-1.5 rounded-xl border border-pink-500/50 text-xs font-black shadow-lg">
-              <span>🥉 [티어 3] 3차 하부 지원 블로그 사이트</span>
-            </div>
+      {/* 3. Main Views Container */}
+      <div className="flex-1 w-full relative overflow-hidden flex">
+        {/* VIEW 1: REACT FLOW GRAPH CANVAS */}
+        {activeView === 'graph' && (
+          <div className="flex-1 w-full h-full relative">
+            {/* Tier Level Background Floating Banners */}
+            {direction === 'TB' && (
+              <div className="absolute left-6 top-6 z-10 flex flex-col gap-32 pointer-events-none opacity-50">
+                <div className="flex items-center gap-2 bg-amber-500/20 text-amber-300 px-3.5 py-1.5 rounded-xl border border-amber-500/50 text-xs font-black shadow-lg">
+                  <span>👑 [티어 0] 최상단 머니사이트 & 목표 사이트 (최종 백링크 집결지)</span>
+                </div>
+                <div className="flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3.5 py-1.5 rounded-xl border border-rose-500/50 text-xs font-black shadow-lg">
+                  <span>🥇 [티어 1] 1차 직결 PBN 백링크 사이트</span>
+                </div>
+                <div className="flex items-center gap-2 bg-cyan-500/20 text-cyan-300 px-3.5 py-1.5 rounded-xl border border-cyan-500/50 text-xs font-black shadow-lg">
+                  <span>🥈 [티어 2] 2차 지원 PBN 백링크 사이트</span>
+                </div>
+                <div className="flex items-center gap-2 bg-pink-500/20 text-pink-300 px-3.5 py-1.5 rounded-xl border border-pink-500/50 text-xs font-black shadow-lg">
+                  <span>🥉 [티어 3] 3차 하부 지원 블로그 사이트</span>
+                </div>
+              </div>
+            )}
+
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              nodeTypes={nodeTypes}
+              onNodeClick={handleNodeClick}
+              onNodeMouseEnter={handleNodeMouseEnter}
+              onNodeMouseLeave={handleNodeMouseLeave}
+              fitView
+              fitViewOptions={{ padding: 0.25 }}
+              minZoom={0.2}
+              maxZoom={2}
+              defaultEdgeOptions={{
+                type: 'smoothstep',
+                animated: true
+              }}
+              className="bg-slate-950"
+            >
+              <Background variant="dots" gap={24} size={1.2} color="#334155" />
+              <Controls
+                className="!bg-slate-900/90 !border !border-slate-800 !rounded-xl !shadow-2xl !text-slate-200"
+                showInteractive={false}
+              />
+            </ReactFlow>
+
+            {/* Empty Canvas Notice */}
+            {sites.length === 0 && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm p-6 text-center z-10">
+                <h3 className="text-lg font-bold text-slate-200 mb-2">등록된 백링크 사이트가 없습니다</h3>
+                <p className="text-sm text-slate-400 max-w-md mb-4">
+                  우측 상단 '사이트 관리' 버튼을 눌러 사이트를 직접 추가하거나 기본 프리셋 데이터로 복원하세요.
+                </p>
+                <button
+                  onClick={() => setSites(INITIAL_SITES)}
+                  className="px-4 py-2 bg-amber-500 text-slate-950 font-black rounded-xl shadow-lg transition-all"
+                >
+                  기본 프리셋 데이터 복원
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          onNodeClick={handleNodeClick}
-          onNodeMouseEnter={handleNodeMouseEnter}
-          onNodeMouseLeave={handleNodeMouseLeave}
-          fitView
-          fitViewOptions={{ padding: 0.25 }}
-          minZoom={0.2}
-          maxZoom={2}
-          defaultEdgeOptions={{
-            type: 'smoothstep',
-            animated: true
-          }}
-          className="bg-slate-950"
-        >
-          <Background variant="dots" gap={24} size={1.2} color="#334155" />
-          <Controls
-            className="!bg-slate-900/90 !border !border-slate-800 !rounded-xl !shadow-2xl !text-slate-200"
-            showInteractive={false}
+        {/* VIEW 2: LIVE BACKLINK EXPLORER & CRAWLER */}
+        {activeView === 'live_search' && (
+          <LiveBacklinkChecker
+            sites={sites}
+            setSites={setSites}
+            onSwitchToGraph={() => setActiveView('graph')}
           />
-        </ReactFlow>
+        )}
 
-        {/* Empty Canvas Notice */}
-        {sites.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm p-6 text-center z-10">
-            <h3 className="text-lg font-bold text-slate-200 mb-2">등록된 백링크 사이트가 없습니다</h3>
-            <p className="text-sm text-slate-400 max-w-md mb-4">
-              우측 상단 '사이트 추가/관리' 버튼을 눌러 사이트를 직접 추가하거나 기본 프리셋 데이터로 복원하세요.
-            </p>
-            <button
-              onClick={() => setSites(INITIAL_SITES)}
-              className="px-4 py-2 bg-amber-500 text-slate-950 font-black rounded-xl shadow-lg transition-all"
-            >
-              기본 프리셋 데이터 복원
-            </button>
-          </div>
+        {/* VIEW 3: BACKLINK DATA TABLE */}
+        {activeView === 'table' && (
+          <BacklinkTable
+            sites={sites}
+            setSites={setSites}
+            onSelectSiteForEdit={(site) => {
+              setEditingSite(site);
+              setIsPanelOpen(true);
+            }}
+          />
+        )}
+
+        {/* VIEW 4: PBN STRATEGY & ARCHITECTURE GUIDE */}
+        {activeView === 'guide' && (
+          <StrategyGuide />
         )}
       </div>
 

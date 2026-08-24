@@ -105,32 +105,40 @@ export default function MoneyNode({ data, selected }) {
 
       {/* Expanded PBN List */}
       {showUrlList && (
-        <div className="mt-2 p-2.5 bg-slate-950 rounded-xl border border-amber-500/50 text-xs space-y-1.5 max-h-40 overflow-y-auto font-mono">
+        <div className="mt-2 p-2.5 bg-slate-950 rounded-xl border border-amber-500/50 text-xs space-y-1.5 max-h-48 overflow-y-auto font-mono">
           <div className="text-[11px] font-extrabold text-amber-300 border-b border-amber-500/20 pb-1">
-            이 머니사이트로 백링크 파워를 보내는 PBN:
+            이 머니사이트로 백링크를 보내는 PBN ({data.inboundSites ? data.inboundSites.length : 0}개):
           </div>
-          <ul className="space-y-1 text-[10px] text-slate-200">
-            <li className="p-1.5 bg-slate-900 rounded border border-slate-800 flex justify-between items-center">
-              <span>🥇 PBN 1 - busaninterior.kr</span>
-              <span className="text-amber-400 font-bold">1차 직결</span>
-            </li>
-            <li className="p-1.5 bg-slate-900 rounded border border-slate-800 flex justify-between items-center">
-              <span>🥇 PBN 2 - pbn-1.pages.dev</span>
-              <span className="text-amber-400 font-bold">1차 직결</span>
-            </li>
-            <li className="p-1.5 bg-slate-900 rounded border border-slate-800 flex justify-between items-center">
-              <span>🥈 PBN 3 - pbn-2.pages.dev</span>
-              <span className="text-cyan-400 font-bold">2차 지원</span>
-            </li>
-            <li className="p-1.5 bg-slate-900 rounded border border-slate-800 flex justify-between items-center">
-              <span>🥈 PBN 4 - academyinteriors.pages.dev</span>
-              <span className="text-amber-400 font-bold">2차 지원</span>
-            </li>
-            <li className="p-1.5 bg-slate-900 rounded border border-slate-800 flex justify-between items-center">
-              <span>🥈 PBN 5 - officeinteriors.pages.dev</span>
-              <span className="text-emerald-400 font-bold">2차 지원</span>
-            </li>
-          </ul>
+          {data.inboundSites && data.inboundSites.length > 0 ? (
+            <ul className="space-y-1 text-[10px] text-slate-200">
+              {data.inboundSites.map((site, sIdx) => (
+                <li
+                  key={sIdx}
+                  className="p-1.5 bg-slate-900 hover:bg-slate-800 rounded border border-slate-800 flex justify-between items-center transition-colors"
+                >
+                  <div className="flex items-center gap-1.5 truncate flex-1 min-w-0 pr-2">
+                    <span
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: site.color || '#6366f1' }}
+                    />
+                    <span className="truncate font-semibold">{site.title || site.id}</span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(site.url, '_blank');
+                    }}
+                    className="text-amber-400 hover:text-amber-300 flex-shrink-0"
+                    title="방문하기"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[10px] text-slate-500 py-1 text-center">연결된 PBN이 없습니다.</p>
+          )}
         </div>
       )}
 
