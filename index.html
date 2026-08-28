@@ -187,6 +187,7 @@
     // ============================================
     const PASSWORD = "2";
     const defaultMenus = [
+      { id: "studio-3d", name: "3D STL 메이커 (P1S)", categoryId: "cat-3d", protected: false },
       { id: "place-rank-check", name: "플레이스순위체크", categoryId: "cat-rank", protected: true },
       { id: "total-statistics", name: "1. 전체 통계", categoryId: "cat-stats", protected: true },
       { id: "ad-dashboard", name: "2. 검색광고 통계", categoryId: "cat-stats", protected: true },
@@ -1114,7 +1115,8 @@
 
       // Default: show the first unprotected panel (or first panel if authenticated), or pre-selected menu from query param
       const urlParams = new URLSearchParams(window.location.search);
-      const queryMenuId = urlParams.get("menu");
+      const isPath3D = (window.location.pathname || '').toLowerCase() === '/3d' || (window.location.pathname || '').toLowerCase() === '/3d/' || window.location.hash === '#3d';
+      const queryMenuId = isPath3D ? "studio-3d" : urlParams.get("menu");
       const queryMenu = queryMenuId ? currentMenus.find(m => m.id === queryMenuId) : null;
       const savedMenuId = localStorage.getItem("activeMenuId");
       const savedMenu = savedMenuId ? currentMenus.find(m => m.id === savedMenuId) : null;
@@ -1125,6 +1127,7 @@
 
       // Initialize scripts for different panels
       setTimeout(() => {
+        setupStudio3D();
         setupKeywordCombiner();
         setupWebP();
         setupKeywordSearchCount();
@@ -1158,6 +1161,7 @@
     }
 
     function getPanelHTML(id, name) {
+      if (id === "studio-3d") return getStudio3DHTML();
       if (id === "place-rank-check") return getPlaceRankCheckHTML();
       if (id === "webp") return getWebPHTML();
       if (id === "keyword") return getKeywordHTML();
@@ -15337,6 +15341,643 @@
 
 
     window.addEventListener("load", initApp);
-  </script>
+  
+    /* ==========================================================================
+       3D STL STUDIO (BAMBU LAB P1S) - NATIVE INTEGRATED PANEL
+       ========================================================================== */
+    function getStudio3DHTML() {
+      return `
+        <div class="space-y-4">
+          <!-- Header Banner -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-blue-900/60 via-indigo-900/60 to-purple-900/60 p-5 rounded-2xl border border-blue-500/30 shadow-lg">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-500 text-white">Bambu Lab P1S</span>
+                <h2 class="text-xl font-bold text-white tracking-tight">🐼 3D STL 메이커 스튜디오</h2>
+              </div>
+              <p class="text-xs text-blue-200">
+                사진을 업로드하면 뱀부랩 P1S(FDM)에 최적화된 애견 목걸이, 네임택, 키링, 리소페인 STL 파일을 1초 만에 생성합니다.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openBambuGuideModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all flex items-center gap-1.5 shadow-sm">
+                <span>🐼</span> P1S 슬라이싱 세팅
+              </button>
+              <a href="/3d.html" target="_blank" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center gap-1.5 shadow-md">
+                <span>↗</span> 전체화면 열기
+              </a>
+            </div>
+          </div>
+
+          <!-- Main Studio 2-Column Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            
+            <!-- Left Control Panel (5 Cols) -->
+            <div class="lg:col-span-5 space-y-4 bg-white dark-mode:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark-mode:border-gray-700 shadow-sm">
+              
+              <!-- 1. Presets -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-gray-500 dark-mode:text-gray-400 uppercase tracking-wider">
+                  <span>1. 원클릭 추천 프리셋</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" onclick="apply3DPreset('pet-circle')" class="p-2.5 rounded-xl border border-gray-200 dark-mode:border-gray-700 bg-gray-50 dark-mode:bg-gray-750 hover:border-blue-500 text-center transition-all text-xs font-bold text-gray-800 dark-mode:text-gray-200 flex flex-col items-center gap-1">
+                    <span class="text-lg">🐶</span>
+                    <span>원형 목걸이</span>
+                  </button>
+                  <button type="button" onclick="apply3DPreset('dog-bone')" class="p-2.5 rounded-xl border border-gray-200 dark-mode:border-gray-700 bg-gray-50 dark-mode:bg-gray-750 hover:border-blue-500 text-center transition-all text-xs font-bold text-gray-800 dark-mode:text-gray-200 flex flex-col items-center gap-1">
+                    <span class="text-lg">🦴</span>
+                    <span>뼈다귀 네임택</span>
+                  </button>
+                  <button type="button" onclick="apply3DPreset('heart-tag')" class="p-2.5 rounded-xl border border-gray-200 dark-mode:border-gray-700 bg-gray-50 dark-mode:bg-gray-750 hover:border-blue-500 text-center transition-all text-xs font-bold text-gray-800 dark-mode:text-gray-200 flex flex-col items-center gap-1">
+                    <span class="text-lg">💖</span>
+                    <span>하트 펜던트</span>
+                  </button>
+                  <button type="button" onclick="apply3DPreset('lithophane')" class="p-2.5 rounded-xl border border-gray-200 dark-mode:border-gray-700 bg-gray-50 dark-mode:bg-gray-750 hover:border-blue-500 text-center transition-all text-xs font-bold text-gray-800 dark-mode:text-gray-200 flex flex-col items-center gap-1">
+                    <span class="text-lg">🖼️</span>
+                    <span>리소페인</span>
+                  </button>
+                  <button type="button" onclick="apply3DPreset('rect-tag')" class="p-2.5 rounded-xl border border-gray-200 dark-mode:border-gray-700 bg-gray-50 dark-mode:bg-gray-750 hover:border-blue-500 text-center transition-all text-xs font-bold text-gray-800 dark-mode:text-gray-200 flex flex-col items-center gap-1">
+                    <span class="text-lg">🏷️</span>
+                    <span>사각 키링</span>
+                  </button>
+                  <button type="button" onclick="apply3DPreset('high-relief')" class="p-2.5 rounded-xl border border-gray-200 dark-mode:border-gray-700 bg-gray-50 dark-mode:bg-gray-750 hover:border-blue-500 text-center transition-all text-xs font-bold text-gray-800 dark-mode:text-gray-200 flex flex-col items-center gap-1">
+                    <span class="text-lg">👑</span>
+                    <span>고양각 입체</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Image Upload -->
+              <div class="space-y-2 pt-2 border-t border-gray-200 dark-mode:border-gray-700">
+                <div class="text-xs font-bold text-gray-500 dark-mode:text-gray-400 uppercase tracking-wider">
+                  <span>2. 사진 업로드 & 누끼 처리</span>
+                </div>
+                <div class="relative border-2 border-dashed border-gray-300 dark-mode:border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 bg-gray-50 dark-mode:bg-gray-750 transition-all cursor-pointer">
+                  <input type="file" id="portal-3d-file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                  <div class="text-2xl mb-1">📷</div>
+                  <div class="text-xs font-bold text-gray-800 dark-mode:text-gray-200">사진 클릭 또는 드래그 업로드</div>
+                  <div class="text-[11px] text-gray-400">JPG, PNG, WebP 지원 (배경 자동 제거)</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <div class="flex justify-between text-xs font-semibold text-gray-600 dark-mode:text-gray-300 mb-1">
+                      <span>대비 (Contrast)</span>
+                      <span id="portal-val-contrast" class="font-mono text-blue-600 font-bold">1.2x</span>
+                    </div>
+                    <input type="range" id="portal-param-contrast" min="0.5" max="2.5" step="0.1" value="1.2" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs font-semibold text-gray-600 dark-mode:text-gray-300 mb-1">
+                      <span>표면 스무딩</span>
+                      <span id="portal-val-smooth" class="font-mono text-blue-600 font-bold">1.0</span>
+                    </div>
+                    <input type="range" id="portal-param-smooth" min="0" max="4" step="0.5" value="1.0" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                  <label class="flex items-center gap-2 text-xs font-semibold text-gray-700 dark-mode:text-gray-300 cursor-pointer">
+                    <input type="checkbox" id="portal-param-invert" class="rounded text-blue-600 focus:ring-blue-500">
+                    <span>명암 반전 (Invert)</span>
+                  </label>
+                  <label class="flex items-center gap-2 text-xs font-semibold text-gray-700 dark-mode:text-gray-300 cursor-pointer">
+                    <input type="checkbox" id="portal-param-remove-bg" checked class="rounded text-blue-600 focus:ring-blue-500">
+                    <span>배경 자동 투명화</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 3. Base Shape & Dimensions -->
+              <div class="space-y-3 pt-2 border-t border-gray-200 dark-mode:border-gray-700">
+                <div class="text-xs font-bold text-gray-500 dark-mode:text-gray-400 uppercase tracking-wider">
+                  <span>3. 베이스 형태 & 크기 (mm)</span>
+                </div>
+
+                <div class="grid grid-cols-5 gap-1 bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl text-xs font-bold">
+                  <button type="button" onclick="setPortalShape('circle')" id="btn-shape-circle" class="py-1.5 rounded-lg bg-blue-600 text-white shadow-sm transition-all text-center">원형</button>
+                  <button type="button" onclick="setPortalShape('rounded')" id="btn-shape-rounded" class="py-1.5 rounded-lg text-gray-600 dark-mode:text-gray-300 hover:text-white transition-all text-center">둥근사각</button>
+                  <button type="button" onclick="setPortalShape('bone')" id="btn-shape-bone" class="py-1.5 rounded-lg text-gray-600 dark-mode:text-gray-300 hover:text-white transition-all text-center">뼈다귀</button>
+                  <button type="button" onclick="setPortalShape('heart')" id="btn-shape-heart" class="py-1.5 rounded-lg text-gray-600 dark-mode:text-gray-300 hover:text-white transition-all text-center">하트</button>
+                  <button type="button" onclick="setPortalShape('rect')" id="btn-shape-rect" class="py-1.5 rounded-lg text-gray-600 dark-mode:text-gray-300 hover:text-white transition-all text-center">직사각</button>
+                </div>
+
+                <div class="space-y-2">
+                  <div>
+                    <div class="flex justify-between text-xs font-semibold text-gray-600 dark-mode:text-gray-300 mb-1">
+                      <span>가로 직경 (Width)</span>
+                      <span id="portal-val-width" class="font-mono text-blue-600 font-bold">40 mm</span>
+                    </div>
+                    <input type="range" id="portal-param-width" min="20" max="90" step="1" value="40" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <div class="flex justify-between text-xs font-semibold text-gray-600 dark-mode:text-gray-300 mb-1">
+                        <span>바닥 두께</span>
+                        <span id="portal-val-base-thick" class="font-mono text-blue-600 font-bold">2.0 mm</span>
+                      </div>
+                      <input type="range" id="portal-param-base-thick" min="1.0" max="5.0" step="0.2" value="2.0" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                      <div class="flex justify-between text-xs font-semibold text-gray-600 dark-mode:text-gray-300 mb-1">
+                        <span>릴리프 높이</span>
+                        <span id="portal-val-relief-height" class="font-mono text-blue-600 font-bold">1.4 mm</span>
+                      </div>
+                      <input type="range" id="portal-param-relief-height" min="0.4" max="4.0" step="0.1" value="1.4" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Loop & Text -->
+              <div class="space-y-3 pt-2 border-t border-gray-200 dark-mode:border-gray-700">
+                <div class="text-xs font-bold text-gray-500 dark-mode:text-gray-400 uppercase tracking-wider">
+                  <span>4. 목걸이 고리 & 각인</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1 bg-gray-100 dark-mode:bg-gray-750 p-1 rounded-xl text-xs font-bold">
+                  <button type="button" onclick="setPortalLoopPos('top')" id="btn-loop-top" class="py-1.5 rounded-lg bg-blue-600 text-white shadow-sm text-center">상단 고리</button>
+                  <button type="button" onclick="setPortalLoopPos('both')" id="btn-loop-both" class="py-1.5 rounded-lg text-gray-600 dark-mode:text-gray-300 text-center">양쪽 고리</button>
+                  <button type="button" onclick="setPortalLoopPos('none')" id="btn-loop-none" class="py-1.5 rounded-lg text-gray-600 dark-mode:text-gray-300 text-center">고리 없음</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="text" id="portal-param-text-line1" value="초코 (CHOCO)" placeholder="이름" class="w-full px-2.5 py-1.5 rounded-lg text-xs border border-gray-300 dark-mode:border-gray-600 bg-white dark-mode:bg-gray-900 text-gray-800 dark-mode:text-white">
+                  <input type="text" id="portal-param-text-line2" value="010-1234-5678" placeholder="연락처" class="w-full px-2.5 py-1.5 rounded-lg text-xs border border-gray-300 dark-mode:border-gray-600 bg-white dark-mode:bg-gray-900 text-gray-800 dark-mode:text-white font-mono">
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right 3D Viewport & Action Area (7 Cols) -->
+            <div class="lg:col-span-7 flex flex-col space-y-4">
+              
+              <!-- 3D Canvas Box -->
+              <div class="relative w-full h-[460px] bg-slate-950 rounded-2xl overflow-hidden border border-gray-800 shadow-inner flex flex-col">
+                
+                <!-- Viewport Floating Badges -->
+                <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+                  <div class="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[11px] font-bold text-white shadow">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>Bambu P1S 빌드 플레이트 (256x256mm)</span>
+                  </div>
+                  <div class="flex items-center gap-1 pointer-events-auto">
+                    <button type="button" onclick="setPortalMaterial('pla')" id="btn-mat-pla" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-600 text-white shadow">PLA</button>
+                    <button type="button" onclick="setPortalMaterial('gold')" id="btn-mat-gold" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-gray-300 hover:text-white">Gold</button>
+                    <button type="button" onclick="setPortalMaterial('litho')" id="btn-mat-litho" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-gray-300 hover:text-white">Litho</button>
+                  </div>
+                </div>
+
+                <!-- WebGL Canvas Mount -->
+                <div id="portal-3d-canvas-wrapper" class="w-full h-full"></div>
+
+                <!-- Viewport Bottom Spec Summary -->
+                <div class="absolute bottom-3 left-3 right-3 bg-slate-900/85 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/10 flex items-center justify-between text-xs text-slate-300 z-10">
+                  <div class="flex items-center gap-4">
+                    <div><span class="text-[10px] text-slate-500 uppercase block">크기</span><strong id="portal-stat-dimensions" class="font-mono text-white">40 x 40 x 3.4 mm</strong></div>
+                    <div><span class="text-[10px] text-slate-500 uppercase block">예상 시간</span><strong id="portal-stat-time" class="font-mono text-emerald-400">~15분</strong></div>
+                    <div><span class="text-[10px] text-slate-500 uppercase block">무게</span><strong id="portal-stat-weight" class="font-mono text-amber-400">~4.5g</strong></div>
+                  </div>
+                  <button type="button" onclick="exportPortalSTL()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-lg shadow-md transition-all flex items-center gap-1.5 cursor-pointer">
+                    <span>⬇️</span> STL 다운로드
+                  </button>
+                </div>
+
+              </div>
+
+              <!-- Bambu Slicing Tips Banner -->
+              <div class="p-4 rounded-xl bg-emerald-50 dark-mode:bg-emerald-950/40 border border-emerald-200 dark-mode:border-emerald-800/60 text-xs leading-relaxed text-emerald-900 dark-mode:text-emerald-200 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-xl">💡</span>
+                  <div>
+                    <strong>Bambu Studio 슬라이싱 꿀팁:</strong> 상단 표면 <code>다림질(Ironing)</code>을 활성화하시면 사진 릴리프와 글씨가 사출품처럼 매끄럽게 마감됩니다!
+                  </div>
+                </div>
+                <button onclick="openBambuGuideModal()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs whitespace-nowrap shadow-sm">
+                  설정 가이드 보기
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <canvas id="portal-proc-canvas" style="display: none;"></canvas>
+      `;
+    }
+
+    let portalScene, portalCamera, portalRenderer, portalControls, portalMeshGroup;
+    let portalCurrentShape = 'circle';
+    let portalCurrentLoopPos = 'top';
+    let portalCurrentMaterial = 'pla';
+    let portalLoadedImage = null;
+    let portalHeightmapData = null;
+    let portalDebounceTimer = null;
+    const portalGridRes = 120;
+
+    function setupStudio3D() {
+      const container = document.getElementById("portal-3d-canvas-wrapper");
+      if (!container) return;
+
+      // Load Three.js if needed
+      if (typeof THREE === "undefined") {
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+        script.onload = () => {
+          loadThreeControlsAndExporter(initPortal3D);
+        };
+        document.head.appendChild(script);
+      } else {
+        loadThreeControlsAndExporter(initPortal3D);
+      }
+
+      // Attach UI event listeners
+      const fileInput = document.getElementById("portal-3d-file-input");
+      if (fileInput) {
+        fileInput.addEventListener("change", handlePortalImageUpload);
+      }
+
+      const inputs = [
+        "portal-param-contrast", "portal-param-smooth", "portal-param-invert",
+        "portal-param-remove-bg", "portal-param-width", "portal-param-base-thick",
+        "portal-param-relief-height", "portal-param-text-line1", "portal-param-text-line2"
+      ];
+      inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("input", triggerPortalUpdate);
+          el.addEventListener("change", triggerPortalUpdate);
+        }
+      });
+    }
+
+    function loadThreeControlsAndExporter(cb) {
+      if (typeof THREE.OrbitControls === "undefined") {
+        const cScript = document.createElement("script");
+        cScript.src = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js";
+        cScript.onload = () => {
+          if (typeof THREE.STLExporter === "undefined") {
+            const eScript = document.createElement("script");
+            eScript.src = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/STLExporter.js";
+            eScript.onload = cb;
+            document.head.appendChild(eScript);
+          } else {
+            cb();
+          }
+        };
+        document.head.appendChild(cScript);
+      } else {
+        cb();
+      }
+    }
+
+    function initPortal3D() {
+      const container = document.getElementById("portal-3d-canvas-wrapper");
+      if (!container || portalRenderer) return;
+
+      portalScene = new THREE.Scene();
+      portalScene.background = new THREE.Color(0x0a0c14);
+
+      portalCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      portalCamera.position.set(0, -55, 60);
+
+      portalRenderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      portalRenderer.setSize(container.clientWidth, container.clientHeight);
+      portalRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      portalRenderer.shadowMap.enabled = true;
+      container.appendChild(portalRenderer.domElement);
+
+      portalControls = new THREE.OrbitControls(portalCamera, portalRenderer.domElement);
+      portalControls.enableDamping = true;
+      portalControls.dampingFactor = 0.05;
+      portalControls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.7);
+      portalScene.add(ambLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+      dirLight.position.set(45, -50, 75);
+      dirLight.castShadow = true;
+      portalScene.add(dirLight);
+
+      const backLight = new THREE.DirectionalLight(0x7090ff, 0.35);
+      backLight.position.set(-45, 50, 40);
+      portalScene.add(backLight);
+
+      // Virtual Bed (256 x 256 mm)
+      const bedGeo = new THREE.PlaneGeometry(256, 256);
+      const bedMat = new THREE.MeshStandardMaterial({ color: 0x181c28, roughness: 0.85 });
+      const bed = new THREE.Mesh(bedGeo, bedMat);
+      bed.position.z = -0.1;
+      portalScene.add(bed);
+
+      const grid = new THREE.GridHelper(256, 25.6, 0x3b82f6, 0x242a3a);
+      grid.rotation.x = Math.PI / 2;
+      portalScene.add(grid);
+
+      portalMeshGroup = new THREE.Group();
+      portalScene.add(portalMeshGroup);
+
+      loadPortalSampleImage();
+
+      function portalAnimate() {
+        requestAnimationFrame(portalAnimate);
+        if (portalControls) portalControls.update();
+        if (portalRenderer && portalScene && portalCamera) portalRenderer.render(portalScene, portalCamera);
+      }
+      portalAnimate();
+    }
+
+    function handlePortalImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = () => {
+          portalLoadedImage = img;
+          triggerPortalUpdate();
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function loadPortalSampleImage() {
+      const canvas = document.getElementById("portal-proc-canvas");
+      if (!canvas) return;
+      canvas.width = 256; canvas.height = 256;
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, 256, 256);
+
+      ctx.fillStyle = "#1e2230";
+      ctx.beginPath(); ctx.arc(128, 120, 56, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(78, 85, 22, 45, -0.4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(178, 85, 22, 45, 0.4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.ellipse(128, 138, 28, 22, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#000000";
+      ctx.beginPath(); ctx.arc(128, 126, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(104, 108, 7, 0, Math.PI * 2); ctx.arc(152, 108, 7, 0, Math.PI * 2); ctx.fill();
+
+      const img = new Image();
+      img.onload = () => {
+        portalLoadedImage = img;
+        triggerPortalUpdate();
+      };
+      img.src = canvas.toDataURL();
+    }
+
+    function triggerPortalUpdate() {
+      if (portalDebounceTimer) clearTimeout(portalDebounceTimer);
+      portalDebounceTimer = setTimeout(updatePortal3DModel, 50);
+    }
+
+    function updatePortal3DModel() {
+      if (!portalMeshGroup) return;
+
+      const width = parseFloat(document.getElementById("portal-param-width")?.value || 40);
+      const baseThick = parseFloat(document.getElementById("portal-param-base-thick")?.value || 2.0);
+      const reliefHeight = parseFloat(document.getElementById("portal-param-relief-height")?.value || 1.4);
+      const contrast = parseFloat(document.getElementById("portal-param-contrast")?.value || 1.2);
+      const smooth = parseFloat(document.getElementById("portal-param-smooth")?.value || 1.0);
+      const invert = document.getElementById("portal-param-invert")?.checked || false;
+      const removeBg = document.getElementById("portal-param-remove-bg")?.checked !== false;
+
+      // Update Labels
+      document.getElementById("portal-val-width").innerText = width + " mm";
+      document.getElementById("portal-val-base-thick").innerText = baseThick.toFixed(1) + " mm";
+      document.getElementById("portal-val-relief-height").innerText = reliefHeight.toFixed(1) + " mm";
+      document.getElementById("portal-val-contrast").innerText = contrast + "x";
+      document.getElementById("portal-val-smooth").innerText = smooth.toFixed(1);
+
+      // Process Heightmap
+      if (portalLoadedImage) {
+        const canvas = document.getElementById("portal-proc-canvas");
+        if (canvas) {
+          canvas.width = portalGridRes; canvas.height = portalGridRes;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(portalLoadedImage, 0, 0, portalGridRes, portalGridRes);
+
+          const l1 = document.getElementById("portal-param-text-line1")?.value.trim();
+          const l2 = document.getElementById("portal-param-text-line2")?.value.trim();
+          if (l1 || l2) {
+            ctx.fillStyle = "#111111"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            if (l1) { ctx.font = "bold 12px sans-serif"; ctx.fillText(l1, portalGridRes / 2, portalGridRes - 22); }
+            if (l2) { ctx.font = "bold 9px monospace"; ctx.fillText(l2, portalGridRes / 2, portalGridRes - 10); }
+          }
+
+          const imgData = ctx.getImageData(0, 0, portalGridRes, portalGridRes);
+          const d = imgData.data;
+          portalHeightmapData = new Float32Array(portalGridRes * portalGridRes);
+
+          for (let y = 0; y < portalGridRes; y++) {
+            for (let x = 0; x < portalGridRes; x++) {
+              const idx = (y * portalGridRes + x) * 4;
+              let lum = (0.299 * d[idx] + 0.587 * d[idx+1] + 0.114 * d[idx+2]) / 255;
+              if (removeBg && (d[idx+3] < 50 || (d[idx] > 240 && d[idx+1] > 240 && d[idx+2] > 240))) {
+                lum = invert ? 1.0 : 0.0;
+              }
+              lum = (lum - 0.5) * contrast + 0.5;
+              lum = Math.max(0, Math.min(1, lum));
+              if (invert) lum = 1.0 - lum;
+              portalHeightmapData[y * portalGridRes + x] = lum;
+            }
+          }
+        }
+      }
+
+      // Clear existing meshes
+      while (portalMeshGroup.children.length > 0) {
+        const obj = portalMeshGroup.children[0];
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) obj.material.dispose();
+        portalMeshGroup.remove(obj);
+      }
+
+      // 1. Build Base Mesh
+      const shapePath = new THREE.Shape();
+      const half = width / 2;
+
+      if (portalCurrentShape === "circle") {
+        shapePath.absarc(0, 0, half, 0, Math.PI * 2, false);
+      } else if (portalCurrentShape === "rounded") {
+        const r = half * 0.35;
+        shapePath.moveTo(-half + r, -half); shapePath.lineTo(half - r, -half);
+        shapePath.quadraticCurveTo(half, -half, half, -half + r); shapePath.lineTo(half, half - r);
+        shapePath.quadraticCurveTo(half, half, half - r, half); shapePath.lineTo(-half + r, half);
+        shapePath.quadraticCurveTo(-half, half, -half, half - r); shapePath.lineTo(-half, -half + r);
+        shapePath.quadraticCurveTo(-half, -half, -half + r, -half);
+      } else if (portalCurrentShape === "bone") {
+        const w = half * 0.85, h = half * 0.45, r = half * 0.28;
+        shapePath.moveTo(-w, -h);
+        shapePath.bezierCurveTo(-w - r, -h - r, -w - r, -h + r, -w, -h * 0.1);
+        shapePath.bezierCurveTo(-w - r, h - r, -w - r, h + r, -w, h);
+        shapePath.lineTo(w, h);
+        shapePath.bezierCurveTo(w + r, h + r, w + r, h - r, w, h * 0.1);
+        shapePath.bezierCurveTo(w + r, -h + r, w + r, -h - r, w, -h);
+        shapePath.closePath();
+      } else if (portalCurrentShape === "heart") {
+        const s = half * 0.85;
+        shapePath.moveTo(0, s * 0.4);
+        shapePath.bezierCurveTo(s * 0.5, s * 0.9, s, s * 0.5, s * 0.5, 0);
+        shapePath.bezierCurveTo(s * 0.25, -s * 0.5, 0, -s * 0.8, 0, -s);
+        shapePath.bezierCurveTo(0, -s * 0.8, -s * 0.25, -s * 0.5, -s * 0.5, 0);
+        shapePath.bezierCurveTo(-s, s * 0.5, -s * 0.5, s * 0.9, 0, s * 0.4);
+      } else {
+        shapePath.moveTo(-half, -half); shapePath.lineTo(half, -half); shapePath.lineTo(half, half); shapePath.lineTo(-half, half); shapePath.closePath();
+      }
+
+      if (portalCurrentLoopPos === "top" || portalCurrentLoopPos === "both") {
+        const holePath = new THREE.Path();
+        holePath.absarc(0, half + 3.2, 1.8, 0, Math.PI * 2, true);
+        shapePath.holes.push(holePath);
+      }
+
+      const baseGeo = new THREE.ExtrudeGeometry(shapePath, { depth: baseThick, bevelEnabled: true, bevelThickness: 0.35, bevelSize: 0.25, bevelSegments: 2 });
+      baseGeo.computeVertexNormals();
+      const baseMesh = new THREE.Mesh(baseGeo, getPortalMaterial());
+      portalMeshGroup.add(baseMesh);
+
+      // 2. Build Relief
+      if (portalHeightmapData) {
+        const segs = portalGridRes - 1;
+        const reliefGeo = new THREE.PlaneGeometry(width * 0.88, width * 0.88, segs, segs);
+        const pos = reliefGeo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i), y = pos.getY(i);
+          const u = (x / (width * 0.88) + 0.5), v = (y / (width * 0.88) + 0.5);
+          const gx = Math.min(portalGridRes - 1, Math.max(0, Math.floor(u * portalGridRes)));
+          const gy = Math.min(portalGridRes - 1, Math.max(0, Math.floor((1 - v) * portalGridRes)));
+          const hVal = portalHeightmapData[gy * portalGridRes + gx] || 0;
+          let inside = true;
+          if (portalCurrentShape === "circle" && Math.sqrt(x*x + y*y) > (half * 0.85)) inside = false;
+          pos.setZ(i, inside ? (hVal * reliefHeight) : 0);
+        }
+        reliefGeo.computeVertexNormals();
+        const reliefMesh = new THREE.Mesh(reliefGeo, getPortalMaterial());
+        reliefMesh.position.z = baseThick + 0.05;
+        portalMeshGroup.add(reliefMesh);
+      }
+
+      // Stats
+      const totalH = (baseThick + reliefHeight).toFixed(1);
+      document.getElementById("portal-stat-dimensions").innerText = width.toFixed(1) + " x " + width.toFixed(1) + " x " + totalH + " mm";
+      const weightG = ((width * width * baseThick * 0.75) / 1000 * 1.24).toFixed(1);
+      document.getElementById("portal-stat-weight").innerText = "~" + weightG + "g";
+      document.getElementById("portal-stat-time").innerText = "~" + Math.max(8, Math.round(weightG * 3.2)) + "분";
+    }
+
+    function getPortalMaterial() {
+      if (portalCurrentMaterial === "gold") {
+        return new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.28, metalness: 0.85 });
+      } else if (portalCurrentMaterial === "litho") {
+        return new THREE.MeshPhysicalMaterial({ color: 0xf5f6f8, roughness: 0.35, transmission: 0.75, thickness: 2.5 });
+      }
+      return new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.45, metalness: 0.05 });
+    }
+
+    function setPortalShape(s) {
+      portalCurrentShape = s;
+      ["circle", "rounded", "bone", "heart", "rect"].forEach(k => {
+        const btn = document.getElementById("btn-shape-" + k);
+        if (btn) {
+          if (k === s) {
+            btn.className = "py-1.5 rounded-lg bg-blue-600 text-white shadow-sm text-center";
+          } else {
+            btn.className = "py-1.5 rounded-lg text-gray-600 dark-mode:text-gray-300 hover:text-white text-center";
+          }
+        }
+      });
+      triggerPortalUpdate();
+    }
+
+    function setPortalLoopPos(pos) {
+      portalCurrentLoopPos = pos;
+      ["top", "both", "none"].forEach(k => {
+        const btn = document.getElementById("btn-loop-" + k);
+        if (btn) {
+          if (k === pos) {
+            btn.className = "py-1.5 rounded-lg bg-blue-600 text-white shadow-sm text-center";
+          } else {
+            btn.className = "py-1.5 rounded-lg text-gray-600 dark-mode:text-gray-300 text-center";
+          }
+        }
+      });
+      triggerPortalUpdate();
+    }
+
+    function setPortalMaterial(m) {
+      portalCurrentMaterial = m;
+      ["pla", "gold", "litho"].forEach(k => {
+        const btn = document.getElementById("btn-mat-" + k);
+        if (btn) {
+          if (k === m) {
+            btn.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-600 text-white shadow";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-gray-300 hover:text-white";
+          }
+        }
+      });
+      triggerPortalUpdate();
+    }
+
+    function apply3DPreset(type) {
+      if (type === "pet-circle") {
+        setPortalShape("circle"); setPortalLoopPos("top");
+        document.getElementById("portal-param-width").value = 40;
+        document.getElementById("portal-param-base-thick").value = 2.0;
+        document.getElementById("portal-param-relief-height").value = 1.4;
+      } else if (type === "dog-bone") {
+        setPortalShape("bone"); setPortalLoopPos("top");
+        document.getElementById("portal-param-width").value = 52;
+        document.getElementById("portal-param-base-thick").value = 2.2;
+        document.getElementById("portal-param-relief-height").value = 1.2;
+      } else if (type === "heart-tag") {
+        setPortalShape("heart"); setPortalLoopPos("top");
+        document.getElementById("portal-param-width").value = 42;
+        document.getElementById("portal-param-base-thick").value = 2.0;
+        document.getElementById("portal-param-relief-height").value = 1.3;
+      } else if (type === "lithophane") {
+        setPortalShape("rect"); setPortalLoopPos("none"); setPortalMaterial("litho");
+        document.getElementById("portal-param-width").value = 60;
+        document.getElementById("portal-param-base-thick").value = 0.8;
+        document.getElementById("portal-param-relief-height").value = 2.2;
+        document.getElementById("portal-param-invert").checked = true;
+      } else if (type === "rect-tag") {
+        setPortalShape("rounded"); setPortalLoopPos("top");
+        document.getElementById("portal-param-width").value = 45;
+        document.getElementById("portal-param-base-thick").value = 2.0;
+        document.getElementById("portal-param-relief-height").value = 1.4;
+      } else if (type === "high-relief") {
+        setPortalShape("circle"); setPortalLoopPos("top");
+        document.getElementById("portal-param-width").value = 45;
+        document.getElementById("portal-param-base-thick").value = 2.4;
+        document.getElementById("portal-param-relief-height").value = 2.8;
+      }
+      triggerPortalUpdate();
+    }
+
+    function exportPortalSTL() {
+      if (!portalMeshGroup || typeof THREE.STLExporter === "undefined") return;
+      const exporter = new THREE.STLExporter();
+      const result = exporter.parse(portalMeshGroup, { binary: true });
+      const blob = new Blob([result], { type: "application/octet-stream" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "BambuP1S_" + portalCurrentShape + "_tag_" + Date.now() + ".stl";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function openBambuGuideModal() {
+      alert("🐼 [Bambu Lab P1S 최적 슬라이싱 가이드]\n\n1. 레이어 높이: 0.12mm (High Quality) 또는 0.16mm\n2. 첫 레이어 높이: 0.20mm\n3. 벽 생성(Wall Loops): 3~4 Loops\n4. 채우기(Infill): 100% Solid\n5. 다림질(Ironing): 모든 상단 표면(All top surfaces) 활성화 ★필수 (매끄러운 마감)");
+    }
+
+</script>
 </body>
 </html>
