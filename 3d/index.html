@@ -766,27 +766,27 @@
           <span class="badge">원클릭</span>
         </div>
         <div class="preset-grid">
-          <div class="preset-btn active" onclick="applyPreset('pet-circle')">
+          <div class="preset-btn active" id="pbtn-pet-circle" onclick="applyPreset('pet-circle')">
             <span class="icon">🐶</span>
             <span class="label">원형 목걸이</span>
           </div>
-          <div class="preset-btn" onclick="applyPreset('dog-bone')">
+          <div class="preset-btn" id="pbtn-dog-bone" onclick="applyPreset('dog-bone')">
             <span class="icon">🦴</span>
             <span class="label">뼈다귀 네임택</span>
           </div>
-          <div class="preset-btn" onclick="applyPreset('heart-tag')">
+          <div class="preset-btn" id="pbtn-heart-tag" onclick="applyPreset('heart-tag')">
             <span class="icon">💖</span>
             <span class="label">하트 펜던트</span>
           </div>
-          <div class="preset-btn" onclick="applyPreset('lithophane')">
+          <div class="preset-btn" id="pbtn-lithophane" onclick="applyPreset('lithophane')">
             <span class="icon">🖼️</span>
             <span class="label">미니 리소페인</span>
           </div>
-          <div class="preset-btn" onclick="applyPreset('rect-tag')">
+          <div class="preset-btn" id="pbtn-rect-tag" onclick="applyPreset('rect-tag')">
             <span class="icon">🏷️</span>
             <span class="label">사각 키링</span>
           </div>
-          <div class="preset-btn" onclick="applyPreset('high-relief')">
+          <div class="preset-btn" id="pbtn-high-relief" onclick="applyPreset('high-relief')">
             <span class="icon">👑</span>
             <span class="label">고양각 입체</span>
           </div>
@@ -804,14 +804,14 @@
           <input type="file" id="image-upload" accept="image/*" onchange="handleImageUpload(event)">
           <div class="upload-icon">📷</div>
           <div class="upload-text">사진을 드래그하거나 클릭하여 업로드</div>
-          <div class="upload-sub">JPG, PNG, WebP 지원 (초경량 변환)</div>
+          <div class="upload-sub">JPG, PNG, WebP (실물 비율 자동 보존)</div>
         </div>
 
         <div class="preview-thumb-area" id="thumb-area">
           <img id="image-thumb" class="preview-thumb" src="" alt="Thumbnail">
           <div class="preview-info">
             <div class="filename" id="thumb-filename">dog_photo.jpg</div>
-            <div class="dimensions" id="thumb-dimensions">512 x 512 px</div>
+            <div class="dimensions" id="thumb-dimensions">512 x 512 px (1.00:1)</div>
           </div>
           <button class="btn-header" style="padding: 3px 8px; font-size: 11px;" onclick="loadSampleImage()">샘플 로드</button>
         </div>
@@ -827,11 +827,11 @@
 
           <div class="control-group">
             <div class="control-label">
-              <span>표면 스무딩 (노이즈 제거)</span>
+              <span>표면 스무딩 (노이즈 완화)</span>
               <span class="control-val" id="val-smooth">1.0</span>
             </div>
             <input type="range" class="slider-range" id="param-smooth" min="0" max="4" step="0.5" value="1.0" oninput="debouncedUpdate()">
-            <div class="control-desc">값을 올리면 거친 노이즈가 완화되어 FDM 출력 시 표면이 매끄러워집니다.</div>
+            <div class="control-desc">FDM 노즐 결을 매끄럽게 정리합니다.</div>
           </div>
 
           <div class="toggle-row">
@@ -863,7 +863,7 @@
           <div class="control-label">바닥 플레이트 모양</div>
           <div class="segmented-control">
             <button class="seg-btn active" id="shape-circle" onclick="setShape('circle')">원형</button>
-            <button class="seg-btn" id="shape-rounded" onclick="setShape('rounded')">둥근 사각</button>
+            <button class="seg-btn" id="shape-rounded" onclick="setShape('rounded')">둥근사각</button>
             <button class="seg-btn" id="shape-bone" onclick="setShape('bone')">뼈다귀</button>
             <button class="seg-btn" id="shape-heart" onclick="setShape('heart')">하트</button>
             <button class="seg-btn" id="shape-rect" onclick="setShape('rect')">직사각</button>
@@ -872,7 +872,7 @@
 
         <div class="control-group">
           <div class="control-label">
-            <span>가로 직경 / 크기 (Width)</span>
+            <span>가로 크기 (Width)</span>
             <span class="control-val" id="val-width">40 mm</span>
           </div>
           <input type="range" class="slider-range" id="param-width" min="20" max="90" step="1" value="40" oninput="debouncedUpdate()">
@@ -880,11 +880,11 @@
 
         <div class="control-group">
           <div class="control-label">
-            <span>바닥판 베이스 두께 (Base Height)</span>
+            <span>바닥판 베이스 두께 (Base Thick)</span>
             <span class="control-val" id="val-base-thick">2.0 mm</span>
           </div>
           <input type="range" class="slider-range" id="param-base-thick" min="1.0" max="5.0" step="0.2" value="2.0" oninput="debouncedUpdate()">
-          <div class="control-desc">권장: 1.8 ~ 2.4mm (목걸이 체결 시 튼튼함)</div>
+          <div class="control-desc">권장: 1.8 ~ 2.4mm (목걸이 체결 시 파손 방지)</div>
         </div>
 
         <div class="control-group">
@@ -907,14 +907,14 @@
       <!-- 4. Keyring Loop -->
       <div class="panel-section">
         <div class="section-title">
-          <span>4. 목걸이 줄 / 키링 고리</span>
+          <span>4. 일체형 목걸이 줄 / 키링 고리</span>
           <span class="badge">LOOP</span>
         </div>
 
         <div class="control-group">
           <div class="control-label">고리 위치</div>
           <div class="segmented-control">
-            <button class="seg-btn active" id="loop-top" onclick="setLoopPos('top')">상단 중앙</button>
+            <button class="seg-btn active" id="loop-top" onclick="setLoopPos('top')">상단 일체형</button>
             <button class="seg-btn" id="loop-both" onclick="setLoopPos('both')">양쪽 고리</button>
             <button class="seg-btn" id="loop-none" onclick="setLoopPos('none')">고리 없음</button>
           </div>
@@ -926,28 +926,28 @@
             <span class="control-val" id="val-hole-dia">3.5 mm</span>
           </div>
           <input type="range" class="slider-range" id="param-hole-dia" min="2.0" max="6.0" step="0.5" value="3.5" oninput="debouncedUpdate()">
-          <div class="hint-chip">💡 목걸이 오링(O-Ring) 체결 시 3.5mm 추천</div>
+          <div class="hint-chip">💡 본체와 100% 일체형으로 결합되어 출력 시 부러지지 않습니다.</div>
         </div>
       </div>
 
-      <!-- 5. Back Engraving -->
+      <!-- 5. Text Engraving -->
       <div class="panel-section">
         <div class="section-title">
-          <span>5. 각인 텍스트 (이름 & 전화번호)</span>
-          <span class="badge">TEXT</span>
+          <span>5. 텍스트 각인 (앞면 양각 / 뒷면 음각)</span>
+          <span class="badge">ENGRAVE</span>
         </div>
 
         <div class="control-group">
-          <div class="toggle-row">
-            <span class="toggle-label">텍스트 각인 활성화</span>
-            <label class="switch">
-              <input type="checkbox" id="param-text-toggle" checked onchange="debouncedUpdate()">
-              <span class="slider-switch"></span>
-            </label>
+          <div class="control-label">각인 위치 및 방식</div>
+          <div class="segmented-control">
+            <button class="seg-btn active" id="engrave-back" onclick="setEngraveMode('back')">뒷면 음각 (추천)</button>
+            <button class="seg-btn" id="engrave-front" onclick="setEngraveMode('front')">앞면 양각</button>
+            <button class="seg-btn" id="engrave-both" onclick="setEngraveMode('both')">앞+뒤 모두</button>
+            <button class="seg-btn" id="engrave-none" onclick="setEngraveMode('none')">없음</button>
           </div>
         </div>
 
-        <div id="text-controls">
+        <div id="text-inputs-box">
           <div class="control-group">
             <div class="control-label">반려견 이름 (Line 1)</div>
             <input type="text" class="text-input" id="param-text-line1" value="초코 (CHOCO)" placeholder="예: 초코" oninput="debouncedUpdate()">
@@ -970,16 +970,15 @@
             <div class="dot"></div>
             <span>Bambu Lab P1S 가상 베드 (256x256mm)</span>
           </div>
-          <div class="vp-pill">
-            <span>실시간 3D 렌더러</span>
-          </div>
         </div>
 
         <div class="vp-controls">
-          <button class="vp-btn active" id="mat-pla" onclick="setMaterial('pla')">Matt PLA</button>
-          <button class="vp-btn" id="mat-gold" onclick="setMaterial('gold')">Silk Gold</button>
-          <button class="vp-btn" id="mat-litho" onclick="setMaterial('litho')">Lithophane</button>
-          <button class="vp-btn" id="mat-wire" onclick="toggleWireframe()">와이어프레임</button>
+          <button class="vp-btn active" id="mat-photo" onclick="setMaterial('photo')">🎨 사진 컬러 매핑</button>
+          <button class="vp-btn" id="mat-pla" onclick="setMaterial('pla')">🐼 Bambu PLA</button>
+          <button class="vp-btn" id="mat-gold" onclick="setMaterial('gold')">✨ Silk Gold</button>
+          <button class="vp-btn" id="mat-litho" onclick="setMaterial('litho')">🖼️ Lithophane</button>
+          <button class="vp-btn" id="mat-wire" onclick="toggleWireframe()">와이어</button>
+          <button class="vp-btn" onclick="flipToBack()">🔄 앞/뒤 회전</button>
           <button class="vp-btn" onclick="resetCamera()">카메라 리셋</button>
         </div>
       </div>
@@ -1001,7 +1000,7 @@
             <span class="stat-value" id="stat-weight">~4.5 g</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Bambu 호환성</span>
+            <span class="stat-label">Bambu P1S 솔리드</span>
             <span class="stat-value" style="color: var(--accent-green);">100% Solid Mesh</span>
           </div>
         </div>
@@ -1063,6 +1062,8 @@
   </div>
 
   <canvas id="proc-canvas" style="display: none;"></canvas>
+  <canvas id="color-canvas" style="display: none;"></canvas>
+  <canvas id="back-canvas" style="display: none;"></canvas>
 
   <script>
     // Global State
@@ -1070,25 +1071,26 @@
     let mainMeshGroup = null;
     let currentShape = 'circle';
     let currentLoopPos = 'top';
-    let currentMaterialMode = 'pla';
+    let currentMaterialMode = 'photo'; // Default: photo color texture!
+    let currentEngraveMode = 'back';   // Default: back deboss!
     let isWireframe = false;
     let loadedImage = null;
+    let imageAspectRatio = 1.0;
     let heightmapData = null;
+    let photoTexture = null;
+    let backTexture = null;
     let debounceTimer = null;
-    const gridRes = 140; // High speed & smooth memory optimization
+    const gridRes = 140;
 
     function init3D() {
       const container = document.getElementById('canvas-wrapper');
       
-      // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0e111a);
 
-      // Camera
       camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
       camera.position.set(0, -55, 60);
 
-      // Renderer (Ultra lightweight & performant)
       renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1096,7 +1098,6 @@
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // OrbitControls
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
@@ -1104,25 +1105,20 @@
       controls.minDistance = 15;
       controls.maxDistance = 250;
 
-      // Lights
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
       scene.add(ambientLight);
 
       const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
       dirLight.position.set(45, -50, 75);
       dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 1024;
-      dirLight.shadow.mapSize.height = 1024;
       scene.add(dirLight);
 
-      const backLight = new THREE.DirectionalLight(0x7090ff, 0.35);
+      const backLight = new THREE.DirectionalLight(0x7090ff, 0.45);
       backLight.position.set(-45, 50, 40);
       scene.add(backLight);
 
-      // Virtual Bambu P1S Bed
       createBambuBed();
 
-      // Main Group
       mainMeshGroup = new THREE.Group();
       scene.add(mainMeshGroup);
 
@@ -1166,7 +1162,7 @@
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         updateModel();
-      }, 50);
+      }, 40);
     }
 
     function handleImageUpload(e) {
@@ -1178,11 +1174,18 @@
         const img = new Image();
         img.onload = function() {
           loadedImage = img;
+          imageAspectRatio = img.width / img.height;
           document.getElementById('image-thumb').src = evt.target.result;
           document.getElementById('thumb-filename').innerText = file.name;
-          document.getElementById('thumb-dimensions').innerText = img.width + ' x ' + img.height + ' px';
+          document.getElementById('thumb-dimensions').innerText = img.width + ' x ' + img.height + ' px (' + imageAspectRatio.toFixed(2) + ':1)';
           document.getElementById('thumb-area').style.display = 'flex';
-          updateModel();
+          
+          // Auto adjust aspect ratio for rect shape
+          if (currentShape === 'rect' || currentShape === 'lithophane') {
+            updateModel();
+          } else {
+            updateModel();
+          }
         };
         img.src = evt.target.result;
       };
@@ -1198,47 +1201,35 @@
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, 256, 256);
 
-      // Cute Puppy Silhouette
-      ctx.fillStyle = '#1e2230';
-      ctx.beginPath();
-      ctx.arc(128, 120, 56, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.ellipse(78, 85, 22, 45, -0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(178, 85, 22, 45, 0.4, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.ellipse(128, 138, 28, 22, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#000000';
-      ctx.beginPath();
-      ctx.arc(128, 126, 9, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(104, 108, 7, 0, Math.PI * 2);
-      ctx.arc(152, 108, 7, 0, Math.PI * 2);
-      ctx.fill();
+      // Cute Puppy with color
+      ctx.fillStyle = '#c68a4c'; // Brown puppy body
+      ctx.beginPath(); ctx.arc(128, 120, 56, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#8b5a2b'; // Dark brown ears
+      ctx.beginPath(); ctx.ellipse(78, 85, 22, 45, -0.4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(178, 85, 22, 45, 0.4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff4e6'; // Muzzle
+      ctx.beginPath(); ctx.ellipse(128, 138, 28, 22, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#1a1a1a'; // Nose
+      ctx.beginPath(); ctx.arc(128, 126, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#222222'; // Eyes
+      ctx.beginPath(); ctx.arc(104, 108, 7, 0, Math.PI * 2); ctx.arc(152, 108, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff'; // Eye reflections
+      ctx.beginPath(); ctx.arc(102, 106, 2.5, 0, Math.PI * 2); ctx.arc(150, 106, 2.5, 0, Math.PI * 2); ctx.fill();
 
       const img = new Image();
       img.onload = function() {
         loadedImage = img;
+        imageAspectRatio = 1.0;
         document.getElementById('image-thumb').src = canvas.toDataURL();
-        document.getElementById('thumb-filename').innerText = 'sample_dog_tag.png';
-        document.getElementById('thumb-dimensions').innerText = '256 x 256 px';
+        document.getElementById('thumb-filename').innerText = 'cute_puppy_sample.png';
+        document.getElementById('thumb-dimensions').innerText = '256 x 256 px (1.00:1)';
         document.getElementById('thumb-area').style.display = 'flex';
         updateModel();
       };
       img.src = canvas.toDataURL();
     }
 
-    function processImageToHeightmap() {
+    function processImageAndTextures() {
       if (!loadedImage) return;
 
       const canvas = document.getElementById('proc-canvas');
@@ -1246,30 +1237,117 @@
       canvas.height = gridRes;
       const ctx = canvas.getContext('2d');
 
-      ctx.drawImage(loadedImage, 0, 0, gridRes, gridRes);
+      const colCanvas = document.getElementById('color-canvas');
+      colCanvas.width = 512;
+      colCanvas.height = 512;
+      const colCtx = colCanvas.getContext('2d');
 
-      // Draw embossed text if enabled
-      const textToggle = document.getElementById('param-text-toggle').checked;
-      if (textToggle) {
+      // Aspect Ratio Fit (Contain / Cover without stretching)
+      ctx.clearRect(0, 0, gridRes, gridRes);
+      colCtx.clearRect(0, 0, 512, 512);
+
+      let drawW = gridRes, drawH = gridRes;
+      let offX = 0, offY = 0;
+
+      let colDrawW = 512, colDrawH = 512;
+      let colOffX = 0, colOffY = 0;
+
+      if (currentShape === 'rect') {
+        // Full width fit
+        drawW = gridRes; drawH = gridRes;
+        colDrawW = 512; colDrawH = 512;
+      } else {
+        // Crop-cover center to prevent squishing
+        if (imageAspectRatio > 1.0) {
+          drawW = gridRes * imageAspectRatio;
+          offX = -(drawW - gridRes) / 2;
+          colDrawW = 512 * imageAspectRatio;
+          colOffX = -(colDrawW - 512) / 2;
+        } else {
+          drawH = gridRes / imageAspectRatio;
+          offY = -(drawH - gridRes) / 2;
+          colDrawH = 512 / imageAspectRatio;
+          colOffY = -(colDrawH - 512) / 2;
+        }
+      }
+
+      ctx.drawImage(loadedImage, offX, offY, drawW, drawH);
+      colCtx.drawImage(loadedImage, colOffX, colOffY, colDrawW, colDrawH);
+
+      // Draw Front Embossed Text if enabled
+      if (currentEngraveMode === 'front' || currentEngraveMode === 'both') {
         const line1 = document.getElementById('param-text-line1').value.trim();
         const line2 = document.getElementById('param-text-line2').value.trim();
 
         if (line1 || line2) {
-          ctx.fillStyle = '#111111';
+          ctx.fillStyle = '#000000';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           
           if (line1) {
-            ctx.font = 'bold 13px Pretendard, sans-serif';
-            ctx.fillText(line1, gridRes / 2, gridRes - 26);
+            ctx.font = '900 13px Pretendard, sans-serif';
+            ctx.fillText(line1, gridRes / 2, gridRes - 24);
           }
           if (line2) {
-            ctx.font = '600 10px JetBrains Mono, monospace';
-            ctx.fillText(line2, gridRes / 2, gridRes - 13);
+            ctx.font = '900 10px JetBrains Mono, monospace';
+            ctx.fillText(line2, gridRes / 2, gridRes - 11);
+          }
+
+          colCtx.fillStyle = '#111111';
+          colCtx.textAlign = 'center';
+          colCtx.textBaseline = 'middle';
+          if (line1) {
+            colCtx.font = '900 36px Pretendard, sans-serif';
+            colCtx.fillText(line1, 256, 512 - 70);
+          }
+          if (line2) {
+            colCtx.font = '900 28px JetBrains Mono, monospace';
+            colCtx.fillText(line2, 256, 512 - 32);
           }
         }
       }
 
+      // Create Photo Texture
+      photoTexture = new THREE.CanvasTexture(colCanvas);
+      photoTexture.generateMipmaps = true;
+
+      // Process Back Texture if Back Deboss is enabled
+      const backCanvas = document.getElementById('back-canvas');
+      backCanvas.width = 512;
+      backCanvas.height = 512;
+      const backCtx = backCanvas.getContext('2d');
+      backCtx.fillStyle = '#222838';
+      backCtx.fillRect(0, 0, 512, 512);
+
+      if (currentEngraveMode === 'back' || currentEngraveMode === 'both') {
+        const line1 = document.getElementById('param-text-line1').value.trim();
+        const line2 = document.getElementById('param-text-line2').value.trim();
+        if (line1 || line2) {
+          backCtx.fillStyle = '#0e111a';
+          backCtx.strokeStyle = '#05070a';
+          backCtx.lineWidth = 4;
+          backCtx.textAlign = 'center';
+          backCtx.textBaseline = 'middle';
+          
+          // Pet Icon on back
+          backCtx.font = '48px sans-serif';
+          backCtx.fillText('🐾', 256, 170);
+
+          if (line1) {
+            backCtx.font = 'bold 36px Pretendard, sans-serif';
+            backCtx.strokeText(line1, 256, 260);
+            backCtx.fillText(line1, 256, 260);
+          }
+          if (line2) {
+            backCtx.font = 'bold 30px JetBrains Mono, monospace';
+            backCtx.strokeText(line2, 256, 330);
+            backCtx.fillText(line2, 256, 330);
+          }
+        }
+      }
+      backTexture = new THREE.CanvasTexture(backCanvas);
+
+      // Calculate Heightmap
       const imgData = ctx.getImageData(0, 0, gridRes, gridRes);
       const data = imgData.data;
 
@@ -1323,65 +1401,83 @@
       document.getElementById('val-smooth').innerText = smooth.toFixed(1);
       document.getElementById('val-contrast').innerText = document.getElementById('param-contrast').value + 'x';
 
-      processImageToHeightmap();
+      processImageAndTextures();
 
       while (mainMeshGroup.children.length > 0) {
         const obj = mainMeshGroup.children[0];
         if (obj.geometry) obj.geometry.dispose();
-        if (obj.material) obj.material.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+          else obj.material.dispose();
+        }
         mainMeshGroup.remove(obj);
       }
 
-      // Base Plate
-      const baseMesh = buildBaseMesh(width, baseThick, currentShape, currentLoopPos, holeDia);
+      // Height based on aspect ratio for rect
+      let height = width;
+      if (currentShape === 'rect' && imageAspectRatio > 0) {
+        height = Math.max(20, Math.min(90, width / imageAspectRatio));
+      }
+
+      // 1. Base Plate Mesh
+      const baseMesh = buildBaseMesh(width, height, baseThick, currentShape);
       mainMeshGroup.add(baseMesh);
 
-      // Relief Mesh
+      // 2. 100% Solid Integral Keyring Loop Mesh (Attached seamlessly!)
+      if (currentLoopPos === 'top' || currentLoopPos === 'both') {
+        const topLoop = buildIntegratedLoopMesh(width, height, baseThick, holeDia, 'top');
+        mainMeshGroup.add(topLoop);
+      }
+      if (currentLoopPos === 'both') {
+        const botLoop = buildIntegratedLoopMesh(width, height, baseThick, holeDia, 'bottom');
+        mainMeshGroup.add(botLoop);
+      }
+
+      // 3. Relief Mesh with Photo Texture
       if (heightmapData) {
-        const reliefMesh = buildReliefMesh(width, baseThick, reliefHeight, currentShape);
+        const reliefMesh = buildReliefMesh(width, height, baseThick, reliefHeight, currentShape);
         if (reliefMesh) mainMeshGroup.add(reliefMesh);
       }
 
-      // Rim Mesh
+      // 4. Rim Mesh
       if (rimHeight > 0 && currentShape === 'circle') {
         const rimMesh = buildRimMesh(width, baseThick, rimHeight);
         if (rimMesh) mainMeshGroup.add(rimMesh);
       }
 
-      // Update Info
+      // Update Specs
       const totalH = (baseThick + reliefHeight).toFixed(1);
-      document.getElementById('stat-dimensions').innerText = width.toFixed(1) + ' x ' + width.toFixed(1) + ' x ' + totalH + ' mm';
+      document.getElementById('stat-dimensions').innerText = width.toFixed(1) + ' x ' + height.toFixed(1) + ' x ' + totalH + ' mm';
       
-      const volCm3 = (width * width * baseThick * 0.75) / 1000;
+      const volCm3 = (width * height * baseThick * 0.75) / 1000;
       const weightG = (volCm3 * 1.24).toFixed(1);
       document.getElementById('stat-weight').innerText = '~' + weightG + ' g';
       const estMin = Math.max(8, Math.round(weightG * 3.2));
       document.getElementById('stat-time').innerText = '~' + estMin + '분 (P1S)';
-
-      applyMaterialToGroup();
     }
 
-    function buildBaseMesh(width, thickness, shape, loopPos, holeDia) {
+    function buildBaseMesh(width, height, thickness, shape) {
       const shapePath = new THREE.Shape();
-      const half = width / 2;
+      const halfW = width / 2;
+      const halfH = height / 2;
 
       if (shape === 'circle') {
-        shapePath.absarc(0, 0, half, 0, Math.PI * 2, false);
+        shapePath.absarc(0, 0, halfW, 0, Math.PI * 2, false);
       } else if (shape === 'rounded') {
-        const r = half * 0.35;
-        shapePath.moveTo(-half + r, -half);
-        shapePath.lineTo(half - r, -half);
-        shapePath.quadraticCurveTo(half, -half, half, -half + r);
-        shapePath.lineTo(half, half - r);
-        shapePath.quadraticCurveTo(half, half, half - r, half);
-        shapePath.lineTo(-half + r, half);
-        shapePath.quadraticCurveTo(-half, half, -half, half - r);
-        shapePath.lineTo(-half, -half + r);
-        shapePath.quadraticCurveTo(-half, -half, -half + r, -half);
+        const r = Math.min(halfW, halfH) * 0.35;
+        shapePath.moveTo(-halfW + r, -halfH);
+        shapePath.lineTo(halfW - r, -halfH);
+        shapePath.quadraticCurveTo(halfW, -halfH, halfW, -halfH + r);
+        shapePath.lineTo(halfW, halfH - r);
+        shapePath.quadraticCurveTo(halfW, halfH, halfW - r, halfH);
+        shapePath.lineTo(-halfW + r, halfH);
+        shapePath.quadraticCurveTo(-halfW, halfH, -halfW, halfH - r);
+        shapePath.lineTo(-halfW, -halfH + r);
+        shapePath.quadraticCurveTo(-halfW, -halfH, -halfW + r, -halfH);
       } else if (shape === 'bone') {
-        const w = half * 0.85;
-        const h = half * 0.45;
-        const r = half * 0.28;
+        const w = halfW * 0.85;
+        const h = halfH * 0.45;
+        const r = halfH * 0.28;
         shapePath.moveTo(-w, -h);
         shapePath.bezierCurveTo(-w - r, -h - r, -w - r, -h + r, -w, -h * 0.1);
         shapePath.bezierCurveTo(-w - r, h - r, -w - r, h + r, -w, h);
@@ -1390,26 +1486,18 @@
         shapePath.bezierCurveTo(w + r, -h + r, w + r, -h - r, w, -h);
         shapePath.closePath();
       } else if (shape === 'heart') {
-        const s = half * 0.85;
+        const s = halfW * 0.85;
         shapePath.moveTo(0, s * 0.4);
         shapePath.bezierCurveTo(s * 0.5, s * 0.9, s, s * 0.5, s * 0.5, 0);
         shapePath.bezierCurveTo(s * 0.25, -s * 0.5, 0, -s * 0.8, 0, -s);
         shapePath.bezierCurveTo(0, -s * 0.8, -s * 0.25, -s * 0.5, -s * 0.5, 0);
         shapePath.bezierCurveTo(-s, s * 0.5, -s * 0.5, s * 0.9, 0, s * 0.4);
       } else { // rect
-        shapePath.moveTo(-half, -half);
-        shapePath.lineTo(half, -half);
-        shapePath.lineTo(half, half);
-        shapePath.lineTo(-half, half);
+        shapePath.moveTo(-halfW, -halfH);
+        shapePath.lineTo(halfW, -halfH);
+        shapePath.lineTo(halfW, halfH);
+        shapePath.lineTo(-halfW, halfH);
         shapePath.closePath();
-      }
-
-      if (loopPos === 'top' || loopPos === 'both') {
-        const loopRadius = holeDia * 0.95;
-        const loopY = half + loopRadius * 0.75;
-        const holePath = new THREE.Path();
-        holePath.absarc(0, loopY, holeDia / 2, 0, Math.PI * 2, true);
-        shapePath.holes.push(holePath);
       }
 
       const geo = new THREE.ExtrudeGeometry(shapePath, {
@@ -1420,96 +1508,221 @@
         bevelSegments: 2
       });
       geo.computeVertexNormals();
-      return new THREE.Mesh(geo, getActiveMaterial());
+
+      // Materials for front and back
+      const baseMat = getBaseMaterial();
+      return new THREE.Mesh(geo, baseMat);
     }
 
-    function buildReliefMesh(width, baseThick, reliefH, shape) {
+    // 100% Solid Seamless Loop Extrusion
+    function buildIntegratedLoopMesh(width, height, thickness, holeDia, pos) {
+      const halfH = height / 2;
+      const holeR = holeDia / 2;
+      const wallThick = 2.4; // Strong solid wall
+      const outerR = holeR + wallThick;
+
+      const loopShape = new THREE.Shape();
+      // Outer Circle
+      loopShape.absarc(0, 0, outerR, 0, Math.PI * 2, false);
+
+      // Inner Hole
+      const holePath = new THREE.Path();
+      holePath.absarc(0, 0, holeR, 0, Math.PI * 2, true);
+      loopShape.holes.push(holePath);
+
+      const loopGeo = new THREE.ExtrudeGeometry(loopShape, {
+        depth: thickness,
+        bevelEnabled: true,
+        bevelThickness: 0.3,
+        bevelSize: 0.2,
+        bevelSegments: 2
+      });
+      loopGeo.computeVertexNormals();
+
+      const loopMesh = new THREE.Mesh(loopGeo, getBaseMaterial());
+
+      // Overlap with base body by 1.6mm for unbreakable solid weld!
+      const posY = (pos === 'top') ? (halfH + outerR - 1.6) : (-halfH - outerR + 1.6);
+      loopMesh.position.set(0, posY, 0);
+
+      return loopMesh;
+    }
+
+    function buildReliefMesh(width, height, baseThick, reliefH, shape) {
       const segs = gridRes - 1;
-      const geo = new THREE.PlaneGeometry(width * 0.88, width * 0.88, segs, segs);
+      const size = Math.min(width, height) * 0.9;
+      const rw = (shape === 'rect') ? width * 0.92 : size;
+      const rh = (shape === 'rect') ? height * 0.92 : size;
+      const geo = new THREE.PlaneGeometry(rw, rh, segs, segs);
       const pos = geo.attributes.position;
-      const half = width / 2;
+      const halfW = width / 2;
+      const halfH = height / 2;
 
       for (let i = 0; i < pos.count; i++) {
         const x = pos.getX(i);
         const y = pos.getY(i);
-        const u = (x / (width * 0.88) + 0.5);
-        const v = (y / (width * 0.88) + 0.5);
+
+        const u = (x / rw) + 0.5;
+        const v = (y / rh) + 0.5;
 
         const gx = Math.min(gridRes - 1, Math.max(0, Math.floor(u * gridRes)));
         const gy = Math.min(gridRes - 1, Math.max(0, Math.floor((1 - v) * gridRes)));
+
         const hVal = heightmapData[gy * gridRes + gx] || 0;
 
-        let inside = true;
-        const dist = Math.sqrt(x * x + y * y);
-        if (shape === 'circle' && dist > (half * 0.85)) inside = false;
+        let isInside = true;
+        if (shape === 'circle') {
+          if (Math.sqrt(x * x + y * y) > (halfW * 0.86)) isInside = false;
+        } else if (shape === 'heart') {
+          const sx = x / (halfW * 0.75), sy = y / (halfH * 0.75);
+          if ((sx*sx + sy*sy - 1)**3 - sx*sx*sy*sy*sy > 0) isInside = false;
+        }
 
-        const z = inside ? (hVal * reliefH) : 0;
-        pos.setZ(i, z);
+        pos.setZ(i, isInside ? (hVal * reliefH) : 0);
       }
 
       geo.computeVertexNormals();
-      const mesh = new THREE.Mesh(geo, getActiveMaterial());
+      const mesh = new THREE.Mesh(geo, getReliefMaterial());
       mesh.position.z = baseThick + 0.05;
-      mesh.castShadow = true;
       return mesh;
     }
 
     function buildRimMesh(width, baseThick, rimH) {
-      const r = (width / 2) * 0.95;
-      const rimGeo = new THREE.RingGeometry(r - 1.2, r, 48);
-      const rimMesh = new THREE.Mesh(rimGeo, getActiveMaterial());
-      rimMesh.position.z = baseThick + 0.06;
-      return rimMesh;
+      const rOuter = (width / 2) * 0.98;
+      const rInner = (width / 2) * 0.87;
+      const rimShape = new THREE.Shape();
+      rimShape.absarc(0, 0, rOuter, 0, Math.PI * 2, false);
+      const rimHole = new THREE.Path();
+      rimHole.absarc(0, 0, rInner, 0, Math.PI * 2, true);
+      rimShape.holes.push(rimHole);
+
+      const geo = new THREE.ExtrudeGeometry(rimShape, {
+        depth: rimH,
+        bevelEnabled: true,
+        bevelThickness: 0.2,
+        bevelSize: 0.15
+      });
+      geo.computeVertexNormals();
+      const mesh = new THREE.Mesh(geo, getBaseMaterial());
+      mesh.position.z = baseThick;
+      return mesh;
     }
 
-    function getActiveMaterial() {
-      if (currentMaterialMode === 'gold') {
+    function getBaseMaterial() {
+      if (currentMaterialMode === 'photo') {
+        return new THREE.MeshStandardMaterial({
+          color: 0x181c28,
+          roughness: 0.45,
+          metalness: 0.1
+        });
+      } else if (currentMaterialMode === 'gold') {
         return new THREE.MeshStandardMaterial({
           color: 0xd4af37,
-          roughness: 0.28,
-          metalness: 0.85,
-          wireframe: isWireframe
+          roughness: 0.25,
+          metalness: 0.9
         });
       } else if (currentMaterialMode === 'litho') {
         return new THREE.MeshPhysicalMaterial({
           color: 0xf5f6f8,
           roughness: 0.35,
           transmission: 0.75,
-          thickness: 2.5,
-          wireframe: isWireframe
-        });
-      } else { // Matt PLA
-        return new THREE.MeshStandardMaterial({
-          color: 0x3b82f6,
-          roughness: 0.45,
-          metalness: 0.05,
-          wireframe: isWireframe
+          thickness: 2.5
         });
       }
-    }
-
-    function applyMaterialToGroup() {
-      const mat = getActiveMaterial();
-      mainMeshGroup.traverse((child) => {
-        if (child.isMesh) {
-          child.material = mat;
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
+      // Bambu PLA
+      return new THREE.MeshStandardMaterial({
+        color: 0x2563eb,
+        roughness: 0.5,
+        metalness: 0.05
       });
     }
 
-    function setMaterial(mode) {
-      currentMaterialMode = mode;
-      document.querySelectorAll('.vp-controls .vp-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('mat-' + mode).classList.add('active');
-      applyMaterialToGroup();
+    function getReliefMaterial() {
+      if (currentMaterialMode === 'photo' && photoTexture) {
+        return new THREE.MeshStandardMaterial({
+          map: photoTexture,
+          roughness: 0.45,
+          metalness: 0.05,
+          transparent: true,
+          alphaTest: 0.05,
+          wireframe: isWireframe
+        });
+      } else if (currentMaterialMode === 'gold') {
+        return new THREE.MeshStandardMaterial({
+          color: 0xd4af37,
+          roughness: 0.25,
+          metalness: 0.9,
+          wireframe: isWireframe
+        });
+      } else if (currentMaterialMode === 'litho') {
+        return new THREE.MeshPhysicalMaterial({
+          color: 0xf5f6f8,
+          roughness: 0.3,
+          transmission: 0.8,
+          thickness: 3.0,
+          wireframe: isWireframe
+        });
+      }
+      // Bambu PLA
+      return new THREE.MeshStandardMaterial({
+        color: 0x60a5fa,
+        roughness: 0.45,
+        metalness: 0.05,
+        wireframe: isWireframe
+      });
+    }
+
+    function setShape(s) {
+      currentShape = s;
+      ['circle', 'rounded', 'bone', 'heart', 'rect'].forEach(k => {
+        const btn = document.getElementById('shape-' + k);
+        if (btn) btn.classList.toggle('active', k === s);
+      });
+      debouncedUpdate();
+    }
+
+    function setLoopPos(pos) {
+      currentLoopPos = pos;
+      ['top', 'both', 'none'].forEach(k => {
+        const btn = document.getElementById('loop-' + k);
+        if (btn) btn.classList.toggle('active', k === pos);
+      });
+      debouncedUpdate();
+    }
+
+    function setEngraveMode(m) {
+      currentEngraveMode = m;
+      ['back', 'front', 'both', 'none'].forEach(k => {
+        const btn = document.getElementById('engrave-' + k);
+        if (btn) btn.classList.toggle('active', k === m);
+      });
+      debouncedUpdate();
+    }
+
+    function setMaterial(m) {
+      currentMaterialMode = m;
+      ['photo', 'pla', 'gold', 'litho'].forEach(k => {
+        const btn = document.getElementById('mat-' + k);
+        if (btn) btn.classList.toggle('active', k === m);
+      });
+      debouncedUpdate();
     }
 
     function toggleWireframe() {
       isWireframe = !isWireframe;
       document.getElementById('mat-wire').classList.toggle('active', isWireframe);
-      applyMaterialToGroup();
+      debouncedUpdate();
+    }
+
+    function flipToBack() {
+      if (controls) {
+        if (camera.position.z > 0) {
+          camera.position.set(0, 55, -60);
+        } else {
+          camera.position.set(0, -55, 60);
+        }
+        camera.lookAt(0, 0, 0);
+      }
     }
 
     function resetCamera() {
@@ -1518,65 +1731,40 @@
       controls.update();
     }
 
-    function setShape(s) {
-      currentShape = s;
-      document.querySelectorAll('.segmented-control .seg-btn').forEach(b => b.classList.remove('active'));
-      const btn = document.getElementById('shape-' + s);
-      if (btn) btn.classList.add('active');
-      debouncedUpdate();
-    }
-
-    function setLoopPos(pos) {
-      currentLoopPos = pos;
-      document.getElementById('loop-top').classList.toggle('active', pos === 'top');
-      document.getElementById('loop-both').classList.toggle('active', pos === 'both');
-      document.getElementById('loop-none').classList.toggle('active', pos === 'none');
-      document.getElementById('loop-params-group').style.display = (pos === 'none') ? 'none' : 'block';
-      debouncedUpdate();
-    }
-
     function applyPreset(type) {
-      document.querySelectorAll('.preset-grid .preset-btn').forEach(b => b.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      ['pet-circle', 'dog-bone', 'heart-tag', 'lithophane', 'rect-tag', 'high-relief'].forEach(k => {
+        const el = document.getElementById('pbtn-' + k);
+        if (el) el.classList.toggle('active', k === type);
+      });
 
       if (type === 'pet-circle') {
-        setShape('circle');
-        setLoopPos('top');
+        setShape('circle'); setLoopPos('top'); setMaterial('photo'); setEngraveMode('back');
         document.getElementById('param-width').value = 40;
         document.getElementById('param-base-thick').value = 2.0;
         document.getElementById('param-relief-height').value = 1.4;
-        document.getElementById('param-rim-height').value = 0.8;
       } else if (type === 'dog-bone') {
-        setShape('bone');
-        setLoopPos('top');
-        document.getElementById('param-width').value = 52;
+        setShape('bone'); setLoopPos('top'); setMaterial('photo'); setEngraveMode('back');
+        document.getElementById('param-width').value = 50;
         document.getElementById('param-base-thick').value = 2.2;
-        document.getElementById('param-relief-height').value = 1.2;
-        document.getElementById('param-rim-height').value = 0;
+        document.getElementById('param-relief-height').value = 1.3;
       } else if (type === 'heart-tag') {
-        setShape('heart');
-        setLoopPos('top');
+        setShape('heart'); setLoopPos('top'); setMaterial('photo'); setEngraveMode('back');
         document.getElementById('param-width').value = 42;
         document.getElementById('param-base-thick').value = 2.0;
-        document.getElementById('param-relief-height').value = 1.3;
-        document.getElementById('param-rim-height').value = 0;
+        document.getElementById('param-relief-height').value = 1.4;
       } else if (type === 'lithophane') {
-        setShape('rect');
-        setLoopPos('none');
-        setMaterial('litho');
+        setShape('rect'); setLoopPos('none'); setMaterial('litho'); setEngraveMode('none');
         document.getElementById('param-width').value = 60;
         document.getElementById('param-base-thick').value = 0.8;
         document.getElementById('param-relief-height').value = 2.2;
         document.getElementById('param-invert').checked = true;
       } else if (type === 'rect-tag') {
-        setShape('rounded');
-        setLoopPos('top');
+        setShape('rounded'); setLoopPos('top'); setMaterial('photo'); setEngraveMode('back');
         document.getElementById('param-width').value = 45;
         document.getElementById('param-base-thick').value = 2.0;
         document.getElementById('param-relief-height').value = 1.4;
       } else if (type === 'high-relief') {
-        setShape('circle');
-        setLoopPos('top');
+        setShape('circle'); setLoopPos('top'); setMaterial('photo'); setEngraveMode('back');
         document.getElementById('param-width').value = 45;
         document.getElementById('param-base-thick').value = 2.4;
         document.getElementById('param-relief-height').value = 2.8;
@@ -1584,8 +1772,16 @@
       debouncedUpdate();
     }
 
-    function resetDefaults() {
-      applyPreset('pet-circle');
+    function exportSTL() {
+      if (!mainMeshGroup) return;
+      const exporter = new THREE.STLExporter();
+      const result = exporter.parse(mainMeshGroup, { binary: true });
+      const blob = new Blob([result], { type: 'application/octet-stream' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'BambuP1S_' + currentShape + '_tag_' + Date.now() + '.stl';
+      link.click();
+      URL.revokeObjectURL(link.href);
     }
 
     function openBambuGuide() {
@@ -1593,25 +1789,16 @@
     }
 
     function closeBambuGuide(e) {
-      if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close')) return;
-      document.getElementById('guide-modal').style.display = 'none';
+      if (!e || e.target.id === 'guide-modal' || e.target.classList.contains('modal-close') || e.target.classList.contains('btn-bambu')) {
+        document.getElementById('guide-modal').style.display = 'none';
+      }
     }
 
-    function exportSTL() {
-      if (!mainMeshGroup) return;
-
-      const exporter = new THREE.STLExporter();
-      const result = exporter.parse(mainMeshGroup, { binary: true });
-
-      const blob = new Blob([result], { type: 'application/octet-stream' });
-      const link = document.createElement('a');
-      const filename = 'BambuP1S_' + currentShape + '_tag_' + Date.now() + '.stl';
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(link.href);
+    function resetDefaults() {
+      applyPreset('pet-circle');
     }
 
+    // Start
     window.addEventListener('DOMContentLoaded', init3D);
   </script>
 </body>
