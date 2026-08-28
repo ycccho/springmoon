@@ -553,6 +553,17 @@
         menus.push({ id: "ad-dashboard", name: "파워링크 분석", protected: true });
         changed = true;
       }
+      if (!menus.some(m => m.id === "studio-3d")) {
+        menus.unshift({ id: "studio-3d", name: "🐼 3D STL 메이커 (P1S)", categoryId: "cat-3d", protected: false });
+        changed = true;
+      } else {
+        const m3d = menus.find(m => m.id === "studio-3d");
+        if (m3d) {
+          m3d.categoryId = "cat-3d";
+          m3d.name = "🐼 3D STL 메이커 (P1S)";
+          m3d.protected = false;
+        }
+      }
       if (!menus.some(m => m.id === "place-rank-check")) {
         menus.unshift({ id: "place-rank-check", name: "플레이스순위체크", categoryId: "cat-rank", protected: true });
         changed = true;
@@ -629,6 +640,10 @@
       }
       if (!cats.some(c => c.id === "cat-homepage")) {
         cats.push({ id: "cat-homepage", name: "홈페이지 관련", collapsed: false });
+        changed = true;
+      }
+      if (!cats.some(c => c.id === "cat-3d")) {
+        cats.push({ id: "cat-3d", name: "🐼 3D 프린팅 / 메이커", collapsed: false });
         changed = true;
       }
       if (!cats.some(c => c.id === "cat-interior")) {
@@ -1120,7 +1135,7 @@
       const queryMenu = queryMenuId ? currentMenus.find(m => m.id === queryMenuId) : null;
       const savedMenuId = localStorage.getItem("activeMenuId");
       const savedMenu = savedMenuId ? currentMenus.find(m => m.id === savedMenuId) : null;
-      const defaultMenu = queryMenu || savedMenu || currentMenus.find(m => isAuthenticated || !m.protected) || currentMenus[0];
+      const defaultMenu = (isPath3D ? currentMenus.find(m => m.id === "studio-3d") : (queryMenu || savedMenu || currentMenus.find(m => isAuthenticated || !m.protected) || currentMenus[0]));
       if (defaultMenu) {
         selectMenu(defaultMenu);
       }
