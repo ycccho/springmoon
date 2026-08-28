@@ -4,18 +4,13 @@
   <script>
   (function() {
     var p = (window.location.pathname || '').toLowerCase();
-    if (p === '/3d' || p === '/3d/' || p === '/3d.html' || p.startsWith('/3d/')) {
-      if (window.location.pathname !== '/3d.html') {
-        window.location.replace('/3d.html');
-      }
-    } else if (p === '/bb' || p === '/bb/' || p === '/bb.html' || p.startsWith('/bb/')) {
-      if (window.location.pathname !== '/bb.html') {
-        window.location.replace('/bb.html');
-      }
+    if (p === '/3d' || p === '/3d/' || p.startsWith('/3d/')) {
+      window.location.replace('/3d.html');
+    } else if (p === '/bb' || p === '/bb/' || p.startsWith('/bb/')) {
+      window.location.replace('/bb.html');
     }
   })();
 </script>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
