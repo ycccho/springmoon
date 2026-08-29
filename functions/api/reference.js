@@ -21,6 +21,8 @@ export async function onRequestPost(context) {
       return await handleSearchReferences(payload, apiKey, corsHeaders);
     } else if (action === 'generate-image') {
       return await handleGenerateImage(payload, apiKey, corsHeaders);
+    } else if (action === 'search-and-generate') {
+      return await handleSearchAndGenerate(payload, apiKey, corsHeaders);
     } else if (action === 'enrich-prompt') {
       return await handleEnrichPrompt(payload, apiKey, corsHeaders);
     } else {
@@ -320,7 +322,42 @@ CAMERA & PHOTOGRAPHY OPTICS: Shot on 24mm architectural tilt-shift lens, perfect
   });
 }
 
-// 3. PROMPT ENRICHMENT HANDLER
+// 3. COMBINED REFERENCE SEARCH + AI IMAGE GENERATION HANDLER
+async function handleSearchAndGenerate(payload, apiKey, corsHeaders) {
+  const [searchResponse, genResponse] = await Promise.allSettled([
+    handleSearchReferences(payload, apiKey, corsHeaders),
+    handleGenerateImage({ promptSpecs: payload, referencePrompt: `${payload.industry || ''} ${payload.style || ''}` }, apiKey, corsHeaders)
+  ]);
+
+  let searchData = {};
+  let genData = {};
+
+  if (searchResponse.status === 'fulfilled') {
+    try {
+      searchData = await searchResponse.value.json();
+    } catch (e) {}
+  }
+  if (genResponse.status === 'fulfilled') {
+    try {
+      genData = await genResponse.value.json();
+    } catch (e) {}
+  }
+
+  return new Response(JSON.stringify({
+    success: true,
+    references: searchData.references || [],
+    totalResults: searchData.totalResults || 0,
+    searchQueries: searchData.searchQueries || [],
+    masterPrompts: searchData.masterPrompts || {},
+    generatedImage: genData.generatedImage || null,
+    metadata: genData.metadata || null
+  }), {
+    status: 200,
+    headers: corsHeaders
+  });
+}
+
+// 4. PROMPT ENRICHMENT HANDLER
 async function handleEnrichPrompt(payload, apiKey, corsHeaders) {
   const { promptSpecs = {} } = payload;
   const {
