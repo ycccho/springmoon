@@ -1,10 +1,8 @@
 {
+  "name": "springmoon",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "build": "echo 'Deploying static files'"
-  },
-  "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "puppeteer-core": "^25.2.1"
+    "build": "echo 'Build complete'"
   }
 }
