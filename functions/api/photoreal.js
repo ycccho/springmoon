@@ -59,7 +59,7 @@ User Selected Options:
 
 Return ONLY a valid JSON object matching the standard INDE RENDER schema.`;
 
-    const geminiVisionUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const geminiVisionUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
     
     const analysisPayload = {
       contents: [

@@ -1326,17 +1326,24 @@
         } catch (err) {
           item.status = 'error';
           console.error(err);
+          showToast(`오류 (${i + 1}번 뷰): ${err.message || '변환 실패'}`);
         }
 
         renderGallery();
-        updateProgress(Math.round(((i + 1) / total) * 100), `[${i + 1}/${total}] 실사 변환 완료`, 3);
+        updateProgress(Math.round(((i + 1) / total) * 100), `[${i + 1}/${total}] 실사 변환 처리됨`, 3);
       }
 
       btnSubmit.disabled = false;
-      showToast(`${successCount}/${total}장의 실사 렌더링이 완료되었습니다!`);
-      selectedIndex = 0;
-      renderGallery();
-      displaySelectedItem();
+      progressBox.style.display = 'none';
+
+      if (successCount > 0) {
+        showToast(`${successCount}/${total}장의 실사 렌더링이 완료되었습니다!`);
+        selectedIndex = 0;
+        renderGallery();
+        displaySelectedItem();
+      } else {
+        emptyState.style.display = 'flex';
+      }
     });
 
     function updateProgress(percent, text, stepNum) {
