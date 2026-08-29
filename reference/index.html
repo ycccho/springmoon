@@ -1698,6 +1698,56 @@
       ];
     }
 
+    function getFilteredPoolClient(industry, customRequirements = '') {
+      const fullPool = getIndustrySpecificPool(industry);
+      const req = (customRequirements || '').toLowerCase();
+
+      if (req.includes('데스크') || req.includes('카운터') || req.includes('인포메이션') || req.includes('리셉션') || req.includes('접수')) {
+        const deskVariations = [
+          "곡면 천연 대리석 & 간접조명 메인 리셉션 데스크",
+          "웜 오크 우드 루버 일체형 안내 카운터",
+          "마이크로시멘트 & 트래버틴 미니멀 인포메이션 데스크",
+          "플로팅 캔틸레버형 슬림 대리석 카운터",
+          "템바보드 곡면 라운드형 접수대",
+          "백라이트 아크릴 & 메탈릭 헤어라인 안내 카운터",
+          "다크 월넛 & 브론즈 스테인리스 프레임 데스크",
+          "테라조 & 라운드 글라스 가림막 안내 카운터",
+          "코브 간접조명 일체형 포세린 매스 데스크",
+          "내추럴 우드 슬랫 & 라이트그레이 인포메이션",
+          "호텔식 미니멀 롱 스팬 리셉션 카운터",
+          "입체 음영 루버 & 브라스 사인 인포메이션 데스크"
+        ];
+        const deskImages = fullPool.filter(p => p.zone.includes('데스크') || p.zone.includes('카운터') || p.zone.includes('인포메이션') || p.zone.includes('접수') || p.zone.includes('로비'));
+        const poolToUse = deskImages.length >= 6 ? deskImages : fullPool;
+        return poolToUse.map((item, idx) => ({
+          ...item,
+          zone: deskVariations[idx % deskVariations.length]
+        }));
+      }
+
+      if (req.includes('대기실') || req.includes('라운지') || req.includes('로비') || req.includes('휴게')) {
+        const loungeImages = fullPool.filter(p => p.zone.includes('대기') || p.zone.includes('라운지') || p.zone.includes('로비') || p.zone.includes('소파') || p.zone.includes('홀'));
+        return loungeImages.length >= 6 ? loungeImages : fullPool;
+      }
+
+      if (req.includes('상담실') || req.includes('원장실') || req.includes('회의') || req.includes('집무실')) {
+        const consultImages = fullPool.filter(p => p.zone.includes('상담') || p.zone.includes('원장') || p.zone.includes('집무') || p.zone.includes('룸') || p.zone.includes('부스'));
+        return consultImages.length >= 6 ? consultImages : fullPool;
+      }
+
+      if (req.includes('복도') || req.includes('통로') || req.includes('월')) {
+        const hallImages = fullPool.filter(p => p.zone.includes('복도') || p.zone.includes('아트월') || p.zone.includes('통로') || p.zone.includes('사이니지'));
+        return hallImages.length >= 6 ? hallImages : fullPool;
+      }
+
+      if (req.includes('진료실') || req.includes('시술실') || req.includes('수술실') || req.includes('체어') || req.includes('강의실')) {
+        const treatImages = fullPool.filter(p => p.zone.includes('진료') || p.zone.includes('시술') || p.zone.includes('체어') || p.zone.includes('수술') || p.zone.includes('강의'));
+        return treatImages.length >= 6 ? treatImages : fullPool;
+      }
+
+      return fullPool;
+    }
+
     function getSourceSearchUrl(source, industry, style, zoneTitle = '') {
       let spaceKeyword = `${industry} ${style}`;
       if (zoneTitle) {
@@ -1901,7 +1951,7 @@
     // Direct Browser Reference Intelligence Engine
     async function clientDirectReferenceSearch(specs) {
       const sourceList = ['Pinterest', 'ArchDaily', 'Google Images', 'Freepik', 'Behance', 'Dezeen'];
-      const industryPool = getIndustrySpecificPool(specs.industry);
+      const industryPool = getFilteredPoolClient(specs.industry, specs.customRequirements);
 
       const references = industryPool.map((seed, idx) => ({
         id: `ref_${state.currentPage}_${idx + 1}`,

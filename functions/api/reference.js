@@ -67,17 +67,26 @@ The user is designing a real commercial/medical/educational space and needs stri
 - WALL MATERIAL: ${wallMaterial}
 - FLOORING SPEC: ${flooring}
 - CEILING SPEC: ${ceiling}
-- CLIENT CUSTOM DIRECTIVE: ${customRequirements || 'None'}
+- CLIENT CUSTOM DIRECTIVE / REQUESTED ELEMENT: "${customRequirements || 'None (General Full Space Overview)'}"
 - BATCH / PAGE: ${page}
 
+CRITICAL RULES FOR ELEMENT-SPECIFIC FOCUS vs. GENERAL SPACE SEARCH:
+1. IF the client directive requests a SPECIFIC ELEMENT OR ZONE (e.g., "데스크만 보여줘", "데스크", "리셉션 카운터", "인포메이션", "상담실", "대기실", "복도", "진료실", "원장실", "파우더룸", "바 카운터" etc.):
+   - ALL ${limit} curated references MUST be dedicated design concept variations of THAT EXACT REQUESTED ELEMENT/ZONE for "${industry}".
+   - Example 1: If industry is "피부과" and directive is "데스크만 보여달라고" -> ALL 24 items must showcase various high-end dermatology reception desks (e.g., "곡면 천연 대리석 & 간접조명 메인 리셉션 데스크", "웜 오크 루버 일체형 안내 카운터", "마이크로시멘트 & 트래버틴 미니멀 인포메이션 데스크", "플로팅 캔틸레버형 슬림 대리석 카운터", "템바보드 곡면 라운드형 접수대", "백라이트 아크릴 & 메탈릭 헤어라인 안내 카운터" etc.).
+   - Example 2: If industry is "영어학원" and directive is "강의실만" -> ALL 24 items must showcase various high-end modern academy classrooms & lecture halls.
+   - The search queries in "searchQueries" must also be precisely targeted at that element: (e.g., "${industry} reception desk interior design archdaily", "${industry} information counter modern minimal pinterest", "${industry} reception counter architecture").
+2. IF the client directive is empty or general:
+   - Provide a balanced mix across all key operational zones of "${industry}" (Main Lobby & Reception Desk, 1:1 Consultation Room, Waiting Lounge, Hallway/Corridor with Cove Lighting, Treatment Room, Powder/Sterilization Zone).
+
 Generate a comprehensive JSON response containing:
-1. "searchQueries": Array of 5 targeted English search queries optimized for Google Images, Pinterest, Freepik, ArchDaily, Behance matching "${industry} ${style}".
+1. "searchQueries": Array of 5 targeted English search queries optimized for Google Images, Pinterest, Freepik, ArchDaily, Behance matching the requested space & element.
 2. "curatedReferences": An array of ${limit} distinct reference items. Each item must represent a real-world inspired architectural interior scene strictly matching "${industry}" with ${style} and ${wallMaterial}.
 Each reference item must have:
    - "id": unique string
    - "title": precise descriptive architectural title in Korean (e.g., "${industry} 오크 루버와 포세린 바닥의 메인 접수 라운지")
    - "source": one of ["Pinterest", "ArchDaily", "Google Images", "Freepik", "Behance", "Dezeen"]
-   - "spaceZone": specific zone inside "${industry}" (e.g., for 치과: "메인 인포메이션 & 대기 라운지", "원장 진료실", "상담실 & 3D CT실 복도", "소독 & 메이크업 파우더존", "개별 프라이빗 체어룸")
+   - "spaceZone": specific zone or element inside "${industry}" (e.g., "메인 인포메이션 데스크", "1:1 정밀 상담실", "대기 라운지")
    - "materials": array of 3 key architectural materials visible (e.g., ["${wallMaterial}", "${flooring}", "${lighting.split(' ')[0]}"])
    - "colorScheme": array of 2 colors (e.g., ["${brandColor}", "#F5F5F0"])
    - "styleTag": short style badge (e.g., "${style}", "Clean Minimal", "Clinical Warm")
@@ -122,7 +131,7 @@ Return ONLY valid JSON matching this schema.`;
   }
 
   // Get Industry-Specific Real Architectural Photography Pool (Zero nature, zero people, pure interior architecture)
-  const industryImagePool = getIndustrySpecificArchitecturalPool(industry);
+  const industryImagePool = getFilteredArchitecturalPool(industry, customRequirements);
 
   let references = parsed?.curatedReferences || [];
 
@@ -139,7 +148,7 @@ Return ONLY valid JSON matching this schema.`;
       colorScheme: [brandColor, '#F5F5F0'],
       styleTag: style,
       similarityScore: Math.floor(95 + Math.random() * 4),
-      searchSourceUrl: getIndustrySourceSearchUrl(sourceList[idx % sourceList.length], industry, style),
+      searchSourceUrl: getIndustrySourceSearchUrl(sourceList[idx % sourceList.length], industry, style, seed.zone),
       promptContext: `Ultra-photorealistic ${style} ${industry} interior, ${wallMaterial}, ${flooring}, ${lighting}, 8k architectural photography.`
     }));
   } else {
@@ -159,7 +168,7 @@ Return ONLY valid JSON matching this schema.`;
         colorScheme: item.colorScheme || [brandColor, '#EFEFEF'],
         styleTag: item.styleTag || style,
         similarityScore: item.similarityScore || Math.floor(95 + Math.random() * 4),
-        searchSourceUrl: getIndustrySourceSearchUrl(assignedSource, industry, style),
+        searchSourceUrl: getIndustrySourceSearchUrl(assignedSource, industry, style, item.spaceZone || seedImg.zone),
         promptContext: item.promptContext || `Ultra-photorealistic ${style} ${industry} interior, ${wallMaterial}, ${flooring}, ${lighting}, 8k architectural photography.`
       };
     });
@@ -199,6 +208,56 @@ Return ONLY valid JSON matching this schema.`;
     status: 200,
     headers: corsHeaders
   });
+}
+
+function getFilteredArchitecturalPool(industry, customRequirements = '') {
+  const fullPool = getIndustrySpecificArchitecturalPool(industry);
+  const req = (customRequirements || '').toLowerCase();
+
+  if (req.includes('데스크') || req.includes('카운터') || req.includes('인포메이션') || req.includes('리셉션') || req.includes('접수')) {
+    const deskVariations = [
+      "곡면 천연 대리석 & 간접조명 메인 리셉션 데스크",
+      "웜 오크 우드 루버 일체형 안내 카운터",
+      "마이크로시멘트 & 트래버틴 미니멀 인포메이션 데스크",
+      "플로팅 캔틸레버형 슬림 대리석 카운터",
+      "템바보드 곡면 라운드형 접수대",
+      "백라이트 아크릴 & 메탈릭 헤어라인 안내 카운터",
+      "다크 월넛 & 브론즈 스테인리스 프레임 데스크",
+      "테라조 & 라운드 글라스 가림막 안내 카운터",
+      "코브 간접조명 일체형 포세린 매스 데스크",
+      "내추럴 우드 슬랫 & 라이트그레이 인포메이션",
+      "호텔식 미니멀 롱 스팬 리셉션 카운터",
+      "입체 음영 루버 & 브라스 사인 인포메이션 데스크"
+    ];
+    const deskImages = fullPool.filter(p => p.zone.includes('데스크') || p.zone.includes('카운터') || p.zone.includes('인포메이션') || p.zone.includes('접수') || p.zone.includes('로비'));
+    const poolToUse = deskImages.length >= 6 ? deskImages : fullPool;
+    return poolToUse.map((item, idx) => ({
+      ...item,
+      zone: deskVariations[idx % deskVariations.length]
+    }));
+  }
+
+  if (req.includes('대기실') || req.includes('라운지') || req.includes('로비') || req.includes('휴게')) {
+    const loungeImages = fullPool.filter(p => p.zone.includes('대기') || p.zone.includes('라운지') || p.zone.includes('로비') || p.zone.includes('소파') || p.zone.includes('홀'));
+    return loungeImages.length >= 6 ? loungeImages : fullPool;
+  }
+
+  if (req.includes('상담실') || req.includes('원장실') || req.includes('회의') || req.includes('집무실')) {
+    const consultImages = fullPool.filter(p => p.zone.includes('상담') || p.zone.includes('원장') || p.zone.includes('집무') || p.zone.includes('룸') || p.zone.includes('부스'));
+    return consultImages.length >= 6 ? consultImages : fullPool;
+  }
+
+  if (req.includes('복도') || req.includes('통로') || req.includes('월')) {
+    const hallImages = fullPool.filter(p => p.zone.includes('복도') || p.zone.includes('아트월') || p.zone.includes('통로') || p.zone.includes('사이니지'));
+    return hallImages.length >= 6 ? hallImages : fullPool;
+  }
+
+  if (req.includes('진료실') || req.includes('시술실') || req.includes('수술실') || req.includes('체어') || req.includes('강의실')) {
+    const treatImages = fullPool.filter(p => p.zone.includes('진료') || p.zone.includes('시술') || p.zone.includes('체어') || p.zone.includes('수술') || p.zone.includes('강의'));
+    return treatImages.length >= 6 ? treatImages : fullPool;
+  }
+
+  return fullPool;
 }
 
 // 2. PROMPT ENRICHMENT HANDLER
