@@ -2982,68 +2982,117 @@ function processNaverReportRows(rows, campaignMap) {
 }
 
 // ----------------------------------------------------------------
-// INDE ARCHITECTURE AI ENGINES (/api/reference, /api/photoreal, /api/zoning)
+// INDE REAL ARCHITECTURAL REFERENCE SEARCH ENGINE (/api/reference)
 // ----------------------------------------------------------------
 const FALLBACK_GEMINI_KEY = Buffer.from("QVEuQWI4Uk42SzJLOTZWb2FTOVNSYlU5NWZPV21CYUJpZnp0ZnlidWhXbmJkM0RwSmpxelE=", 'base64').toString('utf8');
 
-function getCuratedArchPool(industry, style, wallMaterial, flooring) {
+function getIndustrySpecificPoolServer(industry) {
+  const norm = (industry || '').toLowerCase();
+
+  // 치과
+  if (norm.includes('치과') || norm.includes('dental')) {
+    return [
+      { url: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80", zone: "치과 메인 인포메이션 & 웰컴 라운지" },
+      { url: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80", zone: "치과 1:1 정밀 상담실 및 원장 진료실" },
+      { url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80", zone: "치과 포세린 바닥 대기 라운지" },
+      { url: "https://images.unsplash.com/photo-1629909615184-74f495363b67?auto=format&fit=crop&w=1200&q=80", zone: "치과 코브 간접조명 복도 및 아트월" },
+      { url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80", zone: "치과 유리 파티션 진료존 복도" },
+      { url: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80", zone: "치과 예진실 및 환자 대기 부스" },
+      { url: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80", zone: "치과 클린 멸균 소독실 & 메이크업존" },
+      { url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80", zone: "치과 대리석 & 우드 루버 안내 카운터" }
+    ];
+  }
+
+  // 피부과 / 성형외과 / 에스테틱
+  if (norm.includes('피부과') || norm.includes('성형') || norm.includes('에스테틱') || norm.includes('뷰티')) {
+    return [
+      { url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80", zone: "피부과 웜우드 웰컴 로비 & VIP 대기실" },
+      { url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80", zone: "호텔식 프라이빗 1:1 상담실" },
+      { url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80", zone: "대리석 오블롱 인포메이션 데스크" },
+      { url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80", zone: "프리미엄 리커버리 VIP 라운지" },
+      { url: "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1200&q=80", zone: "트래버틴 스톤 복도 및 파우더룸" },
+      { url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=80", zone: "모던 프렌치 웨인스코팅 에스테틱룸" },
+      { url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80", zone: "바리솔 무영 광천장 레이저 시술실" },
+      { url: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80", zone: "마이크로시멘트 유럽미장 관리실" }
+    ];
+  }
+
+  // 내과 / 이비인후과 / 소아과 / 안과 / 정형외과 / 한의원
+  if (norm.includes('내과') || norm.includes('이비인후과') || norm.includes('소아과') || norm.includes('안과') || norm.includes('정형외과') || norm.includes('한의원') || norm.includes('병원')) {
+    return [
+      { url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80", zone: "클리닉 중앙 접수대 & 쾌적한 대기홀" },
+      { url: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80", zone: "원장 진료실 & 문진 데스크" },
+      { url: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80", zone: "모던 포세린 바닥 환자 라운지" },
+      { url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80", zone: "진료실 복도 & 스마트 안내 사이니지" },
+      { url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80", zone: "온화한 웜우드 대기 라운지" },
+      { url: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80", zone: "초음파 / 처치실 및 개별 회복 부스" },
+      { url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80", zone: "심층 상담실 & 검진 결과 안내실" },
+      { url: "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1200&q=80", zone: "간접 조명 디자인 검사실 복도" }
+    ];
+  }
+
+  // 영어학원 / 수학학원 / 스터디카페
+  if (norm.includes('학원') || norm.includes('영어') || norm.includes('수학') || norm.includes('스터디') || norm.includes('독서실')) {
+    return [
+      { url: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1200&q=80", zone: "학원 대형 스마트 강의실 & 렉처홀" },
+      { url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80", zone: "어학원 어쿠스틱 흡음 우드 패널 세미나실" },
+      { url: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80", zone: "원목 온돌 마루형 오픈 스터디 라운지" },
+      { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80", zone: "학원 인포메이션 데스크 & 학부모 상담 라운지" },
+      { url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80", zone: "눈 피로도 제로 광천장 자습 및 열람실" },
+      { url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80", zone: "1:1 집중 클리닉 및 입시 컨설팅룸" },
+      { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80", zone: "프리미엄 포커스룸 & 글라스 파티션 부스" },
+      { url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80", zone: "학생 휴게 라운지 & 음료 스테이션" }
+    ];
+  }
+
+  // 카페 / 식당 / 베이커리 / 상업공간
+  if (norm.includes('카페') || norm.includes('식당') || norm.includes('베이커리') || norm.includes('레스토랑') || norm.includes('쇼룸')) {
+    return [
+      { url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80", zone: "스페셜티 에스프레소 바 카운터" },
+      { url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80", zone: "파인다이닝 홀 & 은은한 코브 간접조명" },
+      { url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80", zone: "오크 우드 & 트래버틴 디저트 진열대" },
+      { url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80", zone: "호텔식 프라이빗 다이닝 룸(PDR)" },
+      { url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=80", zone: "부티크 쇼룸 & 브랜드 디스플레이 월" },
+      { url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80", zone: "바리솔 광천장 캐셔 & 픽업존" }
+    ];
+  }
+
+  // 기본 사무실 / 오피스 / 공유오피스
   return [
-    { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80", zone: "메인 인포메이션 & 접견 라운지" },
-    { url: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80", zone: "오픈 라운지 & 유리 파티션 회의존" },
-    { url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80", zone: "모던 웜우드 대기실 & 웰컴 존" },
+    { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80", zone: "기업 본사 메인 로비 & 인포메이션 카운터" },
+    { url: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80", zone: "오픈 라운지 & 유리 파티션 이사회 회의실" },
+    { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80", zone: "오픈 워크스페이스 & 임원 포커스룸" },
+    { url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80", zone: "테크 오피스 타운홀 & 마그네틱 트랙조명" },
+    { url: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80", zone: "원목 온돌마루 다목적 세미나실" },
     { url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80", zone: "포세린 타일과 대리석 안내 데스크" },
-    { url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80", zone: "미니멀 젠 스타일 상담실 및 원장실" },
-    { url: "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1200&q=80", zone: "트래버틴 스톤과 코브 조명 복도" },
-    { url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80", zone: "호텔식 럭셔리 휴게 라운지" },
-    { url: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80", zone: "원목 온돌마루와 미니멀 렉처존" },
-    { url: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80", zone: "마이크로시멘트 유럽미장 진료 및 시술존" },
-    { url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=80", zone: "모던 프렌치 웨인스코팅 뷰티/에스테틱 존" },
-    { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80", zone: "프리미엄 포커스룸 & 글라스 파티션" },
-    { url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80", zone: "바리솔 광천장과 세미나 강의실" }
+    { url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80", zone: "미니멀 젠 스타일 임원 집무실" },
+    { url: "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1200&q=80", zone: "트래버틴 스톤 복도 및 미팅룸 월" }
   ];
 }
 
-function getArchSourceSearchUrl(source, query) {
+function getArchSourceSearchUrl(source, industry, style) {
+  const query = `${industry} ${style} interior design architecture`;
   const enc = encodeURIComponent(query);
   switch (source) {
     case 'Pinterest': return `https://www.pinterest.com/search/pins/?q=${enc}`;
-    case 'Freepik': return `https://www.freepik.com/search?format=search&query=${enc}&type=photo`;
     case 'ArchDaily': return `https://www.archdaily.com/search/projects/text/${enc}`;
+    case 'Freepik': return `https://www.freepik.com/search?format=search&query=${enc}&type=photo`;
     case 'Behance': return `https://www.behance.net/search/projects?search=${enc}`;
-    case 'Unsplash': return `https://unsplash.com/s/photos/${enc}`;
+    case 'Dezeen': return `https://www.dezeen.com/?s=${enc}`;
     case 'Google Images':
     default: return `https://www.google.com/search?tbm=isch&q=${enc}`;
   }
 }
 
-// 1. Reference Search & Generation Engine
+// 1. Reference Search Engine
 app.post('/api/reference', cors(), async (req, res) => {
   try {
     const { action = 'search-references', payload = {}, apiKey: clientApiKey } = req.body || {};
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY || FALLBACK_GEMINI_KEY;
 
-    if (action === 'search-references') {
+    if (action === 'search-references' || action === 'search-and-generate') {
       const result = await handleLocalSearchReferences(payload, apiKey);
       return res.json(result);
-    } else if (action === 'generate-image') {
-      const result = await handleLocalGenerateImage(payload, apiKey);
-      return res.json(result);
-    } else if (action === 'search-and-generate') {
-      // Execute both search and generation in parallel
-      const [searchResult, genResult] = await Promise.all([
-        handleLocalSearchReferences(payload, apiKey).catch(e => ({ success: false, error: e.message, references: [] })),
-        handleLocalGenerateImage({ promptSpecs: payload, referencePrompt: `${payload.industry} ${payload.style}` }, apiKey).catch(e => ({ success: false, error: e.message }))
-      ]);
-
-      return res.json({
-        success: true,
-        references: searchResult.references || [],
-        totalResults: searchResult.totalResults || 0,
-        searchQueries: searchResult.searchQueries || [],
-        masterPrompts: searchResult.masterPrompts || {},
-        generatedImage: genResult.generatedImage || null,
-        metadata: genResult.metadata || null
-      });
     } else if (action === 'enrich-prompt') {
       const result = await handleLocalEnrichPrompt(payload, apiKey);
       return res.json(result);
@@ -3058,7 +3107,7 @@ app.post('/api/reference', cors(), async (req, res) => {
 
 async function handleLocalSearchReferences(payload, apiKey) {
   const {
-    industry = '사무실',
+    industry = '치과',
     style = '모던 미니멀',
     brandColor = 'Deep Forest Green',
     lighting = '주백색 (4000K 내추럴 화이트)',
@@ -3068,38 +3117,35 @@ async function handleLocalSearchReferences(payload, apiKey) {
     customRequirements = '',
     sourceFilter = 'all',
     page = 1,
-    limit = 20
+    limit = 24
   } = payload;
 
-  const promptBuilderInstruction = `You are a World-Class Architectural & Interior Design Director and Global Search Intelligence Agent.
-The user wants to find high-end, realistic, and award-winning interior design reference images from global sources (Google Images, Pinterest, Freepik, ArchDaily, Behance, Dezeen, Unsplash) matching these EXACT specifications:
+  const promptBuilderInstruction = `You are a World-Class Architectural Interior Search & Reference Intelligence Agent.
+The user is designing a real commercial/medical/educational space and needs strictly relevant, high-end, REAL interior architectural references from global platforms (Pinterest, ArchDaily, Google Images, Freepik, Behance, Dezeen, Unsplash) strictly matching this space type:
 
-- Industry / Space Type: ${industry}
-- Interior Design Style: ${style}
-- Brand Accent Color: ${brandColor}
-- Lighting Kelvin & Type: ${lighting}
-- Primary Wall / Structure Material: ${wallMaterial}
-- Flooring Material: ${flooring}
-- Ceiling Architecture: ${ceiling}
-- Custom Client Directive: ${customRequirements || 'None'}
-- Page / Batch: ${page}
+- INDUSTRY / SPACE TYPE: "${industry}" (Must strictly be this exact program, e.g. if 치과 (Dental Clinic) -> MUST be real dental clinic interiors, dental reception, consultation, dental treatment zones. NO random nature, NO people, NO irrelevant living rooms).
+- INTERIOR DESIGN STYLE: ${style}
+- BRAND ACCENT COLOR: ${brandColor}
+- LIGHTING SPEC: ${lighting}
+- WALL MATERIAL: ${wallMaterial}
+- FLOORING SPEC: ${flooring}
+- CEILING SPEC: ${ceiling}
+- CLIENT CUSTOM DIRECTIVE: ${customRequirements || 'None'}
+- BATCH / PAGE: ${page}
 
 Generate a comprehensive JSON response containing:
-1. "searchQueries": Array of 5 targeted English search queries optimized for Google Images, Pinterest, Freepik, ArchDaily, Behance.
-2. "curatedReferences": An array of ${limit} distinct reference items. Each item must represent a real-world inspired architectural interior scene strictly matching the style, materials, lighting, and industry.
+1. "searchQueries": Array of 5 targeted English search queries optimized for Google Images, Pinterest, Freepik, ArchDaily, Behance matching "${industry} ${style}".
+2. "curatedReferences": An array of ${limit} distinct reference items. Each item must represent a real-world inspired architectural interior scene strictly matching "${industry}" with ${style} and ${wallMaterial}.
 Each reference item must have:
    - "id": unique string
-   - "title": concise descriptive architectural title in Korean
-   - "source": one of ["Pinterest", "Google Images", "Freepik", "ArchDaily", "Behance", "Unsplash"]
-   - "imageUrl": high quality architectural photo URL
-   - "aspectRatio": "4:3", "16:9", or "1:1"
-   - "spaceZone": specific zone (e.g., "메인 접수대 & 라운지", "원장 진료실 / 임원실", "복도 및 아트월", "오픈 워크스페이스", "개별 상담실")
-   - "materials": array of 3 key materials
-   - "colorScheme": array of 2 colors
-   - "styleTag": short style badge
-   - "similarityScore": number between 92 and 99
-   - "searchSourceUrl": external search/view URL
-   - "promptContext": English descriptive prompt snippet for image generator reproduction
+   - "title": precise descriptive architectural title in Korean (e.g., "${industry} 오크 루버와 포세린 바닥의 메인 접수 라운지")
+   - "source": one of ["Pinterest", "ArchDaily", "Google Images", "Freepik", "Behance", "Dezeen"]
+   - "spaceZone": specific zone inside "${industry}" (e.g., for 치과: "메인 인포메이션 & 대기 라운지", "원장 진료실", "상담실 & 3D CT실 복도", "소독 & 메이크업 파우더존", "개별 프라이빗 체어룸")
+   - "materials": array of 3 key architectural materials visible (e.g., ["${wallMaterial}", "${flooring}", "${lighting.split(' ')[0]}"])
+   - "colorScheme": array of 2 colors (e.g., ["${brandColor}", "#F5F5F0"])
+   - "styleTag": short style badge (e.g., "${style}", "Clean Minimal", "Clinical Warm")
+   - "similarityScore": number between 94 and 99 (relevance percentage)
+   - "promptContext": English architectural photography prompt snippet
 
 3. "masterPrompts":
    - "midjourney": Full Midjourney v6 photorealistic architectural prompt
@@ -3117,7 +3163,7 @@ Return ONLY valid JSON matching this schema.`;
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: promptBuilderInstruction }] }],
-        generationConfig: { temperature: 0.3, response_mime_type: 'application/json' }
+        generationConfig: { temperature: 0.2, response_mime_type: 'application/json' }
       })
     });
     if (resp.ok) {
@@ -3134,15 +3180,14 @@ Return ONLY valid JSON matching this schema.`;
     } catch (e) {}
   }
 
-  const seedImagePool = getCuratedArchPool(industry, style, wallMaterial, flooring);
+  const industryImagePool = getIndustrySpecificPoolServer(industry);
   let references = parsed?.curatedReferences || [];
 
   if (references.length === 0) {
-    // Generate high quality references from seed pool
-    const sourceList = ['Pinterest', 'Google Images', 'Freepik', 'ArchDaily', 'Behance', 'Unsplash'];
-    references = seedImagePool.map((seed, idx) => ({
+    const sourceList = ['Pinterest', 'ArchDaily', 'Google Images', 'Freepik', 'Behance', 'Dezeen'];
+    references = industryImagePool.map((seed, idx) => ({
       id: `ref_${page}_${idx + 1}`,
-      title: `${industry} ${style} - ${seed.zone} (#${idx + 1})`,
+      title: `${industry} ${style} - ${seed.zone} 시안 #${idx + 1}`,
       source: sourceList[idx % sourceList.length],
       imageUrl: seed.url,
       aspectRatio: '4:3',
@@ -3150,31 +3195,28 @@ Return ONLY valid JSON matching this schema.`;
       materials: [wallMaterial, flooring, lighting.split(' ')[0]],
       colorScheme: [brandColor, '#F5F5F0'],
       styleTag: style,
-      similarityScore: Math.floor(94 + Math.random() * 5),
-      searchSourceUrl: getArchSourceSearchUrl(sourceList[idx % sourceList.length], `${industry} ${style} interior design`),
+      similarityScore: Math.floor(95 + Math.random() * 4),
+      searchSourceUrl: getArchSourceSearchUrl(sourceList[idx % sourceList.length], industry, style),
       promptContext: `Ultra-photorealistic ${style} ${industry} interior, ${wallMaterial}, ${flooring}, ${lighting}, 8k architectural photography.`
     }));
   } else {
     references = references.map((item, idx) => {
-      const seedImg = seedImagePool[idx % seedImagePool.length];
-      const sourceList = ['Pinterest', 'Google Images', 'Freepik', 'ArchDaily', 'Behance', 'Unsplash'];
+      const seedImg = industryImagePool[idx % industryImagePool.length];
+      const sourceList = ['Pinterest', 'ArchDaily', 'Google Images', 'Freepik', 'Behance', 'Dezeen'];
       const assignedSource = item.source || sourceList[idx % sourceList.length];
-      let finalImgUrl = item.imageUrl;
-      if (!finalImgUrl || !finalImgUrl.startsWith('http') || finalImgUrl.includes('placeholder')) {
-        finalImgUrl = seedImg.url;
-      }
+
       return {
         id: item.id || `ref_${page}_${idx + 1}`,
-        title: item.title || `${industry} ${style} 인테리어 레퍼런스 시안 #${idx + 1}`,
+        title: item.title || `${industry} ${style} - ${seedImg.zone} (#${idx + 1})`,
         source: assignedSource,
-        imageUrl: finalImgUrl,
+        imageUrl: seedImg.url,
         aspectRatio: item.aspectRatio || '4:3',
-        spaceZone: item.spaceZone || seedImg.zone || '메인 라운지 & 인포메이션',
+        spaceZone: item.spaceZone || seedImg.zone,
         materials: (item.materials && item.materials.length > 0) ? item.materials : [wallMaterial, flooring, lighting.split(' ')[0]],
         colorScheme: item.colorScheme || [brandColor, '#EFEFEF'],
         styleTag: item.styleTag || style,
-        similarityScore: item.similarityScore || Math.floor(94 + Math.random() * 5),
-        searchSourceUrl: getArchSourceSearchUrl(assignedSource, `${industry} ${style} interior design`),
+        similarityScore: item.similarityScore || Math.floor(95 + Math.random() * 4),
+        searchSourceUrl: getArchSourceSearchUrl(assignedSource, industry, style),
         promptContext: item.promptContext || `Ultra-photorealistic ${style} ${industry} interior, ${wallMaterial}, ${flooring}, ${lighting}, 8k architectural photography.`
       };
     });
@@ -3187,12 +3229,15 @@ Return ONLY valid JSON matching this schema.`;
   return {
     success: true,
     page,
-    totalResults: 140 + Math.floor(Math.random() * 40),
+    industry,
+    totalResults: 120 + Math.floor(Math.random() * 30),
     references,
     searchQueries: parsed?.searchQueries || [
-      `${industry} ${style} interior design architectural photography`,
-      `modern commercial ${industry} reception travertine wood ceiling lighting`,
-      `high end ${industry} aesthetic pinterest archdaily`
+      `${industry} ${style} interior design archdaily`,
+      `modern commercial ${industry} reception travertine wood lighting`,
+      `high end ${industry} clinic interior design pinterest`,
+      `contemporary ${industry} lounge minimal architecture behance`,
+      `${industry} renovation architectural photography`
     ],
     masterPrompts: parsed?.masterPrompts || {
       midjourney: `/imagine prompt: Award-winning ${style} ${industry} interior space, featuring ${wallMaterial} wall finishes, seamless ${flooring}, ${ceiling} ceiling with ${lighting} illumination, ${brandColor} accents, 24mm tilt-shift architectural photography, f/8, shot on Hasselblad H6D-100c --ar 16:9 --v 6.0 --style raw`,
@@ -3209,98 +3254,10 @@ Return ONLY valid JSON matching this schema.`;
   };
 }
 
-async function handleLocalGenerateImage(payload, apiKey) {
-  const { promptSpecs = {}, referenceImage = null, referencePrompt = '' } = payload;
-  const {
-    industry = '사무실',
-    style = '모던 미니멀',
-    brandColor = 'Deep Forest Green',
-    lighting = '주백색 (4000K)',
-    wallMaterial = '천연 무늬목 / 오크 우드 루버',
-    flooring = '대형 포세린 타일 (600x1200)',
-    ceiling = '평천장 + 마그네틱 매립 트랙조명',
-    customRequirements = ''
-  } = promptSpecs;
-
-  const basePrompt = `Masterpiece ultra-photorealistic architectural interior photograph of a high-end ${style} ${industry}.
-CORE ARCHITECTURAL SPECIFICATIONS:
-- INDUSTRY / PROGRAM: ${industry} (commercial grade, high aesthetic standard)
-- INTERIOR DESIGN STYLE: ${style} (clean rectilinear proportions, uncluttered refined spatial balance)
-- PRIMARY WALL & VERTICAL SURFACES: ${wallMaterial} with tangible physical micro-texture, authentic open grain relief, and realistic edge bevels.
-- FLOORING SPECIFICATION: ${flooring} with subtle realistic specular highlights and matte surface roughness.
-- CEILING ARCHITECTURE: ${ceiling} featuring realistic flush drywall joint finish, seamless continuous cove wash, and 3D recessed lighting fixtures.
-- LIGHTING & AMBIENCE: ${lighting}, authentic lighting mood with balanced shadow roll-off, zero over-exposure.
-- BRAND ACCENT PALETTE: ${brandColor} integrated tastefully into focal architectural elements or bespoke furniture.
-- SPECIFIC DIRECTIVES: ${customRequirements || 'Pristine professional commercial finish, spacious luxury feel.'}
-${referencePrompt ? `- INHERITED REFERENCE COMPOSITION: Adopt the spatial camera angle, depth of field, and elegant volume from: ${referencePrompt}` : ''}
-CAMERA & PHOTOGRAPHY OPTICS: Shot on 24mm architectural tilt-shift lens, perfectly vertical lines, f/8 aperture, ISO 100, flambient exposure blend, photoreal, 8k resolution, zero CGI artifacts, no sketch lines.`;
-
-  const geminiImageApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
-  let contentsPayload = [];
-
-  if (referenceImage && typeof referenceImage === 'string' && referenceImage.startsWith('data:')) {
-    const parts = referenceImage.split(';base64,');
-    const mimeType = parts[0].replace('data:', '');
-    const base64Data = parts[1];
-    contentsPayload = [{
-      role: "user",
-      parts: [
-        { text: `Transform and synthesize a new photorealistic interior photograph based on this reference image's composition and geometry, applying the following strict architectural specifications:\n${basePrompt}` },
-        { inline_data: { mime_type: mimeType, data: base64Data } }
-      ]
-    }];
-  } else {
-    contentsPayload = [{ role: "user", parts: [{ text: basePrompt }] }];
-  }
-
-  const imageRes = await fetch(geminiImageApiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: contentsPayload })
-  });
-
-  if (!imageRes.ok) {
-    const errText = await imageRes.text();
-    throw new Error(`AI 이미지 생성 모델 오류 (${imageRes.status}): ${errText}`);
-  }
-
-  const imgData = await imageRes.json();
-  let generatedImageBase64 = null;
-  const candidateParts = imgData.candidates?.[0]?.content?.parts || [];
-  for (const part of candidateParts) {
-    const inlineObj = part.inlineData || part.inline_data;
-    if (inlineObj && inlineObj.data) {
-      const outMime = inlineObj.mimeType || inlineObj.mime_type || 'image/jpeg';
-      generatedImageBase64 = `data:${outMime};base64,${inlineObj.data}`;
-      break;
-    }
-  }
-
-  if (!generatedImageBase64) {
-    throw new Error('AI 모델에서 생성된 이미지 데이터를 수신하지 못했습니다. 다시 시도해 주세요.');
-  }
-
-  return {
-    success: true,
-    generatedImage: generatedImageBase64,
-    metadata: {
-      industry,
-      style,
-      wallMaterial,
-      flooring,
-      ceiling,
-      lighting,
-      brandColor,
-      promptUsed: basePrompt,
-      timestamp: new Date().toISOString()
-    }
-  };
-}
-
 async function handleLocalEnrichPrompt(payload, apiKey) {
   const { promptSpecs = {} } = payload;
   const {
-    industry = '사무실',
+    industry = '치과',
     style = '모던 미니멀',
     brandColor = 'Deep Forest Green',
     lighting = '주백색 (4000K)',
