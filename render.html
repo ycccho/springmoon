@@ -284,6 +284,7 @@
       height: 100%;
       opacity: 0;
       cursor: pointer;
+      z-index: 10;
     }
 
     /* Multi-Image Gallery Container */
@@ -1066,6 +1067,12 @@
     dropZone.addEventListener('drop', (e) => {
       const files = Array.from(e.dataTransfer.files);
       if (files.length > 0) handleFiles(files);
+    });
+
+    dropZone.addEventListener('click', (e) => {
+      if (e.target !== fileInput) {
+        fileInput.click();
+      }
     });
 
     fileInput.addEventListener('change', (e) => {
