@@ -1,0 +1,36 @@
+# Materials for SK Shipping Office
+newmtl SK_Wall_White
+Ka 0.95 0.95 0.95
+Kd 0.95 0.95 0.95
+Ks 0.1 0.1 0.1
+d 1.0
+
+newmtl SK_Office_Carpet
+Ka 0.35 0.38 0.40
+Kd 0.35 0.38 0.40
+Ks 0.05 0.05 0.05
+d 1.0
+
+newmtl SK_Lounge_Wood_Floor
+Ka 0.76 0.60 0.45
+Kd 0.76 0.60 0.45
+Ks 0.2 0.2 0.2
+d 1.0
+
+newmtl SK_Desk_Oak_White
+Ka 0.90 0.88 0.84
+Kd 0.90 0.88 0.84
+Ks 0.15 0.15 0.15
+d 1.0
+
+newmtl SK_Frame_Dark
+Ka 0.20 0.20 0.22
+Kd 0.20 0.20 0.22
+Ks 0.3 0.3 0.3
+d 1.0
+
+newmtl SK_Glass_Partition
+Ka 0.70 0.85 0.95
+Kd 0.70 0.85 0.95
+Ks 0.9 0.9 0.9
+d 0.35
