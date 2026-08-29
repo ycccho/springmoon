@@ -15,7 +15,16 @@ export async function onRequest(context) {
   const secretKey = "AQAAAAA+iGLEih96xnnGWIxYXg3TOQOrVq+wj1qrlppE2vLU7A==";
 
   const method = context.request.method;
-  
+  if (method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, X-Timestamp, X-API-KEY, X-CUSTOMER, X-Signature"
+      }
+    });
+  }
   // Choose URL to call
   let targetUrlStr = "";
   let signPath = path;
@@ -110,14 +119,4 @@ export async function onRequest(context) {
   }
 }
 
-// Handle OPTIONS requests for CORS preflight
-export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-Timestamp, X-API-KEY, X-CUSTOMER, X-Signature"
-    }
-  });
-}
+// Direct OPTIONS handling inside onRequest
