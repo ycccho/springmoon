@@ -1995,10 +1995,9 @@
       };
     }
 
-    // Default Fallback Key
-    const DEFAULT_API_KEY = atob("QVEuQWI4Uk42SzJLOTZWb2FTOVNSYlU5NWZPV21CYUJpZnp0ZnlidWhXbmJkM0RwSmpxelE=");
+    // Client Key
     function getEffectiveApiKey() {
-      return state.apiKey || DEFAULT_API_KEY;
+      return state.apiKey || '';
     }
 
     // PRIMARY ACTION: SEARCH GLOBAL REFERENCES

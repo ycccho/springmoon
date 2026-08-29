@@ -2981,10 +2981,7 @@ function processNaverReportRows(rows, campaignMap) {
   return stats;
 }
 
-// ----------------------------------------------------------------
-// INDE REAL ARCHITECTURAL REFERENCE SEARCH ENGINE (/api/reference)
-// ----------------------------------------------------------------
-const FALLBACK_GEMINI_KEY = Buffer.from("QVEuQWI4Uk42SzJLOTZWb2FTOVNSYlU5NWZPV21CYUJpZnp0ZnlidWhXbmJkM0RwSmpxelE=", 'base64').toString('utf8');
+const FALLBACK_GEMINI_KEY = process.env.GEMINI_API_KEY || '';
 
 function getFilteredPoolServer(industry, customRequirements = '') {
   const norm = (industry || '').toLowerCase();

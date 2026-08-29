@@ -855,11 +855,6 @@
           <a href="/reference" class="nav-link">레퍼런스 AI <span style="font-size: 0.65rem; font-weight: 700; background: #eff6ff; color: #2563eb; padding: 1px 5px; border-radius: 9999px; border: 1px solid #bfdbfe; margin-left: 2px;">NEW</span></a>
         </nav>
       </div>
-      <div class="header-actions">
-        <button class="btn-secondary" id="btnApiKeyModal">
-          API 키 설정
-        </button>
-      </div>
     </div>
   </header>
 
@@ -1017,26 +1012,6 @@
       </div>
       <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
         <button class="btn-secondary" id="btnCopyJson">복사하기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- API Key Modal -->
-  <div class="modal-overlay" id="apiKeyModal">
-    <div class="modal-card" style="max-width: 480px;">
-      <div class="modal-header">
-        <h3 style="font-size: 0.95rem; font-weight: 700;">Google Gemini API 키 설정</h3>
-        <button class="btn-secondary" id="btnCloseApiKeyModal" style="padding: 4px 8px;">✕</button>
-      </div>
-      <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
-        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
-          기본 서버 키 대신 본인의 개인 API 키를 등록하여 사용하시려면 입력해 주세요. (브라우저 로컬 저장)
-        </p>
-        <input type="password" id="inputApiKey" class="text-input" placeholder="AQ...">
-      </div>
-      <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="btn-secondary" id="btnClearApiKey" style="padding: 8px 16px; font-size: 0.88rem;">초기화 (유료 기본키)</button>
-        <button class="btn-submit" id="btnSaveApiKey" style="padding: 8px 16px; font-size: 0.88rem; margin: 0;">저장</button>
       </div>
     </div>
   </div>
@@ -1290,8 +1265,6 @@
         customNotes: document.getElementById('optCustomNotes').value
       };
 
-      const savedApiKey = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
-
       const total = imageQueue.length;
       let successCount = 0;
 
@@ -1309,7 +1282,6 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               image: item.originalBase64,
-              apiKey: savedApiKey,
               options: options,
               action: 'render'
             })
@@ -1382,30 +1354,9 @@
       const promptObj = item ? item.jsonPrompt : {};
       navigator.clipboard.writeText(JSON.stringify(promptObj || {}, null, 2));
       showToast('JSON 프롬프트가 클립보드에 복사되었습니다.');
-    });
-
-    // API Key Modal
-    const apiKeyModal = document.getElementById('apiKeyModal');
-    const inputApiKey = document.getElementById('inputApiKey');
-    document.getElementById('btnApiKeyModal').addEventListener('click', () => {
-      inputApiKey.value = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
-      apiKeyModal.style.display = 'flex';
-    });
-    document.getElementById('btnCloseApiKeyModal').addEventListener('click', () => {
-      apiKeyModal.style.display = 'none';
-    });
-    document.getElementById('btnSaveApiKey').addEventListener('click', () => {
-      localStorage.setItem('inde_render_api_key', inputApiKey.value.trim());
-      apiKeyModal.style.display = 'none';
-      showToast('API 키가 저장되었습니다.');
-    });
-    document.getElementById('btnClearApiKey').addEventListener('click', () => {
-      localStorage.removeItem('inde_render_api_key');
-      localStorage.removeItem('ppok_gemini_api_key');
-      inputApiKey.value = '';
-      apiKeyModal.style.display = 'none';
-      showToast('기본 서버 유료 키로 초기화되었습니다.');
-    });
+    // Automatically purge any old keys to strictly use the dedicated server Tier-1 key
+    localStorage.removeItem('inde_render_api_key');
+    localStorage.removeItem('ppok_gemini_api_key');
 
     function showToast(msg) {
       const toast = document.getElementById('toastMsg');
