@@ -1035,6 +1035,7 @@
         <input type="password" id="inputApiKey" class="text-input" placeholder="AQ...">
       </div>
       <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-secondary" id="btnClearApiKey" style="padding: 8px 16px; font-size: 0.88rem;">초기화 (유료 기본키)</button>
         <button class="btn-submit" id="btnSaveApiKey" style="padding: 8px 16px; font-size: 0.88rem; margin: 0;">저장</button>
       </div>
     </div>
@@ -1397,6 +1398,13 @@
       localStorage.setItem('inde_render_api_key', inputApiKey.value.trim());
       apiKeyModal.style.display = 'none';
       showToast('API 키가 저장되었습니다.');
+    });
+    document.getElementById('btnClearApiKey').addEventListener('click', () => {
+      localStorage.removeItem('inde_render_api_key');
+      localStorage.removeItem('ppok_gemini_api_key');
+      inputApiKey.value = '';
+      apiKeyModal.style.display = 'none';
+      showToast('기본 서버 유료 키로 초기화되었습니다.');
     });
 
     function showToast(msg) {
