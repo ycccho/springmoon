@@ -1355,6 +1355,8 @@
       const promptObj = item ? item.jsonPrompt : {};
       navigator.clipboard.writeText(JSON.stringify(promptObj || {}, null, 2));
       showToast('JSON 프롬프트가 클립보드에 복사되었습니다.');
+    });
+
     // Automatically purge any old keys to strictly use the dedicated server Tier-1 key
     localStorage.removeItem('inde_render_api_key');
     localStorage.removeItem('ppok_gemini_api_key');
