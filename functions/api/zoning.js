@@ -121,7 +121,7 @@ Return ONLY a valid JSON object matching this schema:
   ]
 }`;
 
-    const geminiVisionUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
     
     const analysisPayload = {
       contents: [
@@ -144,7 +144,7 @@ Return ONLY a valid JSON object matching this schema:
       }
     };
 
-    const visionRes = await fetch(geminiVisionUrl, {
+    const visionRes = await fetch(geminiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(analysisPayload)
