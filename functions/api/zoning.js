@@ -8,7 +8,7 @@ export async function onRequestPost(context) {
 
   try {
     const body = await context.request.json();
-    const { image, spaceType = 'office', config = {}, apiKey: clientApiKey } = body;
+    const { image, config = {}, apiKey: clientApiKey } = body;
 
     if (!image) {
       return new Response(JSON.stringify({ success: false, error: '평면도 이미지 데이터가 필요합니다.' }), {
@@ -30,135 +30,94 @@ export async function onRequestPost(context) {
     }
 
     const {
-      targetArea = '50평 (약 165㎡)',
       specialty = '피부과 / 성형외과',
-      officeType = '일반 기업 본사 / 지사',
-      headcount = '10명',
+      targetArea = '50평 (약 165㎡)',
+      doctorRooms = 2,
+      counselingRooms = 1,
+      hasDirectorRoom = true,
+      treatmentRooms = 2,
+      hasOperationRoom = false,
+      hasXrayRoom = false,
+      entrancePosition = '도면 표시 위치 (기본)',
       customRequirements = ''
     } = config;
 
-    const isOffice = (spaceType === 'office');
+    const roomRequirementsSummary = `
+- 진료 과목: ${specialty}
+- 전용 면적: ${targetArea}
+- 주출입구(E.N.T): ${entrancePosition}
+- 필수 실 구성 요청:
+  * 대기실 및 접수/수납 리셉션 (1개 필수, 출입문 진입 시 첫 공간)
+  * 진료실: ${doctorRooms}개
+  * 상담실: ${counselingRooms}개
+  * 원장실(대표실): ${hasDirectorRoom ? '1개 (독립 원장실 필요)' : '없음 (진료실 내부 겸용)'}
+  * 처치/피부관리실: ${treatmentRooms}개
+  * 수술실 및 회복실: ${hasOperationRoom ? '1개 (청결 멸균 구역)' : '없음'}
+  * X-ray / 방사선 차폐실: ${hasXrayRoom ? '1개 (납 차폐벽 및 조종부 필요)' : '없음'}
+  * 직원 휴게실 및 소독준비실: 1개
+  * 파우더룸 및 세면/화장실
+- 사용자 추가 메모: ${customRequirements || '최신 한국 병원 인테리어 트렌드 및 완벽한 동선 반영'}
+`;
 
-    // Strict Domain Specific System Instructions
-    let domainSpecificInstruction = '';
-    if (isOffice) {
-      domainSpecificInstruction = `
-=========================================
-TARGET: COMMERCIAL OFFICE ONLY (사무실 / 업무 공간 전용)
-STRICT FORBIDDEN: DO NOT USE ANY MEDICAL/HOSPITAL TERMS (NO 진료실, NO 처치실, NO 환자, NO 수술실, NO 소독실, NO 레이저실, NO 피부관리실)!
-YOU MUST USE EXCLUSIVELY OFFICE TERMINOLOGY:
-- 입구 및 접견 라운지 (Welcome Lounge / Reception)
-- 오픈 워크스테이션 / 메인 업무 공간 (Open Workstations / Desks)
-- 대회의실 / 중회의실 (Conference / Meeting Rooms)
-- 대표실 / 임원실 / 프라이빗 룸 (Executive Office / Director Room)
-- 1인 포커스룸 / 폰부스 (Focus Room / Phone Booth)
-- 탕비실 / 팬트리 / 휴게실 (Pantry / Break Area)
-- OA존 / 복합기실 / 서버 창고 (OA & Utility)
+    // Step 1: Vision Architectural Analysis for 8 Distinct Medical Concepts
+    const systemPrompt = `You are the Master Architectural Hospital Space Planner specializing in Korean Medical Clinics (피부과, 성형외과, 치과, 내과, 이비인후과, 안과, 정형외과 등 전 진료과목).
 
-OFFICE CONFIGURATION:
-- Space Category: ${officeType}
-- Target Headcount: ${headcount}
-- Area Scale: ${targetArea}
-- User Custom Directive: ${customRequirements || 'None'}
-=========================================`;
-    } else {
-      domainSpecificInstruction = `
-=========================================
-TARGET: MEDICAL CLINIC ONLY (병원 / 의원 전용)
-STRICT FORBIDDEN: DO NOT USE OFFICE TERMS (NO 워크스테이션, NO 팀장석)!
-USE EXCLUSIVELY CLINIC TERMINOLOGY:
-- 접수 및 대기실 (Reception & Patient Waiting)
-- 원장 진료실 (Doctor Consultation Room)
-- 상담실 (Patient Counseling)
-- 처치실 / 시술실 / 관리실 (Treatment / Care Room)
-- 직원 휴게실 / 소독준비실 (Staff Lounge & Sterilization)
-- 파우더룸 및 세면존 (Powder / Wash)
+PROJECT PARAMETERS:
+${roomRequirementsSummary}
 
-CLINIC CONFIGURATION:
-- Medical Specialty: ${specialty}
-- Area Scale: ${targetArea}
-- User Custom Directive: ${customRequirements || 'None'}
-=========================================`;
-    }
+7 ABSOLUTE RULES OF MEDICAL ZONING (ZERO TOLERANCE FOR HALLUCINATION):
+1. PHYSICAL ENVELOPE & WALL LOCK (100%):
+   - The attached image has an exact outer perimeter wall geometry, columns, windows, and core boundaries.
+   - NEVER alter, expand, or add outer rooms. All partitions MUST be drawn STRICTLY INSIDE the existing white floor area within the black boundary lines.
+2. ENTRANCE & SEQUENCE LOCK:
+   - The main entrance location must be preserved.
+   - The VERY FIRST space when entering through the entrance door MUST be the [Reception Desk & Patient Waiting Lounge (접수/수납 및 대기실)].
+   - NEVER place a doctor's room or treatment room directly in front of the entrance door.
+3. CONTINUOUS CIRCULATION & NO BLIND ROOMS:
+   - All rooms must be accessible via clear, unblocked main corridors with a minimum effective width of 1,200mm ~ 1,500mm.
+   - Zero dead-end blocked corridors, zero inaccessible rooms.
+4. EXACT ROOM PROGRAM ADHERENCE:
+   - Exactly implement the user requested room counts (${doctorRooms} doctor rooms, ${counselingRooms} counseling rooms, ${treatmentRooms} treatment rooms, etc.).
+5. MEDICAL CLEAN / DIRTY DISINFECTION PROTOCOL:
+   - Separate patient circulation from staff/sterile sterilization pathways.
+   - For dermatology/plastic surgery: Lounge -> Counseling -> Wash -> Doctor/Laser -> Operation/Recovery -> Staff.
+6. PRODUCE EXACTLY 8 DISTINCT REALISTIC ARCHITECTURAL CONCEPTS (대안 1~8):
+   - Concept 1 [안 1]: 전면 파노라마 대기형 (Front Panorama Lounge & Reception)
+   - Concept 2 [안 2]: 중앙 아일랜드 코어형 (Central Treatment Island & Ring Corridor)
+   - Concept 3 [안 3]: 진료실 창가 채광 일렬형 (Perimeter Daylight Doctor's Room Alignment)
+   - Concept 4 [안 4]: 환자-의료진 듀얼 동선 분리형 (Dual Loop Clean/Dirty Split)
+   - Concept 5 [안 5]: 프라이빗 개별 룸 집중형 (Private VIP Suites & Booths)
+   - Concept 6 [안 6]: 대기-상담-진료 원스톱 직결형 (Linear Fast-Track Flow)
+   - Concept 7 [안 7]: 상담/케어 라운지 중심형 (Counseling & Open Care Hub)
+   - Concept 8 [안 8]: 가변형 모듈러 구획형 (Modular Flexible Grid Layout)
 
-    const systemPrompt = `You are a licensed Senior Architectural Space Planner.
-${domainSpecificInstruction}
-
-ABSOLUTE 4 RULES OF ARCHITECTURAL ZONING:
-1. STRICT CAD BOUNDARY & WALL LOCK (100%):
-   - The attached image contains the EXACT building core, exterior curtain wall, and tenant boundary.
-   - You MUST 100% preserve and freeze the exact outer black lines, perimeter geometry, corners, columns, and entrance location (Check user notes for entrance position like 9 o'clock/left side).
-   - ZERO outer expansion, ZERO drawing outside the tenant boundary. All partitions and room zones are strictly drawn INSIDE the interior floor area.
-2. EXCLUDE EXTERIOR SERVICE CORES:
-   - Exclude any exterior stairs, elevator cores, EPS, TPS, and public corridors.
-3. REALISTIC SPACE PROGRAM & ROOM PROPORTIONS:
-   - Calculate realistic room sizes in Pyung (평) and Sqm (㎡) matching the requested area (${targetArea}).
-   - Realistic room counts for ${targetArea}:
-     * 30평: 4~5 rooms total
-     * 50~60평: 6~7 rooms total (e.g. Lounge 10평, Open Workstation 20평 for 10 seats, Conference Room 8평, Executive Office 6평, Focus/Phone 3평, Pantry/OA 3평, Corridors 6평)
-     * 70~80평: 7~9 rooms total
-4. 4 DISTINCT ARCHITECTURAL PROPOSALS (대안 1~4) FOR THIS EXACT SPACE:
-   ${isOffice ? `
-   - Concept 1 [안 A]: 전면 라운지 & 오픈 워크스페이스형 (Front Lounge & Open Collaborative Workspace)
-   - Concept 2 [안 B]: 중앙 회의 코어 분할형 (Central Meeting Core & Dual Wing Workstations)
-   - Concept 3 [안 C]: 창가 조망 임원실/회의실 우선형 (Window-Side Executive & Boardroom Priority)
-   - Concept 4 [안 D]: 부서별 독립 구획형 (Zoned Departmental & Focus Intensive Layout)
-   ` : `
-   - Concept 1 [안 A]: 전면 라운지 개방형 (Wide Front Reception & Waiting)
-   - Concept 2 [안 B]: 중앙 통로 분할형 (Efficient Central Spine Corridor)
-   - Concept 3 [안 C]: 창가 조망 진료실 우선형 (Perimeter Window-Side Doctor Rooms)
-   - Concept 4 [안 D]: 고객-스태프 동선 분리형 (Dual Circulation Loop / Staff Privacy)
-   `}
-
-Return ONLY valid JSON matching this schema:
+Return ONLY a valid JSON object matching this schema:
 {
-  "spaceType": "${spaceType}",
-  "totalAreaPyung": "${targetArea}",
+  "specialty": "${specialty}",
+  "totalArea": "${targetArea}",
   "concepts": [
     {
       "id": 1,
-      "name": "안 A: ${isOffice ? '전면 라운지 & 오픈 워크스페이스형' : '전면 라운지 개방형'}",
-      "conceptDescription": "string (설계 의도 및 공간 구성)",
-      "promptGuidance": "string",
+      "name": "안 1: 전면 파노라마 대기형",
+      "conceptDescription": "string (설계 의도 및 핵심 특징)",
+      "circulationSummary": "string (환자 및 의료진 동선 흐름)",
       "zones": [
         {
-          "zoneName": "string",
-          "color": "HEX",
+          "zoneName": "string (대기/접수 구역 / 진료 및 상담 구역 / 처치 및 관리 구역 / 의료진 지원 구역 / 복도 및 공용 구역)",
+          "color": "HEX (Blue, Green, Orange, Purple, Grey)",
           "rooms": [
             { "roomName": "string", "areaM2": number, "areaPyung": number, "percentage": number, "description": "string" }
           ]
         }
-      ],
-      "circulationSummary": "string",
-      "prosAndCons": "string"
+      ]
     },
-    {
-      "id": 2,
-      "name": "안 B: ${isOffice ? '중앙 회의 코어 분할형' : '중앙 통로 분할형'}",
-      "conceptDescription": "string",
-      "promptGuidance": "string",
-      "zones": [ { "zoneName": "string", "color": "HEX", "rooms": [ { "roomName": "string", "areaM2": number, "areaPyung": number, "percentage": number, "description": "string" } ] } ],
-      "circulationSummary": "string",
-      "prosAndCons": "string"
-    },
-    {
-      "id": 3,
-      "name": "안 C: ${isOffice ? '창가 조망 임원실/회의실 우선형' : '창가 조망 진료실 우선형'}",
-      "conceptDescription": "string",
-      "promptGuidance": "string",
-      "zones": [ { "zoneName": "string", "color": "HEX", "rooms": [ { "roomName": "string", "areaM2": number, "areaPyung": number, "percentage": number, "description": "string" } ] } ],
-      "circulationSummary": "string",
-      "prosAndCons": "string"
-    },
-    {
-      "id": 4,
-      "name": "안 D: ${isOffice ? '부서별 독립 구획형' : '고객-스태프 동선 분리형'}",
-      "conceptDescription": "string",
-      "promptGuidance": "string",
-      "zones": [ { "zoneName": "string", "color": "HEX", "rooms": [ { "roomName": "string", "areaM2": number, "areaPyung": number, "percentage": number, "description": "string" } ] } ],
-      "circulationSummary": "string",
-      "prosAndCons": "string"
-    }
+    { "id": 2, "name": "안 2: 중앙 아일랜드 코어형", "conceptDescription": "string", "circulationSummary": "string", "zones": [...] },
+    { "id": 3, "name": "안 3: 진료실 창가 채광 일렬형", "conceptDescription": "string", "circulationSummary": "string", "zones": [...] },
+    { "id": 4, "name": "안 4: 환자-의료진 듀얼 동선 분리형", "conceptDescription": "string", "circulationSummary": "string", "zones": [...] },
+    { "id": 5, "name": "안 5: 프라이빗 개별 룸 집중형", "conceptDescription": "string", "circulationSummary": "string", "zones": [...] },
+    { "id": 6, "name": "안 6: 대기-상담-진료 원스톱 직결형", "conceptDescription": "string", "circulationSummary": "string", "zones": [...] },
+    { "id": 7, "name": "안 7: 상담/케어 라운지 중심형", "conceptDescription": "string", "circulationSummary": "string", "zones": [...] },
+    { "id": 8, "name": "안 8: 가변형 모듈러 구획형", "conceptDescription": "string", "circulationSummary": "string", "zones": [...] }
   ]
 }`;
 
@@ -169,7 +128,7 @@ Return ONLY valid JSON matching this schema:
         {
           role: "user",
           parts: [
-            { text: systemPrompt + `\n\nAnalyze the attached 2D CAD floor plan and generate 4 distinct ${isOffice ? 'COMMERCIAL OFFICE' : 'MEDICAL CLINIC'} zoning proposals in JSON.` },
+            { text: systemPrompt + "\n\nAnalyze the attached floor plan and output the 8 complete medical clinic zoning proposals in JSON." },
             {
               inline_data: {
                 mime_type: mimeType,
@@ -208,23 +167,22 @@ Return ONLY valid JSON matching this schema:
 
     const concepts = zoningResult.concepts || [];
 
-    // Step 2: Generate 4 Distinct Diagrams with Strict Domain & Boundary Locking
+    // Step 2: INDE_RENDER Direct Inpainting Style Overlay on the EXACT Base Image for All 8 Concepts
     const imageApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
 
     async function generateConceptDiagram(concept, index) {
       const roomsList = (concept.zones || [])
-        .flatMap(z => (z.rooms || []).map(r => `${r.roomName}(${r.areaPyung}평)`))
+        .flatMap(z => (z.rooms || []).map(r => `${r.roomName}(${r.areaPyung || ''}평)`))
         .join(', ');
 
-      const inpaintPrompt = `Masterpiece 2D architectural CAD floor plan zoning overlay directly on the attached reference drawing.
-TYPE: ${isOffice ? 'COMMERCIAL OFFICE (사무실) ONLY' : 'MEDICAL CLINIC (병원) ONLY'}.
-${isOffice ? 'ABSOLUTE RULE: THIS IS AN OFFICE. DO NOT DRAW HOSPITAL CLINIC ROOMS! Draw office desks, conference tables, executive desk, phone booths, pantry.' : 'ABSOLUTE RULE: THIS IS A MEDICAL CLINIC. Draw clinic reception, doctor room, treatment beds.'}
-BOUNDARY DIRECTIVE (100% LOCK):
-1. Keep the exact outer building perimeter, curtain wall lines, columns, and public cores (stairs, elevator, EPS) in their exact pixel positions without modifying or redrawing them.
+      const inpaintPrompt = `Masterpiece 2D architectural CAD medical clinic floor plan zoning blueprint for ${concept.name || `Option ${index + 1}`}.
+SPECIALTY: ${specialty} (${targetArea}).
+STRICT BOUNDARY & WALL LOCK (100%):
+1. Keep the exact outer building perimeter lines, columns, entrance door, and outer geometry in their exact pixel positions without modifying or redrawing them.
 2. Inside the tenant interior floor space, draw crisp internal partition walls and fill each functional room with distinct soft architectural pastel colors.
-3. ROOMS TO SUBDIVIDE: ${roomsList || concept.conceptDescription || ''}
+3. ROOM SEQUENCE: Entrance leads immediately to [접수/대기실]. Subdivided rooms inside: ${roomsList || concept.conceptDescription || ''}.
 4. Add clear Korean text labels with room names and door swing lines inside each room.
-5. ZERO external building additions, ZERO drawing outside the tenant boundary box. Pure 2D top-down orthographic architectural floor plan presentation sheet.`;
+5. ZERO external additions, ZERO drawing outside the black boundary box. Clean top-down 2D orthographic architectural presentation sheet.`;
 
       const imgPayload = {
         contents: [
@@ -267,7 +225,8 @@ BOUNDARY DIRECTIVE (100% LOCK):
       return image;
     }
 
-    const diagramPromises = (concepts.length > 0 ? concepts : [1, 2, 3, 4]).map((c, i) => generateConceptDiagram(c, i));
+    // Parallel generation for all 8 concepts
+    const diagramPromises = concepts.map((c, i) => generateConceptDiagram(c, i));
     const generatedDiagrams = await Promise.all(diagramPromises);
 
     if (zoningResult.concepts && Array.isArray(zoningResult.concepts)) {
@@ -289,7 +248,7 @@ BOUNDARY DIRECTIVE (100% LOCK):
   } catch (err) {
     return new Response(JSON.stringify({
       success: false,
-      error: err.message || '도면 조닝 처리 중 오류가 발생했습니다.'
+      error: err.message || '병원 도면 조닝 처리 중 오류가 발생했습니다.'
     }), {
       status: 500,
       headers: corsHeaders

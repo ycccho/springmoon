@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SPACE ZONING AI | 병원 및 오피스 4대안 현실 조닝 시스템</title>
-  <meta name="description" content="업로드된 도면의 외곽 벽체를 100% 고정하고 병원 및 사무실 용도에 따라 각기 다른 4가지 현실적 공간 조닝 대안을 산출하는 전문 건축 AI">
+  <title>HOSPITAL ZONING AI | 대한민국 병원·의원 8대안 도면 조닝 시스템</title>
+  <meta name="description" content="외곽 벽체와 입구를 100% 고정한 채 진료과목과 실 개수 맞춤형으로 8가지 최신 병원 인테리어 조닝 대안을 산출하는 전문 의료 건축 AI">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -106,14 +105,14 @@
     .brand-mark {
       width: 30px;
       height: 30px;
-      background: var(--brand-primary);
+      background: #0f172a;
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
       font-size: 0.85rem;
-      color: #ffffff;
+      color: #38bdf8;
       letter-spacing: -0.03em;
     }
 
@@ -170,11 +169,11 @@
       margin: 0 auto;
       padding: 28px 32px 64px;
       display: grid;
-      grid-template-columns: 460px 1fr;
+      grid-template-columns: 480px 1fr;
       gap: 28px;
     }
 
-    @media (max-width: 1080px) {
+    @media (max-width: 1100px) {
       main {
         grid-template-columns: 1fr;
         padding: 20px 16px 48px;
@@ -191,7 +190,7 @@
       box-shadow: var(--shadow-card);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 18px;
     }
 
     .card-header {
@@ -214,45 +213,11 @@
       color: var(--text-muted);
     }
 
-    /* Segmented Tabs */
-    .segmented-control {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: var(--bg-surface-subtle);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
-      padding: 4px;
-      gap: 4px;
-    }
-
-    .segment-btn {
-      padding: 9px 12px;
-      font-size: 0.86rem;
-      font-weight: 600;
-      border: none;
-      border-radius: var(--radius-sm);
-      background: transparent;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .segment-btn.active {
-      background: var(--brand-primary);
-      color: #ffffff;
-      box-shadow: var(--shadow-sm);
-      font-weight: 700;
-    }
-
     /* Upload Zone */
     .upload-zone {
       border: 1.5px dashed var(--border-strong);
       border-radius: var(--radius-md);
-      padding: 32px 20px;
+      padding: 28px 20px;
       text-align: center;
       cursor: pointer;
       background: var(--bg-surface-subtle);
@@ -332,19 +297,109 @@
       background: #ef4444;
     }
 
-    /* Architectural Rules Banner */
-    .rule-banner {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      font-size: 0.8rem;
-      color: #166534;
-      line-height: 1.5;
+    /* Room Counter Controls */
+    .room-counters-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
-    .rule-banner strong {
-      color: #14532d;
+    .counter-card {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .counter-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .counter-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-counter {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .btn-counter:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-focus);
+    }
+
+    .counter-val {
+      font-size: 0.88rem;
+      font-weight: 700;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    /* Options Grid */
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .option-card:hover {
+      background: var(--bg-surface-subtle);
+      border-color: var(--border-strong);
+    }
+
+    .option-card input[type="checkbox"] {
+      margin-top: 3px;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-primary);
+      cursor: pointer;
+    }
+
+    .option-text-group {
+      flex: 1;
+    }
+
+    .option-label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .option-desc {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
 
     .form-group {
@@ -379,7 +434,7 @@
 
     /* Submit Button */
     .btn-submit {
-      background: var(--brand-primary);
+      background: #0f172a;
       color: #ffffff;
       border: none;
       padding: 13px 20px;
@@ -397,7 +452,7 @@
     }
 
     .btn-submit:hover:not(:disabled) {
-      background: var(--brand-primary-hover);
+      background: #000000;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
     }
@@ -413,7 +468,7 @@
       display: flex;
       flex-direction: column;
       min-height: 580px;
-      gap: 20px;
+      gap: 18px;
     }
 
     .empty-state {
@@ -435,8 +490,8 @@
     .progress-container {
       display: none;
       flex-direction: column;
-      gap: 18px;
-      padding: 24px;
+      gap: 16px;
+      padding: 22px;
       background: var(--bg-surface-subtle);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
@@ -482,7 +537,7 @@
       flex-direction: column;
       gap: 8px;
       border-top: 1px solid var(--border-default);
-      padding-top: 14px;
+      padding-top: 12px;
     }
 
     .progress-step {
@@ -504,18 +559,18 @@
       font-weight: 600;
     }
 
-    /* 4-Concept Tabs Bar */
+    /* 8-Concept Tabs Bar */
     .concepts-nav-bar {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
       border-bottom: 1.5px solid var(--border-default);
       padding-bottom: 8px;
     }
 
     .concept-tab {
-      padding: 8px 16px;
-      font-size: 0.84rem;
+      padding: 7px 13px;
+      font-size: 0.82rem;
       font-weight: 600;
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
@@ -541,11 +596,11 @@
       box-shadow: var(--shadow-sm);
     }
 
-    /* 4-Thumbnail Quick Grid */
+    /* 8-Thumbnail Grid */
     .concept-thumb-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+      gap: 8px;
     }
 
     .concept-thumb-card {
@@ -573,18 +628,18 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 4px;
+      padding: 2px;
     }
 
     .concept-thumb-badge {
       position: absolute;
-      top: 4px;
-      left: 4px;
+      top: 3px;
+      left: 3px;
       background: rgba(17, 24, 39, 0.85);
       color: #fff;
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 700;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: var(--radius-sm);
     }
 
@@ -623,19 +678,19 @@
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      font-size: 0.84rem;
+      font-size: 0.82rem;
     }
 
     th {
       background: var(--bg-surface-subtle);
-      padding: 10px 14px;
+      padding: 9px 12px;
       font-weight: 700;
       color: var(--text-secondary);
       border-bottom: 1px solid var(--border-default);
     }
 
     td {
-      padding: 10px 14px;
+      padding: 9px 12px;
       border-bottom: 1px solid var(--border-subtle);
       color: var(--text-main);
     }
@@ -658,7 +713,7 @@
     }
 
     .percent-bar-container {
-      width: 70px;
+      width: 60px;
       height: 6px;
       background: var(--border-subtle);
       border-radius: var(--radius-full);
@@ -678,16 +733,10 @@
       background: var(--bg-surface-subtle);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
-      padding: 16px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-    }
-
-    .concept-title-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      gap: 6px;
     }
 
     .concept-title-text {
@@ -697,7 +746,7 @@
     }
 
     .concept-desc-text {
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       color: var(--text-secondary);
       line-height: 1.5;
     }
@@ -763,14 +812,13 @@
     <div class="header-container">
       <div class="brand-group">
         <a href="/zoning" class="brand">
-          <div class="brand-mark">ZN</div>
-          <span class="brand-title">SPACE ZONING AI</span>
-          <span class="brand-badge">4-CONCEPT STUDIO</span>
+          <div class="brand-mark">HZ</div>
+          <span class="brand-title">HOSPITAL ZONING AI</span>
+          <span class="brand-badge">8-CONCEPT MATRIX</span>
         </a>
         <nav class="nav-links">
           <a href="/render" class="nav-link">3D 실사 렌더링</a>
-          <a href="/zoning" class="nav-link active">도면 조닝 AI</a>
-          <a href="/reference" class="nav-link">레퍼런스 AI <span style="font-size: 0.65rem; font-weight: 700; background: #eff6ff; color: #2563eb; padding: 1px 5px; border-radius: 9999px; border: 1px solid #bfdbfe; margin-left: 2px;">NEW</span></a>
+          <a href="/zoning" class="nav-link active">병원 도면 조닝 AI</a>
         </nav>
       </div>
     </div>
@@ -781,24 +829,14 @@
     <!-- Left Control Panel -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">도면 업로드 및 조닝 조건 설정</div>
-        <div class="card-subtext">외곽 벽체 100% 고정 및 현실적 실별 면적 적용</div>
-      </div>
-
-      <!-- Space Type Toggle -->
-      <div class="segmented-control">
-        <button class="segment-btn active" id="tabHospital" onclick="switchSpaceType('hospital')">
-          병원 / 의원 (Clinic)
-        </button>
-        <button class="segment-btn" id="tabOffice" onclick="switchSpaceType('office')">
-          사무실 / 오피스 (Office)
-        </button>
+        <div class="card-title">병원 도면 업로드 및 실 구성 설정</div>
+        <div class="card-subtext">외곽 벽체 100% 고정 · 출입구 진입 시퀀스 엄수 · 8대안 동시 산출</div>
       </div>
 
       <!-- Floor Plan Upload Zone -->
       <div class="upload-zone" id="dropZone">
-        <div class="upload-text">2D 평면도 이미지를 끌어다 놓으세요</div>
-        <div class="upload-sub">도면의 외곽 벽체와 입구를 고정한 채 내부 4대안을 자동 생성합니다</div>
+        <div class="upload-text">텅 빈 병원 2D 평면도를 끌어다 놓으세요</div>
+        <div class="upload-sub">외곽 벽체와 입구를 고정한 채 8가지 최신 병원 조닝 대안을 생성합니다</div>
         <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/webp">
       </div>
 
@@ -807,69 +845,131 @@
         <button class="btn-remove" onclick="removeFloorplan()">✕</button>
       </div>
 
-      <!-- Realistic Space Standards Banner -->
-      <div class="rule-banner" id="ruleBanner"></div>
+      <!-- Specialty Selector -->
+      <div class="form-group">
+        <label class="form-label" for="selectSpecialty">진료 과목 선택</label>
+        <select id="selectSpecialty" class="select-input">
+          <option value="피부과 / 성형외과" selected>피부과 / 성형외과 (대기·상담·세안·진료·레이저처치·관리실)</option>
+          <option value="치과">치과 (대기·상담·X-ray·체어존·중앙소독실)</option>
+          <option value="이비인후과 / 내과 / 소아과">이비인후과 / 내과 / 소아과 (대기·진료실·호흡기처치실·주사실)</option>
+          <option value="안과">안과 (대기·암실검사실·진료실·상담실·레이저실)</option>
+          <option value="정형외과 / 재활통증의학과">정형외과 / 재활통증의학과 (대기·진료실·물리치료실·도수치료·X-ray)</option>
+          <option value="한의원">한의원 (대기·진료상담실·침구치료실·추나베드·탕전실)</option>
+          <option value="정신건강의학과">정신건강의학과 (프라이빗 대기·방음 상담실·원장 진료실·검사실)</option>
+          <option value="산부인과 / 여성의원">산부인과 / 여성의원 (대기·상담·초음파진료·수술/회복·탈의실)</option>
+        </select>
+      </div>
 
-      <!-- Common Settings -->
+      <!-- Target Area Selector -->
       <div class="form-group">
         <label class="form-label" for="inputArea">예상 전용 면적</label>
-        <select id="inputArea" class="select-input" onchange="updateAreaRuleText()"></select>
+        <select id="inputArea" class="select-input">
+          <option value="30평 (약 99㎡)">30평 (약 99㎡ - 소형 의원 / 4~5개실)</option>
+          <option value="40평 (약 132㎡)">40평 (약 132㎡ - 표준 의원 / 5~6개실)</option>
+          <option value="50평 (약 165㎡)" selected>50평 (약 165㎡ - 중형 클리닉 / 6~7개실)</option>
+          <option value="60평 (약 198㎡)">60평 (약 198㎡ - 중대형 클리닉 / 7~8개실)</option>
+          <option value="70평 (약 231㎡)">70평 (약 231㎡ - 대형 클리닉 / 8~10개실)</option>
+          <option value="80평 (약 264㎡)">80평 (약 264㎡ - 멀티 클리닉 / 10~12개실)</option>
+          <option value="100평 (약 330㎡)">100평 (약 330㎡ - 수술실/복합 클리닉 / 12~15개실)</option>
+          <option value="150평 이상 (약 495㎡+)">150평 이상 (약 495㎡+ - 대형 병원 / 15개실 이상)</option>
+        </select>
       </div>
 
-      <!-- Hospital Dynamic Form -->
-      <div id="hospitalForm" class="options-grid">
-        <div class="form-group">
-          <label class="form-label" for="selectSpecialty">진료 과목 선택</label>
-          <select id="selectSpecialty" class="select-input">
-            <option value="피부과 / 성형외과" selected>피부과 / 성형외과 (대기·상담·진료·피부관리실)</option>
-            <option value="치과">치과 (대기·진료체어존·상담·소독준비실)</option>
-            <option value="이비인후과 / 내과 / 소아과">이비인후과 / 내과 / 소아과 (대기·진료실·호흡기처치실)</option>
-            <option value="안과">안과 (대기·검사실·진료실·상담실)</option>
-            <option value="정형외과 / 통증 / 재활">정형외과 / 통증 / 재활 (대기·진료실·물리치료실·X-ray)</option>
-            <option value="한의원">한의원 (대기·진료상담실·침구치료실·탕전실)</option>
-          </select>
+      <!-- Room Program Counters -->
+      <div>
+        <label class="form-label" style="margin-bottom: 8px; display: block;">필수 실 구성 개수 설정</label>
+        <div class="room-counters-grid">
+          
+          <div class="counter-card">
+            <span class="counter-label">진료실 수</span>
+            <div class="counter-control">
+              <button class="btn-counter" onclick="changeCounter('doctorRooms', -1)">-</button>
+              <span class="counter-val" id="cnt_doctorRooms">2</span>
+              <button class="btn-counter" onclick="changeCounter('doctorRooms', 1)">+</button>
+            </div>
+          </div>
+
+          <div class="counter-card">
+            <span class="counter-label">상담실 수</span>
+            <div class="counter-control">
+              <button class="btn-counter" onclick="changeCounter('counselingRooms', -1)">-</button>
+              <span class="counter-val" id="cnt_counselingRooms">1</span>
+              <button class="btn-counter" onclick="changeCounter('counselingRooms', 1)">+</button>
+            </div>
+          </div>
+
+          <div class="counter-card">
+            <span class="counter-label">처치/관리실</span>
+            <div class="counter-control">
+              <button class="btn-counter" onclick="changeCounter('treatmentRooms', -1)">-</button>
+              <span class="counter-val" id="cnt_treatmentRooms">2</span>
+              <button class="btn-counter" onclick="changeCounter('treatmentRooms', 1)">+</button>
+            </div>
+          </div>
+
+          <div class="counter-card">
+            <span class="counter-label">독립 원장실</span>
+            <div class="counter-control">
+              <button class="btn-counter" onclick="toggleDirectorRoom()" id="btnDirector">있음</button>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Office Dynamic Form -->
-      <div id="officeForm" class="options-grid" style="display: none;">
-        <div class="form-group">
-          <label class="form-label" for="selectOfficeType">업무 조직 유형</label>
-          <select id="selectOfficeType" class="select-input">
-            <option value="일반 기업 본사 / 지사" selected>일반 기업 본사 / 지사 (부서별 고정석·임원실·회의실)</option>
-            <option value="IT / 테크 / 스타트업">IT / 테크 / 스타트업 (워크스테이션·회의실·대표실·탕비실)</option>
-            <option value="전문직 / 금융 / 법무">전문직 / 금융 / 법무 (개인 독립실·기밀 상담실)</option>
-            <option value="크리에이티브 / 에이전시">크리에이티브 / 에이전시 (협업 라운지·스튜디오)</option>
-          </select>
-        </div>
+      <!-- Additional Medical Equipment -->
+      <div class="options-grid">
+        <label class="option-card">
+          <input type="checkbox" id="chkOperationRoom">
+          <div class="option-text-group">
+            <div class="option-label">수술실 및 회복실 (청결 클린코어존)</div>
+            <div class="option-desc">의료진 전용 멸균 동선 및 회복 베드 격리 구획</div>
+          </div>
+        </label>
 
-        <div class="form-group">
-          <label class="form-label" for="inputHeadcount">상주 인원 수</label>
-          <input type="text" id="inputHeadcount" class="text-input" value="10명">
-        </div>
+        <label class="option-card">
+          <input type="checkbox" id="chkXrayRoom">
+          <div class="option-text-group">
+            <div class="option-label">X-ray / 방사선 차폐실 배치</div>
+            <div class="option-desc">납 차폐벽 및 조종실 분리 규격 반영</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Entrance Location -->
+      <div class="form-group">
+        <label class="form-label" for="selectEntrance">주출입구(E.N.T) 위치</label>
+        <select id="selectEntrance" class="select-input">
+          <option value="도면 표시 위치 (기본)" selected>도면 표시 위치 (AI 자동 감지 100% 고정)</option>
+          <option value="하단 좌측 (9시~8시 방향)">하단 좌측 (9시~8시 방향)</option>
+          <option value="하단 중앙 (6시 방향)">하단 중앙 (6시 방향)</option>
+          <option value="하단 우측 (4시~5시 방향)">하단 우측 (4시~5시 방향)</option>
+          <option value="좌측 중앙 (9시 방향)">좌측 중앙 (9시 방향)</option>
+          <option value="우측 중앙 (3시 방향)">우측 중앙 (3시 방향)</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label class="form-label" for="inputCustomReq">추가 요청사항 (선택)</label>
-        <input type="text" id="inputCustomReq" class="text-input" placeholder="예: 메인입구는 9시방향, 대회의실 1개와 대표실 필요">
+        <input type="text" id="inputCustomReq" class="text-input" placeholder="예: 대기실을 호텔 라운지처럼 넓게, 상담실은 시선차단된 프라이빗존으로">
       </div>
 
       <button class="btn-submit" id="btnSubmitZoning">
-        4가지 현실 조닝 대안 일괄 생성 시작
+        8가지 병원 조닝 대안 일괄 생성 시작
       </button>
     </div>
 
     <!-- Right Results Panel -->
     <div class="card results-card">
       <div class="card-header">
-        <div class="card-title">4가지 현실 조닝 대안 비교 뷰어</div>
-        <div class="card-subtext">외곽 벽체 고정 기반 실별 적정 평수 4가지 공간 레이아웃 및 면적 산출표</div>
+        <div class="card-title">8가지 병원 조닝 대안 비교 뷰어</div>
+        <div class="card-subtext">외곽 벽체 및 입구 고정 기반 8대안 공간 레이아웃 & 실별 정밀 면적 산출표</div>
       </div>
 
       <!-- Empty State -->
       <div class="empty-state" id="emptyState">
-        <div class="upload-text">왼쪽에서 평면도 이미지를 업로드하세요</div>
-        <div class="upload-sub">도면의 외곽 벽체를 고정한 채 4가지 각기 다른 배치 대안이 즉시 산출됩니다.</div>
+        <div class="upload-text">왼쪽에서 텅 빈 평면도 이미지를 업로드하세요</div>
+        <div class="upload-sub">도면의 외곽 벽체와 입구를 고정한 채 한국 최신 병원 8대안이 즉시 산출됩니다.</div>
       </div>
 
       <!-- Progress Box -->
@@ -882,36 +982,34 @@
           <div class="progress-fill" id="progressBarFill"></div>
         </div>
         <div class="progress-steps">
-          <div class="progress-step" id="step1">1단계: 평면도 외곽 벽체/기둥 스캔 및 공용부(계단/EV) 제외</div>
-          <div class="progress-step" id="step2">2단계: 4가지 현실 조닝 대안(안 A, B, C, D) 동선/면적 산출</div>
-          <div class="progress-step" id="step3">3단계: 4컷 컬러 조닝 다이어그램 생성 및 도면 완성</div>
+          <div class="progress-step" id="step1">1단계: 평면도 외곽 벽체/기둥 스캔 및 출입구 진입 시퀀스 고정</div>
+          <div class="progress-step" id="step2">2단계: 지정된 실 구성 기반 8가지 병원 조닝 대안(안 1~8) 동선/면적 산출</div>
+          <div class="progress-step" id="step3">3단계: 8컷 컬러 조닝 다이어그램 병렬 렌더링 및 도면 완성</div>
         </div>
       </div>
 
-      <!-- 4-Concept Result Section -->
+      <!-- 8-Concept Result Section -->
       <div id="zoningResultSection" style="display: none; flex-direction: column; gap: 18px;">
         
-        <!-- 4-Concept Tabs -->
+        <!-- 8-Concept Tabs -->
         <div class="concepts-nav-bar" id="conceptsNavBar"></div>
 
-        <!-- 4-Thumbnails Selector Grid -->
+        <!-- 8-Thumbnails Matrix Grid -->
         <div class="concept-thumb-grid" id="conceptThumbGrid"></div>
 
         <!-- Concept Info Card -->
         <div class="concept-info-card" id="conceptInfoCard">
-          <div class="concept-title-row">
-            <span class="concept-title-text" id="conceptTitleText">안 A</span>
-          </div>
+          <div class="concept-title-text" id="conceptTitleText">안 1: 전면 파노라마 대기형</div>
           <p class="concept-desc-text" id="conceptDescText"></p>
         </div>
 
         <!-- Main Diagram View -->
         <div class="diagram-view-box">
-          <img src="" id="mainDiagramImg" alt="Zoning Diagram">
+          <img src="" id="mainDiagramImg" alt="Hospital Zoning Diagram">
         </div>
 
         <div class="result-actions">
-          <a href="#" class="btn-download" id="btnDownloadSelected" download="zoning_concept.jpg">
+          <a href="#" class="btn-download" id="btnDownloadSelected" download="hospital_zoning_concept.jpg">
             선택된 조닝 다이어그램 다운로드
           </a>
         </div>
@@ -919,7 +1017,7 @@
         <!-- Area Breakdown Table -->
         <div>
           <div style="font-size: 0.92rem; font-weight: 700; margin-bottom: 10px; color: var(--text-main);">
-            실별 면적 산출표 (Spatial Area Breakdown)
+            실별 정밀 면적 산출표 (Spatial Area Breakdown)
           </div>
           <div class="table-container">
             <table id="areaTable">
@@ -929,7 +1027,7 @@
                   <th>실 이름 (Room)</th>
                   <th>면적 (㎡ / 평)</th>
                   <th>점유율 (%)</th>
-                  <th>공간 특징 및 기능</th>
+                  <th>공간 특징 및 동선 기능</th>
                 </tr>
               </thead>
               <tbody id="areaTableBody"></tbody>
@@ -945,19 +1043,22 @@
   <div class="toast" id="toastMsg">알림 메시지</div>
 
   <script>
-    let currentSpaceType = 'hospital';
     let currentFloorPlanBase64 = null;
     let conceptsData = [];
     let selectedConceptIndex = 0;
+
+    const counters = {
+      doctorRooms: 2,
+      counselingRooms: 1,
+      treatmentRooms: 2,
+      hasDirectorRoom: true
+    };
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const previewBox = document.getElementById('previewBox');
     const previewImg = document.getElementById('previewImg');
     const btnSubmitZoning = document.getElementById('btnSubmitZoning');
-    const ruleBanner = document.getElementById('ruleBanner');
-    const inputArea = document.getElementById('inputArea');
-    const inputCustomReq = document.getElementById('inputCustomReq');
 
     const emptyState = document.getElementById('emptyState');
     const progressBox = document.getElementById('progressBox');
@@ -974,71 +1075,21 @@
     const btnDownloadSelected = document.getElementById('btnDownloadSelected');
     const areaTableBody = document.getElementById('areaTableBody');
 
-    const areaOptionsData = {
-      hospital: [
-        { value: "30평 (약 99㎡)", text: "30평 (약 99㎡ - 소형 의원 / 4~5개실)" },
-        { value: "50평 (약 165㎡)", text: "50평 (약 165㎡ - 표준 의원 / 6~7개실)" },
-        { value: "60평 (약 198㎡)", text: "60평 (약 198㎡ - 중형 클리닉 / 6~8개실)", selected: true },
-        { value: "70평 (약 231㎡)", text: "70평 (약 231㎡ - 중대형 클리닉 / 8~10개실)" },
-        { value: "100평 (약 330㎡)", text: "100평 (약 330㎡ - 수술실/복합 클리닉 / 12~15개실)" },
-        { value: "150평 이상 (약 495㎡+)", text: "150평 이상 (약 495㎡+ - 대형 병원 / 15개실 이상)" }
-      ],
-      office: [
-        { value: "30평 (약 99㎡)", text: "30평 (약 99㎡ - 소형 오피스 / 8~12인 / 4~5개실)" },
-        { value: "50평 (약 165㎡)", text: "50평 (약 165㎡ - 표준 오피스 / 15~20인 / 5~6개실)" },
-        { value: "60평 (약 198㎡)", text: "60평 (약 198㎡ - 중형 오피스 / 20~25인 / 6~7개실)", selected: true },
-        { value: "70평 (약 231㎡)", text: "70평 (약 231㎡ - 중대형 오피스 / 25~35인 / 7~9개실)" },
-        { value: "100평 (약 330㎡)", text: "100평 (약 330㎡ - 대형 오피스 / 35~50인 / 10~12개실)" },
-        { value: "150평 이상 (약 495㎡+)", text: "150평 이상 (약 495㎡+ - 전사 사옥 / 50인 이상 / 12개실 이상)" }
-      ]
-    };
-
-    function renderAreaOptions() {
-      const options = areaOptionsData[currentSpaceType] || areaOptionsData.hospital;
-      const currentSelectedVal = inputArea.value || "60평 (약 198㎡)";
-      inputArea.innerHTML = '';
-      options.forEach(opt => {
-        const optionEl = document.createElement('option');
-        optionEl.value = opt.value;
-        optionEl.textContent = opt.text;
-        if (opt.value === currentSelectedVal || (opt.selected && !inputArea.value)) {
-          optionEl.selected = true;
-        }
-        inputArea.appendChild(optionEl);
-      });
-      updateAreaRuleText();
-    }
-
-    function updateAreaRuleText() {
-      const val = inputArea.value || '';
-      const isOff = currentSpaceType === 'office';
-      if (val.includes('30평')) {
-        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 30평 기준 복도/벽체를 제외한 실면적(약 22~25평)에 맞춰 ${isOff ? '<strong>오피스 핵심 4~5개 실</strong>(엔트런스, 워크스테이션, 회의실, 대표실, 탕비/OA)' : '<strong>병원 핵심 4~5개 실</strong>(대기실, 진료실, 상담실, 처치관리실, 직원실)'}로 최적화 구획됩니다.`;
-      } else if (val.includes('60평') || val.includes('50평')) {
-        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 50~60평 기준 실면적(약 42~50평)에 맞춰 ${isOff ? '<strong>오피스 핵심 6~7개 실</strong>(접견 라운지, 오픈 워크스테이션, 대회의실, 대표실, 1인 포커스룸, 탕비/팬트리, OA실)' : '<strong>병원 핵심 6~7개 실</strong>(대기실, 진료실 2개, 상담실, 처치실, 관리실, 직원실)'}로 구획됩니다.`;
-      } else {
-        ruleBanner.innerHTML = `<strong>현실적 평수 기준 엄격 적용</strong>: 선택하신 ${isOff ? '사무실' : '병원'} 면적 규모에 맞추어 건축 법규 및 이동 동선 유효폭을 충족하는 실별 적정 평수가 배분됩니다.`;
+    function changeCounter(key, delta) {
+      if (key in counters) {
+        counters[key] = Math.max(0, Math.min(8, counters[key] + delta));
+        const el = document.getElementById(`cnt_${key}`);
+        if (el) el.innerText = counters[key];
       }
     }
 
-    function switchSpaceType(type) {
-      currentSpaceType = type;
-      document.getElementById('tabHospital').classList.toggle('active', type === 'hospital');
-      document.getElementById('tabOffice').classList.toggle('active', type === 'office');
-      document.getElementById('hospitalForm').style.display = type === 'hospital' ? 'flex' : 'none';
-      document.getElementById('officeForm').style.display = type === 'office' ? 'flex' : 'none';
-
-      if (type === 'office') {
-        inputCustomReq.placeholder = "예: 60평이고 메인입구는 9시방향, 대회의실 1개와 대표실 필요";
-      } else {
-        inputCustomReq.placeholder = "예: 60평이고 메인입구는 9시방향, 대기실을 넓게 하고 원장실 1개 배치";
-      }
-
-      renderAreaOptions();
+    function toggleDirectorRoom() {
+      counters.hasDirectorRoom = !counters.hasDirectorRoom;
+      const btn = document.getElementById('btnDirector');
+      btn.innerText = counters.hasDirectorRoom ? '있음' : '없음';
+      btn.style.background = counters.hasDirectorRoom ? '#0f172a' : '#ffffff';
+      btn.style.color = counters.hasDirectorRoom ? '#ffffff' : '#4b5563';
     }
-
-    // Init
-    renderAreaOptions();
 
     // Drag and drop
     ['dragenter', 'dragover'].forEach(eName => {
@@ -1100,34 +1151,37 @@
       zoningResultSection.style.display = 'none';
       progressBox.style.display = 'flex';
 
-      const typeLabel = currentSpaceType === 'office' ? '사무실 / 오피스' : '병원 / 의원';
-      updateProgress(15, `1단계: 평면도 외곽 벽체 고정 및 ${typeLabel} 공간 분석 중...`, 1);
+      updateProgress(15, '1단계: 평면도 외곽 벽체 고정 및 출입구 진입 시퀀스 분석 중...', 1);
 
       const config = {
-        targetArea: inputArea.value,
         specialty: document.getElementById('selectSpecialty').value,
-        officeType: document.getElementById('selectOfficeType').value,
-        headcount: document.getElementById('inputHeadcount').value,
-        customRequirements: inputCustomReq.value
+        targetArea: document.getElementById('inputArea').value,
+        doctorRooms: counters.doctorRooms,
+        counselingRooms: counters.counselingRooms,
+        treatmentRooms: counters.treatmentRooms,
+        hasDirectorRoom: counters.hasDirectorRoom,
+        hasOperationRoom: document.getElementById('chkOperationRoom').checked,
+        hasXrayRoom: document.getElementById('chkXrayRoom').checked,
+        entrancePosition: document.getElementById('selectEntrance').value,
+        customRequirements: document.getElementById('inputCustomReq').value
       };
 
       const savedApiKey = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
 
       try {
         const step2Timer = setTimeout(() => {
-          updateProgress(45, `2단계: ${typeLabel} 4대안(안 A, B, C, D) 동선/면적 산출 중...`, 2);
-        }, 1800);
+          updateProgress(45, '2단계: 8가지 병원 조닝 대안(안 1~8) 동선/면적 산출 중...', 2);
+        }, 2000);
 
         const step3Timer = setTimeout(() => {
-          updateProgress(75, `3단계: 4컷 컬러 조닝 다이어그램 병렬 렌더링 중...`, 3);
-        }, 4000);
+          updateProgress(75, '3단계: 8컷 컬러 조닝 다이어그램 병렬 렌더링 중...', 3);
+        }, 5000);
 
         const response = await fetch('/api/zoning', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             image: currentFloorPlanBase64,
-            spaceType: currentSpaceType,
             config: config,
             apiKey: savedApiKey
           })
@@ -1138,10 +1192,10 @@
 
         const resData = await response.json();
         if (!resData.success) {
-          throw new Error(resData.error || '조닝 분석 중 오류가 발생했습니다.');
+          throw new Error(resData.error || '병원 조닝 분석 중 오류가 발생했습니다.');
         }
 
-        updateProgress(100, `4가지 ${typeLabel} 조닝 대안 생성 완료`, 3);
+        updateProgress(100, '8가지 병원 조닝 대안 생성 완료', 3);
         conceptsData = resData.zoningResult?.concepts || [];
         selectedConceptIndex = 0;
 
@@ -1180,7 +1234,7 @@
     function renderConceptsView() {
       if (!conceptsData || conceptsData.length === 0) return;
 
-      // 1. Render Top Tabs
+      // 1. Render 8 Tabs
       conceptsNavBar.innerHTML = '';
       conceptsData.forEach((concept, idx) => {
         const btn = document.createElement('button');
@@ -1193,14 +1247,14 @@
         conceptsNavBar.appendChild(btn);
       });
 
-      // 2. Render 4-Thumbnails Grid
+      // 2. Render 8-Thumbnails Matrix Grid
       conceptThumbGrid.innerHTML = '';
       conceptsData.forEach((concept, idx) => {
         const thumb = document.createElement('div');
         thumb.className = `concept-thumb-card ${idx === selectedConceptIndex ? 'active' : ''}`;
         thumb.innerHTML = `
           <img src="${concept.diagramImage || currentFloorPlanBase64}">
-          <span class="concept-thumb-badge">대안 ${idx + 1}</span>
+          <span class="concept-thumb-badge">안 ${idx + 1}</span>
         `;
         thumb.addEventListener('click', () => {
           selectedConceptIndex = idx;
@@ -1212,11 +1266,11 @@
       // 3. Render Active Concept Details
       const cur = conceptsData[selectedConceptIndex];
       conceptTitleText.innerText = cur.name || `대안 ${selectedConceptIndex + 1}`;
-      conceptDescText.innerHTML = `<strong>설계 의도:</strong> ${cur.conceptDescription || '-'}<br><strong>동선 및 특징:</strong> ${cur.circulationSummary || '-'}`;
+      conceptDescText.innerHTML = `<strong>설계 컨셉:</strong> ${cur.conceptDescription || '-'}<br><strong>동선 흐름:</strong> ${cur.circulationSummary || '-'}`;
       
       mainDiagramImg.src = cur.diagramImage || currentFloorPlanBase64;
       btnDownloadSelected.href = cur.diagramImage || currentFloorPlanBase64;
-      btnDownloadSelected.download = `zoning_concept_${selectedConceptIndex + 1}.jpg`;
+      btnDownloadSelected.download = `hospital_zoning_concept_${selectedConceptIndex + 1}.jpg`;
 
       // 4. Render Area Table
       areaTableBody.innerHTML = '';
