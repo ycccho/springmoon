@@ -1,3 +1,9 @@
+export async function onRequest() {
+  return new Response(JSON.stringify({ status: 'backup_data' }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
 export const backupStats = {
   "4093046": {
     "2026-01-01": {
