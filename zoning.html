@@ -1136,6 +1136,13 @@
     const apiKeyModal = document.getElementById('apiKeyModal');
     const userApiKeyInput = document.getElementById('userApiKeyInput');
 
+    // Auto-clear legacy depleted key
+    const depK = atob("QVEuQWI4Uk42SzJLOTZWb2FTOVNSYlU5NWZPV21CYUJpZnp0ZnlidWhXbmJkM0RwSmpxelE=");
+    if (localStorage.getItem('inde_render_api_key') === depK) {
+      localStorage.removeItem('inde_render_api_key');
+      localStorage.removeItem('ppok_gemini_api_key');
+    }
+
     function openApiKeyModal() {
       userApiKeyInput.value = localStorage.getItem('inde_render_api_key') || localStorage.getItem('ppok_gemini_api_key') || '';
       apiKeyModal.style.display = 'flex';

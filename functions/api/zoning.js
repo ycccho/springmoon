@@ -210,78 +210,15 @@ Return ONLY a valid JSON object matching this schema:
 
     const concepts = zoningResult.concepts || [];
 
-    // Step 2: INDE_RENDER Direct Inpainting Style Overlay on the EXACT Base Image for All 8 Concepts
-    const imageApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-    async function generateConceptDiagram(concept, index) {
-      const roomsList = (concept.zones || [])
-        .flatMap(z => (z.rooms || []).map(r => `${r.roomName}(${r.areaPyung || ''}평)`))
-        .join(', ');
-
-      const inpaintPrompt = `Masterpiece 2D architectural CAD medical clinic floor plan zoning blueprint for ${concept.name || `Option ${index + 1}`}.
-SPECIALTY: ${specialty} (${targetArea}).
-STRICT BOUNDARY & WALL LOCK (100%):
-1. Keep the exact outer building perimeter lines, columns, entrance door, and outer geometry in their exact pixel positions without modifying or redrawing them.
-2. Inside the tenant interior floor space, draw crisp internal partition walls and fill each functional room with distinct soft architectural pastel colors.
-3. ROOM SEQUENCE: Entrance leads immediately to [접수/대기실]. Subdivided rooms inside: ${roomsList || concept.conceptDescription || ''}.
-4. Add clear Korean text labels with room names and door swing lines inside each room.
-5. ZERO external additions, ZERO drawing outside the black boundary box. Clean top-down 2D orthographic architectural presentation sheet.`;
-
-      const imgPayload = {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: inpaintPrompt },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Data
-                }
-              }
-            ]
-          }
-        ]
-      };
-
-      try {
-        const res = await fetch(imageApiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(imgPayload)
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const parts = data.candidates?.[0]?.content?.parts || [];
-          for (const p of parts) {
-            const inlineObj = p.inlineData || p.inline_data;
-            if (inlineObj && inlineObj.data) {
-              const mime = inlineObj.mimeType || inlineObj.mime_type || 'image/jpeg';
-              return `data:${mime};base64,${inlineObj.data}`;
-            }
-          }
-        }
-      } catch (e) {
-        console.error(`Concept ${index + 1} diagram error:`, e);
-      }
-      return image;
-    }
-
-    // Parallel generation for all 8 concepts
-    const diagramPromises = concepts.map((c, i) => generateConceptDiagram(c, i));
-    const generatedDiagrams = await Promise.all(diagramPromises);
-
     if (zoningResult.concepts && Array.isArray(zoningResult.concepts)) {
       zoningResult.concepts.forEach((concept, idx) => {
-        concept.diagramImage = generatedDiagrams[idx] || image;
+        concept.diagramImage = image;
       });
     }
 
     return new Response(JSON.stringify({
       success: true,
       zoningResult,
-      diagrams: generatedDiagrams,
       originalFloorPlan: image
     }), {
       status: 200,
