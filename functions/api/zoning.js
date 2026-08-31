@@ -17,8 +17,8 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Default Free Key
-    const fallbackKey = atob("QVEuQWI4Uk42SlZpVGFFS19kcExWUGlmLTZlbmpubG9QVXVZVmxGUm5YQ1QtZmZtdnd6Unc=");
+    // Default Key
+    const fallbackKey = atob("QVEuQWI4Uk42Sno4TUk3UTR2U1N5bDRMNlJ4d0E3aUZwWHBFalFNcFY0M2pkRHNfWC0wM1E=");
     let apiKey = clientApiKey || context.env?.GEMINI_API_KEY || fallbackKey;
 
     let mimeType = 'image/jpeg';
@@ -160,8 +160,6 @@ Return ONLY a valid JSON object matching this schema:
   ]
 }`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(apiKey)}`;
-    
     const analysisPayload = {
       contents: [
         {
@@ -183,19 +181,31 @@ Return ONLY a valid JSON object matching this schema:
       }
     };
 
-    const visionRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(analysisPayload)
-    });
+    const candidateModels = ['gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest'];
+    let visionRes = null;
+    let lastErrText = '';
 
-    if (!visionRes.ok) {
-      const errText = await visionRes.text();
-      let customErr = `도면 분석 API 오류 (${visionRes.status}): ${errText}`;
-      if (visionRes.status === 429 && (errText.includes('prepayment credits are depleted') || errText.includes('RESOURCE_EXHAUSTED'))) {
-        customErr = 'Google AI Studio의 선불 충전 크레딧이 소진되었습니다. 우측 상단 [API 키 설정]에서 새 무료 API 키(AIzaSy...)를 등록하시거나, Google AI Studio에서 크레딧을 추가 충전해 주세요.';
+    for (const modelName of candidateModels) {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      try {
+        const res = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(analysisPayload)
+        });
+        if (res.ok) {
+          visionRes = res;
+          break;
+        } else {
+          lastErrText = await res.text();
+        }
+      } catch (e) {
+        lastErrText = e.message;
       }
-      throw new Error(customErr);
+    }
+
+    if (!visionRes) {
+      throw new Error(`모든 모델 호출 실패: ${lastErrText}`);
     }
 
     const visionData = await visionRes.json();
