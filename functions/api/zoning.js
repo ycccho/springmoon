@@ -134,6 +134,7 @@ Return ONLY a valid JSON object matching this schema:
 {
   "specialty": "${specialty}",
   "totalArea": "${targetArea}",
+  "buildingInteriorPolygon": [[225, 307], [225, 540], [340, 655], [472, 693], [762, 693], [762, 381], [677, 381], [677, 307]],
   "concepts": [
     {
       "id": 1,
@@ -143,9 +144,16 @@ Return ONLY a valid JSON object matching this schema:
       "zones": [
         {
           "zoneName": "string (대기/접수 구역 / 진료 및 상담 구역 / 처치 및 관리 구역 / 의료진 지원 구역 / 복도 및 공용 구역)",
-          "color": "HEX (Blue, Green, Orange, Purple, Grey)",
+          "color": "HEX (#3b82f6, #10b981, #f59e0b, #8b5cf6, #64748b)",
           "rooms": [
-            { "roomName": "string", "areaM2": number, "areaPyung": number, "percentage": number, "description": "string" }
+            {
+              "roomName": "string",
+              "areaM2": number,
+              "areaPyung": number,
+              "percentage": number,
+              "description": "string",
+              "poly": [[600, 381], [600, 690], [755, 690], [755, 381]]
+            }
           ]
         }
       ]
