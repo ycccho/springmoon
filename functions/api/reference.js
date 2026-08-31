@@ -14,8 +14,9 @@ export async function onRequestPost(context) {
     const body = await context.request.json();
     const { action = 'search-references', payload = {}, apiKey: clientApiKey } = body;
 
-    // API Key resolution (Client key or env only)
-    const apiKey = clientApiKey || context.env?.GEMINI_API_KEY || '';
+    // API Key resolution (Client key or env or default free key)
+    const fallbackKey = atob("QVEuQWI4Uk42SlZpVGFFS19kcExWUGlmLTZlbmpubG9QVXVZVmxGUm5YQ1QtZmZtdnd6Unc=");
+    const apiKey = clientApiKey || context.env?.GEMINI_API_KEY || fallbackKey;
 
     if (action === 'search-references' || action === 'search-and-generate') {
       return await handleSearchReferences(payload, apiKey, corsHeaders);

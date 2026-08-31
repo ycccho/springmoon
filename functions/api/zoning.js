@@ -17,8 +17,8 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Tier-1 Paid Key fallback
-    const fallbackKey = atob("QVEuQWI4Uk42SzJLOTZWb2FTOVNSYlU5NWZPV21CYUJpZnp0ZnlidWhXbmJkM0RwSmpxelE=");
+    // Default Free Key
+    const fallbackKey = atob("QVEuQWI4Uk42SlZpVGFFS19kcExWUGlmLTZlbmpubG9QVXVZVmxGUm5YQ1QtZmZtdnd6Unc=");
     let apiKey = clientApiKey || context.env?.GEMINI_API_KEY || fallbackKey;
 
     let mimeType = 'image/jpeg';
@@ -160,7 +160,7 @@ Return ONLY a valid JSON object matching this schema:
   ]
 }`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(apiKey)}`;
     
     const analysisPayload = {
       contents: [
