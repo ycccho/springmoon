@@ -953,69 +953,11 @@
         </select>
       </div>
 
-      <!-- Room Program Counters -->
-      <div>
-        <label class="form-label" style="margin-bottom: 8px; display: block;">필수 실 구성 개수 설정</label>
-        <div class="room-counters-grid">
-          
-          <div class="counter-card">
-            <span class="counter-label">진료실 수</span>
-            <div class="counter-control">
-              <button class="btn-counter" onclick="changeCounter('doctorRooms', -1)">-</button>
-              <span class="counter-val" id="cnt_doctorRooms">2</span>
-              <button class="btn-counter" onclick="changeCounter('doctorRooms', 1)">+</button>
-            </div>
-          </div>
-
-          <div class="counter-card">
-            <span class="counter-label">상담실 수</span>
-            <div class="counter-control">
-              <button class="btn-counter" onclick="changeCounter('counselingRooms', -1)">-</button>
-              <span class="counter-val" id="cnt_counselingRooms">1</span>
-              <button class="btn-counter" onclick="changeCounter('counselingRooms', 1)">+</button>
-            </div>
-          </div>
-
-          <div class="counter-card">
-            <span class="counter-label">처치/관리실</span>
-            <div class="counter-control">
-              <button class="btn-counter" onclick="changeCounter('treatmentRooms', -1)">-</button>
-              <span class="counter-val" id="cnt_treatmentRooms">2</span>
-              <button class="btn-counter" onclick="changeCounter('treatmentRooms', 1)">+</button>
-            </div>
-          </div>
-
-          <div class="counter-card">
-            <span class="counter-label">독립 원장실</span>
-            <div class="counter-control">
-              <button class="btn-counter" onclick="toggleDirectorRoom()" id="btnDirector">있음</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Additional Medical Equipment -->
-      <div class="options-grid">
-        <label class="option-card">
-          <input type="checkbox" id="chkOperationRoom">
-          <div class="option-text-group">
-            <div class="option-label">수술실 및 회복실 (청결 클린코어존)</div>
-            <div class="option-desc">의료진 전용 멸균 동선 및 회복 베드 격리 구획</div>
-          </div>
-        </label>
-
-        <label class="option-card">
-          <input type="checkbox" id="chkXrayRoom">
-          <div class="option-text-group">
-            <div class="option-label">X-ray / 방사선 차폐실 배치</div>
-            <div class="option-desc">납 차폐벽 및 조종실 분리 규격 반영</div>
-          </div>
-        </label>
-      </div>
+      <!-- Dynamic Specialty Room Program & Equipment -->
+      <div id="specialtyConfigContainer" style="display: flex; flex-direction: column; gap: 16px;"></div>
 
       <!-- Entrance Location -->
-      <div class="form-group">
+      <div class="form-group" style="margin-top: 4px;">
         <label class="form-label" for="selectEntrance">주출입구(E.N.T) 위치</label>
         <select id="selectEntrance" class="select-input">
           <option value="도면 표시 위치 (기본)" selected>도면 표시 위치 (AI 자동 감지 100% 고정)</option>
@@ -1211,21 +1153,187 @@
       closeApiKeyModal();
     }
 
-    function changeCounter(key, delta) {
+    // Dynamic Medical Specialty Presets
+    const SPECIALTY_PRESETS = {
+      '치과': {
+        counters: [
+          { key: 'chairZones', label: '오픈 진료구역 (체어 수)', default: 4, min: 1, max: 15, unit: '대' },
+          { key: 'counselingRooms', label: '상담실 수', default: 1, min: 0, max: 5, unit: '개' },
+          { key: 'vipRooms', label: '독립 VIP 진료실 (임플란트/특진)', default: 1, min: 0, max: 5, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 대표 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkCT', label: '3D-CT / X-ray 파노라마 차폐실', desc: '납 차폐벽 및 파노라마 촬영 구역 배치', checked: true },
+          { id: 'chkSterile', label: '중앙 멸균 소독실 (의료진 접근 최단화)', desc: '오픈 체어존과 VIP 진료실 중앙 동선 연계', checked: true },
+          { id: 'chkLab', label: '기공실 / 메이크업 & 예진존', desc: '석고 트랩 배수 및 환자 파우더 공간', checked: true }
+        ]
+      },
+      '피부과 / 성형외과': {
+        counters: [
+          { key: 'doctorRooms', label: '진료실 수', default: 2, min: 1, max: 6, unit: '개' },
+          { key: 'counselingRooms', label: '상담실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'treatmentRooms', label: '레이저 처치 / 피부관리실', default: 2, min: 1, max: 8, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 대표 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkOperationRoom', label: '수술실 및 회복실 (청결 클린코어존)', desc: '의료진 전용 멸균 동선 및 회복 베드 격리 구획', checked: false },
+          { id: 'chkPowder', label: '세안실 / 파우더룸 & 락커존', desc: '환자 시술 전후 세안 및 프라이빗 락커', checked: true }
+        ]
+      },
+      '이비인후과 / 내과 / 소아과': {
+        counters: [
+          { key: 'doctorRooms', label: '진료실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'treatmentRooms', label: '호흡기치료 / 주사실', default: 1, min: 1, max: 4, unit: '개' },
+          { key: 'counselingRooms', label: '영양수액실 (베드존)', default: 1, min: 0, max: 4, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkXrayRoom', label: 'X-ray / 방사선실', desc: '흉부/부비동 촬영 차폐벽 반영', checked: true },
+          { id: 'chkEndo', label: '내시경 / 임상병리실', desc: '소화기 내시경 및 세척 소독 구획', checked: false }
+        ]
+      },
+      '정형외과 / 재활통증의학과': {
+        counters: [
+          { key: 'doctorRooms', label: '진료실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'dosuRooms', label: '1:1 도수치료실', default: 2, min: 1, max: 6, unit: '개' },
+          { key: 'physicalBeds', label: '물리치료 베드존', default: 4, min: 2, max: 12, unit: '베드' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkXrayRoom', label: 'X-ray / C-arm 차폐실', desc: '투시조영 및 방사선 방어 규격', checked: true },
+          { id: 'chkLocker', label: '환자 탈의실 & 락커룸', desc: '남/여 분리 탈의 공간', checked: true }
+        ]
+      },
+      '한의원': {
+        counters: [
+          { key: 'doctorRooms', label: '원장 진료/상담실', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'acupunctureBeds', label: '침구 치료실 (베드 수)', default: 6, min: 2, max: 15, unit: '베드' },
+          { key: 'chunaRooms', label: '추나 치료실', default: 1, min: 0, max: 3, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 대표실', default: true }
+        ],
+        options: [
+          { id: 'chkTangjeon', label: '탕전실 & 약재 보관실', desc: '배기 덕트 및 급배수 설비 구획', checked: true },
+          { id: 'chkPhysical', label: '물리치료 / 견인치료존', desc: '온열 및 한방 물리치료 구획', checked: true }
+        ]
+      },
+      '안과': {
+        counters: [
+          { key: 'doctorRooms', label: '진료실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'darkExamRoom', label: '암실 정밀 검사실', default: 1, min: 1, max: 3, unit: '개' },
+          { key: 'counselingRooms', label: '상담실 수', default: 1, min: 0, max: 3, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkLaserOp', label: '시력교정 레이저 수술실 / 회복실', desc: '양압 공조 및 무균 수술 구획', checked: false },
+          { id: 'chkVisionPrep', label: '시력검사 및 안경/렌즈 피팅존', desc: '대기실 연계 오픈 검안 구역', checked: true }
+        ]
+      },
+      '정신건강의학과': {
+        counters: [
+          { key: 'doctorRooms', label: '원장 심층진료실 (방음)', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'counselingRooms', label: '임상 심리상담실 (방음)', default: 1, min: 0, max: 4, unit: '개' },
+          { key: 'examRooms', label: '정밀 뇌파/스트레스 검사실', default: 1, min: 0, max: 3, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkPrivateWaiting', label: '프라이빗 1인 개별 대기 부스', desc: '환자 간 시선 차단 독립 대기석', checked: true },
+          { id: 'chkTMS', label: 'TMS 자기자극 치료실', desc: '편안한 리클라이너 체어 배치', checked: false }
+        ]
+      },
+      '산부인과 / 여성의원': {
+        counters: [
+          { key: 'doctorRooms', label: '진료실 (초음파실 연계)', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'counselingRooms', label: '상담실 수', default: 1, min: 0, max: 3, unit: '개' },
+          { key: 'treatmentRooms', label: '처치실 / 태동검사실', default: 1, min: 1, max: 4, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkOpRecovery', label: '소수술실 및 회복실', desc: '프라이빗 회복 베드 및 락커', checked: true },
+          { id: 'chkToiletLock', label: '진료실 직결 전용 화장실 & 탈의실', desc: '환자 동선 차단 내부 연결', checked: true }
+        ]
+      }
+    };
+
+    const specialtyConfigContainer = document.getElementById('specialtyConfigContainer');
+    const selectSpecialty = document.getElementById('selectSpecialty');
+
+    function renderSpecialtyConfig() {
+      const selected = selectSpecialty.value;
+      const preset = SPECIALTY_PRESETS[selected] || SPECIALTY_PRESETS['피부과 / 성형외과'];
+
+      // Reset counters state for the active preset
+      counters = {};
+      let countersHtml = `
+        <div>
+          <label class="form-label" style="margin-bottom: 8px; display: block;">필수 실 구성 개수 설정 (${selected})</label>
+          <div class="room-counters-grid">
+      `;
+
+      preset.counters.forEach(c => {
+        counters[c.key] = c.default;
+        if (c.type === 'toggle') {
+          countersHtml += `
+            <div class="counter-card">
+              <span class="counter-label">${c.label}</span>
+              <div class="counter-control">
+                <button class="btn-counter" onclick="toggleSpecialtyRoom('${c.key}')" id="btn_${c.key}" style="background: #0f172a; color: #ffffff;">있음</button>
+              </div>
+            </div>
+          `;
+        } else {
+          countersHtml += `
+            <div class="counter-card">
+              <span class="counter-label">${c.label}</span>
+              <div class="counter-control">
+                <button class="btn-counter" onclick="changeSpecialtyCounter('${c.key}', -1, ${c.min}, ${c.max})">-</button>
+                <span class="counter-val" id="cnt_${c.key}">${c.default}</span>
+                <button class="btn-counter" onclick="changeSpecialtyCounter('${c.key}', 1, ${c.min}, ${c.max})">+</button>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      countersHtml += `</div></div>`;
+
+      // Options
+      let optionsHtml = `<div class="options-grid">`;
+      preset.options.forEach(opt => {
+        optionsHtml += `
+          <label class="option-card">
+            <input type="checkbox" id="${opt.id}" ${opt.checked ? 'checked' : ''}>
+            <div class="option-text-group">
+              <div class="option-label">${opt.label}</div>
+              <div class="option-desc">${opt.desc}</div>
+            </div>
+          </label>
+        `;
+      });
+      optionsHtml += `</div>`;
+
+      specialtyConfigContainer.innerHTML = countersHtml + optionsHtml;
+    }
+
+    function changeSpecialtyCounter(key, delta, min, max) {
       if (key in counters) {
-        counters[key] = Math.max(0, Math.min(8, counters[key] + delta));
+        counters[key] = Math.max(min, Math.min(max, counters[key] + delta));
         const el = document.getElementById(`cnt_${key}`);
         if (el) el.innerText = counters[key];
       }
     }
 
-    function toggleDirectorRoom() {
-      counters.hasDirectorRoom = !counters.hasDirectorRoom;
-      const btn = document.getElementById('btnDirector');
-      btn.innerText = counters.hasDirectorRoom ? '있음' : '없음';
-      btn.style.background = counters.hasDirectorRoom ? '#0f172a' : '#ffffff';
-      btn.style.color = counters.hasDirectorRoom ? '#ffffff' : '#4b5563';
+    function toggleSpecialtyRoom(key) {
+      counters[key] = !counters[key];
+      const btn = document.getElementById(`btn_${key}`);
+      if (btn) {
+        btn.innerText = counters[key] ? '있음' : '없음';
+        btn.style.background = counters[key] ? '#0f172a' : '#ffffff';
+        btn.style.color = counters[key] ? '#ffffff' : '#4b5563';
+      }
     }
+
+    selectSpecialty.addEventListener('change', renderSpecialtyConfig);
+    renderSpecialtyConfig(); // Initial render
 
     // Drag and drop
     ['dragenter', 'dragover'].forEach(eName => {
@@ -1289,15 +1397,23 @@
 
       updateProgress(15, '1단계: 평면도 외곽 벽체 고정 및 출입구 진입 시퀀스 분석 중...', 1);
 
+      const specialtyVal = document.getElementById('selectSpecialty').value;
+      const optionsChecked = {};
+      const preset = SPECIALTY_PRESETS[specialtyVal] || SPECIALTY_PRESETS['피부과 / 성형외과'];
+      preset.options.forEach(opt => {
+        const el = document.getElementById(opt.id);
+        if (el) optionsChecked[opt.label] = el.checked;
+      });
+
       const config = {
-        specialty: document.getElementById('selectSpecialty').value,
+        specialty: specialtyVal,
         targetArea: document.getElementById('inputArea').value,
-        doctorRooms: counters.doctorRooms,
-        counselingRooms: counters.counselingRooms,
-        treatmentRooms: counters.treatmentRooms,
-        hasDirectorRoom: counters.hasDirectorRoom,
-        hasOperationRoom: document.getElementById('chkOperationRoom').checked,
-        hasXrayRoom: document.getElementById('chkXrayRoom').checked,
+        counters: counters,
+        optionsChecked: optionsChecked,
+        doctorRooms: counters.doctorRooms || counters.chairZones || 2,
+        counselingRooms: counters.counselingRooms || 1,
+        treatmentRooms: counters.treatmentRooms || counters.vipRooms || 2,
+        hasDirectorRoom: counters.hasDirectorRoom !== undefined ? counters.hasDirectorRoom : true,
         entrancePosition: document.getElementById('selectEntrance').value,
         customRequirements: document.getElementById('inputCustomReq').value
       };

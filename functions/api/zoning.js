@@ -32,30 +32,46 @@ export async function onRequestPost(context) {
     const {
       specialty = '피부과 / 성형외과',
       targetArea = '50평 (약 165㎡)',
-      doctorRooms = 2,
-      counselingRooms = 1,
-      hasDirectorRoom = true,
-      treatmentRooms = 2,
-      hasOperationRoom = false,
-      hasXrayRoom = false,
+      counters = {},
+      optionsChecked = {},
       entrancePosition = '도면 표시 위치 (기본)',
       customRequirements = ''
     } = config;
+
+    let specialtyDetails = '';
+    if (specialty.includes('치과')) {
+      specialtyDetails = `
+  * 대기실 및 접수/수납 리셉션 (1개 필수, 출입문 진입 시 첫 공간)
+  * 오픈 진료구역 (체어존): ${counters.chairZones || 4}대 (오픈/세미오픈 체어 배치)
+  * 상담실: ${counters.counselingRooms || 1}개 (상담실장/원장 상담)
+  * 독립 VIP 진료실 (임플란트/수술/특진실): ${counters.vipRooms || 1}개
+  * 대표 원장실: ${counters.hasDirectorRoom ? '1개' : '없음 (진료구역 내부 겸용)'}
+  * 3D-CT / X-ray 파노라마 차폐실: 1개 (납 차폐벽 및 파노라마 촬영 구역)
+  * 중앙 멸균 소독실: 1개 (오픈 체어존과 VIP 진료실에서 최단 접근 가능한 중앙 코어 배치)
+  * 기공실 및 파우더/예진존: 1개
+  * 직원 휴게실 및 락커룸: 1개`;
+    } else {
+      const countersText = Object.entries(counters)
+        .map(([k, v]) => `  * ${k}: ${typeof v === 'boolean' ? (v ? '있음' : '없음') : v + '개'}`)
+        .join('\n');
+      const optionsText = Object.entries(optionsChecked)
+        .filter(([k, v]) => v)
+        .map(([k]) => `  * ${k} (필수 배치)`)
+        .join('\n');
+      specialtyDetails = `
+  * 대기실 및 접수/수납 리셉션 (1개 필수, 출입문 진입 시 첫 공간)
+${countersText}
+${optionsText}
+  * 직원 휴게실 및 소독준비실: 1개
+  * 파우더룸 및 세면/화장실`;
+    }
 
     const roomRequirementsSummary = `
 - 진료 과목: ${specialty}
 - 전용 면적: ${targetArea}
 - 주출입구(E.N.T): ${entrancePosition}
 - 필수 실 구성 요청:
-  * 대기실 및 접수/수납 리셉션 (1개 필수, 출입문 진입 시 첫 공간)
-  * 진료실: ${doctorRooms}개
-  * 상담실: ${counselingRooms}개
-  * 원장실(대표실): ${hasDirectorRoom ? '1개 (독립 원장실 필요)' : '없음 (진료실 내부 겸용)'}
-  * 처치/피부관리실: ${treatmentRooms}개
-  * 수술실 및 회복실: ${hasOperationRoom ? '1개 (청결 멸균 구역)' : '없음'}
-  * X-ray / 방사선 차폐실: ${hasXrayRoom ? '1개 (납 차폐벽 및 조종부 필요)' : '없음'}
-  * 직원 휴게실 및 소독준비실: 1개
-  * 파우더룸 및 세면/화장실
+${specialtyDetails}
 - 사용자 추가 메모: ${customRequirements || '최신 한국 병원 인테리어 트렌드 및 완벽한 동선 반영'}
 `;
 
