@@ -93,7 +93,7 @@ ${roomRequirementsSummary}
    - All rooms must be accessible via clear, unblocked main corridors with a minimum effective width of 1,200mm ~ 1,500mm.
    - Zero dead-end blocked corridors, zero inaccessible rooms.
 4. EXACT ROOM PROGRAM ADHERENCE:
-   - Exactly implement the user requested room counts (${doctorRooms} doctor rooms, ${counselingRooms} counseling rooms, ${treatmentRooms} treatment rooms, etc.).
+   - Exactly implement the user requested room counts, chair counts, VIP rooms, and specialty medical equipment specified in PROJECT PARAMETERS above.
 5. MEDICAL CLEAN / DIRTY DISINFECTION PROTOCOL:
    - Separate patient circulation from staff/sterile sterilization pathways.
    - For dermatology/plastic surgery: Lounge -> Counseling -> Wash -> Doctor/Laser -> Operation/Recovery -> Staff.
