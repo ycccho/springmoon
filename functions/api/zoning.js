@@ -191,7 +191,11 @@ Return ONLY a valid JSON object matching this schema:
 
     if (!visionRes.ok) {
       const errText = await visionRes.text();
-      throw new Error(`도면 분석 API 오류 (${visionRes.status}): ${errText}`);
+      let customErr = `도면 분석 API 오류 (${visionRes.status}): ${errText}`;
+      if (visionRes.status === 429 && (errText.includes('prepayment credits are depleted') || errText.includes('RESOURCE_EXHAUSTED'))) {
+        customErr = 'Google AI Studio의 선불 충전 크레딧이 소진되었습니다. 우측 상단 [API 키 설정]에서 새 무료 API 키(AIzaSy...)를 등록하시거나, Google AI Studio에서 크레딧을 추가 충전해 주세요.';
+      }
+      throw new Error(customErr);
     }
 
     const visionData = await visionRes.json();
