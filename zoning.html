@@ -956,6 +956,17 @@
       <!-- Dynamic Specialty Room Program & Equipment -->
       <div id="specialtyConfigContainer" style="display: flex; flex-direction: column; gap: 16px;"></div>
 
+      <!-- Building Infrastructure / Toilet Option -->
+      <div class="options-grid" style="margin-top: 2px;">
+        <label class="option-card">
+          <input type="checkbox" id="chkInternalToilet">
+          <div class="option-text-group">
+            <div class="option-label">호실 내부 전용 화장실 신설 배치</div>
+            <div class="option-desc">체크 시 내부에 전용 화장실 구획 (해제 시 상가 복도 공용 화장실 이용)</div>
+          </div>
+        </label>
+      </div>
+
       <!-- Entrance Location -->
       <div class="form-group" style="margin-top: 4px;">
         <label class="form-label" for="selectEntrance">주출입구(E.N.T) 위치</label>
@@ -1414,6 +1425,7 @@
         counselingRooms: counters.counselingRooms || 1,
         treatmentRooms: counters.treatmentRooms || counters.vipRooms || 2,
         hasDirectorRoom: counters.hasDirectorRoom !== undefined ? counters.hasDirectorRoom : true,
+        hasInternalToilet: document.getElementById('chkInternalToilet').checked,
         entrancePosition: document.getElementById('selectEntrance').value,
         customRequirements: document.getElementById('inputCustomReq').value
       };

@@ -34,9 +34,14 @@ export async function onRequestPost(context) {
       targetArea = '50평 (약 165㎡)',
       counters = {},
       optionsChecked = {},
+      hasInternalToilet = false,
       entrancePosition = '도면 표시 위치 (기본)',
       customRequirements = ''
     } = config;
+
+    const toiletRequirement = hasInternalToilet
+      ? '  * 호실 내부 전용 화장실 (신설 구획 필수): 1개 (약 1.5~2.5평 / 배수 배관 위치 연계, 대기실 또는 파우더룸 인근 구획)'
+      : '  * 화장실: 건물 공용 화장실 이용 (호실 내부 화장실 미설치하여 진료/대기 공간 면적 극대화)';
 
     let specialtyDetails = '';
     if (specialty.includes('치과')) {
@@ -49,7 +54,8 @@ export async function onRequestPost(context) {
   * 3D-CT / X-ray 파노라마 차폐실: 1개 (납 차폐벽 및 파노라마 촬영 구역)
   * 중앙 멸균 소독실: 1개 (오픈 체어존과 VIP 진료실에서 최단 접근 가능한 중앙 코어 배치)
   * 기공실 및 파우더/예진존: 1개
-  * 직원 휴게실 및 락커룸: 1개`;
+  * 직원 휴게실 및 락커룸: 1개
+${toiletRequirement}`;
     } else {
       const countersText = Object.entries(counters)
         .map(([k, v]) => `  * ${k}: ${typeof v === 'boolean' ? (v ? '있음' : '없음') : v + '개'}`)
@@ -63,7 +69,8 @@ export async function onRequestPost(context) {
 ${countersText}
 ${optionsText}
   * 직원 휴게실 및 소독준비실: 1개
-  * 파우더룸 및 세면/화장실`;
+  * 파우더룸 및 세면존
+${toiletRequirement}`;
     }
 
     const roomRequirementsSummary = `
