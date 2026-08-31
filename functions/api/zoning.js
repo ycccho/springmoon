@@ -17,9 +17,9 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Default Key
-    const fallbackKey = atob("QVEuQWI4Uk42Sno4TUk3UTR2U1N5bDRMNlJ4d0E3aUZwWHBFalFNcFY0M2pkRHNfWC0wM1E=");
-    let apiKey = clientApiKey || context.env?.GEMINI_API_KEY || fallbackKey;
+    // Active Working Key
+    const activeKey = atob("QVEuQWI4Uk42Sno4TUk3UTR2U1N5bDRMNlJ4d0E3aUZwWHBFalFNcFY0M2pkRHNfWC0wM1E=");
+    let apiKey = clientApiKey || activeKey;
 
     let mimeType = 'image/jpeg';
     let base64Data = image;
@@ -205,7 +205,7 @@ Return ONLY a valid JSON object matching this schema:
     }
 
     if (!visionRes) {
-      throw new Error(`모든 모델 호출 실패: ${lastErrText}`);
+      throw new Error(`모든 모델 호출 실패 (Key: ${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 4)}): ${lastErrText}`);
     }
 
     const visionData = await visionRes.json();
