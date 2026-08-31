@@ -1590,89 +1590,102 @@
     }
 
     // Canvas 2D Architectural Zoning Generator for 8 Distinct Medical Concepts
-    async function generateConceptDiagram(baseImgSrc, concept, conceptIndex) {
+    function generateConceptDiagram(baseImgSrc, concept, conceptIndex) {
       return new Promise((resolve) => {
+        let isDone = false;
         const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = img.naturalWidth || 1200;
-          canvas.height = img.naturalHeight || 900;
-          const W = canvas.width;
-          const H = canvas.height;
+        const doRender = () => {
+          if (isDone) return;
+          isDone = true;
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.naturalWidth || 1200;
+            canvas.height = img.naturalHeight || 900;
+            const W = canvas.width;
+            const H = canvas.height;
 
-          // 1. Draw base CAD floor plan (100% outer perimeter & columns locked)
-          ctx.drawImage(img, 0, 0, W, H);
+            // 1. Draw base CAD floor plan (100% outer perimeter & columns locked)
+            ctx.drawImage(img, 0, 0, W, H);
 
-          // Flatten rooms
-          const allRooms = [];
-          if (concept.zones && Array.isArray(concept.zones)) {
-            concept.zones.forEach(z => {
-              const zColor = z.color || '#3b82f6';
-              if (z.rooms && Array.isArray(z.rooms)) {
-                z.rooms.forEach(r => {
-                  allRooms.push({
-                    ...r,
-                    zoneName: z.zoneName,
-                    color: zColor
+            // Flatten rooms
+            const allRooms = [];
+            if (concept.zones && Array.isArray(concept.zones)) {
+              concept.zones.forEach(z => {
+                const zColor = z.color || '#3b82f6';
+                if (z.rooms && Array.isArray(z.rooms)) {
+                  z.rooms.forEach(r => {
+                    allRooms.push({
+                      ...r,
+                      zoneName: z.zoneName,
+                      color: zColor
+                    });
                   });
-                });
+                }
+              });
+            }
+
+            if (allRooms.length === 0) {
+              resolve(baseImgSrc);
+              return;
+            }
+
+            // 2. Generate True Architectural Polygons for this Concept (0~7)
+            const roomPolygons = computeConceptPolygons(allRooms, conceptIndex, W, H);
+
+            // 3. Render Architectural Zoning Overlays onto CAD Canvas
+            ctx.save();
+
+            // A. Draw Room Background Fills (Soft Pastel)
+            roomPolygons.forEach((r) => {
+              if (r.pts && r.pts.length >= 3) {
+                ctx.beginPath();
+                ctx.moveTo(r.pts[0][0], r.pts[0][1]);
+                for (let i = 1; i < r.pts.length; i++) {
+                  ctx.lineTo(r.pts[i][0], r.pts[i][1]);
+                }
+                ctx.closePath();
+
+                ctx.fillStyle = hexToRgba(r.color || '#3b82f6', 0.40);
+                ctx.fill();
+
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = Math.max(2.8, W * 0.003);
+                ctx.lineCap = 'square';
+                ctx.lineJoin = 'miter';
+                ctx.stroke();
               }
             });
-          }
 
-          if (allRooms.length === 0) {
-            resolve(baseImgSrc);
-            return;
-          }
-
-          // 2. Generate True Architectural Polygons for this Concept (0~7)
-          const roomPolygons = computeConceptPolygons(allRooms, conceptIndex, W, H);
-
-          // 3. Render Architectural Zoning Overlays onto CAD Canvas
-          ctx.save();
-
-          // A. Draw Room Background Fills (Soft Pastel)
-          roomPolygons.forEach((r) => {
-            if (r.pts && r.pts.length >= 3) {
-              ctx.beginPath();
-              ctx.moveTo(r.pts[0][0], r.pts[0][1]);
-              for (let i = 1; i < r.pts.length; i++) {
-                ctx.lineTo(r.pts[i][0], r.pts[i][1]);
+            // B. Draw Door Swings
+            roomPolygons.forEach((r) => {
+              if (r.doorPos) {
+                drawDoorSwingAt(ctx, r.doorPos[0], r.doorPos[1], r.doorAngle || 0);
               }
-              ctx.closePath();
+            });
 
-              ctx.fillStyle = hexToRgba(r.color || '#3b82f6', 0.40);
-              ctx.fill();
+            // C. Draw Patient Circulation Flow Arrow (Cyan Dashed Line)
+            drawCirculationPathFromPolygons(ctx, roomPolygons, W, H);
 
-              ctx.strokeStyle = '#1e293b';
-              ctx.lineWidth = Math.max(2.8, W * 0.003);
-              ctx.lineCap = 'square';
-              ctx.lineJoin = 'miter';
-              ctx.stroke();
-            }
-          });
+            // D. Draw Room Label Badges (Korean Name + Pyung Area)
+            roomPolygons.forEach((r) => {
+              drawRoomLabelAtCentroid(ctx, r);
+            });
 
-          // B. Draw Door Swings
-          roomPolygons.forEach((r) => {
-            if (r.doorPos) {
-              drawDoorSwingAt(ctx, r.doorPos[0], r.doorPos[1], r.doorAngle || 0);
-            }
-          });
-
-          // C. Draw Patient Circulation Flow Arrow (Cyan Dashed Line)
-          drawCirculationPathFromPolygons(ctx, roomPolygons, W, H);
-
-          // D. Draw Room Label Badges (Korean Name + Pyung Area)
-          roomPolygons.forEach((r) => {
-            drawRoomLabelAtCentroid(ctx, r);
-          });
-
-          ctx.restore();
-          resolve(canvas.toDataURL('image/jpeg', 0.92));
+            ctx.restore();
+            resolve(canvas.toDataURL('image/jpeg', 0.92));
+          } catch (e) {
+            console.error('generateConceptDiagram error:', e);
+            resolve(baseImgSrc);
+          }
         };
-        img.onerror = () => resolve(baseImgSrc);
+
+        img.onload = doRender;
+        img.onerror = () => { if (!isDone) { isDone = true; resolve(baseImgSrc); } };
         img.src = baseImgSrc;
+        if (img.complete) {
+          setTimeout(doRender, 10);
+        }
       });
     }
 
