@@ -1535,15 +1535,22 @@
           throw new Error(resData.error || '병원 조닝 분석 중 오류가 발생했습니다.');
         }
 
-        updateProgress(100, '8가지 병원 조닝 대안 생성 완료', 3);
         conceptsData = resData.zoningResult?.concepts || [];
+        updateProgress(85, '3단계: 8가지 병원 조닝 평면도 및 공간 구획 렌더링 중...', 3);
+
+        // Generate 8 distinct architectural CAD zoning diagrams on canvas
+        for (let i = 0; i < conceptsData.length; i++) {
+          conceptsData[i].diagramImage = await generateConceptDiagram(currentFloorPlanBase64, conceptsData[i], i);
+        }
+
+        updateProgress(100, '8가지 병원 조닝 대안 생성 완료', 3);
         selectedConceptIndex = 0;
 
         setTimeout(() => {
           progressBox.style.display = 'none';
           zoningResultSection.style.display = 'flex';
           renderConceptsView();
-        }, 600);
+        }, 400);
 
       } catch (err) {
         alert('오류: ' + err.message);
@@ -1569,6 +1576,394 @@
           stepEl.classList.add('active');
         }
       }
+    }
+
+    // Helper: HEX to RGBA
+    function hexToRgba(hex, alpha) {
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      const r = (num >> 16) & 255;
+      const g = (num >> 8) & 255;
+      const b = num & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // Canvas 2D Architectural Zoning Generator for 8 Distinct Medical Concepts
+    async function generateConceptDiagram(baseImgSrc, concept, conceptIndex) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.naturalWidth || 1200;
+          canvas.height = img.naturalHeight || 900;
+          const W = canvas.width;
+          const H = canvas.height;
+
+          // 1. Draw base CAD floor plan (100% outer perimeter & columns locked)
+          ctx.drawImage(img, 0, 0, W, H);
+
+          // 2. Define tenant boundary box (interior space within CAD perimeter)
+          const bx = W * 0.22;
+          const by = H * 0.16;
+          const bw = W * 0.58;
+          const bh = H * 0.70;
+
+          // Flatten rooms
+          const allRooms = [];
+          if (concept.zones && Array.isArray(concept.zones)) {
+            concept.zones.forEach(z => {
+              const zColor = z.color || '#3b82f6';
+              if (z.rooms && Array.isArray(z.rooms)) {
+                z.rooms.forEach(r => {
+                  allRooms.push({
+                    ...r,
+                    zoneName: z.zoneName,
+                    color: zColor
+                  });
+                });
+              }
+            });
+          }
+
+          if (allRooms.length === 0) {
+            resolve(baseImgSrc);
+            return;
+          }
+
+          // 3. Compute distinct architectural room layout based on Concept (0~7)
+          const roomRects = computeConceptRoomRects(allRooms, conceptIndex, bx, by, bw, bh);
+
+          // 4. Render Architectural Zoning Overlays
+          ctx.save();
+
+          // A. Draw Room Background Fills (Soft Pastel)
+          roomRects.forEach((r) => {
+            ctx.fillStyle = hexToRgba(r.color, 0.38);
+            ctx.fillRect(r.x, r.y, r.w, r.h);
+
+            ctx.fillStyle = hexToRgba(r.color, 0.08);
+            ctx.fillRect(r.x + 3, r.y + 3, r.w - 6, r.h - 6);
+          });
+
+          // B. Draw Internal Architectural Partition Walls (Solid Dark Slate 2.5px)
+          ctx.strokeStyle = '#1e293b';
+          ctx.lineWidth = Math.max(2.5, W * 0.0028);
+          ctx.lineCap = 'square';
+          ctx.lineJoin = 'miter';
+
+          roomRects.forEach((r) => {
+            ctx.strokeRect(r.x, r.y, r.w, r.h);
+          });
+
+          // C. Draw Door Openings & Swings
+          roomRects.forEach((r) => {
+            drawDoorSwing(ctx, r.x, r.y, r.w, r.h, r.doorSide || 'bottom');
+          });
+
+          // D. Draw Patient Circulation Flow Arrow (Cyan Dashed Line)
+          drawCirculationArrows(ctx, roomRects, bx, by, bw, bh);
+
+          // E. Draw Room Label Badges (Korean Name + Pyung Area)
+          roomRects.forEach((r) => {
+            drawRoomLabel(ctx, r, W, H);
+          });
+
+          ctx.restore();
+          resolve(canvas.toDataURL('image/jpeg', 0.92));
+        };
+        img.onerror = () => resolve(baseImgSrc);
+        img.src = baseImgSrc;
+      });
+    }
+
+    // Concept-Specific 8 Spatial Layout Engine
+    function computeConceptRoomRects(rooms, conceptIndex, bx, by, bw, bh) {
+      const N = rooms.length;
+      const rects = [];
+      const pad = 4;
+
+      // Identify special rooms
+      const waitingRoom = rooms.find(r => r.zoneName.includes('대기') || r.roomName.includes('대기') || r.roomName.includes('접수')) || rooms[0];
+      const otherRooms = rooms.filter(r => r !== waitingRoom);
+
+      if (conceptIndex === 0) {
+        // 안 1: 전면 파노라마 대기형 (하단 전면 와이드 대기실 + 상단 진료/수술존)
+        const waitH = bh * 0.32;
+        rects.push({
+          ...waitingRoom,
+          x: bx + pad,
+          y: by + bh - waitH + pad,
+          w: bw - pad * 2,
+          h: waitH - pad * 2,
+          doorSide: 'top'
+        });
+
+        const topH = bh - waitH;
+        const cols = Math.ceil(otherRooms.length / 2);
+        const colW = (bw - pad * (cols + 1)) / cols;
+        const rowH = (topH - pad * 3) / 2;
+
+        otherRooms.forEach((r, idx) => {
+          const col = idx % cols;
+          const row = Math.floor(idx / cols);
+          rects.push({
+            ...r,
+            x: bx + pad + col * (colW + pad),
+            y: by + pad + row * (rowH + pad),
+            w: colW,
+            h: rowH,
+            doorSide: row === 0 ? 'bottom' : 'top'
+          });
+        });
+
+      } else if (conceptIndex === 1) {
+        // 안 2: 중앙 아일랜드 코어형 (중앙 진료/처치 코어 + 360 순환 복도 + 외곽 진료/대기)
+        const centerW = bw * 0.44;
+        const centerH = bh * 0.44;
+        const cx = bx + (bw - centerW) / 2;
+        const cy = by + (bh - centerH) / 2;
+
+        // Center room
+        const centerRoom = otherRooms[0] || rooms[1] || rooms[0];
+        rects.push({
+          ...centerRoom,
+          x: cx,
+          y: cy,
+          w: centerW,
+          h: centerH,
+          doorSide: 'bottom'
+        });
+
+        // Surrounding perimeter rooms
+        const periRooms = rooms.filter(r => r !== centerRoom);
+        const perCount = periRooms.length;
+        const sideW = (bw - centerW) / 2 - pad * 2;
+        const topH = (bh - centerH) / 2 - pad * 2;
+
+        periRooms.forEach((r, idx) => {
+          if (idx === 0) { // Bottom Waiting
+            rects.push({ ...r, x: bx + pad, y: cy + centerH + pad, w: bw - pad * 2, h: topH, doorSide: 'top' });
+          } else if (idx % 3 === 1) { // Left
+            rects.push({ ...r, x: bx + pad, y: cy, w: sideW, h: centerH, doorSide: 'right' });
+          } else if (idx % 3 === 2) { // Right
+            rects.push({ ...r, x: cx + centerW + pad, y: cy, w: sideW, h: centerH, doorSide: 'left' });
+          } else { // Top
+            rects.push({ ...r, x: bx + pad, y: by + pad, w: bw - pad * 2, h: topH, doorSide: 'bottom' });
+          }
+        });
+
+      } else if (conceptIndex === 2) {
+        // 안 3: 진료실 창가 채광 일렬형 (상단 창가 1열 진료실 + 하단 대기/상담/지원)
+        const topH = bh * 0.48;
+        const botH = bh - topH;
+        const topRooms = otherRooms.slice(0, Math.ceil(otherRooms.length / 2));
+        const botRooms = [waitingRoom, ...otherRooms.slice(Math.ceil(otherRooms.length / 2))];
+
+        const topColW = (bw - pad * (topRooms.length + 1)) / (topRooms.length || 1);
+        topRooms.forEach((r, idx) => {
+          rects.push({ ...r, x: bx + pad + idx * (topColW + pad), y: by + pad, w: topColW, h: topH - pad * 2, doorSide: 'bottom' });
+        });
+
+        const botColW = (bw - pad * (botRooms.length + 1)) / (botRooms.length || 1);
+        botRooms.forEach((r, idx) => {
+          rects.push({ ...r, x: bx + pad + idx * (botColW + pad), y: by + topH + pad, w: botColW, h: botH - pad * 2, doorSide: 'top' });
+        });
+
+      } else if (conceptIndex === 3) {
+        // 안 4: 환자-의료진 듀얼 동선 분리형 (중앙 더블 로드 + 전면 환자복도 / 배면 의료진 전용 백코리도)
+        const midW = bw * 0.70;
+        const mx = bx + (bw - midW) / 2;
+        const rows = Math.ceil(rooms.length / 2);
+        const rowH = (bh - pad * (rows + 1)) / rows;
+        const colW = (midW - pad * 3) / 2;
+
+        rooms.forEach((r, idx) => {
+          const col = idx % 2;
+          const row = Math.floor(idx / 2);
+          rects.push({
+            ...r,
+            x: mx + pad + col * (colW + pad),
+            y: by + pad + row * (rowH + pad),
+            w: colW,
+            h: rowH,
+            doorSide: col === 0 ? 'right' : 'left'
+          });
+        });
+
+      } else {
+        // 안 5~8: 가변형 모듈러 / 프라이빗 집중형 / 원스톱 직결형 / 케어 라운지 중심형
+        const cols = conceptIndex === 4 ? 3 : (conceptIndex === 5 ? 2 : (conceptIndex === 6 ? 3 : 2));
+        const rows = Math.ceil(rooms.length / cols);
+        const colW = (bw - pad * (cols + 1)) / cols;
+        const rowH = (bh - pad * (rows + 1)) / rows;
+
+        rooms.forEach((r, idx) => {
+          const col = (idx + (conceptIndex % 2)) % cols;
+          const row = Math.floor(idx / cols);
+          rects.push({
+            ...r,
+            x: bx + pad + col * (colW + pad),
+            y: by + pad + row * (rowH + pad),
+            w: colW,
+            h: rowH,
+            doorSide: row === 0 ? 'bottom' : 'top'
+          });
+        });
+      }
+
+      return rects;
+    }
+
+    // Door Swing Renderer (Quarter Arc with 45deg Door Leaf)
+    function drawDoorSwing(ctx, x, y, w, h, side) {
+      ctx.save();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.fillStyle = '#ffffff';
+
+      const r = Math.min(22, Math.min(w, h) * 0.28);
+      let dx = x + 16;
+      let dy = y + h;
+
+      if (side === 'bottom') {
+        dx = x + 14;
+        dy = y + h;
+        ctx.beginPath();
+        ctx.arc(dx, dy, r, Math.PI * 1.5, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(dx, dy);
+        ctx.lineTo(dx + r, dy);
+        ctx.stroke();
+      } else if (side === 'top') {
+        dx = x + 14;
+        dy = y;
+        ctx.beginPath();
+        ctx.arc(dx, dy, r, 0, Math.PI * 0.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(dx, dy);
+        ctx.lineTo(dx + r, dy);
+        ctx.stroke();
+      } else if (side === 'left') {
+        dx = x;
+        dy = y + 14;
+        ctx.beginPath();
+        ctx.arc(dx, dy, r, 0, Math.PI * 0.5);
+        ctx.stroke();
+      } else {
+        dx = x + w;
+        dy = y + 14;
+        ctx.beginPath();
+        ctx.arc(dx, dy, r, Math.PI * 0.5, Math.PI);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    // Circulation Arrow Line (Cyan/Blue Dashed Flow)
+    function drawCirculationArrows(ctx, rects, bx, by, bw, bh) {
+      if (rects.length < 2) return;
+      ctx.save();
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([8, 6]);
+
+      ctx.beginPath();
+      const startX = bx + bw * 0.15;
+      const startY = by + bh * 0.95;
+      ctx.moveTo(startX, startY);
+
+      // Connect through room centers
+      rects.slice(0, 4).forEach(r => {
+        ctx.lineTo(r.x + r.w / 2, r.y + r.h / 2);
+      });
+      ctx.stroke();
+
+      // Draw arrow head
+      const last = rects[Math.min(3, rects.length - 1)];
+      ctx.fillStyle = '#0284c7';
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.arc(last.x + last.w / 2, last.y + last.h / 2, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // Korean Room Label Badge (Name + Pyung)
+    function drawRoomLabel(ctx, room, W, H) {
+      ctx.save();
+      const cx = room.x + room.w / 2;
+      const cy = room.y + room.h / 2;
+
+      const titleText = room.roomName || '진료실';
+      const pyungText = room.areaPyung ? `${room.areaPyung}평` : '';
+
+      ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+      const titleW = ctx.measureText(titleText).width;
+      const boxW = Math.max(titleW + 28, 88);
+      const boxH = pyungText ? 38 : 26;
+
+      const bx = cx - boxW / 2;
+      const by = cy - boxH / 2;
+
+      // Drop Shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 2;
+
+      // Rounded Badge Card
+      ctx.fillStyle = '#ffffff';
+      roundRect(ctx, bx, by, boxW, boxH, 6);
+      ctx.fill();
+
+      ctx.shadowColor = 'transparent';
+
+      // Left Zone Color Stripe
+      ctx.fillStyle = room.color || '#3b82f6';
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(bx, by, 5, boxH, [6, 0, 0, 6]) : ctx.fillRect(bx, by, 5, boxH);
+      ctx.fill();
+
+      // Border
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1;
+      roundRect(ctx, bx, by, boxW, boxH, 6);
+      ctx.stroke();
+
+      // Text: Room Title
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = pyungText ? 'top' : 'middle';
+      ctx.fillText(titleText, cx + 2, pyungText ? by + 6 : cy);
+
+      // Text: Pyung Area Subtitle
+      if (pyungText) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '500 11px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+        ctx.fillText(pyungText, cx + 2, by + 21);
+      }
+
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
     }
 
     function renderConceptsView() {
