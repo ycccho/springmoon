@@ -925,16 +925,19 @@
 
       <!-- Specialty Selector -->
       <div class="form-group">
-        <label class="form-label" for="selectSpecialty">진료 과목 선택</label>
+        <label class="form-label" for="selectSpecialty">진료 과목 선택 (11대 전문 진료과)</label>
         <select id="selectSpecialty" class="select-input">
-          <option value="피부과 / 성형외과" selected>피부과 / 성형외과 (대기·상담·세안·진료·레이저처치·관리실)</option>
-          <option value="치과">치과 (대기·상담·X-ray·체어존·중앙소독실)</option>
-          <option value="이비인후과 / 내과 / 소아과">이비인후과 / 내과 / 소아과 (대기·진료실·호흡기처치실·주사실)</option>
-          <option value="안과">안과 (대기·암실검사실·진료실·상담실·레이저실)</option>
-          <option value="정형외과 / 재활통증의학과">정형외과 / 재활통증의학과 (대기·진료실·물리치료실·도수치료·X-ray)</option>
-          <option value="한의원">한의원 (대기·진료상담실·침구치료실·추나베드·탕전실)</option>
-          <option value="정신건강의학과">정신건강의학과 (프라이빗 대기·방음 상담실·원장 진료실·검사실)</option>
-          <option value="산부인과 / 여성의원">산부인과 / 여성의원 (대기·상담·초음파진료·수술/회복·탈의실)</option>
+          <option value="치과" selected>치과 (보철·임플란트·교정·소아·통합치의학)</option>
+          <option value="피부과">피부과 (레이저·메디컬스킨케어·안티에이징)</option>
+          <option value="성형외과">성형외과 (눈/코/안면윤곽·체형·무균수술실)</option>
+          <option value="정형외과 / 재활통증 / 신경외과">정형외과 / 재활통증 / 신경외과 (도수치료·물리치료·C-arm)</option>
+          <option value="내과 / 소아청소년과 / 가정의학과">내과 / 소아청소년과 / 가정의학과 (검진·내시경·초음파·수액)</option>
+          <option value="이비인후과">이비인후과 (호흡기유니트·네블라이저·청력검사·어지럼증)</option>
+          <option value="안과">안과 (시력교정수술·백내장·암실정밀검사·드림렌즈)</option>
+          <option value="한의원 / 한방병원">한의원 / 한방병원 (침구치료·추나치료·탕전실·물리치료)</option>
+          <option value="정신건강의학과">정신건강의학과 (이중방음·프라이빗대기·TMS·심리검사)</option>
+          <option value="산부인과 / 여성의원">산부인과 / 여성의원 (초음파·태동검사·소수술·여성검진)</option>
+          <option value="비뇨의학과">비뇨의학과 (요속검사·체외충격파쇄석·남성수술)</option>
         </select>
       </div>
 
@@ -1164,103 +1167,169 @@
       closeApiKeyModal();
     }
 
-    // Dynamic Medical Specialty Presets
+    // Dynamic 11 Medical Specialty Architectural Presets (한국 개원의원 기준)
     const SPECIALTY_PRESETS = {
       '치과': {
         counters: [
-          { key: 'chairZones', label: '오픈 진료구역 (체어 수)', default: 4, min: 1, max: 15, unit: '대' },
-          { key: 'counselingRooms', label: '상담실 수', default: 1, min: 0, max: 5, unit: '개' },
-          { key: 'vipRooms', label: '독립 VIP 진료실 (임플란트/특진)', default: 1, min: 0, max: 5, unit: '개' },
+          { key: 'chairZones', label: '오픈 진료구역 (체어 수)', default: 4, min: 1, max: 20, unit: '대' },
+          { key: 'vipRooms', label: '독립 VIP 수술실 (임플란트/특진)', default: 1, min: 0, max: 5, unit: '개' },
+          { key: 'counselingRooms', label: '상담실 수 (실장/교정)', default: 1, min: 0, max: 5, unit: '개' },
           { key: 'hasDirectorRoom', type: 'toggle', label: '독립 대표 원장실', default: true }
         ],
         options: [
-          { id: 'chkCT', label: '3D-CT / X-ray 파노라마 차폐실', desc: '납 차폐벽 및 파노라마 촬영 구역 배치', checked: true },
-          { id: 'chkSterile', label: '중앙 멸균 소독실 (의료진 접근 최단화)', desc: '오픈 체어존과 VIP 진료실 중앙 동선 연계', checked: true },
-          { id: 'chkLab', label: '기공실 / 메이크업 & 예진존', desc: '석고 트랩 배수 및 환자 파우더 공간', checked: true }
+          { id: 'chkCT', label: '3D-CT / 파노라마 / 세팔로 방사선 차폐실', desc: '납 차폐벽 및 파노라마 촬영 구역 배치', checked: true },
+          { id: 'chkSterile', label: '중앙 3분할 멸균 소독실 (세척 ➡️ 건조 ➡️ 멸균)', desc: '오픈 체어존과 VIP 진료실 중앙 동선 연계', checked: true },
+          { id: 'chkLab', label: '기공실 및 석고 트랩 설비 구획', desc: '분진 및 소음 차단 독립 구획', checked: true },
+          { id: 'chkMakeup', label: '메이크업 & 양치 파우더존', desc: '대기실/상담실 인접 환자 전용 파우더 공간', checked: true },
+          { id: 'chkMachine', label: '컴프레셔 & 석션 기계실 (방음/환기 덕트)', desc: '배기 덕트 및 소음 차단 설비실', checked: true },
+          { id: 'chkPedo', label: '소아치과 전용 진료존 & 놀이공간', desc: '소아 환자 전용 체어 및 키즈존 구획', checked: false }
         ]
       },
-      '피부과 / 성형외과': {
+      '피부과': {
         counters: [
-          { key: 'doctorRooms', label: '진료실 수', default: 2, min: 1, max: 6, unit: '개' },
-          { key: 'counselingRooms', label: '상담실 수', default: 2, min: 1, max: 5, unit: '개' },
-          { key: 'treatmentRooms', label: '레이저 처치 / 피부관리실', default: 2, min: 1, max: 8, unit: '개' },
+          { key: 'doctorRooms', label: '원장 진료실 수', default: 2, min: 1, max: 6, unit: '개' },
+          { key: 'counselingRooms', label: '상담실 수 (시선 차단)', default: 2, min: 1, max: 6, unit: '개' },
+          { key: 'laserRooms', label: '레이저 처치실 수', default: 2, min: 1, max: 8, unit: '개' },
+          { key: 'skinCareBeds', label: '피부관리실 (베드 수)', default: 4, min: 2, max: 15, unit: '베드' },
           { key: 'hasDirectorRoom', type: 'toggle', label: '독립 대표 원장실', default: true }
         ],
         options: [
-          { id: 'chkOperationRoom', label: '수술실 및 회복실 (청결 클린코어존)', desc: '의료진 전용 멸균 동선 및 회복 베드 격리 구획', checked: false },
-          { id: 'chkPowder', label: '세안실 / 파우더룸 & 락커존', desc: '환자 시술 전후 세안 및 프라이빗 락커', checked: true }
+          { id: 'chkCleansing', label: '세안실(클렌징) & 파우더룸 & 환자 락커존', desc: '환자 시술 전후 세안 및 프라이빗 락커룸', checked: true },
+          { id: 'chkVisia', label: '피부 정밀 진단 암실 촬영실 (비지아/마크뷰)', desc: '빛 차단 암실 환경 피부 진단존', checked: true },
+          { id: 'chkVipCare', label: '1인 프라이빗 VIP 케어룸 (독립 부스형)', desc: 'VIP 1:1 전용 관리 및 시술 부스', checked: true },
+          { id: 'chkLaserDuct', label: '레이저실 집진 덕트 및 흡배기 공조 구획', desc: '시술 연기 배기 및 환기 시스템 반영', checked: true },
+          { id: 'chkCooling', label: '진정/쿨링/팩 전용 오픈 베드존', desc: '시술 후 진정 케어 오픈 구역', checked: false }
         ]
       },
-      '이비인후과 / 내과 / 소아과': {
+      '성형외과': {
         counters: [
-          { key: 'doctorRooms', label: '진료실 수', default: 2, min: 1, max: 5, unit: '개' },
-          { key: 'treatmentRooms', label: '호흡기치료 / 주사실', default: 1, min: 1, max: 4, unit: '개' },
-          { key: 'counselingRooms', label: '영양수액실 (베드존)', default: 1, min: 0, max: 4, unit: '개' },
+          { key: 'doctorRooms', label: '원장 진료실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'counselingRooms', label: '실장 & 원장 상담실 수', default: 2, min: 1, max: 6, unit: '개' },
+          { key: 'operationRooms', label: '무균 수술실 (Class 10,000 양압)', default: 1, min: 1, max: 4, unit: '개' },
+          { key: 'recoveryBeds', label: '회복실 (개별 산소 베드)', default: 2, min: 1, max: 8, unit: '베드' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 대표 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkScrub', label: '수술실 연계 스크럽(손소독)존 & 멸균 준비실', desc: '의료진 전용 무균 진입 시퀀스 구획', checked: true },
+          { id: 'chkBackCorridor', label: '의료진 전용 백코리도 (청결/오염 동선 분리)', desc: '환자 공용 복도와 수술/소독 동선 완전 격리', checked: true },
+          { id: 'chk3DPhoto', label: '3D 가상성형 전후 사진 촬영실', desc: '표준 조명 및 3D 스캐너 촬영 구역', checked: true },
+          { id: 'chkVipRecovery', label: 'VIP 1인 전용 회복실 (모니터링 연계)', desc: '환자 프라이버시 보호 독립 1인 회복룸', checked: true },
+          { id: 'chkLocker', label: '환자 전용 탈의실 및 개인 락커룸', desc: '수술 전후 전용 탈의 공간', checked: true }
+        ]
+      },
+      '정형외과 / 재활통증 / 신경외과': {
+        counters: [
+          { key: 'doctorRooms', label: '원장 진료실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'dosuRooms', label: '1:1 독립 도수치료실 수', default: 2, min: 1, max: 8, unit: '개' },
+          { key: 'physicalBeds', label: '물리치료실 (전기/온열 베드 수)', default: 6, min: 2, max: 20, unit: '베드' },
           { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
         ],
         options: [
-          { id: 'chkXrayRoom', label: 'X-ray / 방사선실', desc: '흉부/부비동 촬영 차폐벽 반영', checked: true },
-          { id: 'chkEndo', label: '내시경 / 임상병리실', desc: '소화기 내시경 및 세척 소독 구획', checked: false }
+          { id: 'chkXrayCarm', label: 'X-ray 및 C-arm 투시조영 방사선 차폐실', desc: '납 차폐벽 및 신경차단술 처치 구역', checked: true },
+          { id: 'chkESWT', label: '체외충격파(ESWT) 치료실 (방음 구획)', desc: '충격파 소음 차단 독립 룸', checked: true },
+          { id: 'chkSonoBlock', label: '초음파 유도 주사/신경 처치실', desc: '실시간 초음파 유도 정밀 시술 공간', checked: true },
+          { id: 'chkGenderLocker', label: '환자 남/녀 분리 탈의실 & 락커', desc: '도수/물리치료 환자 전용 탈의 구역', checked: true },
+          { id: 'chkBarrierFree', label: '무단차(Barrier-free) 1,800mm 광폭 복도 설계', desc: '휠체어 및 보행 불편 환자 안전 동선', checked: true }
         ]
       },
-      '정형외과 / 재활통증의학과': {
+      '내과 / 소아청소년과 / 가정의학과': {
         counters: [
-          { key: 'doctorRooms', label: '진료실 수', default: 2, min: 1, max: 5, unit: '개' },
-          { key: 'dosuRooms', label: '1:1 도수치료실', default: 2, min: 1, max: 6, unit: '개' },
-          { key: 'physicalBeds', label: '물리치료 베드존', default: 4, min: 2, max: 12, unit: '베드' },
+          { key: 'doctorRooms', label: '원장 진료실 수', default: 2, min: 1, max: 6, unit: '개' },
+          { key: 'fluidBeds', label: '수액 치료실 (리클라이너/베드)', default: 4, min: 2, max: 12, unit: '베드' },
+          { key: 'labRooms', label: '임상병리 / 채혈 / 주사실', default: 1, min: 1, max: 3, unit: '개' },
           { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
         ],
         options: [
-          { id: 'chkXrayRoom', label: 'X-ray / C-arm 차폐실', desc: '투시조영 및 방사선 방어 규격', checked: true },
-          { id: 'chkLocker', label: '환자 탈의실 & 락커룸', desc: '남/여 분리 탈의 공간', checked: true }
+          { id: 'chkEndoOneStop', label: '위/대장 내시경 ➡️ 세척소독 ➡️ 회복실 원스톱 구획', desc: '내시경 검사부터 소독, 수면 회복 원웨이 동선', checked: true },
+          { id: 'chkSono', label: '초음파 검사실 (복부/갑상선/심장 암실)', desc: '조도 조절 암실 환경 초음파 진단존', checked: true },
+          { id: 'chkXrayBmd', label: '흉부 X-ray 및 골밀도(BMD) 검사실', desc: '방사선 차폐 검진 구역', checked: true },
+          { id: 'chkCheckupLocker', label: '건강검진 전용 환자 탈의실', desc: '검진 가운 환자 분리 락커존', checked: true },
+          { id: 'chkInfectionZone', label: '격리 진료 / 호흡기 감염 안심 대기 구역', desc: '발열/호흡기 환자 별도 음압/분리 대기', checked: false }
         ]
       },
-      '한의원': {
+      '이비인후과': {
         counters: [
-          { key: 'doctorRooms', label: '원장 진료/상담실', default: 2, min: 1, max: 5, unit: '개' },
-          { key: 'acupunctureBeds', label: '침구 치료실 (베드 수)', default: 6, min: 2, max: 15, unit: '베드' },
-          { key: 'chunaRooms', label: '추나 치료실', default: 1, min: 0, max: 3, unit: '개' },
-          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 대표실', default: true }
+          { key: 'doctorRooms', label: '원장 진료실 (호흡기 유니트)', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'nebulizerUnits', label: '호흡기 치료존 (네블라이저 수)', default: 4, min: 2, max: 10, unit: '구' },
+          { key: 'treatmentRooms', label: '주사 / 수액 처치실', default: 1, min: 1, max: 4, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
         ],
         options: [
-          { id: 'chkTangjeon', label: '탕전실 & 약재 보관실', desc: '배기 덕트 및 급배수 설비 구획', checked: true },
-          { id: 'chkPhysical', label: '물리치료 / 견인치료존', desc: '온열 및 한방 물리치료 구획', checked: true }
+          { id: 'chkAudioBooth', label: '청력검사 방음 부스실 (이중 차음 구조)', desc: '외부 소음 100% 차단 정밀 청력검사 부스', checked: true },
+          { id: 'chkDizzyExam', label: '어지럼증 검사실 (비디오안진/Frenzel)', desc: '전정기능 정밀 검사 암실 구획', checked: true },
+          { id: 'chkSinusXray', label: '부비동 / 경부 X-ray 차폐실', desc: '이비인후과 전용 X-ray 촬영 구역', checked: true },
+          { id: 'chkEndoWashing', label: '후두/비강 내시경 세척 소독 구역', desc: '진료실 연계 신속 소독 싱크대', checked: true },
+          { id: 'chkKidsPlay', label: '소아 대기존 및 유아 놀이 공간', desc: '소아 환자 친화적 놀이 코너', checked: false }
         ]
       },
       '안과': {
         counters: [
-          { key: 'doctorRooms', label: '진료실 수', default: 2, min: 1, max: 5, unit: '개' },
-          { key: 'darkExamRoom', label: '암실 정밀 검사실', default: 1, min: 1, max: 3, unit: '개' },
-          { key: 'counselingRooms', label: '상담실 수', default: 1, min: 0, max: 3, unit: '개' },
+          { key: 'doctorRooms', label: '원장 진료실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'darkExamRoom', label: '암실 정밀 검사실 (안저/시야)', default: 1, min: 1, max: 3, unit: '개' },
+          { key: 'counselingRooms', label: '상담실 수 (라식/노안백내장)', default: 1, min: 0, max: 4, unit: '개' },
           { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
         ],
         options: [
-          { id: 'chkLaserOp', label: '시력교정 레이저 수술실 / 회복실', desc: '양압 공조 및 무균 수술 구획', checked: false },
-          { id: 'chkVisionPrep', label: '시력검사 및 안경/렌즈 피팅존', desc: '대기실 연계 오픈 검안 구역', checked: true }
+          { id: 'chk5mOpto', label: '5m 직선거리 시력검사 레인 확보', desc: '법적 5m 표준 거리 시력표 통로 구획', checked: true },
+          { id: 'chkAutoRefract', label: '1차 예진 및 자동굴절 검사존 (오픈형)', desc: '대기실 연계 신속 자동 안압/굴절 검사', checked: true },
+          { id: 'chkLasikOp', label: '라식/라섹 레이저 수술실 & 준비실', desc: '항온항습 클린룸 무균 수술 구획', checked: false },
+          { id: 'chkLensFitting', label: '안경 / 드림렌즈 피팅 및 상담 코너', desc: '렌즈 착용 교육 세면대 및 피팅 테이블', checked: true }
+        ]
+      },
+      '한의원 / 한방병원': {
+        counters: [
+          { key: 'doctorRooms', label: '원장 진료/문진실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'acupunctureBeds', label: '침구 치료실 (베드 수)', default: 6, min: 2, max: 20, unit: '베드' },
+          { key: 'chunaRooms', label: '추나 치료실 수', default: 1, min: 0, max: 3, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 대표실', default: true }
+        ],
+        options: [
+          { id: 'chkTangjeon', label: '탕전실 & 약재 보관실 (고용량 배기 덕트/급배수)', desc: '추출기/포장기 배기 및 환기 설비 완비', checked: true },
+          { id: 'chkOrientalPhysical', label: '한방 물리치료 / 온열 / 견인 치료존', desc: 'ICT, 간섭파, 견인치료 베드 구획', checked: true },
+          { id: 'chkAcupunctureLab', label: '약침 / 봉침 무균 조제대 구획', desc: '청결 약침 준비 클린 벤치', checked: true },
+          { id: 'chkBodyAnalysis', label: '예진실 및 인바디/체형 분석존', desc: '체성분 및 체형 밸런스 검사 구역', checked: true }
         ]
       },
       '정신건강의학과': {
         counters: [
           { key: 'doctorRooms', label: '원장 심층진료실 (방음)', default: 2, min: 1, max: 5, unit: '개' },
           { key: 'counselingRooms', label: '임상 심리상담실 (방음)', default: 1, min: 0, max: 4, unit: '개' },
-          { key: 'examRooms', label: '정밀 뇌파/스트레스 검사실', default: 1, min: 0, max: 3, unit: '개' },
+          { key: 'examRooms', label: '정밀 뇌파(EEG)/스트레스 검사실', default: 1, min: 0, max: 3, unit: '개' },
           { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
         ],
         options: [
-          { id: 'chkPrivateWaiting', label: '프라이빗 1인 개별 대기 부스', desc: '환자 간 시선 차단 독립 대기석', checked: true },
-          { id: 'chkTMS', label: 'TMS 자기자극 치료실', desc: '편안한 리클라이너 체어 배치', checked: false }
+          { id: 'chkDoubleAcoustic', label: '전 실 이중 차음벽 & 방음 도어 (Sound-Masking)', desc: '상담 비밀 보장을 위한 완벽 차음벽 시공', checked: true },
+          { id: 'chkPrivateWaiting', label: '프라이빗 1인 개별 대기 큐브 (시선 차단)', desc: '환자 간 마주침을 없앤 독립 1인 대기석', checked: true },
+          { id: 'chkTMS', label: 'TMS(경두개 자기자극) 집중 치료실', desc: '편안한 리클라이너 체어 및 힐링 조명', checked: false },
+          { id: 'chkSecretExit', label: '원웨이 순환 퇴실 동선 (수납 후 비밀 출구)', desc: '대기실을 거치지 않고 바로 나가는 순환로', checked: true }
         ]
       },
       '산부인과 / 여성의원': {
         counters: [
-          { key: 'doctorRooms', label: '진료실 (초음파실 연계)', default: 2, min: 1, max: 5, unit: '개' },
-          { key: 'counselingRooms', label: '상담실 수', default: 1, min: 0, max: 3, unit: '개' },
-          { key: 'treatmentRooms', label: '처치실 / 태동검사실', default: 1, min: 1, max: 4, unit: '개' },
+          { key: 'doctorRooms', label: '원장 진료실 (초음파실 직결)', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'counselingRooms', label: '상담실 수', default: 1, min: 0, max: 4, unit: '개' },
+          { key: 'treatmentRooms', label: '처치실 / 태동검사실(NST)', default: 1, min: 1, max: 4, unit: '개' },
           { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
         ],
         options: [
-          { id: 'chkOpRecovery', label: '소수술실 및 회복실', desc: '프라이빗 회복 베드 및 락커', checked: true },
-          { id: 'chkToiletLock', label: '진료실 직결 전용 화장실 & 탈의실', desc: '환자 동선 차단 내부 연결', checked: true }
+          { id: 'chkToiletLock', label: '진료실 내부 직결 전용 화장실 & 탈의실', desc: '환자 동선 차단 내부 연결형 전용 화장실', checked: true },
+          { id: 'chkOpRecovery', label: '소수술실 및 1인 프라이빗 회복실', desc: '시술 후 프라이빗 안식 베드 구획', checked: true },
+          { id: 'chk4DSono', label: '4D 정밀 입체초음파실', desc: '보호자 동반 대형 모니터 관람 공간', checked: true },
+          { id: 'chkNursingRoom', label: '수유실 / 기저귀 교환실', desc: '여성/영유아 배려 독립 공간', checked: false }
+        ]
+      },
+      '비뇨의학과': {
+        counters: [
+          { key: 'doctorRooms', label: '원장 진료실 수', default: 2, min: 1, max: 5, unit: '개' },
+          { key: 'counselingRooms', label: '남성/여성 상담실 수', default: 1, min: 0, max: 4, unit: '개' },
+          { key: 'opRooms', label: '남성 1인 수술실 수', default: 1, min: 0, max: 3, unit: '개' },
+          { key: 'hasDirectorRoom', type: 'toggle', label: '독립 원장실', default: true }
+        ],
+        options: [
+          { id: 'chkUroflow', label: '요속/소변 검사실 (전용 화장실 원스톱 직결)', desc: '채뇨 후 즉시 검사 연계 독립 화장실', checked: true },
+          { id: 'chkESWL', label: '체외충격파 쇄석실 (ESWL / 방음 구획)', desc: '쇄석기 소음 차단 및 환자 베드 구획', checked: true },
+          { id: 'chkCysto', label: '초음파 & 방광경 정밀 검사실', desc: '내시경 소독 및 초음파 진단 공간', checked: true },
+          { id: 'chkRecovery', label: '수술 후 1인 안심 회복실', desc: '모니터링 연계 프라이빗 회복 공간', checked: true }
         ]
       }
     };

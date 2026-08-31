@@ -43,42 +43,55 @@ export async function onRequestPost(context) {
       ? '  * 호실 내부 전용 화장실 (신설 구획 필수): 1개 (약 1.5~2.5평 / 배수 배관 위치 연계, 대기실 또는 파우더룸 인근 구획)'
       : '  * 화장실: 건물 공용 화장실 이용 (호실 내부 화장실 미설치하여 진료/대기 공간 면적 극대화)';
 
-    let specialtyDetails = '';
-    if (specialty.includes('치과')) {
-      specialtyDetails = `
-  * 대기실 및 접수/수납 리셉션 (1개 필수, 출입문 진입 시 첫 공간)
-  * 오픈 진료구역 (체어존): ${counters.chairZones || 4}대 (오픈/세미오픈 체어 배치)
-  * 상담실: ${counters.counselingRooms || 1}개 (상담실장/원장 상담)
-  * 독립 VIP 진료실 (임플란트/수술/특진실): ${counters.vipRooms || 1}개
-  * 대표 원장실: ${counters.hasDirectorRoom ? '1개' : '없음 (진료구역 내부 겸용)'}
-  * 3D-CT / X-ray 파노라마 차폐실: 1개 (납 차폐벽 및 파노라마 촬영 구역)
-  * 중앙 멸균 소독실: 1개 (오픈 체어존과 VIP 진료실에서 최단 접근 가능한 중앙 코어 배치)
-  * 기공실 및 파우더/예진존: 1개
-  * 직원 휴게실 및 락커룸: 1개
-${toiletRequirement}`;
-    } else {
-      const countersText = Object.entries(counters)
-        .map(([k, v]) => `  * ${k}: ${typeof v === 'boolean' ? (v ? '있음' : '없음') : v + '개'}`)
-        .join('\n');
-      const optionsText = Object.entries(optionsChecked)
-        .filter(([k, v]) => v)
-        .map(([k]) => `  * ${k} (필수 배치)`)
-        .join('\n');
-      specialtyDetails = `
+    const LABEL_MAP = {
+      chairZones: '오픈 진료구역 (체어 수)',
+      vipRooms: '독립 VIP 수술실 (특진/임플란트)',
+      doctorRooms: '원장 진료실 수',
+      counselingRooms: '상담실 수',
+      laserRooms: '레이저 처치실 수',
+      skinCareBeds: '피부관리실 (베드 수)',
+      operationRooms: '무균 수술실 (Class 10,000 양압)',
+      opRooms: '남성 수술실 수',
+      recoveryBeds: '회복실 (개별 산소 베드)',
+      dosuRooms: '1:1 독립 도수치료실 수',
+      physicalBeds: '물리치료실 (전기/온열 베드 수)',
+      fluidBeds: '수액 치료실 (리클라이너/베드)',
+      labRooms: '임상병리 / 채혈 / 주사실',
+      nebulizerUnits: '호흡기 치료존 (네블라이저 구수)',
+      treatmentRooms: '주사 / 수액 / 태동 처치실',
+      darkExamRoom: '암실 정밀 검사실 (안저/시야)',
+      acupunctureBeds: '침구 치료실 (베드 수)',
+      chunaRooms: '추나 치료실 수',
+      examRooms: '정밀 뇌파/스트레스 검사실',
+      hasDirectorRoom: '독립 대표 원장실'
+    };
+
+    const countersText = Object.entries(counters)
+      .map(([k, v]) => {
+        const lbl = LABEL_MAP[k] || k;
+        if (typeof v === 'boolean') {
+          return `  * ${lbl}: ${v ? '1개 필수' : '없음'}`;
+        }
+        return `  * ${lbl}: ${v}개`;
+      })
+      .join('\n');
+
+    const optionsText = Object.entries(optionsChecked)
+      .filter(([k, v]) => v)
+      .map(([k]) => `  * ${k} (필수 배치 및 동선 연계)`)
+      .join('\n');
+
+    const roomRequirementsSummary = `
+- 진료 과목: ${specialty} (대한민국 11대 전문 진료과)
+- 전용 면적: ${targetArea}
+- 주출입구(E.N.T): ${entrancePosition}
+- 필수 실 구성 및 특화 장비 요청:
   * 대기실 및 접수/수납 리셉션 (1개 필수, 출입문 진입 시 첫 공간)
 ${countersText}
 ${optionsText}
   * 직원 휴게실 및 소독준비실: 1개
   * 파우더룸 및 세면존
-${toiletRequirement}`;
-    }
-
-    const roomRequirementsSummary = `
-- 진료 과목: ${specialty}
-- 전용 면적: ${targetArea}
-- 주출입구(E.N.T): ${entrancePosition}
-- 필수 실 구성 요청:
-${specialtyDetails}
+${toiletRequirement}
 - 사용자 추가 메모: ${customRequirements || '최신 한국 병원 인테리어 트렌드 및 완벽한 동선 반영'}
 `;
 
