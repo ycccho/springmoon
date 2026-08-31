@@ -1,6 +1,6 @@
 export async function onRequestPost(context) {
   const corsHeaders = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key'
@@ -106,6 +106,9 @@ ${roomRequirementsSummary}
    - Concept 6 [안 6]: 대기-상담-진료 원스톱 직결형 (Linear Fast-Track Flow)
    - Concept 7 [안 7]: 상담/케어 라운지 중심형 (Counseling & Open Care Hub)
    - Concept 8 [안 8]: 가변형 모듈러 구획형 (Modular Flexible Grid Layout)
+
+LANGUAGE DIRECTIVE (CRITICAL):
+- Output ALL room names (roomName), zone names (zoneName), concept names (name), descriptions (conceptDescription, description), and circulation summaries (circulationSummary) in 100% natural, highly professional Korean architectural terminology (자연스러운 한국어 표기, 글자 깨짐 절대 금지).
 
 Return ONLY a valid JSON object matching this schema:
 {
