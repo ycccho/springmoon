@@ -17,9 +17,9 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Active Working Key
-    const activeKey = atob("QVEuQWI4Uk42Sno4TUk3UTR2U1N5bDRMNlJ4d0E3aUZwWHBFalFNcFY0M2pkRHNfWC0wM1E=");
-    let apiKey = clientApiKey || activeKey;
+    // Active User Free Key
+    const fallbackKey = atob("QVEuQWI4Uk42Sno4TUk3UTR2U1N5bDRMNlJ4d0E3aUZwWHBFalFNcFY0M2pkRHNfWC0wM1E=");
+    let apiKey = clientApiKey || fallbackKey;
 
     let mimeType = 'image/jpeg';
     let base64Data = image;
@@ -134,7 +134,6 @@ Return ONLY a valid JSON object matching this schema:
 {
   "specialty": "${specialty}",
   "totalArea": "${targetArea}",
-  "buildingInteriorPolygon": [[225, 307], [225, 540], [340, 655], [472, 693], [762, 693], [762, 381], [677, 381], [677, 307]],
   "concepts": [
     {
       "id": 1,
@@ -144,16 +143,9 @@ Return ONLY a valid JSON object matching this schema:
       "zones": [
         {
           "zoneName": "string (대기/접수 구역 / 진료 및 상담 구역 / 처치 및 관리 구역 / 의료진 지원 구역 / 복도 및 공용 구역)",
-          "color": "HEX (#3b82f6, #10b981, #f59e0b, #8b5cf6, #64748b)",
+          "color": "HEX (Blue, Green, Orange, Purple, Grey)",
           "rooms": [
-            {
-              "roomName": "string",
-              "areaM2": number,
-              "areaPyung": number,
-              "percentage": number,
-              "description": "string",
-              "poly": [[600, 381], [600, 690], [755, 690], [755, 381]]
-            }
+            { "roomName": "string", "areaM2": number, "areaPyung": number, "percentage": number, "description": "string" }
           ]
         }
       ]
@@ -168,6 +160,8 @@ Return ONLY a valid JSON object matching this schema:
   ]
 }`;
 
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    
     const analysisPayload = {
       contents: [
         {
@@ -189,31 +183,15 @@ Return ONLY a valid JSON object matching this schema:
       }
     };
 
-    const candidateModels = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3-flash-preview', 'gemini-3.6-flash'];
-    let visionRes = null;
-    let lastErrText = '';
+    const visionRes = await fetch(geminiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(analysisPayload)
+    });
 
-    for (const modelName of candidateModels) {
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      try {
-        const res = await fetch(geminiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(analysisPayload)
-        });
-        if (res.ok) {
-          visionRes = res;
-          break;
-        } else {
-          lastErrText = await res.text();
-        }
-      } catch (e) {
-        lastErrText = e.message;
-      }
-    }
-
-    if (!visionRes) {
-      throw new Error(`모든 모델 호출 실패 (Key: ${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 4)}): ${lastErrText}`);
+    if (!visionRes.ok) {
+      const errText = await visionRes.text();
+      throw new Error(`도면 분석 API 오류 (${visionRes.status}): ${errText}`);
     }
 
     const visionData = await visionRes.json();
@@ -228,15 +206,78 @@ Return ONLY a valid JSON object matching this schema:
 
     const concepts = zoningResult.concepts || [];
 
+    // Step 2: INDE_RENDER Direct Inpainting Style Overlay on the EXACT Base Image for All 8 Concepts
+    const imageApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+    async function generateConceptDiagram(concept, index) {
+      const roomsList = (concept.zones || [])
+        .flatMap(z => (z.rooms || []).map(r => `${r.roomName}(${r.areaPyung || ''}평)`))
+        .join(', ');
+
+      const inpaintPrompt = `Masterpiece 2D architectural CAD medical clinic floor plan zoning blueprint for ${concept.name || `Option ${index + 1}`}.
+SPECIALTY: ${specialty} (${targetArea}).
+STRICT BOUNDARY & WALL LOCK (100%):
+1. Keep the exact outer building perimeter lines, columns, entrance door, and outer geometry in their exact pixel positions without modifying or redrawing them.
+2. Inside the tenant interior floor space, draw crisp internal partition walls and fill each functional room with distinct soft architectural pastel colors.
+3. ROOM SEQUENCE: Entrance leads immediately to [접수/대기실]. Subdivided rooms inside: ${roomsList || concept.conceptDescription || ''}.
+4. Add clear Korean text labels with room names and door swing lines inside each room.
+5. ZERO external additions, ZERO drawing outside the black boundary box. Clean top-down 2D orthographic architectural presentation sheet.`;
+
+      const imgPayload = {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: inpaintPrompt },
+              {
+                inline_data: {
+                  mime_type: mimeType,
+                  data: base64Data
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      try {
+        const res = await fetch(imageApiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(imgPayload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const parts = data.candidates?.[0]?.content?.parts || [];
+          for (const p of parts) {
+            const inlineObj = p.inlineData || p.inline_data;
+            if (inlineObj && inlineObj.data) {
+              const mime = inlineObj.mimeType || inlineObj.mime_type || 'image/jpeg';
+              return `data:${mime};base64,${inlineObj.data}`;
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`Concept ${index + 1} diagram error:`, e);
+      }
+      return image;
+    }
+
+    // Parallel generation for all 8 concepts
+    const diagramPromises = concepts.map((c, i) => generateConceptDiagram(c, i));
+    const generatedDiagrams = await Promise.all(diagramPromises);
+
     if (zoningResult.concepts && Array.isArray(zoningResult.concepts)) {
       zoningResult.concepts.forEach((concept, idx) => {
-        concept.diagramImage = image;
+        concept.diagramImage = generatedDiagrams[idx] || image;
       });
     }
 
     return new Response(JSON.stringify({
       success: true,
       zoningResult,
+      diagrams: generatedDiagrams,
       originalFloorPlan: image
     }), {
       status: 200,
