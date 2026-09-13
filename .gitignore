@@ -27,3 +27,4 @@ mkt_scheduler/*.log
 mkt_scheduler/*tokens.json
 mkt_scheduler/credentials.json
 *credentials.json
+*gfa_profile/
