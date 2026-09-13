@@ -1,3 +1,1 @@
-# Cloudflare Pages Clean URLs and /mkt routing
-/mkt      /mkt/index.html   200
-/mkt/*    /mkt/index.html   200
+# Cloudflare Pages Clean URLs are enabled natively
