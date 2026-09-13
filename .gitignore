@@ -28,3 +28,6 @@ mkt_scheduler/*tokens.json
 mkt_scheduler/credentials.json
 *credentials.json
 *gfa_profile/
+*.csv
+*.pdf
+소상공인 사업자정보/

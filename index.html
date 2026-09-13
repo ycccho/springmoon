@@ -4,6 +4,10 @@
   <script>
   (function() {
     var p = (window.location.pathname || '').toLowerCase();
+    if (p === '/mkt' || p === '/mkt/' || p === '/mkt.html' || p.startsWith('/mkt/')) {
+      window.location.replace('/mkt.html');
+      return;
+    }
     if (p === '/reference' || p === '/reference/' || p === '/ref' || p === '/ref/') {
       window.location.replace('/reference.html');
       return;
