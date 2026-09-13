@@ -90,10 +90,12 @@ def execute_daily_routine(target_date: str = None):
     # 4. KakaoTalk Notifications
     logger.info("Step 4/4: Dispatching KakaoTalk Notifications...")
 
-    # 4-1. Daily Report
+    # 4-1. Daily Report (Yesterday vs Day before yesterday)
     try:
         daily_stats = get_period_stats(target_date, target_date)
-        daily_msg = format_daily_report(daily_stats)
+        prev_day = (datetime.strptime(target_date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+        prev_daily_stats = get_period_stats(prev_day, prev_day)
+        daily_msg = format_daily_report(daily_stats, prev_daily_stats)
         send_res = send_kakao_memo(daily_msg)
         if send_res:
             logger.info("  ✅ Daily memo delivered to KakaoTalk.")
@@ -102,7 +104,7 @@ def execute_daily_routine(target_date: str = None):
     except Exception as e:
         logger.error(f"  Error sending daily memo: {e}")
 
-    # 4-2. Weekly Report (Every Monday 09:00: Last Mon ~ Sun)
+    # 4-2. Weekly Report (Every Monday 09:00: Last Mon ~ Sun vs 2-weeks ago Mon ~ Sun)
     if today.weekday() == 0 or "--weekly" in sys.argv:
         try:
             last_sunday = today - timedelta(days=today.weekday() + 1 if today.weekday() == 0 else 1)
@@ -110,15 +112,19 @@ def execute_daily_routine(target_date: str = None):
             s_str = last_monday.strftime("%Y-%m-%d")
             e_str = last_sunday.strftime("%Y-%m-%d")
 
+            prev_w_s = (last_monday - timedelta(days=7)).strftime("%Y-%m-%d")
+            prev_w_e = (last_sunday - timedelta(days=7)).strftime("%Y-%m-%d")
+            prev_weekly_stats = get_period_stats(prev_w_s, prev_w_e)
+
             logger.info(f"  Triggering Weekly Report for {s_str} ~ {e_str}...")
             weekly_stats = get_period_stats(s_str, e_str)
-            weekly_msg = format_weekly_report(weekly_stats)
+            weekly_msg = format_weekly_report(weekly_stats, prev_weekly_stats)
             send_kakao_memo(weekly_msg)
             logger.info("  ✅ Weekly memo delivered to KakaoTalk.")
         except Exception as e:
             logger.error(f"  Error sending weekly memo: {e}")
 
-    # 4-3. Monthly Report (Every 1st 09:00: 1st ~ Last day of previous month)
+    # 4-3. Monthly Report (Every 1st 09:00: Last month vs 2-months ago)
     if today.day == 1 or "--monthly" in sys.argv:
         try:
             first_day_this_month = today.replace(day=1)
@@ -127,9 +133,15 @@ def execute_daily_routine(target_date: str = None):
             ms_str = first_day_prev_month.strftime("%Y-%m-%d")
             me_str = last_day_prev_month.strftime("%Y-%m-%d")
 
+            last_day_2m_ago = first_day_prev_month - timedelta(days=1)
+            first_day_2m_ago = last_day_2m_ago.replace(day=1)
+            prev_m_s = first_day_2m_ago.strftime("%Y-%m-%d")
+            prev_m_e = last_day_2m_ago.strftime("%Y-%m-%d")
+            prev_monthly_stats = get_period_stats(prev_m_s, prev_m_e)
+
             logger.info(f"  Triggering Monthly Report for {ms_str} ~ {me_str}...")
             monthly_stats = get_period_stats(ms_str, me_str)
-            monthly_msg = format_monthly_report(monthly_stats)
+            monthly_msg = format_monthly_report(monthly_stats, prev_monthly_stats)
             send_kakao_memo(monthly_msg)
             logger.info("  ✅ Monthly memo delivered to KakaoTalk.")
         except Exception as e:

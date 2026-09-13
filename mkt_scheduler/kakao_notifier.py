@@ -119,16 +119,36 @@ def _format_channel_block(label: str, ch_data: dict) -> list:
     spend = ch_data.get("spend", 0)
     clicks = ch_data.get("clicks", 0)
     impr = ch_data.get("impressions", 0)
-    cpc = ch_data.get("cpc", 0)
-    lines.append(f"• {label}: ₩{spend:,} ({clicks}클릭, {impr:,}노출 / CPC ₩{cpc:,})")
+    cpc = round(float(ch_data.get("cpc", 0) or 0))
+    lines.append(f"▶ {label}: ₩{spend:,} ({clicks}클릭 / {impr:,}노출 / CPC ₩{cpc:,})")
     
     kws = ch_data.get("top_keywords", [])
     if kws:
-        for k in kws[:5]: # Top 5 clicked keywords
-            lines.append(f"  - {k['keyword']}: {k['clicks']}클릭 (₩{k['spend']:,})")
+        kw_strs = [f"{k['keyword']}({k['clicks']}클릭)" for k in kws[:4]]
+        lines.append(f"  • 유입 키워드: {', '.join(kw_strs)}")
     return lines
 
-def format_daily_report(stats: dict) -> str:
+def _format_diff_line(label: str, curr_val: int, prev_val: int, unit: str = "원", is_cpc: bool = False) -> str:
+    diff = curr_val - prev_val
+    if prev_val > 0:
+        pct = round((abs(diff) / prev_val) * 100, 1)
+        pct_str = f" ({pct}%)"
+    else:
+        pct_str = ""
+
+    prefix = "₩" if unit == "원" else ""
+    suffix = "" if unit == "원" else unit
+
+    if diff > 0:
+        badge = "🔺 상승" if is_cpc else "🔺 증가"
+        return f"• {label}: {prefix}{curr_val:,}{suffix} (전기 대비 +{prefix}{diff:,}{suffix}{pct_str} {badge})"
+    elif diff < 0:
+        badge = "🔻 절감(효율 UP!)" if is_cpc else "🔻 감소"
+        return f"• {label}: {prefix}{curr_val:,}{suffix} (전기 대비 -{prefix}{abs(diff):,}{suffix}{pct_str} {badge})"
+    else:
+        return f"• {label}: {prefix}{curr_val:,}{suffix} (전기와 동일)"
+
+def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
     target_date = stats.get("start_date", "")
     total_spend = stats.get("total_spend", 0)
     total_impr = stats.get("total_impressions", 0)
@@ -140,28 +160,42 @@ def format_daily_report(stats: dict) -> str:
     pl = bd.get("NAVER_POWERLINK", {})
     pc = bd.get("NAVER_POWERCONTENTS", {})
     place = bd.get("NAVER_PLACE", {})
-    google = bd.get("GOOGLE_SA", {})
+    gfa = bd.get("NAVER_GFA", {})
 
     lines = [
-        f"[광고 성과 일간 리포트 ({target_date})]",
-        "",
-        f"💰 총 광고비: ₩{total_spend:,}",
-        f"👁️ 총 노출수: {total_impr:,}회",
-        f"👆 총 클릭수: {total_clicks:,}회",
-        f"🎯 평균 CPC: ₩{avg_cpc:,} (CTR {avg_ctr}%)",
-        "",
-        "■ 매체별 실적 및 클릭 키워드"
+        f"📢 [광고 성과 일간 리포트 ({target_date})]",
+        "━━━━━━━━━━━━━━━━━━━━━",
+        f"💰 소진 광고비: ₩{total_spend:,}",
+        f"👆 유입 클릭수: {total_clicks:,}회 (광고 누르고 유입된 수)",
+        f"👀 광고 노출수: {total_impr:,}회 (화면에 보여진 수)",
+        f"🎯 클릭단가(CPC): ₩{avg_cpc:,} (고객 1명당 유입비용)",
+        f"⚡ 클릭 반응률: {avg_ctr}% (100명 중 클릭 비율)",
+        "━━━━━━━━━━━━━━━━━━━━━",
+        "📊 [전일(어제) 대비 성과 비교]"
     ]
 
-    for label, data in [("네이버 파워링크", pl), ("네이버 파워컨텐츠", pc), ("네이버 플레이스", place), ("구글 검색광고", google)]:
+    if prev_stats and prev_stats.get("has_data"):
+        p_spend = prev_stats.get("total_spend", 0)
+        p_clicks = prev_stats.get("total_clicks", 0)
+        p_cpc = prev_stats.get("avg_cpc", 0)
+        lines.append(_format_diff_line("광고비", total_spend, p_spend, "원"))
+        lines.append(_format_diff_line("클릭수", total_clicks, p_clicks, "회"))
+        lines.append(_format_diff_line("클릭단가", avg_cpc, p_cpc, "원", is_cpc=True))
+    else:
+        lines.append("※ 비교할 전일(그저께) 데이터가 아직 없습니다.")
+
+    lines.append("━━━━━━━━━━━━━━━━━━━━━")
+    lines.append("■ 매체별 실적 & 유입 키워드")
+
+    for label, data in [("파워링크(검색상단)", pl), ("파워컨텐츠(블로그뷰)", pc), ("플레이스(지도광고)", place), ("GFA(배너광고)", gfa)]:
         if data.get("spend", 0) > 0 or data.get("clicks", 0) > 0 or data.get("impressions", 0) > 0:
             lines.extend(_format_channel_block(label, data))
 
     lines.append("")
-    lines.append(f"실시간 대시보드 확인:\n{DASHBOARD_URL}")
+    lines.append(f"📊 상세 분석 대시보드:\n{DASHBOARD_URL}")
     return "\n".join(lines).strip()
 
-def format_weekly_report(stats: dict) -> str:
+def format_weekly_report(stats: dict, prev_stats: dict = None) -> str:
     s_date = stats.get("start_date", "")
     e_date = stats.get("end_date", "")
     total_spend = stats.get("total_spend", 0)
@@ -169,33 +203,34 @@ def format_weekly_report(stats: dict) -> str:
     total_clicks = stats.get("total_clicks", 0)
     avg_cpc = stats.get("avg_cpc", 0)
     avg_ctr = stats.get("avg_ctr", 0.0)
-    bd = stats.get("breakdown", {})
 
-    naver_spend = bd.get("NAVER_POWERLINK", {}).get("spend", 0) + \
-                  bd.get("NAVER_POWERCONTENTS", {}).get("spend", 0) + \
-                  bd.get("NAVER_PLACE", {}).get("spend", 0)
-    google_spend = bd.get("GOOGLE_SA", {}).get("spend", 0)
+    lines = [
+        "📢 [광고 성과 주간 종합 리포트]",
+        f"기간: {s_date} ~ {e_date} (지난주 7일간)",
+        "━━━━━━━━━━━━━━━━━━━━━",
+        f"💰 주간 총 광고비: ₩{total_spend:,}",
+        f"👆 주간 총 클릭수: {total_clicks:,}회",
+        f"👀 주간 총 노출수: {total_impr:,}회",
+        f"🎯 주간 평균 CPC: ₩{avg_cpc:,} (CTR {avg_ctr}%)",
+        "━━━━━━━━━━━━━━━━━━━━━",
+        "📊 [지지난주 대비 성과 비교]"
+    ]
 
-    naver_pct = round((naver_spend / total_spend) * 100, 1) if total_spend > 0 else 0
-    google_pct = round((google_spend / total_spend) * 100, 1) if total_spend > 0 else 0
+    if prev_stats and prev_stats.get("has_data"):
+        p_spend = prev_stats.get("total_spend", 0)
+        p_clicks = prev_stats.get("total_clicks", 0)
+        p_cpc = prev_stats.get("avg_cpc", 0)
+        lines.append(_format_diff_line("주간 광고비", total_spend, p_spend, "원"))
+        lines.append(_format_diff_line("주간 클릭수", total_clicks, p_clicks, "회"))
+        lines.append(_format_diff_line("주간 평균단가", avg_cpc, p_cpc, "원", is_cpc=True))
+    else:
+        lines.append("※ 비교할 지지난주 데이터가 아직 없습니다.")
 
-    text = f"""[광고 성과 주간 종합 리포트]
-기간: {s_date} ~ {e_date}
+    lines.append("━━━━━━━━━━━━━━━━━━━━━")
+    lines.append(f"📊 주간 상세 분석 보기:\n{DASHBOARD_URL}")
+    return "\n".join(lines).strip()
 
-💰 주간 총 지출: ₩{total_spend:,}
-👁️ 주간 총 노출: {total_impr:,}회
-👆 주간 총 클릭: {total_clicks:,}회
-🎯 주간 평균 CPC: ₩{avg_cpc:,} (CTR {avg_ctr}%)
-
-■ 매체별 비중
-• 네이버 검색광고: ₩{naver_spend:,} ({naver_pct}%)
-• 구글 검색광고: ₩{google_spend:,} ({google_pct}%)
-
-주간 누적 분석 바로가기:
-{DASHBOARD_URL}"""
-    return text.strip()
-
-def format_monthly_report(stats: dict) -> str:
+def format_monthly_report(stats: dict, prev_stats: dict = None) -> str:
     s_date = stats.get("start_date", "")
     e_date = stats.get("end_date", "")
     total_spend = stats.get("total_spend", 0)
@@ -203,25 +238,29 @@ def format_monthly_report(stats: dict) -> str:
     total_clicks = stats.get("total_clicks", 0)
     avg_cpc = stats.get("avg_cpc", 0)
     avg_ctr = stats.get("avg_ctr", 0.0)
-    bd = stats.get("breakdown", {})
 
-    naver_spend = bd.get("NAVER_POWERLINK", {}).get("spend", 0) + \
-                  bd.get("NAVER_POWERCONTENTS", {}).get("spend", 0) + \
-                  bd.get("NAVER_PLACE", {}).get("spend", 0)
-    google_spend = bd.get("GOOGLE_SA", {}).get("spend", 0)
+    lines = [
+        "📢 [광고 성과 월간 종합 리포트]",
+        f"기간: {s_date} ~ {e_date} (지난달 1달 전체)",
+        "━━━━━━━━━━━━━━━━━━━━━",
+        f"💰 월간 총 광고비: ₩{total_spend:,}",
+        f"👆 월간 총 클릭수: {total_clicks:,}회",
+        f"👀 월간 총 노출수: {total_impr:,}회",
+        f"🎯 월간 평균 CPC: ₩{avg_cpc:,} (CTR {avg_ctr}%)",
+        "━━━━━━━━━━━━━━━━━━━━━",
+        "📊 [지지난달 대비 성과 비교]"
+    ]
 
-    text = f"""[광고 성과 월간 종합 리포트]
-기간: {s_date} ~ {e_date}
+    if prev_stats and prev_stats.get("has_data"):
+        p_spend = prev_stats.get("total_spend", 0)
+        p_clicks = prev_stats.get("total_clicks", 0)
+        p_cpc = prev_stats.get("avg_cpc", 0)
+        lines.append(_format_diff_line("월간 광고비", total_spend, p_spend, "원"))
+        lines.append(_format_diff_line("월간 클릭수", total_clicks, p_clicks, "회"))
+        lines.append(_format_diff_line("월간 평균단가", avg_cpc, p_cpc, "원", is_cpc=True))
+    else:
+        lines.append("※ 비교할 지지난달 데이터가 아직 없습니다.")
 
-💰 월간 총 지출: ₩{total_spend:,}
-👁️ 월간 총 노출: {total_impr:,}회
-👆 월간 총 클릭: {total_clicks:,}회
-🎯 월간 평균 CPC: ₩{avg_cpc:,} (CTR {avg_ctr}%)
-
-■ 매체별 실적
-• 네이버 SA 합계: ₩{naver_spend:,}
-• 구글 SA 합계: ₩{google_spend:,}
-
-월간 세부 키워드 리포트:
-{DASHBOARD_URL}"""
-    return text.strip()
+    lines.append("━━━━━━━━━━━━━━━━━━━━━")
+    lines.append(f"📊 월간 상세 분석 보기:\n{DASHBOARD_URL}")
+    return "\n".join(lines).strip()

@@ -198,6 +198,7 @@ def get_period_stats(start_date, end_date):
     return {
         'start_date': start_date,
         'end_date': end_date,
+        'has_data': len(rows) > 0,
         'total_spend': total_spend,
         'total_impressions': total_impr,
         'total_clicks': total_clicks,
