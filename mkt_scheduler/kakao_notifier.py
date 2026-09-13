@@ -111,6 +111,20 @@ def send_kakao_memo(message_text: str) -> bool:
         log_event("KAKAO_SEND", "ERROR", str(e))
         return False
 
+def _format_channel_block(label: str, ch_data: dict) -> list:
+    lines = []
+    spend = ch_data.get("spend", 0)
+    clicks = ch_data.get("clicks", 0)
+    impr = ch_data.get("impressions", 0)
+    cpc = ch_data.get("cpc", 0)
+    lines.append(f"• {label}: ₩{spend:,} ({clicks}클릭, {impr:,}노출 / CPC ₩{cpc:,})")
+    
+    kws = ch_data.get("top_keywords", [])
+    if kws:
+        for k in kws[:5]: # Top 5 clicked keywords
+            lines.append(f"  - {k['keyword']}: {k['clicks']}클릭 (₩{k['spend']:,})")
+    return lines
+
 def format_daily_report(stats: dict) -> str:
     target_date = stats.get("start_date", "")
     total_spend = stats.get("total_spend", 0)
@@ -125,22 +139,24 @@ def format_daily_report(stats: dict) -> str:
     place = bd.get("NAVER_PLACE", {})
     google = bd.get("GOOGLE_SA", {})
 
-    text = f"""[광고 성과 일간 리포트 ({target_date})]
+    lines = [
+        f"[광고 성과 일간 리포트 ({target_date})]",
+        "",
+        f"💰 총 광고비: ₩{total_spend:,}",
+        f"👁️ 총 노출수: {total_impr:,}회",
+        f"👆 총 클릭수: {total_clicks:,}회",
+        f"🎯 평균 CPC: ₩{avg_cpc:,} (CTR {avg_ctr}%)",
+        "",
+        "■ 매체별 실적 및 클릭 키워드"
+    ]
 
-💰 총 광고비: ₩{total_spend:,}
-👁️ 총 노출수: {total_impr:,}회
-👆 총 클릭수: {total_clicks:,}회
-🎯 평균 CPC: ₩{avg_cpc:,} (CTR {avg_ctr}%)
+    for label, data in [("네이버 파워링크", pl), ("네이버 파워컨텐츠", pc), ("네이버 플레이스", place), ("구글 검색광고", google)]:
+        if data.get("spend", 0) > 0 or data.get("clicks", 0) > 0 or data.get("impressions", 0) > 0:
+            lines.extend(_format_channel_block(label, data))
 
-■ 매체별 실적
-• 네이버 파워링크: ₩{pl.get('spend', 0):,} ({pl.get('clicks', 0)}클릭, {pl.get('impressions', 0):,}노출)
-• 네이버 파워컨텐츠: ₩{pc.get('spend', 0):,} ({pc.get('clicks', 0)}클릭, {pc.get('impressions', 0):,}노출)
-• 네이버 플레이스: ₩{place.get('spend', 0):,} ({place.get('clicks', 0)}클릭, {place.get('impressions', 0):,}노출)
-• 구글 검색광고: ₩{google.get('spend', 0):,} ({google.get('clicks', 0)}클릭, {google.get('impressions', 0):,}노출)
-
-실시간 대시보드 확인:
-{DASHBOARD_URL}"""
-    return text.strip()
+    lines.append("")
+    lines.append(f"실시간 대시보드 확인:\n{DASHBOARD_URL}")
+    return "\n".join(lines).strip()
 
 def format_weekly_report(stats: dict) -> str:
     s_date = stats.get("start_date", "")

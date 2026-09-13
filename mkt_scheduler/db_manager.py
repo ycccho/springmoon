@@ -166,6 +166,32 @@ def get_period_stats(start_date, end_date):
             'ctr': ctr
         }
 
+    cur.execute("""
+        SELECT media, keyword, SUM(clicks) as k_clicks, SUM(spend) as k_spend, SUM(impressions) as k_impr
+        FROM keyword_performance
+        WHERE date >= ? AND date <= ? AND clicks > 0
+        GROUP BY media, keyword
+        ORDER BY k_clicks DESC, k_spend DESC
+    """, (start_date, end_date))
+    kw_rows = cur.fetchall()
+
+    keywords_by_media = {}
+    for kr in kw_rows:
+        km = kr['media']
+        if km not in keywords_by_media:
+            keywords_by_media[km] = []
+        c = int(kr['k_clicks'] or 0)
+        s = int(kr['k_spend'] or 0)
+        keywords_by_media[km].append({
+            'keyword': kr['keyword'],
+            'clicks': c,
+            'spend': s,
+            'cpc': round(s / c) if c > 0 else 0
+        })
+
+    for m in media_breakdown:
+        media_breakdown[m]['top_keywords'] = keywords_by_media.get(m, [])
+
     overall_cpc = round(total_spend / total_clicks) if total_clicks > 0 else 0
     overall_ctr = round((total_clicks / total_impr) * 100, 2) if total_impr > 0 else 0.0
 
