@@ -139,7 +139,6 @@ def get_period_stats(start_date, end_date):
     """, (start_date, end_date))
 
     rows = cur.fetchall()
-    conn.close()
 
     total_spend = 0
     total_impr = 0
@@ -174,6 +173,7 @@ def get_period_stats(start_date, end_date):
         ORDER BY k_clicks DESC, k_spend DESC
     """, (start_date, end_date))
     kw_rows = cur.fetchall()
+    conn.close()
 
     keywords_by_media = {}
     for kr in kw_rows:
