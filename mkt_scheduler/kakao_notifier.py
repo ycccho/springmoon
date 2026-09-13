@@ -6,6 +6,7 @@ import requests
 
 from .config import (
     KAKAO_REST_API_KEY,
+    KAKAO_CLIENT_SECRET,
     KAKAO_TOKENS_PATH,
     KAKAO_MEMO_SEND_URL,
     KAKAO_TOKEN_URL,
@@ -48,6 +49,8 @@ def refresh_kakao_access_token() -> str:
         "client_id": KAKAO_REST_API_KEY,
         "refresh_token": refresh_token
     }
+    if KAKAO_CLIENT_SECRET:
+        payload["client_secret"] = KAKAO_CLIENT_SECRET
     headers = {"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"}
 
     try:

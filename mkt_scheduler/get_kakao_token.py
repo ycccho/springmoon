@@ -16,9 +16,11 @@ if sys.platform.startswith("win"):
 
 from .config import (
     KAKAO_REST_API_KEY,
+    KAKAO_CLIENT_SECRET,
     KAKAO_REDIRECT_URI,
     KAKAO_TOKENS_PATH,
-    KAKAO_TOKEN_URL
+    KAKAO_TOKEN_URL,
+    CREDENTIALS_PATH
 )
 
 DEFAULT_REDIRECT_URI = "http://localhost:5000/oauth"
@@ -81,10 +83,40 @@ def exchange_kakao_code(code: str, redirect_uri: str) -> bool:
         "redirect_uri": redirect_uri,
         "code": code
     }
+    if KAKAO_CLIENT_SECRET:
+        payload["client_secret"] = KAKAO_CLIENT_SECRET
+
     headers = {"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"}
 
     try:
         res = requests.post(KAKAO_TOKEN_URL, data=payload, headers=headers, timeout=15)
+        
+        # If KOE010 is returned, client secret is enabled in Kakao console
+        if res.status_code != 200 and "KOE010" in res.text and not payload.get("client_secret"):
+            print("\n" + "!" * 65)
+            print("💡 [알림] 카카오 개발자 콘솔에서 'Client Secret(보안 코드)'이 켜져 있습니다.")
+            print("   카카오 콘솔 화면에서 확인된 Client Secret 코드를 입력해 주세요.")
+            print("   (또는 카카오 콘솔의 [카카오 로그인] > [보안]에서 활성화 상태를 '사용 안함'으로 변경)")
+            print("!" * 65)
+            secret_input = input("Client Secret 코드 입력: ").strip()
+            if secret_input:
+                payload["client_secret"] = secret_input
+                # Save to credentials.json
+                try:
+                    if CREDENTIALS_PATH.exists():
+                        with open(CREDENTIALS_PATH, "r", encoding="utf-8") as cf:
+                            cdata = json.load(cf)
+                    else:
+                        cdata = {}
+                    if "kakao" not in cdata:
+                        cdata["kakao"] = {}
+                    cdata["kakao"]["client_secret"] = secret_input
+                    with open(CREDENTIALS_PATH, "w", encoding="utf-8") as cf:
+                        json.dump(cdata, cf, indent=2, ensure_ascii=False)
+                except Exception:
+                    pass
+                res = requests.post(KAKAO_TOKEN_URL, data=payload, headers=headers, timeout=15)
+
         if res.status_code == 200:
             token_data = res.json()
             with open(KAKAO_TOKENS_PATH, "w", encoding="utf-8") as f:
@@ -147,9 +179,9 @@ def main():
         print("수신 대기 중... (Ctrl+C로 취소 가능)")
 
         start_wait = time.time()
-        # Wait up to 120 seconds for browser callback
+        # Wait up to 600 seconds (10 minutes) for browser callback
         try:
-            while not auth_code and (time.time() - start_wait < 120):
+            while not auth_code and (time.time() - start_wait < 600):
                 server.handle_request()
         except KeyboardInterrupt:
             print("\n취소되었습니다.")

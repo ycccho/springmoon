@@ -45,6 +45,7 @@ GOOGLE_API_VERSION = "v22"
 # KakaoTalk Memo API Credentials
 _kakao = _creds.get("kakao", {})
 KAKAO_REST_API_KEY = _kakao.get("rest_api_key", "")
+KAKAO_CLIENT_SECRET = _kakao.get("client_secret", "")
 KAKAO_REDIRECT_URI = _kakao.get("redirect_uri", "http://localhost:5000/oauth")
 KAKAO_MEMO_SEND_URL = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
