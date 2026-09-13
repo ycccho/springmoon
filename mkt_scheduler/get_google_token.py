@@ -14,19 +14,21 @@ if sys.platform.startswith("win"):
         pass
 
 from .config import (
+    CREDENTIALS_PATH,
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     GOOGLE_TOKENS_PATH
 )
 
-DEFAULT_REDIRECT_URI = "http://localhost:8080"
+# For Google Desktop Clients, loopback IP (http://127.0.0.1:8080) is officially supported
+# without registering any redirect URI in Google Cloud Console!
+DEFAULT_REDIRECT_URI = "http://127.0.0.1:8080"
 SCOPE = "https://www.googleapis.com/auth/adwords"
 
 auth_code = None
 
 class OAuthHandler(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        # Suppress noisy HTTP server logs
         return
 
     def do_GET(self):
@@ -54,13 +56,28 @@ class OAuthHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"Authorization code not found.")
 
-def exchange_code_for_tokens(code: str, redirect_uri: str) -> bool:
+def update_credentials_file(client_id: str, client_secret: str):
+    try:
+        data = {}
+        if CREDENTIALS_PATH.exists():
+            with open(CREDENTIALS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        if "google" not in data:
+            data["google"] = {}
+        data["google"]["client_id"] = client_id
+        data["google"]["client_secret"] = client_secret
+        with open(CREDENTIALS_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"[경고] credentials.json 저장 오류: {e}")
+
+def exchange_code_for_tokens(code: str, client_id: str, client_secret: str, redirect_uri: str) -> bool:
     print("\n[진행중] 인가 코드를 구글 서버로 전송하여 Refresh Token 발급 중...")
     token_url = "https://oauth2.googleapis.com/token"
     payload = {
         "code": code,
-        "client_id": GOOGLE_CLIENT_ID,
-        "client_secret": GOOGLE_CLIENT_SECRET,
+        "client_id": client_id,
+        "client_secret": client_secret,
         "redirect_uri": redirect_uri,
         "grant_type": "authorization_code"
     }
@@ -90,11 +107,11 @@ def exchange_code_for_tokens(code: str, redirect_uri: str) -> bool:
         print(f"\n[오류] 토큰 교환 실패 (HTTP {res.status_code}): {res.text}")
         return False
 
-def verify_and_save_refresh_token(refresh_token: str) -> bool:
+def verify_and_save_refresh_token(refresh_token: str, client_id: str, client_secret: str) -> bool:
     print("\n[검증중] 입력하신 Refresh Token의 유효성을 구글 서버에서 확인 중...")
     res = requests.post("https://oauth2.googleapis.com/token", data={
-        "client_id": GOOGLE_CLIENT_ID,
-        "client_secret": GOOGLE_CLIENT_SECRET,
+        "client_id": client_id,
+        "client_secret": client_secret,
         "refresh_token": refresh_token.strip(),
         "grant_type": "refresh_token"
     })
@@ -117,55 +134,55 @@ def verify_and_save_refresh_token(refresh_token: str) -> bool:
         return False
 
 def main():
-    print("=" * 65)
-    print(" [구글 검색광고 OAuth2 Refresh Token 발급 & 등록 마법사]")
-    print(f" - 클라이언트 ID: {GOOGLE_CLIENT_ID[:25]}...")
-    print("=" * 65)
-    print("\n어떤 방법으로 진행하시겠습니까?")
-    print("  [1] 브라우저 자동 로그인 시도 (기본값: http://localhost:8080)")
-    print("  [2] 다른 Redirect URI로 로그인 시도 (예: http://localhost:8080/, http://127.0.0.1:8080)")
-    print("  [3] 발급받은 Refresh Token 직접 입력하기 (가장 빠름)")
-    print("  [4] 구글 리디렉션 URI 불일치(redirect_uri_mismatch) 해결 가이드 보기")
-    
-    choice = input("\n선택 번호를 입력하세요 (1~4, 기본값 1): ").strip()
-    if not choice:
-        choice = "1"
+    global auth_code
+    auth_code = None
 
-    if choice == "3":
+    print("=" * 65)
+    print(" [구글 검색광고 데스크톱 OAuth2 Refresh Token 발급기]")
+    print("=" * 65)
+
+    # Load currently configured client ID and secret
+    client_id = GOOGLE_CLIENT_ID
+    client_secret = GOOGLE_CLIENT_SECRET
+
+    # If the user has the new desktop client from console screenshot:
+    screenshot_client_id = "844149672380-i482fp0tqp2t2a1kkke8525jj3di5i6m.apps.googleusercontent.com"
+    if screenshot_client_id not in client_id:
+        print(f"\n💡 구글 콘솔 화면의 '데스크톱 클라이언트 1'을 사용하시겠습니까?")
+        print(f"   [1] 네, 콘솔의 데스크톱 클라이언트 사용 ({screenshot_client_id[:25]}...)")
+        print(f"   [2] 아니오, 기존 설정된 클라이언트 사용 ({client_id[:25]}...)")
+        use_ds = input("   선택 (1 또는 2, 기본값 1): ").strip()
+        if use_ds != "2":
+            client_id = screenshot_client_id
+            print("\n구글 콘솔 화면에서 [클라이언트 보안 비밀번호] 아래의 '+ Add secret'을 클릭하거나")
+            print("생성된 보안 비밀번호를 복사하여 아래에 붙여넣어 주세요.")
+            sec_input = input("클라이언트 보안 비밀번호 입력: ").strip()
+            if sec_input:
+                client_secret = sec_input
+                update_credentials_file(client_id, client_secret)
+
+    print("\n" + "-" * 65)
+    print(f"▶ 대상 클라이언트 ID: {client_id}")
+    print("▶ 데스크톱 앱 공식 리디렉션 주소: http://127.0.0.1:8080 (사전 등록 불필요)")
+    print("-" * 65)
+
+    print("\n어떤 방법으로 진행하시겠습니까?")
+    print("  [1] 브라우저 자동 로그인 (추천 - 클릭 한 번으로 완료)")
+    print("  [2] 이미 발급받은 Refresh Token 직접 입력")
+
+    choice = input("\n선택 번호를 입력하세요 (기본값 1): ").strip()
+    if choice == "2":
         token_input = input("\n구글 Refresh Token을 붙여넣으세요: ").strip()
         if token_input:
-            verify_and_save_refresh_token(token_input)
+            verify_and_save_refresh_token(token_input, client_id, client_secret)
         return
 
-    if choice == "4":
-        print("\n" + "-" * 65)
-        print("💡 [redirect_uri_mismatch 400 에러 해결 방법]")
-        print("1. 구글 클라우드 콘솔 접속:")
-        print("   https://console.cloud.google.com/apis/credentials")
-        print("2. 'OAuth 2.0 클라이언트 ID' 목록에서 본인 앱 클릭")
-        print("3. '승인된 리디렉션 URI' 섹션에 다음 주소들을 추가하고 [저장] 클릭:")
-        print("   - http://localhost:8080")
-        print("   - http://localhost:8080/")
-        print("   - http://127.0.0.1:8080")
-        print("4. 저장 후 1번을 선택하여 다시 로그인을 시도하시면 즉시 성공합니다!")
-        print("-" * 65)
-        input("\n확인하셨으면 엔터를 누르세요...")
-        return
-
-    redirect_uri = DEFAULT_REDIRECT_URI
+    redirect_uri = "http://127.0.0.1:8080"
     port = 8080
-
-    if choice == "2":
-        uri_input = input(f"\n사용할 Redirect URI를 입력하세요 (기본값: {DEFAULT_REDIRECT_URI}): ").strip()
-        if uri_input:
-            redirect_uri = uri_input
-            parsed = urllib.parse.urlparse(redirect_uri)
-            if parsed.port:
-                port = parsed.port
 
     auth_url = (
         f"https://accounts.google.com/o/oauth2/v2/auth?"
-        f"client_id={GOOGLE_CLIENT_ID}&"
+        f"client_id={urllib.parse.quote(client_id)}&"
         f"redirect_uri={urllib.parse.quote(redirect_uri)}&"
         f"response_type=code&"
         f"scope={urllib.parse.quote(SCOPE)}&"
@@ -174,36 +191,34 @@ def main():
     )
 
     print(f"\n브라우저에서 구글 로그인 페이지를 엽니다...")
-    print(f"Redirect URI: {redirect_uri}")
-    print(f"인증 URL: {auth_url}\n")
+    print(f"URL: {auth_url}\n")
     try:
         webbrowser.open(auth_url)
     except Exception:
         print("브라우저 자동 열기 실패. 위 URL을 브라우저에 직접 붙여넣어 접속하세요.")
 
-    print(f"로컬 인증 서버 대기 중 (포트: {port})...")
+    print(f"로컬 인증 서버 대기 중 (127.0.0.1:{port})...")
     try:
-        server = http.server.HTTPServer(("0.0.0.0", port), OAuthHandler)
+        server = http.server.HTTPServer(("127.0.0.1", port), OAuthHandler)
         server.handle_request()
     except Exception as e:
         print(f"\n[오류] 로컬 서버 시작 실패: {e}")
-        code_input = input("\n로그인 후 브라우저 주소창에 나타난 'code=...' 값을 직접 입력하세요: ").strip()
+        code_input = input("\n로그인 후 주소창의 code 값을 입력하세요: ").strip()
         if code_input:
             if "code=" in code_input:
                 code_input = urllib.parse.parse_qs(urllib.parse.urlparse(code_input).query).get("code", [code_input])[0]
-            exchange_code_for_tokens(code_input, redirect_uri)
+            exchange_code_for_tokens(code_input, client_id, client_secret, redirect_uri)
         return
 
     if auth_code:
-        exchange_code_for_tokens(auth_code, redirect_uri)
+        exchange_code_for_tokens(auth_code, client_id, client_secret, redirect_uri)
     else:
         print("\n[오류] 인가 코드를 수신하지 못했습니다.")
         code_input = input("로그인 후 브라우저 주소창의 전체 URL 또는 code 값을 붙여넣으세요: ").strip()
         if code_input:
             if "code=" in code_input:
-                parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(code_input).query)
-                code_input = parsed_qs.get("code", [code_input])[0]
-            exchange_code_for_tokens(code_input, redirect_uri)
+                code_input = urllib.parse.parse_qs(urllib.parse.urlparse(code_input).query).get("code", [code_input])[0]
+            exchange_code_for_tokens(code_input, client_id, client_secret, redirect_uri)
 
 if __name__ == "__main__":
     main()
