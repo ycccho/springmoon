@@ -1,0 +1,589 @@
+{
+  "updated_at": "2026-09-13T00:23:55.923009",
+  "summary": {
+    "total_spend": 1198712,
+    "total_impressions": 46116,
+    "total_clicks": 1336,
+    "avg_cpc": 897,
+    "avg_ctr": 2.9,
+    "naver_spend": 782712,
+    "google_spend": 416000
+  },
+  "daily": {
+    "2026-09-01": {
+      "spend": 82000,
+      "impressions": 3100,
+      "clicks": 92,
+      "cpc": 891,
+      "ctr": 2.97,
+      "naver": {
+        "spend": 58000,
+        "impressions": 2100,
+        "clicks": 64,
+        "cpc": 906,
+        "powerlink": {
+          "spend": 32000,
+          "clicks": 35,
+          "impressions": 1100
+        },
+        "powercontents": {
+          "spend": 14000,
+          "clicks": 15,
+          "impressions": 500
+        },
+        "place": {
+          "spend": 12000,
+          "clicks": 14,
+          "impressions": 500
+        }
+      },
+      "google": {
+        "spend": 24000,
+        "impressions": 1000,
+        "clicks": 28,
+        "cpc": 857
+      }
+    },
+    "2026-09-02": {
+      "spend": 94500,
+      "impressions": 3540,
+      "clicks": 108,
+      "cpc": 875,
+      "ctr": 3.05,
+      "naver": {
+        "spend": 66500,
+        "impressions": 2440,
+        "clicks": 76,
+        "cpc": 875,
+        "powerlink": {
+          "spend": 38500,
+          "clicks": 44,
+          "impressions": 1300
+        },
+        "powercontents": {
+          "spend": 16000,
+          "clicks": 18,
+          "impressions": 580
+        },
+        "place": {
+          "spend": 12000,
+          "clicks": 14,
+          "impressions": 560
+        }
+      },
+      "google": {
+        "spend": 28000,
+        "impressions": 1100,
+        "clicks": 32,
+        "cpc": 875
+      }
+    },
+    "2026-09-03": {
+      "spend": 112000,
+      "impressions": 4120,
+      "clicks": 124,
+      "cpc": 903,
+      "ctr": 3.01,
+      "naver": {
+        "spend": 79000,
+        "impressions": 2820,
+        "clicks": 88,
+        "cpc": 898,
+        "powerlink": {
+          "spend": 45000,
+          "clicks": 50,
+          "impressions": 1500
+        },
+        "powercontents": {
+          "spend": 19000,
+          "clicks": 21,
+          "impressions": 680
+        },
+        "place": {
+          "spend": 15000,
+          "clicks": 17,
+          "impressions": 640
+        }
+      },
+      "google": {
+        "spend": 33000,
+        "impressions": 1300,
+        "clicks": 36,
+        "cpc": 917
+      }
+    },
+    "2026-09-04": {
+      "spend": 105000,
+      "impressions": 3980,
+      "clicks": 116,
+      "cpc": 905,
+      "ctr": 2.91,
+      "naver": {
+        "spend": 74000,
+        "impressions": 2730,
+        "clicks": 81,
+        "cpc": 914,
+        "powerlink": {
+          "spend": 42000,
+          "clicks": 46,
+          "impressions": 1450
+        },
+        "powercontents": {
+          "spend": 18000,
+          "clicks": 20,
+          "impressions": 660
+        },
+        "place": {
+          "spend": 14000,
+          "clicks": 15,
+          "impressions": 620
+        }
+      },
+      "google": {
+        "spend": 31000,
+        "impressions": 1250,
+        "clicks": 35,
+        "cpc": 886
+      }
+    },
+    "2026-09-05": {
+      "spend": 121000,
+      "impressions": 4600,
+      "clicks": 135,
+      "cpc": 896,
+      "ctr": 2.93,
+      "naver": {
+        "spend": 85000,
+        "impressions": 3200,
+        "clicks": 95,
+        "cpc": 895,
+        "powerlink": {
+          "spend": 49000,
+          "clicks": 55,
+          "impressions": 1750
+        },
+        "powercontents": {
+          "spend": 21000,
+          "clicks": 23,
+          "impressions": 750
+        },
+        "place": {
+          "spend": 15000,
+          "clicks": 17,
+          "impressions": 700
+        }
+      },
+      "google": {
+        "spend": 36000,
+        "impressions": 1400,
+        "clicks": 40,
+        "cpc": 900
+      }
+    },
+    "2026-09-06": {
+      "spend": 135000,
+      "impressions": 5100,
+      "clicks": 148,
+      "cpc": 912,
+      "ctr": 2.9,
+      "naver": {
+        "spend": 93000,
+        "impressions": 3500,
+        "clicks": 102,
+        "cpc": 912,
+        "powerlink": {
+          "spend": 54000,
+          "clicks": 59,
+          "impressions": 1900
+        },
+        "powercontents": {
+          "spend": 22000,
+          "clicks": 24,
+          "impressions": 820
+        },
+        "place": {
+          "spend": 17000,
+          "clicks": 19,
+          "impressions": 780
+        }
+      },
+      "google": {
+        "spend": 42000,
+        "impressions": 1600,
+        "clicks": 46,
+        "cpc": 913
+      }
+    },
+    "2026-09-07": {
+      "spend": 118000,
+      "impressions": 4450,
+      "clicks": 130,
+      "cpc": 908,
+      "ctr": 2.92,
+      "naver": {
+        "spend": 82000,
+        "impressions": 3050,
+        "clicks": 90,
+        "cpc": 911,
+        "powerlink": {
+          "spend": 47000,
+          "clicks": 52,
+          "impressions": 1650
+        },
+        "powercontents": {
+          "spend": 20000,
+          "clicks": 22,
+          "impressions": 730
+        },
+        "place": {
+          "spend": 15000,
+          "clicks": 16,
+          "impressions": 670
+        }
+      },
+      "google": {
+        "spend": 36000,
+        "impressions": 1400,
+        "clicks": 40,
+        "cpc": 900
+      }
+    },
+    "2026-09-08": {
+      "spend": 109000,
+      "impressions": 4150,
+      "clicks": 121,
+      "cpc": 901,
+      "ctr": 2.92,
+      "naver": {
+        "spend": 76000,
+        "impressions": 2850,
+        "clicks": 84,
+        "cpc": 905,
+        "powerlink": {
+          "spend": 44000,
+          "clicks": 49,
+          "impressions": 1550
+        },
+        "powercontents": {
+          "spend": 18000,
+          "clicks": 20,
+          "impressions": 680
+        },
+        "place": {
+          "spend": 14000,
+          "clicks": 15,
+          "impressions": 620
+        }
+      },
+      "google": {
+        "spend": 33000,
+        "impressions": 1300,
+        "clicks": 37,
+        "cpc": 892
+      }
+    },
+    "2026-09-09": {
+      "spend": 115000,
+      "impressions": 4320,
+      "clicks": 127,
+      "cpc": 906,
+      "ctr": 2.94,
+      "naver": {
+        "spend": 80000,
+        "impressions": 2980,
+        "clicks": 88,
+        "cpc": 909,
+        "powerlink": {
+          "spend": 46000,
+          "clicks": 51,
+          "impressions": 1600
+        },
+        "powercontents": {
+          "spend": 19000,
+          "clicks": 21,
+          "impressions": 710
+        },
+        "place": {
+          "spend": 15000,
+          "clicks": 16,
+          "impressions": 670
+        }
+      },
+      "google": {
+        "spend": 35000,
+        "impressions": 1340,
+        "clicks": 39,
+        "cpc": 897
+      }
+    },
+    "2026-09-10": {
+      "spend": 123000,
+      "impressions": 4650,
+      "clicks": 136,
+      "cpc": 904,
+      "ctr": 2.92,
+      "naver": {
+        "spend": 86000,
+        "impressions": 3220,
+        "clicks": 95,
+        "cpc": 905,
+        "powerlink": {
+          "spend": 49500,
+          "clicks": 55,
+          "impressions": 1720
+        },
+        "powercontents": {
+          "spend": 21000,
+          "clicks": 23,
+          "impressions": 770
+        },
+        "place": {
+          "spend": 15500,
+          "clicks": 17,
+          "impressions": 730
+        }
+      },
+      "google": {
+        "spend": 37000,
+        "impressions": 1430,
+        "clicks": 41,
+        "cpc": 902
+      }
+    },
+    "2026-09-11": {
+      "spend": 46552,
+      "impressions": 2160,
+      "clicks": 56,
+      "cpc": 831,
+      "ctr": 2.59,
+      "naver": {
+        "spend": 3052,
+        "impressions": 510,
+        "clicks": 8,
+        "cpc": 382,
+        "powerlink": {
+          "spend": 308,
+          "clicks": 5,
+          "impressions": 310
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 129
+        },
+        "place": {
+          "spend": 2744,
+          "clicks": 3,
+          "impressions": 71
+        }
+      },
+      "google": {
+        "spend": 43500,
+        "impressions": 1650,
+        "clicks": 48,
+        "cpc": 906
+      }
+    },
+    "2026-09-12": {
+      "spend": 37660,
+      "impressions": 1946,
+      "clicks": 43,
+      "cpc": 876,
+      "ctr": 2.21,
+      "naver": {
+        "spend": 160,
+        "impressions": 446,
+        "clicks": 1,
+        "cpc": 160,
+        "powerlink": {
+          "spend": 160,
+          "clicks": 1,
+          "impressions": 323
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 54
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 69
+        }
+      },
+      "google": {
+        "spend": 37500,
+        "impressions": 1500,
+        "clicks": 42,
+        "cpc": 893
+      }
+    }
+  },
+  "keywords": [
+    {
+      "keyword": "부산병원인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "부산피부과인테리어",
+      "impressions": 4120,
+      "clicks": 165,
+      "ctr": 4.0,
+      "cpc": 1280,
+      "spend": 211200
+    },
+    {
+      "keyword": "부산피부과인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "부산피부과인테리어",
+      "impressions": 3200,
+      "clicks": 134,
+      "ctr": 4.19,
+      "cpc": 1420,
+      "spend": 190280
+    },
+    {
+      "keyword": "플레이스 광고 (스마트플레이스)",
+      "media": "네이버 플레이스",
+      "campaign": "부산_플레이스광고",
+      "group": "인디컴퍼니_본점",
+      "impressions": 7800,
+      "clicks": 192,
+      "ctr": 2.46,
+      "cpc": 890,
+      "spend": 170880
+    },
+    {
+      "keyword": "병원 인테리어 전문",
+      "media": "구글 검색광고",
+      "campaign": "Search_Hospital_Design",
+      "group": "Hospital_Main",
+      "impressions": 4900,
+      "clicks": 142,
+      "ctr": 2.9,
+      "cpc": 980,
+      "spend": 139160
+    },
+    {
+      "keyword": "부산성형외과인테리어",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "부산_컨텐츠광고",
+      "group": "성형외과컨텐츠",
+      "impressions": 2840,
+      "clicks": 98,
+      "ctr": 3.45,
+      "cpc": 1050,
+      "spend": 102900
+    },
+    {
+      "keyword": "부산치과인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "치과인테리어",
+      "impressions": 2650,
+      "clicks": 92,
+      "ctr": 3.47,
+      "cpc": 1100,
+      "spend": 101200
+    },
+    {
+      "keyword": "피부과 개원 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "Search_Clinic_Open",
+      "group": "Clinic_Open",
+      "impressions": 2980,
+      "clicks": 89,
+      "ctr": 2.99,
+      "cpc": 1120,
+      "spend": 99680
+    },
+    {
+      "keyword": "병원인테리어 견적",
+      "media": "구글 검색광고",
+      "campaign": "Search_Hospital_Design",
+      "group": "Estimate",
+      "impressions": 3410,
+      "clicks": 86,
+      "ctr": 2.52,
+      "cpc": 890,
+      "spend": 76540
+    },
+    {
+      "keyword": "부산의원인테리어",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "부산_컨텐츠광고",
+      "group": "의원컨텐츠",
+      "impressions": 2140,
+      "clicks": 74,
+      "ctr": 3.46,
+      "cpc": 980,
+      "spend": 72520
+    },
+    {
+      "keyword": "부산 한의원 인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "한의원인테리어",
+      "impressions": 1820,
+      "clicks": 58,
+      "ctr": 3.19,
+      "cpc": 920,
+      "spend": 53360
+    },
+    {
+      "keyword": "정형외과 인테리어 설계",
+      "media": "구글 검색광고",
+      "campaign": "Search_Hospital_Design",
+      "group": "Orthopedic",
+      "impressions": 1980,
+      "clicks": 48,
+      "ctr": 2.42,
+      "cpc": 880,
+      "spend": 42240
+    },
+    {
+      "keyword": "부산 상가 인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "상가일반",
+      "impressions": 1450,
+      "clicks": 42,
+      "ctr": 2.9,
+      "cpc": 580,
+      "spend": 24360
+    },
+    {
+      "keyword": "플레이스 광고 (2. 플레이스(법인))",
+      "media": "네이버 플레이스",
+      "campaign": "2. 플레이스(법인)",
+      "group": "스마트플레이스 연동",
+      "impressions": 48,
+      "clicks": 3,
+      "ctr": 6.25,
+      "cpc": 915,
+      "spend": 2744
+    },
+    {
+      "keyword": "인디컴퍼니",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 14,
+      "clicks": 4,
+      "ctr": 28.57,
+      "cpc": 60,
+      "spend": 242
+    },
+    {
+      "keyword": "플레이스 광고 (3. 플레이스(상가 사무실))",
+      "media": "네이버 플레이스",
+      "campaign": "3. 플레이스(상가 사무실)",
+      "group": "스마트플레이스 연동",
+      "impressions": 23,
+      "clicks": 0,
+      "ctr": 0.0,
+      "cpc": 0,
+      "spend": 0
+    }
+  ]
+}
