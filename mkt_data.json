@@ -1,21 +1,21 @@
 {
-  "updated_at": "2026-09-14T00:59:15.820132",
+  "updated_at": "2026-09-14T01:23:18.953268",
   "summary": {
-    "total_spend": 413433,
-    "total_impressions": 73716,
-    "total_clicks": 586,
-    "avg_cpc": 706,
-    "avg_ctr": 0.79,
+    "total_spend": 34933,
+    "total_impressions": 58946,
+    "total_clicks": 164,
+    "avg_cpc": 213,
+    "avg_ctr": 0.28,
     "naver_spend": 34933,
-    "google_spend": 378500
+    "google_spend": 0
   },
   "daily": {
     "2026-09-01": {
-      "spend": 26662,
-      "impressions": 1863,
-      "clicks": 35,
-      "cpc": 762,
-      "ctr": 1.88,
+      "spend": 2662,
+      "impressions": 863,
+      "clicks": 7,
+      "cpc": 380,
+      "ctr": 0.81,
       "naver": {
         "spend": 2662,
         "impressions": 863,
@@ -48,18 +48,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 24000,
-        "impressions": 1000,
-        "clicks": 28,
-        "cpc": 857
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-02": {
-      "spend": 29779,
-      "impressions": 1880,
-      "clicks": 41,
-      "cpc": 726,
-      "ctr": 2.18,
+      "spend": 1779,
+      "impressions": 780,
+      "clicks": 9,
+      "cpc": 198,
+      "ctr": 1.15,
       "naver": {
         "spend": 1779,
         "impressions": 780,
@@ -92,18 +92,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 28000,
-        "impressions": 1100,
-        "clicks": 32,
-        "cpc": 875
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-03": {
-      "spend": 33535,
-      "impressions": 1940,
-      "clicks": 43,
-      "cpc": 780,
-      "ctr": 2.22,
+      "spend": 535,
+      "impressions": 640,
+      "clicks": 7,
+      "cpc": 76,
+      "ctr": 1.09,
       "naver": {
         "spend": 535,
         "impressions": 640,
@@ -136,18 +136,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 33000,
-        "impressions": 1300,
-        "clicks": 36,
-        "cpc": 917
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-04": {
-      "spend": 31409,
-      "impressions": 1888,
-      "clicks": 38,
-      "cpc": 827,
-      "ctr": 2.01,
+      "spend": 409,
+      "impressions": 638,
+      "clicks": 3,
+      "cpc": 136,
+      "ctr": 0.47,
       "naver": {
         "spend": 409,
         "impressions": 638,
@@ -180,18 +180,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 31000,
-        "impressions": 1250,
-        "clicks": 35,
-        "cpc": 886
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-05": {
-      "spend": 36339,
-      "impressions": 2018,
-      "clicks": 42,
-      "cpc": 865,
-      "ctr": 2.08,
+      "spend": 339,
+      "impressions": 618,
+      "clicks": 2,
+      "cpc": 170,
+      "ctr": 0.32,
       "naver": {
         "spend": 339,
         "impressions": 618,
@@ -224,18 +224,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 36000,
-        "impressions": 1400,
-        "clicks": 40,
-        "cpc": 900
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-06": {
-      "spend": 42088,
-      "impressions": 2075,
-      "clicks": 47,
-      "cpc": 895,
-      "ctr": 2.27,
+      "spend": 88,
+      "impressions": 475,
+      "clicks": 1,
+      "cpc": 88,
+      "ctr": 0.21,
       "naver": {
         "spend": 88,
         "impressions": 475,
@@ -268,18 +268,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 42000,
-        "impressions": 1600,
-        "clicks": 46,
-        "cpc": 913
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-07": {
-      "spend": 37039,
-      "impressions": 1976,
-      "clicks": 50,
-      "cpc": 741,
-      "ctr": 2.53,
+      "spend": 1039,
+      "impressions": 576,
+      "clicks": 10,
+      "cpc": 104,
+      "ctr": 1.74,
       "naver": {
         "spend": 1039,
         "impressions": 576,
@@ -312,18 +312,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 36000,
-        "impressions": 1400,
-        "clicks": 40,
-        "cpc": 900
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-08": {
-      "spend": 34121,
-      "impressions": 1963,
-      "clicks": 51,
-      "cpc": 669,
-      "ctr": 2.6,
+      "spend": 1121,
+      "impressions": 663,
+      "clicks": 14,
+      "cpc": 80,
+      "ctr": 2.11,
       "naver": {
         "spend": 1121,
         "impressions": 663,
@@ -356,18 +356,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 33000,
-        "impressions": 1300,
-        "clicks": 37,
-        "cpc": 892
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-09": {
-      "spend": 37502,
-      "impressions": 1894,
-      "clicks": 44,
-      "cpc": 852,
-      "ctr": 2.32,
+      "spend": 2502,
+      "impressions": 554,
+      "clicks": 5,
+      "cpc": 500,
+      "ctr": 0.9,
       "naver": {
         "spend": 2502,
         "impressions": 554,
@@ -400,18 +400,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 35000,
-        "impressions": 1340,
-        "clicks": 39,
-        "cpc": 897
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-10": {
-      "spend": 39539,
-      "impressions": 2085,
-      "clicks": 47,
-      "cpc": 841,
-      "ctr": 2.25,
+      "spend": 2539,
+      "impressions": 655,
+      "clicks": 6,
+      "cpc": 423,
+      "ctr": 0.92,
       "naver": {
         "spend": 2539,
         "impressions": 655,
@@ -444,18 +444,18 @@
         "impressions": 0
       },
       "google": {
-        "spend": 37000,
-        "impressions": 1430,
-        "clicks": 41,
-        "cpc": 902
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-11": {
-      "spend": 55800,
-      "impressions": 23470,
-      "clicks": 106,
-      "cpc": 526,
-      "ctr": 0.45,
+      "spend": 12300,
+      "impressions": 21820,
+      "clicks": 58,
+      "cpc": 212,
+      "ctr": 0.27,
       "naver": {
         "spend": 12300,
         "impressions": 21820,
@@ -488,10 +488,10 @@
         "impressions": 21310
       },
       "google": {
-        "spend": 43500,
-        "impressions": 1650,
-        "clicks": 48,
-        "cpc": 906
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     },
     "2026-09-12": {
@@ -607,17 +607,6 @@
       "spend": 190280
     },
     {
-      "keyword": "병원 인테리어 전문",
-      "media": "구글 검색광고",
-      "campaign": "Search_Hospital_Design",
-      "group": "Hospital_Main",
-      "impressions": 4900,
-      "clicks": 142,
-      "ctr": 2.9,
-      "cpc": 980,
-      "spend": 139160
-    },
-    {
       "keyword": "부산성형외과인테리어",
       "media": "네이버 파워컨텐츠",
       "campaign": "부산_컨텐츠광고",
@@ -640,28 +629,6 @@
       "spend": 101200
     },
     {
-      "keyword": "피부과 개원 인테리어",
-      "media": "구글 검색광고",
-      "campaign": "Search_Clinic_Open",
-      "group": "Clinic_Open",
-      "impressions": 2980,
-      "clicks": 89,
-      "ctr": 2.99,
-      "cpc": 1120,
-      "spend": 99680
-    },
-    {
-      "keyword": "병원인테리어 견적",
-      "media": "구글 검색광고",
-      "campaign": "Search_Hospital_Design",
-      "group": "Estimate",
-      "impressions": 3410,
-      "clicks": 86,
-      "ctr": 2.52,
-      "cpc": 890,
-      "spend": 76540
-    },
-    {
       "keyword": "부산의원인테리어",
       "media": "네이버 파워컨텐츠",
       "campaign": "부산_컨텐츠광고",
@@ -682,17 +649,6 @@
       "ctr": 3.19,
       "cpc": 920,
       "spend": 53360
-    },
-    {
-      "keyword": "정형외과 인테리어 설계",
-      "media": "구글 검색광고",
-      "campaign": "Search_Hospital_Design",
-      "group": "Orthopedic",
-      "impressions": 1980,
-      "clicks": 48,
-      "ctr": 2.42,
-      "cpc": 880,
-      "spend": 42240
     },
     {
       "keyword": "부산 상가 인테리어",

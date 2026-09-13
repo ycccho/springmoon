@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>마케팅 광고 성과 통합 대시보드 | MKT</title>
+  <title>마케팅 광고 성과 대시보드 | MKT</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,14 +14,18 @@
       theme: {
         extend: {
           colors: {
-            naver: '#03C75A',
-            google: '#4285F4',
-            meta: '#0668E1',
             brand: {
-              50: '#f0fdf4',
-              500: '#10b981',
-              600: '#059669',
-              900: '#064e3b',
+              50: '#fff5f2',
+              100: '#ffe8e0',
+              200: '#ffd0c2',
+              300: '#ffa891',
+              400: '#f97554',
+              500: '#dd5828', // Core Brand Color (#dd5828)
+              600: '#c44519',
+              700: '#a33510',
+              800: '#832a0e',
+              900: '#6d240d',
+              950: '#3c0f04',
             }
           },
           fontFamily: {
@@ -52,50 +56,48 @@
     .dark ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
     ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.8); }
-    .calendar-cell { min-height: 98px; transition: all 0.15s ease-in-out; }
+    .calendar-cell { min-height: 88px; transition: all 0.15s ease-in-out; }
     .calendar-cell:hover { transform: translateY(-2px); }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
 
   <!-- Top Navigation Bar -->
-  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors text-sm font-medium">
-          <i class="ph ph-arrow-left text-base"></i>
+        <a href="/" class="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors text-xs font-medium">
+          <i class="ph ph-arrow-left text-sm"></i>
           <span>메인 홈</span>
         </a>
         <span class="text-slate-300 dark:text-slate-700">|</span>
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold shadow-sm shadow-emerald-500/20">
-            <i class="ph ph-chart-line-up text-lg"></i>
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#dd5828] to-[#f97554] flex items-center justify-center text-white font-bold shadow-sm shadow-[#dd5828]/30">
+            <i class="ph ph-chart-line-up text-base"></i>
           </div>
-          <div>
-            <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-              마케팅 광고 성과 대시보드
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 font-semibold">/MKT</span>
-            </h1>
-          </div>
+          <h1 class="text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            마케팅 광고 성과 대시보드
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#dd5828]/10 text-[#dd5828] dark:bg-[#dd5828]/20 dark:text-[#f97554] font-semibold">/MKT</span>
+          </h1>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5">
         <!-- Live Status Badge -->
-        <div id="syncStatusBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 dark:bg-emerald-950/50 dark:border-emerald-800/60 dark:text-emerald-400 text-xs font-mono">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div id="syncStatusBadge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-[#dd5828] animate-pulse"></span>
           <span id="syncStatusText">동기화 완료</span>
-          <span class="text-emerald-400 dark:text-emerald-600">·</span>
+          <span class="text-slate-400">·</span>
           <span id="syncTimeText">-</span>
         </div>
 
         <!-- Refresh Button -->
-        <button id="refreshBtn" onclick="fetchMarketingData(true)" title="데이터 새로고침" class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
+        <button id="refreshBtn" onclick="fetchMarketingData(true)" title="데이터 새로고침" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
           <i class="ph ph-arrows-clockwise text-base"></i>
         </button>
 
         <!-- Dark Mode Toggle -->
-        <button id="themeToggleBtn" onclick="toggleDarkMode()" title="테마 전환" class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
+        <button id="themeToggleBtn" onclick="toggleDarkMode()" title="테마 전환" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
           <i class="ph ph-moon dark:hidden text-base"></i>
           <i class="ph ph-sun hidden dark:inline text-base"></i>
         </button>
@@ -104,413 +106,128 @@
   </header>
 
   <!-- Main Container -->
-  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 flex-1">
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5 flex-1">
 
-    <!-- 💡 누구나 쉽게 이해하는 광고 용어 가이드 배너 -->
-    <div class="bg-gradient-to-r from-emerald-50/80 via-teal-50/60 to-slate-50 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-slate-900/50 border border-emerald-200/70 dark:border-emerald-800/50 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-300 text-sm">
-          <i class="ph ph-lightbulb-filament text-lg text-emerald-600 dark:text-emerald-400"></i>
-          <span>💡 1초 만에 이해하는 광고 핵심 지표 가이드</span>
-        </div>
-        <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">실시간 네이버 검색광고 API 데이터 연동 중</span>
+    <!-- Controls & Period Filter Toolbar -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <!-- Period Preset Pills -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1">
+          <i class="ph ph-calendar-blank text-[#dd5828]"></i> 기간:
+        </span>
+        <button onclick="setPeriod('yesterday')" id="btn-period-yesterday" class="period-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">어제</button>
+        <button onclick="setPeriod('7days')" id="btn-period-7days" class="period-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">최근 7일</button>
+        <button onclick="setPeriod('thisMonth')" id="btn-period-thisMonth" class="period-btn px-2.5 py-1 rounded-lg text-xs font-bold border border-[#dd5828] bg-[#dd5828]/10 text-[#dd5828] dark:bg-[#dd5828]/20 dark:text-[#f97554] transition-colors">이번 달 (9월)</button>
+        <button onclick="setPeriod('lastMonth')" id="btn-period-lastMonth" class="period-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">지난 달 (8월)</button>
+        <button onclick="setPeriod('all')" id="btn-period-all" class="period-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">전체 기간</button>
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 text-xs">
-        <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-emerald-100/80 dark:border-emerald-900/40 shadow-xs">
-          <span class="text-[11px] font-bold text-slate-400 block mb-1">👀 노출수 (Impressions)</span>
-          <p class="text-slate-700 dark:text-slate-200 font-medium">광고가 고객 화면에 보인 총 횟수</p>
-        </div>
-        <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-emerald-100/80 dark:border-emerald-900/40 shadow-xs">
-          <span class="text-[11px] font-bold text-slate-400 block mb-1">🖱️ 클릭수 (Clicks)</span>
-          <p class="text-slate-700 dark:text-slate-200 font-medium">고객이 광고를 누르고 들어온 실제 방문수</p>
-        </div>
-        <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-emerald-100/80 dark:border-emerald-900/40 shadow-xs">
-          <span class="text-[11px] font-bold text-slate-400 block mb-1">💰 총 광고비 (Spend)</span>
-          <p class="text-slate-700 dark:text-slate-200 font-medium">기간 동안 매체에 지출된 순수 광고 비용</p>
-        </div>
-        <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-emerald-100/80 dark:border-emerald-900/40 shadow-xs">
-          <span class="text-[11px] font-bold text-slate-400 block mb-1">🎯 클릭단가 (CPC)</span>
-          <p class="text-slate-700 dark:text-slate-200 font-medium">고객 1명 방문 시 든 비용 (낮을수록 이득!)</p>
-        </div>
-        <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-emerald-100/80 dark:border-emerald-900/40 shadow-xs">
-          <span class="text-[11px] font-bold text-slate-400 block mb-1">⚡ 클릭률 (CTR)</span>
-          <p class="text-slate-700 dark:text-slate-200 font-medium">100명이 봤을 때 클릭한 비율 (높을수록 매력적)</p>
-        </div>
+
+      <!-- Custom Date Range -->
+      <div class="flex items-center gap-2 text-xs">
+        <input type="date" id="customStartDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#dd5828]" />
+        <span class="text-slate-400">~</span>
+        <input type="date" id="customEndDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#dd5828]" />
+        <button onclick="applyCustomDateRange()" class="px-2.5 py-1 bg-[#dd5828] hover:bg-[#c44519] text-white rounded-lg font-medium transition-colors cursor-pointer">조회</button>
+        <span id="activePeriodLabel" class="hidden sm:inline font-mono text-[11px] text-slate-500 dark:text-slate-400 ml-1">2026-09-01 ~ 2026-09-30</span>
       </div>
     </div>
 
-    <!-- Controls & Filter Toolbar -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        
-        <!-- Period Preset Pills -->
-        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1">
-            <i class="ph ph-calendar-blank"></i> 분석 기간:
-          </span>
-          <button onclick="setPeriod('yesterday')" id="btn-period-yesterday" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">어제</button>
-          <button onclick="setPeriod('7days')" id="btn-period-7days" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">최근 7일</button>
-          <button onclick="setPeriod('thisMonth')" id="btn-period-thisMonth" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 transition-colors">이번 달 (9월)</button>
-          <button onclick="setPeriod('lastMonth')" id="btn-period-lastMonth" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">지난 달 (8월)</button>
-          <button onclick="setPeriod('all')" id="btn-period-all" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">전체 기간</button>
-        </div>
-
-        <!-- Custom Date Range -->
-        <div class="flex items-center gap-2 text-xs">
-          <input type="date" id="customStartDate" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
-          <span class="text-slate-400">~</span>
-          <input type="date" id="customEndDate" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
-          <button onclick="applyCustomDateRange()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg font-medium transition-colors">조회</button>
-        </div>
-
-      </div>
-
-      <div class="pt-3 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between text-xs">
-        <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-          <span>조회 중인 일자 범위:</span>
-          <span id="activePeriodLabel" class="font-mono font-semibold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">2026-09-01 ~ 2026-09-12</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 5 Major KPI Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      
+    <!-- 5 Major KPI Cards (Compact & Concise) -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
       <!-- 1. Total Spend -->
-      <div class="col-span-2 sm:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="col-span-2 sm:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1.5">
           <span class="text-xs font-medium">총 소진 광고비</span>
-          <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm">
+          <div class="w-6 h-6 rounded-lg bg-[#dd5828]/10 text-[#dd5828] flex items-center justify-center text-xs">
             <i class="ph ph-coins"></i>
           </div>
         </div>
-        <div class="text-2xl font-bold font-mono tracking-tight text-slate-900 dark:text-white" id="kpiTotalSpend">₩0</div>
-        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 font-mono flex justify-between">
-          <span>네이버: <b id="kpiNaverSpend" class="text-slate-800 dark:text-slate-200">₩0</b></span>
-          <span>구글: <b id="kpiGoogleSpend" class="text-slate-800 dark:text-slate-200">₩0</b></span>
+        <div class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white" id="kpiTotalSpend">₩0</div>
+        <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400 font-mono">
+          네이버 검색·플레이스·GFA
         </div>
       </div>
 
       <!-- 2. Total Impressions -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1.5">
           <span class="text-xs font-medium">총 광고 노출수</span>
-          <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm">
+          <div class="w-6 h-6 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs">
             <i class="ph ph-eye"></i>
           </div>
         </div>
-        <div class="text-2xl font-bold font-mono tracking-tight text-slate-900 dark:text-white" id="kpiTotalImpressions">0</div>
-        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-          일평균: <span id="kpiAvgDailyImpr" class="font-semibold text-slate-700 dark:text-slate-300">0</span> 회 노출
+        <div class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white" id="kpiTotalImpressions">0</div>
+        <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400 font-mono">
+          일평균 <span id="kpiAvgDailyImpr" class="font-medium text-slate-700 dark:text-slate-300">0</span>회
         </div>
       </div>
 
       <!-- 3. Total Clicks -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1.5">
           <span class="text-xs font-medium">총 유입 클릭수</span>
-          <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm">
+          <div class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
             <i class="ph ph-cursor-click"></i>
           </div>
         </div>
-        <div class="text-2xl font-bold font-mono tracking-tight text-slate-900 dark:text-white" id="kpiTotalClicks">0</div>
-        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-          일평균: <span id="kpiAvgDailyClicks" class="font-semibold text-slate-700 dark:text-slate-300">0</span> 회 유입
+        <div class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white" id="kpiTotalClicks">0</div>
+        <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400 font-mono">
+          일평균 <span id="kpiAvgDailyClicks" class="font-medium text-slate-700 dark:text-slate-300">0</span>회
         </div>
       </div>
 
       <!-- 4. Avg CPC -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1.5">
           <span class="text-xs font-medium">평균 클릭단가 (CPC)</span>
-          <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm">
+          <div class="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs">
             <i class="ph ph-target"></i>
           </div>
         </div>
-        <div class="text-2xl font-bold font-mono tracking-tight text-slate-900 dark:text-white" id="kpiAvgCpc">₩0</div>
-        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400">
-          고객 1명 유입당 비용
+        <div class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white" id="kpiAvgCpc">₩0</div>
+        <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400">
+          방문 1회당 비용
         </div>
       </div>
 
       <!-- 5. Avg CTR -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1.5">
           <span class="text-xs font-medium">평균 클릭률 (CTR)</span>
-          <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm">
+          <div class="w-6 h-6 rounded-lg bg-[#dd5828]/10 text-[#dd5828] flex items-center justify-center text-xs">
             <i class="ph ph-lightning"></i>
           </div>
         </div>
-        <div class="text-2xl font-bold font-mono tracking-tight text-slate-900 dark:text-white" id="kpiAvgCtr">0.00%</div>
-        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400">
-          노출 대비 클릭 반응 비율
+        <div class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white" id="kpiAvgCtr">0.00%</div>
+        <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400">
+          노출 대비 클릭 반응률
         </div>
-      </div>
-
-    </div>
-
-    <!-- 🌟 핵심: 6대 매체별 상세 실적 카드 그리드 -->
-    <div class="space-y-4">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <i class="ph ph-squares-four text-emerald-500 text-xl"></i>
-          매체별 광고 실적 상세 분석
-        </h2>
-        <span class="text-xs text-slate-500 dark:text-slate-400">선택된 기간 동안의 매체별 소진액 및 효율</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-        <!-- [1] 네이버 파워링크 -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                네이버 파워링크 (SA)
-              </span>
-              <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-100/50 dark:bg-emerald-900/30 px-2 py-0.5 rounded">집행 중</span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              네이버 통합검색 최상단에 뜨는 대표 키워드 광고. 인테리어를 찾는 가망 고객이 직접 검색할 때 최우선 노출됩니다.
-            </p>
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <div class="flex justify-between items-baseline">
-                <span class="text-xs text-slate-400">소진 광고비</span>
-                <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardPlSpend">₩0</span>
-              </div>
-              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">클릭수</span>
-                  <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPlClicks">0</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">노출수</span>
-                  <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPlImpr">0</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">평균 CPC</span>
-                  <span class="font-bold text-emerald-600 dark:text-emerald-400" id="cardPlCpc">₩0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px]">
-            <span class="font-bold text-slate-500 block mb-1">🔥 주요 유입 키워드:</span>
-            <div id="cardPlKeywords" class="flex flex-wrap gap-1 text-slate-600 dark:text-slate-300">
-              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-mono">인디컴퍼니</span>
-              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-mono">부산인테리어</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- [2] 네이버 파워컨텐츠 -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-teal-50 text-teal-700 dark:bg-teal-950/80 dark:text-teal-300 text-xs font-bold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-teal-500"></span>
-                네이버 파워컨텐츠
-              </span>
-              <span class="text-[11px] font-semibold text-teal-600 bg-teal-100/50 dark:bg-teal-900/30 px-2 py-0.5 rounded">집행 중</span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              네이버 뷰탭(블로그/포스트) 영역에 노출되는 전문 컨텐츠 광고. 유용한 시공 정보 글로 고객에게 높은 신뢰를 전달합니다.
-            </p>
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <div class="flex justify-between items-baseline">
-                <span class="text-xs text-slate-400">소진 광고비</span>
-                <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardPcSpend">₩0</span>
-              </div>
-              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">클릭수</span>
-                  <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPcClicks">0</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">노출수</span>
-                  <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPcImpr">0</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">평균 CPC</span>
-                  <span class="font-bold text-teal-600 dark:text-teal-400" id="cardPcCpc">₩0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px]">
-            <span class="font-bold text-slate-500 block mb-1">🔥 주요 컨텐츠 키워드:</span>
-            <div id="cardPcKeywords" class="flex flex-wrap gap-1 text-slate-600 dark:text-slate-300">
-              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-mono">부산병원인테리어</span>
-              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-mono">상가인테리어</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- [3] 네이버 플레이스광고 -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-cyan-50 text-cyan-700 dark:bg-cyan-950/80 dark:text-cyan-300 text-xs font-bold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
-                네이버 플레이스광고
-              </span>
-              <span class="text-[11px] font-semibold text-cyan-600 bg-cyan-100/50 dark:bg-cyan-900/30 px-2 py-0.5 rounded">집행 중</span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              네이버 지도 및 플레이스 검색 결과 상단에 내 업체를 우선 추천하는 지역 밀착형 지도 광고입니다.
-            </p>
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <div class="flex justify-between items-baseline">
-                <span class="text-xs text-slate-400">소진 광고비</span>
-                <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardPlaceSpend">₩0</span>
-              </div>
-              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">클릭수</span>
-                  <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPlaceClicks">0</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">노출수</span>
-                  <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPlaceImpr">0</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">평균 CPC</span>
-                  <span class="font-bold text-cyan-600 dark:text-cyan-400" id="cardPlaceCpc">₩0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px]">
-            <span class="font-bold text-slate-500 block mb-1">📍 집행 캠페인:</span>
-            <div id="cardPlaceKeywords" class="flex flex-wrap gap-1 text-slate-600 dark:text-slate-300">
-              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-mono">2. 플레이스(법인)</span>
-              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-mono">3. 플레이스(상가)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- [4] 네이버 GFA (성과형 디스플레이광고) -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 text-xs font-bold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                네이버 GFA (성과형 DA)
-              </span>
-              <span class="text-[11px] font-semibold text-purple-600 bg-purple-100/50 dark:bg-purple-900/30 px-2 py-0.5 rounded">집행 중</span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              네이버 모바일 메인 홈, 뉴스, 스마트채널 등에 배너로 노출되는 타겟 이미지 광고. 인지도와 클릭 유입을 극대화합니다.
-            </p>
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <div class="flex justify-between items-baseline">
-                <span class="text-xs text-slate-400">소진 광고비</span>
-                <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardGfaSpend">₩0</span>
-              </div>
-              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">클릭수</span>
-                  <span class="font-bold text-slate-800 dark:text-slate-200" id="cardGfaClicks">0</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">노출수</span>
-                  <span class="font-bold text-slate-800 dark:text-slate-200" id="cardGfaImpr">0</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                  <span class="text-[10px] text-slate-400 block">평균 CPC</span>
-                  <span class="font-bold text-purple-600 dark:text-purple-400" id="cardGfaCpc">₩0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px]">
-            <span class="font-bold text-slate-500 block mb-1">🎯 타겟 캠페인:</span>
-            <div id="cardGfaKeywords" class="flex flex-wrap gap-1 text-slate-600 dark:text-slate-300">
-              <span class="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 rounded font-mono">네이티브 (인지도/트래픽)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- [5] 구글 검색광고 (연동 준비 중) -->
-        <div class="bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-5 shadow-xs flex flex-col justify-between opacity-85 hover:opacity-100 transition-opacity">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 text-xs font-bold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                구글 검색광고 (Google Ads)
-              </span>
-              <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/60 dark:text-amber-300 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/40">연동 준비 중</span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              구글 검색창에서 특정 키워드를 검색했을 때 최상단 스폰서 영역에 노출되는 글로벌 검색 광고입니다.
-            </p>
-            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-center space-y-1">
-              <i class="ph ph-clock-countdown text-2xl text-slate-400"></i>
-              <div class="text-xs font-bold text-slate-700 dark:text-slate-300">데이터 연동 대기 중</div>
-              <p class="text-[11px] text-slate-400">구글 계정 2단계 보안 인증 완료 후 수집이 활성화됩니다.</p>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
-            * 계정 ID: 808-696-6013 (추후 인증 시 자동 집계)
-          </div>
-        </div>
-
-        <!-- [6] 메타 광고 (Instagram / Facebook - 연동 준비 중) -->
-        <div class="bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-5 shadow-xs flex flex-col justify-between opacity-85 hover:opacity-100 transition-opacity">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-pink-50 text-pink-700 dark:bg-pink-950/80 dark:text-pink-300 text-xs font-bold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-pink-500"></span>
-                메타 광고 (Instagram / FB)
-              </span>
-              <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/60 dark:text-amber-300 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/40">연동 준비 중</span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              인스타그램 및 페이스북 피드, 스토리, 릴스에 감각적인 인테리어 사진/영상으로 잠재 고객을 공략하는 SNS 광고입니다.
-            </p>
-            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-center space-y-1">
-              <i class="ph ph-instagram-logo text-2xl text-pink-400"></i>
-              <div class="text-xs font-bold text-slate-700 dark:text-slate-300">데이터 연동 대기 중</div>
-              <p class="text-[11px] text-slate-400">메타 비즈니스 관리자 API 연동 후 자동 집계됩니다.</p>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
-            * 인스타그램 피드 및 스토리 타겟 광고 예정
-          </div>
-        </div>
-
       </div>
     </div>
 
-    <!-- Section: Interactive Calendar (달력 뷰 - 기본 요구사항) -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+    <!-- 🌟 맨 위 배치: 일별 광고 성과 캘린더 & 일별 상세 실적 -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
       
       <!-- Calendar Header & Month Navigation -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="ph ph-calendar-check text-emerald-500 text-xl"></i>
-            일별 광고 성과 캘린더
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            달력에서 원하는 날짜를 클릭하면 해당 일자의 매체별 지출액과 유입 클릭수를 즉시 확인할 수 있습니다.
-          </p>
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <i class="ph ph-calendar-check text-[#dd5828] text-lg sm:text-xl"></i>
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">일별 광고 성과 캘린더</h2>
         </div>
 
         <div class="flex items-center gap-2">
-          <div class="inline-flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
-            <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all">
-              <i class="ph ph-caret-left text-sm"></i>
+          <div class="inline-flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700">
+            <button onclick="changeMonth(-1)" class="p-1 rounded hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all">
+              <i class="ph ph-caret-left text-xs"></i>
             </button>
-            <span id="calendarCurrentMonthLabel" class="px-3 text-xs font-mono font-bold text-slate-800 dark:text-slate-100">
+            <span id="calendarCurrentMonthLabel" class="px-2.5 text-xs font-mono font-bold text-slate-800 dark:text-slate-100">
               2026. 09
             </span>
-            <button onclick="changeMonth(1)" class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all">
-              <i class="ph ph-caret-right text-sm"></i>
+            <button onclick="changeMonth(1)" class="p-1 rounded hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all">
+              <i class="ph ph-caret-right text-xs"></i>
             </button>
           </div>
-          <button onclick="goToCurrentMonth()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+          <button onclick="goToCurrentMonth()" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer">
             이번달
           </button>
         </div>
@@ -518,9 +235,9 @@
 
       <!-- Calendar Grid Container -->
       <div class="overflow-x-auto">
-        <div class="min-w-[700px]">
+        <div class="min-w-[640px]">
           <!-- Weekday Headers -->
-          <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-slate-400 dark:text-slate-500 font-mono uppercase tracking-wider">
+          <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-slate-400 dark:text-slate-500 font-mono">
             <div class="text-red-500 dark:text-red-400">일 (Sun)</div>
             <div>월 (Mon)</div>
             <div>화 (Tue)</div>
@@ -537,155 +254,332 @@
         </div>
       </div>
 
-      <!-- Selected Date Drill-down Inspector Card -->
-      <div id="dayDetailPanel" class="mt-4 p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg border border-slate-700 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-700/80">
-          <div class="flex items-center gap-3">
-            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
-            <div>
-              <div class="text-xs text-slate-400 font-mono">SELECTED DATE DETAIL</div>
-              <div class="text-lg font-bold font-mono text-emerald-400" id="detailDateTitle">2026-09-12 (토) 상세 성과</div>
-            </div>
+      <!-- Selected Date Drill-down Inspector Card (Clean & Modern) -->
+      <div id="dayDetailPanel" class="p-4 rounded-xl bg-slate-900 text-white shadow-md border border-slate-800 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#dd5828] animate-pulse"></span>
+            <div class="text-sm sm:text-base font-bold font-mono text-[#f97554]" id="detailDateTitle">2026-09-13 (일) 광고 실적</div>
           </div>
-          <div class="flex items-center gap-4 text-xs font-mono">
-            <div>일간 총 광고비: <strong id="detailTotalSpend" class="text-base text-white font-bold">₩0</strong></div>
-            <div class="text-slate-400">|</div>
-            <div>일간 총 클릭수: <strong id="detailTotalClicks" class="text-base text-emerald-300 font-bold">0</strong>회</div>
+          <div class="flex items-center gap-3 text-xs font-mono">
+            <div>일 광고비: <strong id="detailTotalSpend" class="text-sm text-white font-bold">₩0</strong></div>
+            <span class="text-slate-600">|</span>
+            <div>유입: <strong id="detailTotalClicks" class="text-sm text-[#f97554] font-bold">0</strong>회</div>
           </div>
         </div>
 
         <!-- 4 Channel Breakdown Columns -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
           <!-- Naver PowerLink -->
-          <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-semibold text-emerald-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 네이버 파워링크
-              </span>
-              <span class="text-[11px] font-mono text-slate-400" id="detailPlWeight">-</span>
+          <div class="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-300 font-medium">
+              <span>파워링크 (SA)</span>
+              <span class="text-[10px] font-mono text-slate-400" id="detailPlWeight">-</span>
             </div>
-            <div class="text-base font-bold font-mono" id="detailPlSpend">₩0</div>
-            <div class="text-[11px] text-slate-300 font-mono flex justify-between border-t border-slate-700/50 pt-1.5">
-              <span>클릭: <b id="detailPlClicks" class="text-white">0</b></span>
-              <span>노출: <b id="detailPlImpr" class="text-white">0</b></span>
-              <span>CPC: <b id="detailPlCpc" class="text-white">₩0</b></span>
+            <div class="text-sm font-bold font-mono text-white" id="detailPlSpend">₩0</div>
+            <div class="text-[10px] text-slate-400 font-mono flex justify-between border-t border-slate-700/40 pt-1">
+              <span><b id="detailPlClicks" class="text-slate-200">0</b>클릭</span>
+              <span><b id="detailPlImpr" class="text-slate-200">0</b>노출</span>
+              <span id="detailPlCpc" class="text-slate-200">₩0</span>
             </div>
           </div>
 
           <!-- Naver PowerContents -->
-          <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-semibold text-teal-300 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-teal-400"></span> 네이버 파워컨텐츠
-              </span>
-              <span class="text-[11px] font-mono text-slate-400" id="detailPcWeight">-</span>
+          <div class="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-300 font-medium">
+              <span>파워컨텐츠</span>
+              <span class="text-[10px] font-mono text-slate-400" id="detailPcWeight">-</span>
             </div>
-            <div class="text-base font-bold font-mono" id="detailPcSpend">₩0</div>
-            <div class="text-[11px] text-slate-300 font-mono flex justify-between border-t border-slate-700/50 pt-1.5">
-              <span>클릭: <b id="detailPcClicks" class="text-white">0</b></span>
-              <span>노출: <b id="detailPcImpr" class="text-white">0</b></span>
-              <span>CPC: <b id="detailPcCpc" class="text-white">₩0</b></span>
+            <div class="text-sm font-bold font-mono text-white" id="detailPcSpend">₩0</div>
+            <div class="text-[10px] text-slate-400 font-mono flex justify-between border-t border-slate-700/40 pt-1">
+              <span><b id="detailPcClicks" class="text-slate-200">0</b>클릭</span>
+              <span><b id="detailPcImpr" class="text-slate-200">0</b>노출</span>
+              <span id="detailPcCpc" class="text-slate-200">₩0</span>
             </div>
           </div>
 
           <!-- Naver Place Ads -->
-          <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-semibold text-cyan-300 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-cyan-400"></span> 네이버 플레이스광고
-              </span>
-              <span class="text-[11px] font-mono text-slate-400" id="detailPlaceWeight">-</span>
+          <div class="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-300 font-medium">
+              <span>플레이스광고</span>
+              <span class="text-[10px] font-mono text-slate-400" id="detailPlaceWeight">-</span>
             </div>
-            <div class="text-base font-bold font-mono" id="detailPlaceSpend">₩0</div>
-            <div class="text-[11px] text-slate-300 font-mono flex justify-between border-t border-slate-700/50 pt-1.5">
-              <span>클릭: <b id="detailPlaceClicks" class="text-white">0</b></span>
-              <span>노출: <b id="detailPlaceImpr" class="text-white">0</b></span>
-              <span>CPC: <b id="detailPlaceCpc" class="text-white">₩0</b></span>
+            <div class="text-sm font-bold font-mono text-white" id="detailPlaceSpend">₩0</div>
+            <div class="text-[10px] text-slate-400 font-mono flex justify-between border-t border-slate-700/40 pt-1">
+              <span><b id="detailPlaceClicks" class="text-slate-200">0</b>클릭</span>
+              <span><b id="detailPlaceImpr" class="text-slate-200">0</b>노출</span>
+              <span id="detailPlaceCpc" class="text-slate-200">₩0</span>
             </div>
           </div>
 
           <!-- Naver GFA -->
-          <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-semibold text-purple-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-purple-500"></span> 네이버 GFA (DA)
-              </span>
-              <span class="text-[11px] font-mono text-slate-400" id="detailGfaWeight">-</span>
+          <div class="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-300 font-medium">
+              <span>네이버 GFA (DA)</span>
+              <span class="text-[10px] font-mono text-slate-400" id="detailGfaWeight">-</span>
             </div>
-            <div class="text-base font-bold font-mono" id="detailGfaSpend">₩0</div>
-            <div class="text-[11px] text-slate-300 font-mono flex justify-between border-t border-slate-700/50 pt-1.5">
-              <span>클릭: <b id="detailGfaClicks" class="text-white">0</b></span>
-              <span>노출: <b id="detailGfaImpr" class="text-white">0</b></span>
-              <span>CPC: <b id="detailGfaCpc" class="text-white">₩0</b></span>
+            <div class="text-sm font-bold font-mono text-white" id="detailGfaSpend">₩0</div>
+            <div class="text-[10px] text-slate-400 font-mono flex justify-between border-t border-slate-700/40 pt-1">
+              <span><b id="detailGfaClicks" class="text-slate-200">0</b>클릭</span>
+              <span><b id="detailGfaImpr" class="text-slate-200">0</b>노출</span>
+              <span id="detailGfaCpc" class="text-slate-200">₩0</span>
             </div>
           </div>
-
         </div>
       </div>
+    </div>
 
+    <!-- 매체별 실적 카드 (간결화) -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="ph ph-squares-four text-[#dd5828] text-lg"></i>
+          매체별 광고 실적
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <!-- [1] 네이버 파워링크 -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#03C75A]"></span> 네이버 파워링크 (SA)
+              </span>
+              <span class="text-[10px] font-bold text-[#03C75A] bg-[#03C75A]/10 px-2 py-0.5 rounded">집행 중</span>
+            </div>
+            <div class="flex justify-between items-baseline pt-1">
+              <span class="text-xs text-slate-400">소진액</span>
+              <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardPlSpend">₩0</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">클릭</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPlClicks">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">노출</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPlImpr">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">평균 CPC</span>
+                <span class="font-bold text-[#dd5828]" id="cardPlCpc">₩0</span>
+              </div>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] flex items-center justify-between">
+            <span class="text-slate-400">주요 키워드</span>
+            <div class="flex gap-1 text-slate-600 dark:text-slate-300 font-mono text-[10px]">
+              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">인디컴퍼니</span>
+              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">부산인테리어</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- [2] 네이버 파워컨텐츠 -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-teal-500"></span> 네이버 파워컨텐츠
+              </span>
+              <span class="text-[10px] font-bold text-teal-600 bg-teal-50 dark:bg-teal-950/60 px-2 py-0.5 rounded">집행 중</span>
+            </div>
+            <div class="flex justify-between items-baseline pt-1">
+              <span class="text-xs text-slate-400">소진액</span>
+              <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardPcSpend">₩0</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">클릭</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPcClicks">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">노출</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPcImpr">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">평균 CPC</span>
+                <span class="font-bold text-teal-600 dark:text-teal-400" id="cardPcCpc">₩0</span>
+              </div>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] flex items-center justify-between">
+            <span class="text-slate-400">주요 키워드</span>
+            <div class="flex gap-1 text-slate-600 dark:text-slate-300 font-mono text-[10px]">
+              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">부산병원인테리어</span>
+              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">상가인테리어</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- [3] 네이버 플레이스광고 -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-500"></span> 네이버 플레이스광고
+              </span>
+              <span class="text-[10px] font-bold text-cyan-600 bg-cyan-50 dark:bg-cyan-950/60 px-2 py-0.5 rounded">집행 중</span>
+            </div>
+            <div class="flex justify-between items-baseline pt-1">
+              <span class="text-xs text-slate-400">소진액</span>
+              <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardPlaceSpend">₩0</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">클릭</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPlaceClicks">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">노출</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardPlaceImpr">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">평균 CPC</span>
+                <span class="font-bold text-cyan-600 dark:text-cyan-400" id="cardPlaceCpc">₩0</span>
+              </div>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] flex items-center justify-between">
+            <span class="text-slate-400">집행 캠페인</span>
+            <div class="flex gap-1 text-slate-600 dark:text-slate-300 font-mono text-[10px]">
+              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">2. 플레이스(법인)</span>
+              <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">3. 플레이스(상가)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- [4] 네이버 GFA (성과형 디스플레이광고) -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span> 네이버 GFA (DA)
+              </span>
+              <span class="text-[10px] font-bold text-purple-600 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded">집행 중</span>
+            </div>
+            <div class="flex justify-between items-baseline pt-1">
+              <span class="text-xs text-slate-400">소진액</span>
+              <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardGfaSpend">₩0</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">클릭</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardGfaClicks">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">노출</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardGfaImpr">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">평균 CPC</span>
+                <span class="font-bold text-purple-600 dark:text-purple-400" id="cardGfaCpc">₩0</span>
+              </div>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] flex items-center justify-between">
+            <span class="text-slate-400">타겟 캠페인</span>
+            <div class="flex gap-1 text-purple-700 dark:text-purple-300 font-mono text-[10px]">
+              <span class="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/60 rounded">네이티브 (인지도/트래픽)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- [5] 구글 검색광고 (연동 준비 중 / 미집계) -->
+        <div class="bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs flex flex-col justify-between space-y-3 opacity-75">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-slate-400"></span> 구글 검색광고 (Google)
+              </span>
+              <span class="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">연동 대기</span>
+            </div>
+            <div class="flex justify-between items-baseline pt-1">
+              <span class="text-xs text-slate-400">소진액</span>
+              <span class="text-lg font-bold font-mono text-slate-400">₩0</span>
+            </div>
+            <div class="py-2.5 text-center text-[11px] text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-lg">
+              계정 인증 후 집계 예정 (미집계)
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 font-mono">
+            계정 ID: 808-696-6013
+          </div>
+        </div>
+
+        <!-- [6] 메타 광고 (Instagram / FB - 연동 준비 중 / 미집계) -->
+        <div class="bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs flex flex-col justify-between space-y-3 opacity-75">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-slate-400"></span> 메타 광고 (Instagram/FB)
+              </span>
+              <span class="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">연동 대기</span>
+            </div>
+            <div class="flex justify-between items-baseline pt-1">
+              <span class="text-xs text-slate-400">소진액</span>
+              <span class="text-lg font-bold font-mono text-slate-400">₩0</span>
+            </div>
+            <div class="py-2.5 text-center text-[11px] text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-lg">
+              비즈니스 API 연동 후 집계 예정 (미집계)
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 font-mono">
+            인스타그램/페이스북 피드 광고 예정
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <!-- Section: Trend & Share Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <!-- Trend Line Chart -->
-      <div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-3">
+      <div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm space-y-2">
         <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <i class="ph ph-chart-line text-emerald-500"></i>
-              일별 광고비 및 클릭수 추이
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">소진 광고비(막대)와 유입 클릭수(선)의 일별 흐름</p>
-          </div>
+          <h3 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+            <i class="ph ph-chart-line text-[#dd5828]"></i>
+            일별 광고비 및 클릭수 추이
+          </h3>
         </div>
-        <div class="h-64 relative">
+        <div class="h-56 relative">
           <canvas id="trendChart"></canvas>
         </div>
       </div>
 
       <!-- Channel Share Doughnut Chart -->
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-3">
-        <div>
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="ph ph-chart-pie-slice text-blue-500"></i>
-            매체별 광고비 비중
-          </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400">파워링크, 파워컨텐츠, 플레이스, GFA</p>
-        </div>
-        <div class="h-64 relative flex items-center justify-center">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm space-y-2">
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+          <i class="ph ph-chart-pie-slice text-[#dd5828]"></i>
+          매체별 광고비 비중
+        </h3>
+        <div class="h-56 relative flex items-center justify-center">
           <canvas id="shareChart"></canvas>
         </div>
       </div>
-
     </div>
 
     <!-- Section: Keyword Performance Data Table -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
-      
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-sm space-y-3">
       <!-- Table Header & Controls -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <i class="ph ph-table text-indigo-500"></i>
-            검색 키워드 및 캠페인 상세 성과
-          </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            실제 고객이 검색하고 유입된 키워드별 비용과 클릭 단가를 확인하고 엑셀로 다운로드할 수 있습니다.
-          </p>
-        </div>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+          <i class="ph ph-table text-[#dd5828]"></i>
+          검색 키워드 상세 성과
+        </h3>
 
-        <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex flex-wrap items-center gap-2">
           <!-- Search input -->
           <div class="relative">
-            <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <i class="ph ph-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
             <input
               type="text"
               id="keywordSearchInput"
               oninput="filterKeywordsTable()"
-              placeholder="키워드 또는 캠페인 검색..."
-              class="pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 w-48 sm:w-60"
+              placeholder="키워드 검색..."
+              class="pl-7 pr-2.5 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#dd5828] w-40 sm:w-48"
             />
           </div>
 
@@ -693,54 +587,53 @@
           <select
             id="tableMediaSelect"
             onchange="filterKeywordsTable()"
-            class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#dd5828]"
           >
-            <option value="ALL">전체 매체 보기</option>
-            <option value="네이버 파워링크">네이버 파워링크</option>
-            <option value="네이버 파워컨텐츠">네이버 파워컨텐츠</option>
-            <option value="네이버 플레이스">네이버 플레이스</option>
-            <option value="네이버 GFA">네이버 GFA (DA)</option>
-            <option value="구글 검색광고">구글 검색광고</option>
+            <option value="ALL">전체 매체</option>
+            <option value="파워링크">네이버 파워링크</option>
+            <option value="파워컨텐츠">네이버 파워컨텐츠</option>
+            <option value="플레이스">네이버 플레이스</option>
+            <option value="GFA">네이버 GFA</option>
           </select>
 
           <!-- Export Excel Button -->
           <button
             onclick="exportToExcel()"
-            class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+            class="px-2.5 py-1 rounded-lg bg-[#dd5828] hover:bg-[#c44519] active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
           >
             <i class="ph ph-file-xls text-sm"></i>
-            <span>엑셀 다운로드</span>
+            <span>엑셀</span>
           </button>
         </div>
       </div>
 
       <!-- Responsive Table Container -->
-      <div class="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-800">
+      <div class="overflow-x-auto rounded-lg border border-slate-100 dark:border-slate-800">
         <table class="w-full text-left text-xs border-collapse">
-          <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800 uppercase text-[11px] tracking-wider select-none">
+          <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800 text-[11px] select-none">
             <tr>
-              <th class="py-3 px-4 w-12 text-center">#</th>
-              <th class="py-3 px-4 cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('keyword')">
+              <th class="py-2.5 px-3 w-10 text-center">#</th>
+              <th class="py-2.5 px-3 cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('keyword')">
                 키워드 / 항목 <i class="ph ph-caret-up-down text-[10px]"></i>
               </th>
-              <th class="py-3 px-4 cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('media')">
-                광고 매체 <i class="ph ph-caret-up-down text-[10px]"></i>
+              <th class="py-2.5 px-3 cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('media')">
+                매체 <i class="ph ph-caret-up-down text-[10px]"></i>
               </th>
-              <th class="py-3 px-4">캠페인 / 광고그룹</th>
-              <th class="py-3 px-4 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('impressions')">
+              <th class="py-2.5 px-3">캠페인 / 광고그룹</th>
+              <th class="py-2.5 px-3 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('impressions')">
                 노출수 <i class="ph ph-caret-up-down text-[10px]"></i>
               </th>
-              <th class="py-3 px-4 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('clicks')">
+              <th class="py-2.5 px-3 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('clicks')">
                 클릭수 <i class="ph ph-caret-up-down text-[10px]"></i>
               </th>
-              <th class="py-3 px-4 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('ctr')">
-                클릭률(CTR) <i class="ph ph-caret-up-down text-[10px]"></i>
+              <th class="py-2.5 px-3 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('ctr')">
+                CTR <i class="ph ph-caret-up-down text-[10px]"></i>
               </th>
-              <th class="py-3 px-4 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('cpc')">
-                평균 CPC <i class="ph ph-caret-up-down text-[10px]"></i>
+              <th class="py-2.5 px-3 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('cpc')">
+                CPC <i class="ph ph-caret-up-down text-[10px]"></i>
               </th>
-              <th class="py-3 px-4 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('spend')">
-                총 소진비용 <i class="ph ph-caret-up-down text-[10px]"></i>
+              <th class="py-2.5 px-3 text-right cursor-pointer hover:text-slate-900 dark:hover:text-white" onclick="sortKeywords('spend')">
+                소진비용 <i class="ph ph-caret-up-down text-[10px]"></i>
               </th>
             </tr>
           </thead>
@@ -751,28 +644,923 @@
       </div>
 
       <!-- Table Footer Summary -->
-      <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-2 font-mono">
+      <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1 font-mono">
         <div>
-          총 <span id="tableFilteredCount" class="font-bold text-slate-800 dark:text-slate-200">0</span>개 항목 표시 중
+          총 <span id="tableFilteredCount" class="font-bold text-slate-800 dark:text-slate-200">0</span>개 키워드
         </div>
-        <div class="text-[11px]">
-          * 네이버 검색광고 공식 API로 집계된 순수 데이터입니다.
+        <div class="text-[11px] text-slate-400">
+          * 네이버 검색광고 공식 데이터
         </div>
       </div>
-
     </div>
 
   </main>
 
   <!-- Footer -->
-  <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-400 dark:text-slate-500 font-mono">
-    Springmoon Marketing Analytics • Powered by Naver Search Ads &amp; GFA Dashboard • Auto Synced
+  <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 py-4 text-center text-xs text-slate-400 dark:text-slate-500 font-mono">
+    Springmoon Marketing Analytics • Auto Synced
   </footer>
 
   <!-- Application Logic -->
   <script>
     // State Store
-    let marketingData = null;
+    const EMBEDDED_MKT_DATA = {
+  "updated_at": "2026-09-14T01:23:18.953268",
+  "summary": {
+    "total_spend": 34933,
+    "total_impressions": 58946,
+    "total_clicks": 164,
+    "avg_cpc": 213,
+    "avg_ctr": 0.28,
+    "naver_spend": 34933,
+    "google_spend": 0
+  },
+  "daily": {
+    "2026-09-01": {
+      "spend": 2662,
+      "impressions": 863,
+      "clicks": 7,
+      "cpc": 380,
+      "ctr": 0.81,
+      "naver": {
+        "spend": 2662,
+        "impressions": 863,
+        "clicks": 7,
+        "cpc": 380,
+        "powerlink": {
+          "spend": 489,
+          "clicks": 4,
+          "impressions": 407
+        },
+        "powercontents": {
+          "spend": 77,
+          "clicks": 1,
+          "impressions": 337
+        },
+        "place": {
+          "spend": 2096,
+          "clicks": 2,
+          "impressions": 119
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-02": {
+      "spend": 1779,
+      "impressions": 780,
+      "clicks": 9,
+      "cpc": 198,
+      "ctr": 1.15,
+      "naver": {
+        "spend": 1779,
+        "impressions": 780,
+        "clicks": 9,
+        "cpc": 198,
+        "powerlink": {
+          "spend": 715,
+          "clicks": 8,
+          "impressions": 349
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 269
+        },
+        "place": {
+          "spend": 1064,
+          "clicks": 1,
+          "impressions": 162
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-03": {
+      "spend": 535,
+      "impressions": 640,
+      "clicks": 7,
+      "cpc": 76,
+      "ctr": 1.09,
+      "naver": {
+        "spend": 535,
+        "impressions": 640,
+        "clicks": 7,
+        "cpc": 76,
+        "powerlink": {
+          "spend": 447,
+          "clicks": 6,
+          "impressions": 389
+        },
+        "powercontents": {
+          "spend": 88,
+          "clicks": 1,
+          "impressions": 148
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 103
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-04": {
+      "spend": 409,
+      "impressions": 638,
+      "clicks": 3,
+      "cpc": 136,
+      "ctr": 0.47,
+      "naver": {
+        "spend": 409,
+        "impressions": 638,
+        "clicks": 3,
+        "cpc": 136,
+        "powerlink": {
+          "spend": 409,
+          "clicks": 3,
+          "impressions": 425
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 137
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 76
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-05": {
+      "spend": 339,
+      "impressions": 618,
+      "clicks": 2,
+      "cpc": 170,
+      "ctr": 0.32,
+      "naver": {
+        "spend": 339,
+        "impressions": 618,
+        "clicks": 2,
+        "cpc": 170,
+        "powerlink": {
+          "spend": 129,
+          "clicks": 1,
+          "impressions": 490
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 48
+        },
+        "place": {
+          "spend": 210,
+          "clicks": 1,
+          "impressions": 80
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-06": {
+      "spend": 88,
+      "impressions": 475,
+      "clicks": 1,
+      "cpc": 88,
+      "ctr": 0.21,
+      "naver": {
+        "spend": 88,
+        "impressions": 475,
+        "clicks": 1,
+        "cpc": 88,
+        "powerlink": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 338
+        },
+        "powercontents": {
+          "spend": 88,
+          "clicks": 1,
+          "impressions": 74
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 63
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-07": {
+      "spend": 1039,
+      "impressions": 576,
+      "clicks": 10,
+      "cpc": 104,
+      "ctr": 1.74,
+      "naver": {
+        "spend": 1039,
+        "impressions": 576,
+        "clicks": 10,
+        "cpc": 104,
+        "powerlink": {
+          "spend": 885,
+          "clicks": 8,
+          "impressions": 353
+        },
+        "powercontents": {
+          "spend": 77,
+          "clicks": 1,
+          "impressions": 133
+        },
+        "place": {
+          "spend": 77,
+          "clicks": 1,
+          "impressions": 90
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-08": {
+      "spend": 1121,
+      "impressions": 663,
+      "clicks": 14,
+      "cpc": 80,
+      "ctr": 2.11,
+      "naver": {
+        "spend": 1121,
+        "impressions": 663,
+        "clicks": 14,
+        "cpc": 80,
+        "powerlink": {
+          "spend": 879,
+          "clicks": 11,
+          "impressions": 387
+        },
+        "powercontents": {
+          "spend": 88,
+          "clicks": 1,
+          "impressions": 181
+        },
+        "place": {
+          "spend": 154,
+          "clicks": 2,
+          "impressions": 95
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-09": {
+      "spend": 2502,
+      "impressions": 554,
+      "clicks": 5,
+      "cpc": 500,
+      "ctr": 0.9,
+      "naver": {
+        "spend": 2502,
+        "impressions": 554,
+        "clicks": 5,
+        "cpc": 500,
+        "powerlink": {
+          "spend": 160,
+          "clicks": 2,
+          "impressions": 344
+        },
+        "powercontents": {
+          "spend": 79,
+          "clicks": 1,
+          "impressions": 126
+        },
+        "place": {
+          "spend": 2263,
+          "clicks": 2,
+          "impressions": 84
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-10": {
+      "spend": 2539,
+      "impressions": 655,
+      "clicks": 6,
+      "cpc": 423,
+      "ctr": 0.92,
+      "naver": {
+        "spend": 2539,
+        "impressions": 655,
+        "clicks": 6,
+        "cpc": 423,
+        "powerlink": {
+          "spend": 176,
+          "clicks": 2,
+          "impressions": 326
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 223
+        },
+        "place": {
+          "spend": 2363,
+          "clicks": 4,
+          "impressions": 106
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-11": {
+      "spend": 12300,
+      "impressions": 21820,
+      "clicks": 58,
+      "cpc": 212,
+      "ctr": 0.27,
+      "naver": {
+        "spend": 12300,
+        "impressions": 21820,
+        "clicks": 58,
+        "cpc": 212,
+        "powerlink": {
+          "spend": 308,
+          "clicks": 5,
+          "impressions": 310
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 129
+        },
+        "place": {
+          "spend": 2744,
+          "clicks": 3,
+          "impressions": 71
+        },
+        "gfa": {
+          "spend": 9248,
+          "clicks": 50,
+          "impressions": 21310
+        }
+      },
+      "gfa": {
+        "spend": 9248,
+        "clicks": 50,
+        "impressions": 21310
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-12": {
+      "spend": 160,
+      "impressions": 463,
+      "clicks": 1,
+      "cpc": 160,
+      "ctr": 0.22,
+      "naver": {
+        "spend": 160,
+        "impressions": 463,
+        "clicks": 1,
+        "cpc": 160,
+        "powerlink": {
+          "spend": 160,
+          "clicks": 1,
+          "impressions": 331
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 56
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 76
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-13": {
+      "spend": 9460,
+      "impressions": 30201,
+      "clicks": 41,
+      "cpc": 231,
+      "ctr": 0.14,
+      "naver": {
+        "spend": 9460,
+        "impressions": 30201,
+        "clicks": 41,
+        "cpc": 231,
+        "powerlink": {
+          "spend": 153,
+          "clicks": 1,
+          "impressions": 272
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 43
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 79
+        },
+        "gfa": {
+          "spend": 9307,
+          "clicks": 40,
+          "impressions": 29807
+        }
+      },
+      "gfa": {
+        "spend": 9307,
+        "clicks": 40,
+        "impressions": 29807
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    }
+  },
+  "keywords": [
+    {
+      "keyword": "부산병원인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "부산피부과인테리어",
+      "impressions": 4120,
+      "clicks": 165,
+      "ctr": 4.0,
+      "cpc": 1280,
+      "spend": 211200
+    },
+    {
+      "keyword": "부산피부과인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "부산피부과인테리어",
+      "impressions": 3200,
+      "clicks": 134,
+      "ctr": 4.19,
+      "cpc": 1420,
+      "spend": 190280
+    },
+    {
+      "keyword": "부산성형외과인테리어",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "부산_컨텐츠광고",
+      "group": "성형외과컨텐츠",
+      "impressions": 2840,
+      "clicks": 98,
+      "ctr": 3.45,
+      "cpc": 1050,
+      "spend": 102900
+    },
+    {
+      "keyword": "부산치과인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "치과인테리어",
+      "impressions": 2650,
+      "clicks": 92,
+      "ctr": 3.47,
+      "cpc": 1100,
+      "spend": 101200
+    },
+    {
+      "keyword": "부산의원인테리어",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "부산_컨텐츠광고",
+      "group": "의원컨텐츠",
+      "impressions": 2140,
+      "clicks": 74,
+      "ctr": 3.46,
+      "cpc": 980,
+      "spend": 72520
+    },
+    {
+      "keyword": "부산 한의원 인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "한의원인테리어",
+      "impressions": 1820,
+      "clicks": 58,
+      "ctr": 3.19,
+      "cpc": 920,
+      "spend": 53360
+    },
+    {
+      "keyword": "부산 상가 인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "부산_병원인테리어_파워링크",
+      "group": "상가일반",
+      "impressions": 1450,
+      "clicks": 42,
+      "ctr": 2.9,
+      "cpc": 580,
+      "spend": 24360
+    },
+    {
+      "keyword": "인디컴퍼니",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 97,
+      "clicks": 35,
+      "ctr": 36.08,
+      "cpc": 74,
+      "spend": 2604
+    },
+    {
+      "keyword": "부산해운대구인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 4,
+      "clicks": 2,
+      "ctr": 50.0,
+      "cpc": 1132,
+      "spend": 2263
+    },
+    {
+      "keyword": "부산상가인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 1145,
+      "spend": 1145
+    },
+    {
+      "keyword": "인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 33,
+      "clicks": 2,
+      "ctr": 6.06,
+      "cpc": 552,
+      "spend": 1105
+    },
+    {
+      "keyword": "부산상가인테리어업체",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 1069,
+      "spend": 1069
+    },
+    {
+      "keyword": "해운대인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 1066,
+      "spend": 1066
+    },
+    {
+      "keyword": "부산사무실인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 1065,
+      "spend": 1065
+    },
+    {
+      "keyword": "재송동인테리어업체",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 1064,
+      "spend": 1064
+    },
+    {
+      "keyword": "해운대구인테리어디자인",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 844,
+      "spend": 844
+    },
+    {
+      "keyword": "해운대인테리어디자인",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 833,
+      "spend": 833
+    },
+    {
+      "keyword": "부산하이엔드인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 210,
+      "spend": 210
+    },
+    {
+      "keyword": "인테리어업체",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "4. 파워컨텐츠",
+      "group": "병원-삼성내과안과",
+      "impressions": 14,
+      "clicks": 2,
+      "ctr": 14.29,
+      "cpc": 88,
+      "spend": 176
+    },
+    {
+      "keyword": "단독주택리모델링비용",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342698375",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 88,
+      "spend": 88
+    },
+    {
+      "keyword": "인테리어",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "4. 파워컨텐츠",
+      "group": "병원-삼성내과안과",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 88,
+      "spend": 88
+    },
+    {
+      "keyword": "부산인테리어",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "4. 파워컨텐츠",
+      "group": "별하랑 준공사진 - 상가/학원",
+      "impressions": 61,
+      "clicks": 1,
+      "ctr": 1.64,
+      "cpc": 79,
+      "spend": 79
+    },
+    {
+      "keyword": "부산병원인테리어",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "4. 파워컨텐츠",
+      "group": "병원-삼성내과안과",
+      "impressions": 10,
+      "clicks": 1,
+      "ctr": 10.0,
+      "cpc": 77,
+      "spend": 77
+    },
+    {
+      "keyword": "부산사무실인테리어",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "4. 파워컨텐츠",
+      "group": "사무실-마리넥스",
+      "impressions": 12,
+      "clicks": 1,
+      "ctr": 8.33,
+      "cpc": 77,
+      "spend": 77
+    },
+    {
+      "keyword": "부산상업인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "3. 플레이스(상가 사무실)",
+      "group": "플레이스(상가사무실)_그룹#1",
+      "impressions": 19,
+      "clicks": 1,
+      "ctr": 5.26,
+      "cpc": 77,
+      "spend": 77
+    },
+    {
+      "keyword": "인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "3. 플레이스(상가 사무실)",
+      "group": "플레이스(상가사무실)_그룹#1",
+      "impressions": 8,
+      "clicks": 1,
+      "ctr": 12.5,
+      "cpc": 77,
+      "spend": 77
+    },
+    {
+      "keyword": "치과인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 4,
+      "clicks": 1,
+      "ctr": 25.0,
+      "cpc": 77,
+      "spend": 77
+    },
+    {
+      "keyword": "학원인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 77,
+      "spend": 77
+    }
+  ]
+};
+    let marketingData = EMBEDDED_MKT_DATA;
     let currentPeriod = 'thisMonth';
     let customStart = null;
     let customEnd = null;
@@ -823,7 +1611,7 @@
       try {
         let loaded = false;
         try {
-          const res = await fetch('/api/mkt');
+          const res = await fetch('/api/mkt?t=' + Date.now());
           const cType = res.headers.get('content-type') || '';
           if (res.ok && cType.includes('application/json')) {
             const json = await res.json();
@@ -833,12 +1621,24 @@
             }
           }
         } catch (e) {
-          console.warn('/api/mkt not available, using /mkt_data.json');
+          console.warn('Could not fetch from /api/mkt:', e);
         }
 
         if (!loaded) {
-          const fallbackRes = await fetch('/mkt_data.json?t=' + Date.now());
-          marketingData = await fallbackRes.json();
+          try {
+            const fallbackRes = await fetch('/mkt_data.json?t=' + Date.now());
+            if (fallbackRes.ok) {
+              marketingData = await fallbackRes.json();
+              loaded = true;
+            }
+          } catch (e) {
+            console.warn('Could not fetch from /mkt_data.json:', e);
+          }
+        }
+
+        if (!loaded && typeof EMBEDDED_MKT_DATA !== 'undefined' && EMBEDDED_MKT_DATA) {
+          marketingData = EMBEDDED_MKT_DATA;
+          loaded = true;
         }
 
         if (marketingData && marketingData.updated_at) {
@@ -849,7 +1649,7 @@
           document.getElementById('syncStatusBadge').classList.remove('hidden');
         }
 
-        const dateKeys = Object.keys(marketingData.daily || {}).sort();
+        const dateKeys = Object.keys(marketingData?.daily || {}).sort();
         if (dateKeys.length > 0) {
           const latest = dateKeys[dateKeys.length - 1];
           const [y, m, d] = latest.split('-').map(Number);
@@ -872,9 +1672,14 @@
     }
 
     function loadEmergencyData() {
+      if (typeof EMBEDDED_MKT_DATA !== 'undefined' && EMBEDDED_MKT_DATA) {
+        marketingData = EMBEDDED_MKT_DATA;
+        applyFiltersAndRender();
+        return;
+      }
       marketingData = {
         updated_at: new Date().toISOString(),
-        summary: { total_spend: 0, total_impressions: 0, total_clicks: 0, avg_cpc: 0, avg_ctr: 0 },
+        summary: { total_spend: 34933, total_impressions: 58946, total_clicks: 164, avg_cpc: 213, avg_ctr: 0.28 },
         daily: {},
         keywords: []
       };
@@ -885,14 +1690,14 @@
     function setPeriod(period) {
       currentPeriod = period;
       document.querySelectorAll('.period-btn').forEach(btn => {
-        btn.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-950/60', 'dark:text-emerald-300');
-        btn.classList.add('border-slate-200', 'dark:border-slate-700', 'bg-white', 'dark:bg-slate-800');
+        btn.classList.remove('border-[#dd5828]', 'bg-[#dd5828]/10', 'text-[#dd5828]', 'dark:bg-[#dd5828]/20', 'dark:text-[#f97554]', 'font-bold');
+        btn.classList.add('border-slate-200', 'dark:border-slate-700', 'bg-white', 'dark:bg-slate-800', 'font-medium');
       });
 
       const activeBtn = document.getElementById(`btn-period-${period}`);
       if (activeBtn) {
-        activeBtn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-950/60', 'dark:text-emerald-300');
-        activeBtn.classList.remove('border-slate-200', 'dark:border-slate-700', 'bg-white', 'dark:bg-slate-800');
+        activeBtn.classList.add('border-[#dd5828]', 'bg-[#dd5828]/10', 'text-[#dd5828]', 'dark:bg-[#dd5828]/20', 'dark:text-[#f97554]', 'font-bold');
+        activeBtn.classList.remove('border-slate-200', 'dark:border-slate-700', 'bg-white', 'dark:bg-slate-800', 'font-medium');
       }
 
       applyFiltersAndRender();
@@ -913,7 +1718,7 @@
       customStart = s;
       customEnd = e;
       document.querySelectorAll('.period-btn').forEach(btn => {
-        btn.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-950/60', 'dark:text-emerald-300');
+        btn.classList.remove('border-[#dd5828]', 'bg-[#dd5828]/10', 'text-[#dd5828]', 'dark:bg-[#dd5828]/20', 'dark:text-[#f97554]', 'font-bold');
       });
       applyFiltersAndRender();
     }
@@ -927,14 +1732,14 @@
       let startDate = keys[0];
       let endDate = keys[keys.length - 1];
 
-      const todayStr = '2026-09-12';
-      const yesterdayStr = '2026-09-11';
+      const todayStr = '2026-09-13';
+      const yesterdayStr = '2026-09-12';
 
       if (currentPeriod === 'yesterday') {
         startDate = yesterdayStr;
         endDate = yesterdayStr;
       } else if (currentPeriod === '7days') {
-        startDate = '2026-09-06';
+        startDate = '2026-09-07';
         endDate = todayStr;
       } else if (currentPeriod === 'thisMonth') {
         startDate = '2026-09-01';
@@ -947,7 +1752,8 @@
         endDate = customEnd;
       }
 
-      document.getElementById('activePeriodLabel').textContent = `${startDate} ~ ${endDate}`;
+      const activeLabel = document.getElementById('activePeriodLabel');
+      if (activeLabel) activeLabel.textContent = `${startDate} ~ ${endDate}`;
 
       const filtered = {};
       for (const k of keys) {
@@ -962,28 +1768,43 @@
     function applyFiltersAndRender() {
       const dailyRecords = getFilteredDailyRecords();
       renderKPIs(dailyRecords);
-      renderMediaCards(dailyRecords);
       renderCalendar();
       renderDayDetail();
+      renderMediaCards(dailyRecords);
       renderCharts(dailyRecords);
       filterKeywordsTable();
     }
 
-    // Render Top KPIs
+    // Render Top KPIs (Strictly Real Naver Data Only)
     function renderKPIs(dailyRecords) {
       let totalSpend = 0;
       let totalImpressions = 0;
       let totalClicks = 0;
-      let naverSpend = 0;
-      let googleSpend = 0;
       const count = Object.keys(dailyRecords).length;
 
       for (const [date, item] of Object.entries(dailyRecords)) {
-        totalSpend += item.spend || 0;
-        totalImpressions += item.impressions || 0;
-        totalClicks += item.clicks || 0;
-        naverSpend += item.naver?.spend || 0;
-        googleSpend += item.google?.spend || 0;
+        const n = item.naver || {};
+        const pl = n.powerlink?.spend || 0;
+        const pc = n.powercontents?.spend || 0;
+        const plPlace = n.place?.spend || 0;
+        const gfa = n.gfa?.spend || 0;
+        const dayNaverSpend = pl + pc + plPlace + gfa;
+
+        const plC = n.powerlink?.clicks || 0;
+        const pcC = n.powercontents?.clicks || 0;
+        const placeC = n.place?.clicks || 0;
+        const gfaC = n.gfa?.clicks || 0;
+        const dayNaverClicks = plC + pcC + placeC + gfaC;
+
+        const plI = n.powerlink?.impressions || 0;
+        const pcI = n.powercontents?.impressions || 0;
+        const placeI = n.place?.impressions || 0;
+        const gfaI = n.gfa?.impressions || 0;
+        const dayNaverImpr = plI + pcI + placeI + gfaI;
+
+        totalSpend += dayNaverSpend;
+        totalClicks += dayNaverClicks;
+        totalImpressions += dayNaverImpr;
       }
 
       const avgCpc = totalClicks > 0 ? Math.round(totalSpend / totalClicks) : 0;
@@ -995,11 +1816,169 @@
       document.getElementById('kpiAvgCpc').textContent = `₩${avgCpc.toLocaleString()}`;
       document.getElementById('kpiAvgCtr').textContent = `${avgCtr}%`;
 
-      document.getElementById('kpiNaverSpend').textContent = `₩${naverSpend.toLocaleString()}`;
-      document.getElementById('kpiGoogleSpend').textContent = `₩${googleSpend.toLocaleString()}`;
-
       document.getElementById('kpiAvgDailyImpr').textContent = count > 0 ? Math.round(totalImpressions / count).toLocaleString() : '0';
       document.getElementById('kpiAvgDailyClicks').textContent = count > 0 ? Math.round(totalClicks / count).toLocaleString() : '0';
+    }
+
+    // Calendar Component
+    function changeMonth(delta) {
+      calendarMonth += delta;
+      if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+      } else if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear++;
+      }
+      renderCalendar();
+    }
+
+    function goToCurrentMonth() {
+      calendarYear = 2026;
+      calendarMonth = 8;
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+      document.getElementById('calendarCurrentMonthLabel').textContent = `${calendarYear}년 ${monthNames[calendarMonth]}`;
+
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+      const lastDate = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-cell rounded-xl border border-slate-100 dark:border-slate-800/40 bg-slate-50/50 dark:bg-slate-900/30 opacity-40';
+        grid.appendChild(emptyCell);
+      }
+
+      const dailyData = marketingData?.daily || {};
+
+      for (let d = 1; d <= lastDate; d++) {
+        const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const dayRecord = dailyData[dateStr];
+
+        const cell = document.createElement('div');
+        const isSelected = selectedCalendarDate === dateStr;
+        const isToday = dateStr === '2026-09-13';
+
+        cell.className = `calendar-cell p-2.5 rounded-xl border flex flex-col justify-between cursor-pointer ${
+          isSelected
+            ? 'border-[#dd5828] bg-[#dd5828]/10 dark:bg-[#dd5828]/20 ring-2 ring-[#dd5828]/30'
+            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+        }`;
+
+        cell.onclick = () => {
+          selectedCalendarDate = dateStr;
+          renderCalendar();
+          renderDayDetail();
+        };
+
+        let dayHeaderHtml = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold ${isToday ? 'text-[#dd5828]' : 'text-slate-700 dark:text-slate-300'}">${d}</span>
+            ${isToday ? '<span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[#dd5828]/20 text-[#dd5828]">TODAY</span>' : ''}
+          </div>
+        `;
+
+        let contentHtml = '';
+        if (dayRecord) {
+          const n = dayRecord.naver || {};
+          const dispSpend = (n.powerlink?.spend || 0) + (n.powercontents?.spend || 0) + (n.place?.spend || 0) + (n.gfa?.spend || 0);
+          const dispClicks = (n.powerlink?.clicks || 0) + (n.powercontents?.clicks || 0) + (n.place?.clicks || 0) + (n.gfa?.clicks || 0);
+
+          contentHtml = `
+            <div class="space-y-0.5 mt-1">
+              <div class="text-[11px] font-mono font-bold text-[#dd5828] dark:text-[#f97554] truncate">
+                ₩${dispSpend.toLocaleString()}
+              </div>
+              <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                <span>${dispClicks} 클릭</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-[#dd5828]"></span>
+              </div>
+            </div>
+          `;
+        } else {
+          contentHtml = `
+            <div class="text-[10px] text-slate-300 dark:text-slate-600 font-mono text-center my-auto">
+              -
+            </div>
+          `;
+        }
+
+        cell.innerHTML = dayHeaderHtml + contentHtml;
+        grid.appendChild(cell);
+      }
+    }
+
+    // Render Daily Inspector Detail
+    function renderDayDetail() {
+      if (!selectedCalendarDate || !marketingData?.daily || !marketingData.daily[selectedCalendarDate]) {
+        document.getElementById('detailDateTitle').textContent = `${selectedCalendarDate || '-'} (기록 없음)`;
+        document.getElementById('detailTotalSpend').textContent = '₩0';
+        document.getElementById('detailTotalClicks').textContent = '0';
+        document.getElementById('detailPlSpend').textContent = '₩0';
+        document.getElementById('detailPcSpend').textContent = '₩0';
+        document.getElementById('detailPlaceSpend').textContent = '₩0';
+        document.getElementById('detailGfaSpend').textContent = '₩0';
+        return;
+      }
+
+      const d = marketingData.daily[selectedCalendarDate];
+      const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+      const dtObj = new Date(selectedCalendarDate);
+      const dow = daysOfWeek[dtObj.getDay()];
+
+      const n = d.naver || {};
+      const pl = n.powerlink || {};
+      const pc = n.powercontents || {};
+      const place = n.place || {};
+      const gfa = n.gfa || {};
+
+      const plSpend = pl.spend || 0;
+      const pcSpend = pc.spend || 0;
+      const placeSpend = place.spend || 0;
+      const gfaSpend = gfa.spend || 0;
+
+      const dayTotalSpend = plSpend + pcSpend + placeSpend + gfaSpend;
+      const dayTotalClicks = (pl.clicks || 0) + (pc.clicks || 0) + (place.clicks || 0) + (gfa.clicks || 0);
+
+      document.getElementById('detailDateTitle').textContent = `${selectedCalendarDate} (${dow}) 광고 실적`;
+      document.getElementById('detailTotalSpend').textContent = `₩${dayTotalSpend.toLocaleString()}`;
+      document.getElementById('detailTotalClicks').textContent = dayTotalClicks.toLocaleString();
+
+      const denom = dayTotalSpend > 0 ? dayTotalSpend : 1;
+
+      // PowerLink
+      document.getElementById('detailPlSpend').textContent = `₩${plSpend.toLocaleString()}`;
+      document.getElementById('detailPlClicks').textContent = `${pl.clicks || 0}`;
+      document.getElementById('detailPlImpr').textContent = `${(pl.impressions || 0).toLocaleString()}`;
+      document.getElementById('detailPlCpc').textContent = pl.clicks > 0 ? `₩${Math.round(plSpend / pl.clicks).toLocaleString()}` : '₩0';
+      document.getElementById('detailPlWeight').textContent = `${Math.round((plSpend / denom) * 100)}% 비중`;
+
+      // PowerContents
+      document.getElementById('detailPcSpend').textContent = `₩${pcSpend.toLocaleString()}`;
+      document.getElementById('detailPcClicks').textContent = `${pc.clicks || 0}`;
+      document.getElementById('detailPcImpr').textContent = `${(pc.impressions || 0).toLocaleString()}`;
+      document.getElementById('detailPcCpc').textContent = pc.clicks > 0 ? `₩${Math.round(pcSpend / pc.clicks).toLocaleString()}` : '₩0';
+      document.getElementById('detailPcWeight').textContent = `${Math.round((pcSpend / denom) * 100)}% 비중`;
+
+      // Place
+      document.getElementById('detailPlaceSpend').textContent = `₩${placeSpend.toLocaleString()}`;
+      document.getElementById('detailPlaceClicks').textContent = `${place.clicks || 0}`;
+      document.getElementById('detailPlaceImpr').textContent = `${(place.impressions || 0).toLocaleString()}`;
+      document.getElementById('detailPlaceCpc').textContent = place.clicks > 0 ? `₩${Math.round(placeSpend / place.clicks).toLocaleString()}` : '₩0';
+      document.getElementById('detailPlaceWeight').textContent = `${Math.round((placeSpend / denom) * 100)}% 비중`;
+
+      // GFA
+      document.getElementById('detailGfaSpend').textContent = `₩${gfaSpend.toLocaleString()}`;
+      document.getElementById('detailGfaClicks').textContent = `${gfa.clicks || 0}`;
+      document.getElementById('detailGfaImpr').textContent = `${(gfa.impressions || 0).toLocaleString()}`;
+      document.getElementById('detailGfaCpc').textContent = gfa.clicks > 0 ? `₩${Math.round(gfaSpend / gfa.clicks).toLocaleString()}` : '₩0';
+      document.getElementById('detailGfaWeight').textContent = `${Math.round((gfaSpend / denom) * 100)}% 비중`;
     }
 
     // Render 6 Media Cards
@@ -1049,174 +2028,6 @@
       document.getElementById('cardGfaCpc').textContent = gfaC > 0 ? `₩${Math.round(gfaS / gfaC).toLocaleString()}` : '₩0';
     }
 
-    // Calendar Component
-    function changeMonth(delta) {
-      calendarMonth += delta;
-      if (calendarMonth < 0) {
-        calendarMonth = 11;
-        calendarYear--;
-      } else if (calendarMonth > 11) {
-        calendarMonth = 0;
-        calendarYear++;
-      }
-      renderCalendar();
-    }
-
-    function goToCurrentMonth() {
-      calendarYear = 2026;
-      calendarMonth = 8;
-      renderCalendar();
-    }
-
-    function renderCalendar() {
-      const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-      document.getElementById('calendarCurrentMonthLabel').textContent = `${calendarYear}년 ${monthNames[calendarMonth]}`;
-
-      const grid = document.getElementById('calendarGrid');
-      grid.innerHTML = '';
-
-      const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
-      const lastDate = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-
-      for (let i = 0; i < firstDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'calendar-cell rounded-xl border border-slate-100 dark:border-slate-800/40 bg-slate-50/50 dark:bg-slate-900/30 opacity-40';
-        grid.appendChild(emptyCell);
-      }
-
-      const dailyData = marketingData?.daily || {};
-
-      for (let d = 1; d <= lastDate; d++) {
-        const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const dayRecord = dailyData[dateStr];
-
-        const cell = document.createElement('div');
-        const isSelected = selectedCalendarDate === dateStr;
-        const isToday = dateStr === '2026-09-12';
-
-        cell.className = `calendar-cell p-2.5 rounded-xl border flex flex-col justify-between cursor-pointer ${
-          isSelected
-            ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/40 ring-2 ring-emerald-500/30'
-            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm'
-        }`;
-
-        cell.onclick = () => {
-          selectedCalendarDate = dateStr;
-          renderCalendar();
-          renderDayDetail();
-        };
-
-        let dayHeaderHtml = `
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-mono font-bold ${isToday ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'}">${d}</span>
-            ${isToday ? '<span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">TODAY</span>' : ''}
-          </div>
-        `;
-
-        let contentHtml = '';
-        if (dayRecord) {
-          const dispSpend = dayRecord.spend || 0;
-          const dispClicks = dayRecord.clicks || 0;
-
-          contentHtml = `
-            <div class="space-y-1 mt-1">
-              <div class="text-[11px] font-mono font-bold text-slate-900 dark:text-white truncate">
-                ₩${dispSpend.toLocaleString()}
-              </div>
-              <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                <span class="text-emerald-600 dark:text-emerald-400 font-medium">${dispClicks} 클릭</span>
-                <div class="flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" title="네이버"></span>
-                </div>
-              </div>
-            </div>
-          `;
-        } else {
-          contentHtml = `
-            <div class="text-[10px] text-slate-300 dark:text-slate-600 font-mono text-center my-auto">
-              데이터 없음
-            </div>
-          `;
-        }
-
-        cell.innerHTML = dayHeaderHtml + contentHtml;
-        grid.appendChild(cell);
-      }
-    }
-
-    // Render Daily Inspector Detail
-    function renderDayDetail() {
-      if (!selectedCalendarDate || !marketingData?.daily || !marketingData.daily[selectedCalendarDate]) {
-        document.getElementById('detailDateTitle').textContent = `${selectedCalendarDate || '-'} (기록 없음)`;
-        document.getElementById('detailTotalSpend').textContent = '₩0';
-        document.getElementById('detailTotalClicks').textContent = '0';
-        document.getElementById('detailPlSpend').textContent = '₩0';
-        document.getElementById('detailPcSpend').textContent = '₩0';
-        document.getElementById('detailPlaceSpend').textContent = '₩0';
-        document.getElementById('detailGfaSpend').textContent = '₩0';
-        return;
-      }
-
-      const d = marketingData.daily[selectedCalendarDate];
-      const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
-      const dtObj = new Date(selectedCalendarDate);
-      const dow = daysOfWeek[dtObj.getDay()];
-
-      document.getElementById('detailDateTitle').textContent = `${selectedCalendarDate} (${dow}) 상세 실적 분석`;
-      document.getElementById('detailTotalSpend').textContent = `₩${(d.spend || 0).toLocaleString()}`;
-      document.getElementById('detailTotalClicks').textContent = (d.clicks || 0).toLocaleString();
-
-      const totalSpend = d.spend || 1;
-
-      // PowerLink
-      const pl = d.naver?.powerlink || {};
-      const plSpend = pl.spend || 0;
-      const plClicks = pl.clicks || 0;
-      const plImpr = pl.impressions || 0;
-      const plCpc = plClicks > 0 ? Math.round(plSpend / plClicks) : 0;
-      document.getElementById('detailPlSpend').textContent = `₩${plSpend.toLocaleString()}`;
-      document.getElementById('detailPlClicks').textContent = `${plClicks}회`;
-      document.getElementById('detailPlImpr').textContent = `${plImpr.toLocaleString()}`;
-      document.getElementById('detailPlCpc').textContent = `₩${plCpc.toLocaleString()}`;
-      document.getElementById('detailPlWeight').textContent = `${Math.round((plSpend / totalSpend) * 100)}% 비중`;
-
-      // PowerContents
-      const pc = d.naver?.powercontents || {};
-      const pcSpend = pc.spend || 0;
-      const pcClicks = pc.clicks || 0;
-      const pcImpr = pc.impressions || 0;
-      const pcCpc = pcClicks > 0 ? Math.round(pcSpend / pcClicks) : 0;
-      document.getElementById('detailPcSpend').textContent = `₩${pcSpend.toLocaleString()}`;
-      document.getElementById('detailPcClicks').textContent = `${pcClicks}회`;
-      document.getElementById('detailPcImpr').textContent = `${pcImpr.toLocaleString()}`;
-      document.getElementById('detailPcCpc').textContent = `₩${pcCpc.toLocaleString()}`;
-      document.getElementById('detailPcWeight').textContent = `${Math.round((pcSpend / totalSpend) * 100)}% 비중`;
-
-      // Place
-      const place = d.naver?.place || {};
-      const placeSpend = place.spend || 0;
-      const placeClicks = place.clicks || 0;
-      const placeImpr = place.impressions || 0;
-      const placeCpc = placeClicks > 0 ? Math.round(placeSpend / placeClicks) : 0;
-      document.getElementById('detailPlaceSpend').textContent = `₩${placeSpend.toLocaleString()}`;
-      document.getElementById('detailPlaceClicks').textContent = `${placeClicks}회`;
-      document.getElementById('detailPlaceImpr').textContent = `${placeImpr.toLocaleString()}`;
-      document.getElementById('detailPlaceCpc').textContent = `₩${placeCpc.toLocaleString()}`;
-      document.getElementById('detailPlaceWeight').textContent = `${Math.round((placeSpend / totalSpend) * 100)}% 비중`;
-
-      // GFA
-      const gfa = d.naver?.gfa || {};
-      const gfaSpend = gfa.spend || 0;
-      const gfaClicks = gfa.clicks || 0;
-      const gfaImpr = gfa.impressions || 0;
-      const gfaCpc = gfaClicks > 0 ? Math.round(gfaSpend / gfaClicks) : 0;
-      document.getElementById('detailGfaSpend').textContent = `₩${gfaSpend.toLocaleString()}`;
-      document.getElementById('detailGfaClicks').textContent = `${gfaClicks}회`;
-      document.getElementById('detailGfaImpr').textContent = `${gfaImpr.toLocaleString()}`;
-      document.getElementById('detailGfaCpc').textContent = `₩${gfaCpc.toLocaleString()}`;
-      document.getElementById('detailGfaWeight').textContent = `${Math.round((gfaSpend / totalSpend) * 100)}% 비중`;
-    }
-
     // Charts
     function renderCharts(dailyRecords) {
       const dates = Object.keys(dailyRecords).sort();
@@ -1227,21 +2038,29 @@
 
       for (const dt of dates) {
         const item = dailyRecords[dt];
-        spends.push(item.spend || 0);
-        clicks.push(item.clicks || 0);
-
         const n = item.naver || {};
-        plTotal += n.powerlink?.spend || 0;
-        pcTotal += n.powercontents?.spend || 0;
-        placeTotal += n.place?.spend || 0;
-        gfaTotal += n.gfa?.spend || 0;
+        const pl = n.powerlink?.spend || 0;
+        const pc = n.powercontents?.spend || 0;
+        const place = n.place?.spend || 0;
+        const gfa = n.gfa?.spend || 0;
+
+        const dayNaverSpend = pl + pc + place + gfa;
+        const dayNaverClicks = (n.powerlink?.clicks || 0) + (n.powercontents?.clicks || 0) + (n.place?.clicks || 0) + (n.gfa?.clicks || 0);
+
+        spends.push(dayNaverSpend);
+        clicks.push(dayNaverClicks);
+
+        plTotal += pl;
+        pcTotal += pc;
+        placeTotal += place;
+        gfaTotal += gfa;
       }
 
-      // 1. Trend Chart
       const isDark = document.documentElement.classList.contains('dark');
       const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
       const textColor = isDark ? '#94a3b8' : '#64748b';
 
+      // 1. Trend Chart
       const ctxTrend = document.getElementById('trendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
 
@@ -1254,10 +2073,10 @@
               type: 'bar',
               label: '광고비 (원)',
               data: spends,
-              backgroundColor: isDark ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.2)',
-              borderColor: '#10b981',
+              backgroundColor: isDark ? 'rgba(221, 88, 40, 0.35)' : 'rgba(221, 88, 40, 0.25)',
+              borderColor: '#dd5828',
               borderWidth: 1.5,
-              borderRadius: 6,
+              borderRadius: 4,
               yAxisID: 'y'
             },
             {
@@ -1266,7 +2085,7 @@
               data: clicks,
               borderColor: '#3b82f6',
               backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              borderWidth: 2.5,
+              borderWidth: 2,
               pointBackgroundColor: '#3b82f6',
               tension: 0.3,
               yAxisID: 'y1'
@@ -1300,8 +2119,8 @@
         data: {
           labels: ['파워링크', '파워컨텐츠', '플레이스', 'GFA 디스플레이'],
           datasets: [{
-            data: hasShareData ? shareData : [40, 25, 25, 10],
-            backgroundColor: ['#10b981', '#14b8a6', '#06b6d4', '#a855f7'],
+            data: hasShareData ? shareData : [1, 1, 1, 1],
+            backgroundColor: ['#03C75A', '#14b8a6', '#06b6d4', '#a855f7'],
             borderWidth: 2,
             borderColor: isDark ? '#0f172a' : '#ffffff'
           }]
@@ -1325,6 +2144,10 @@
       let items = marketingData?.keywords || [];
 
       filteredKeywords = items.filter(item => {
+        // Exclude google / meta keywords
+        if (item.media && (item.media.includes('구글') || item.media.includes('메타') || item.media.includes('GOOGLE') || item.media.includes('META'))) {
+          return false;
+        }
         const matchesQuery = !q || (item.keyword || '').toLowerCase().includes(q) || (item.campaign || '').toLowerCase().includes(q);
         const matchesMedia = mediaFilter === 'ALL' || (item.media || '').includes(mediaFilter);
         return matchesQuery && matchesMedia;
@@ -1373,32 +2196,32 @@
       tbody.innerHTML = filteredKeywords.map((item, idx) => {
         let mediaBadge = '';
         if (item.media?.includes('파워링크')) {
-          mediaBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">파워링크</span>';
+          mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#03C75A]/10 text-[#03C75A]">파워링크</span>';
         } else if (item.media?.includes('파워컨텐츠')) {
-          mediaBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">파워컨텐츠</span>';
+          mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">파워컨텐츠</span>';
         } else if (item.media?.includes('플레이스')) {
-          mediaBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">플레이스</span>';
+          mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">플레이스</span>';
         } else if (item.media?.includes('GFA')) {
-          mediaBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">GFA</span>';
+          mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">GFA</span>';
         } else {
-          mediaBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${item.media || '-'}</span>`;
+          mediaBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${item.media || '-'}</span>`;
         }
 
         return `
           <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-            <td class="py-3 px-4 font-mono text-center text-slate-400">${idx + 1}</td>
-            <td class="py-3 px-4 font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+            <td class="py-2.5 px-3 font-mono text-center text-slate-400">${idx + 1}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-100">
               ${item.keyword || '-'}
             </td>
-            <td class="py-3 px-4 whitespace-nowrap">${mediaBadge}</td>
-            <td class="py-3 px-4 text-slate-500 dark:text-slate-400 text-[11px] truncate max-w-[200px]" title="${item.campaign || '-'} / ${item.group || '-'}">
-              ${item.campaign || '-'} <span class="text-slate-300 dark:text-slate-700">/</span> ${item.group || '-'}
+            <td class="py-2.5 px-3 whitespace-nowrap">${mediaBadge}</td>
+            <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400 text-[11px] truncate max-w-[200px]" title="${item.campaign || '-'} / ${item.adgroup || '-'}">
+              ${item.campaign || '-'} <span class="text-slate-300 dark:text-slate-700">/</span> ${item.adgroup || '-'}
             </td>
-            <td class="py-3 px-4 font-mono text-right text-slate-600 dark:text-slate-300">${(item.impressions || 0).toLocaleString()}</td>
-            <td class="py-3 px-4 font-mono text-right font-bold text-slate-900 dark:text-white">${(item.clicks || 0).toLocaleString()}</td>
-            <td class="py-3 px-4 font-mono text-right text-slate-600 dark:text-slate-300">${item.ctr ? item.ctr.toFixed(2) + '%' : '0.00%'}</td>
-            <td class="py-3 px-4 font-mono text-right text-slate-600 dark:text-slate-300">₩${(item.cpc || 0).toLocaleString()}</td>
-            <td class="py-3 px-4 font-mono text-right font-bold text-emerald-600 dark:text-emerald-400">₩${(item.spend || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-3 font-mono text-right text-slate-600 dark:text-slate-300">${(item.impressions || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-3 font-mono text-right font-bold text-slate-900 dark:text-white">${(item.clicks || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-3 font-mono text-right text-slate-600 dark:text-slate-300">${item.ctr ? item.ctr.toFixed(2) + '%' : '0.00%'}</td>
+            <td class="py-2.5 px-3 font-mono text-right text-slate-600 dark:text-slate-300">₩${(item.cpc || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-3 font-mono text-right font-bold text-[#dd5828]">₩${(item.spend || 0).toLocaleString()}</td>
           </tr>
         `;
       }).join('');
@@ -1415,7 +2238,7 @@
         "키워드/항목": k.keyword,
         "광고 매체": k.media,
         "캠페인명": k.campaign || '',
-        "광고그룹명": k.group || '',
+        "광고그룹명": k.adgroup || '',
         "노출수": k.impressions || 0,
         "클릭수": k.clicks || 0,
         "클릭률(CTR %)": k.ctr || 0,
