@@ -63,8 +63,15 @@ class KakaoOAuthHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"OK")
 
-class ReusableServer(http.server.HTTPServer):
+import socket
+
+class DualStackServer(http.server.ThreadingHTTPServer):
+    address_family = socket.AF_INET6
     allow_reuse_address = True
+
+    def server_bind(self):
+        self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        super().server_bind()
 
 def exchange_kakao_code(code: str, redirect_uri: str) -> bool:
     print("\n[진행중] 인가 코드로 카카오 토큰 서버에서 Refresh Token 발급 중...")
@@ -120,9 +127,9 @@ def main():
     # Start local HTTP server first before opening browser
     server = None
     try:
-        server = ReusableServer(("127.0.0.1", port), KakaoOAuthHandler)
+        server = DualStackServer(("::", port), KakaoOAuthHandler)
         server.timeout = 1.0
-        print(f"\n로컬 인증 수신 서버 준비 완료 (포트 {port})")
+        print(f"\n로컬 인증 수신 서버 준비 완료 (포트 {port}, IPv4/IPv6 지원)")
     except Exception as e:
         print(f"\n[경고] 포트 {port} 서버 바인딩 실패: {e}")
 
