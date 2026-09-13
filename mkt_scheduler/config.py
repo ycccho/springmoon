@@ -40,7 +40,7 @@ GOOGLE_DEVELOPER_TOKEN = _google.get("developer_token", "")
 GOOGLE_CLIENT_ID = _google.get("client_id", "")
 GOOGLE_CLIENT_SECRET = _google.get("client_secret", "")
 GOOGLE_CUSTOMER_ID = _google.get("customer_id", "8086966013")
-GOOGLE_API_VERSION = "v17"
+GOOGLE_API_VERSION = "v22"
 
 # KakaoTalk Memo API Credentials
 _kakao = _creds.get("kakao", {})
