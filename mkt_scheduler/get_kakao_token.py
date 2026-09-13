@@ -120,7 +120,7 @@ def main():
     # Start local HTTP server first before opening browser
     server = None
     try:
-        server = ReusableServer(("0.0.0.0", port), KakaoOAuthHandler)
+        server = ReusableServer(("127.0.0.1", port), KakaoOAuthHandler)
         server.timeout = 1.0
         print(f"\n로컬 인증 수신 서버 준비 완료 (포트 {port})")
     except Exception as e:

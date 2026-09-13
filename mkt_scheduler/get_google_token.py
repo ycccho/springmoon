@@ -163,19 +163,10 @@ def main():
 
     print("\n" + "-" * 65)
     print(f"▶ 대상 클라이언트 ID: {client_id}")
-    print("▶ 데스크톱 앱 공식 리디렉션 주소: http://127.0.0.1:8080 (사전 등록 불필요)")
+    print("▶ 데스크톱 앱 리디렉션 주소: http://127.0.0.1:8080")
     print("-" * 65)
-
-    print("\n어떤 방법으로 진행하시겠습니까?")
-    print("  [1] 브라우저 자동 로그인 (추천 - 클릭 한 번으로 완료)")
-    print("  [2] 이미 발급받은 Refresh Token 직접 입력")
-
-    choice = input("\n선택 번호를 입력하세요 (기본값 1): ").strip()
-    if choice == "2":
-        token_input = input("\n구글 Refresh Token을 붙여넣으세요: ").strip()
-        if token_input:
-            verify_and_save_refresh_token(token_input, client_id, client_secret)
-        return
+    print("\n브라우저에서 구글 로그인 및 권한 승인 창을 엽니다...")
+    print("(브라우저에서 계정을 선택하고 [계속]을 누르시면 자동으로 토큰이 저장됩니다.)\n")
 
     redirect_uri = "http://127.0.0.1:8080"
     port = 8080
