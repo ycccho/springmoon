@@ -1579,6 +1579,17 @@
     // Initialize
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
+      if (typeof marketingData !== 'undefined' && marketingData) {
+        const dateKeys = Object.keys(marketingData?.daily || {}).sort();
+        if (dateKeys.length > 0) {
+          const latest = dateKeys[dateKeys.length - 1];
+          const [y, m, d] = latest.split('-').map(Number);
+          calendarYear = y;
+          calendarMonth = m - 1;
+          selectedCalendarDate = latest;
+        }
+        applyFiltersAndRender();
+      }
       fetchMarketingData();
     });
 
