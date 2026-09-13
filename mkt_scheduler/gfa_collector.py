@@ -88,76 +88,71 @@ def collect_gfa_stats(target_date: str) -> dict:
         else:
             logger.info(f"[GFA Collector] No GFA spend recorded on {target_date}.")
 
-        # 2. Place Ads Clicked Keywords (admng_exp_keyword)
-        js_place = f"""
-        function getCookie(name) {{
-            const value = `; ` + document.cookie;
-            const parts = value.split(`; ` + name + `=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-            return '';
-        }}
-        const payload = {{
-          "domain": "admng_exp_keyword",
-          "cols": {{
-            "keys": [
-              {{
-                "columns": [
-                  {{"code": "customerId", "isSelected": true, "filter": {{"value": "1610516"}}, "isGroupBy": true}},
-                  {{"code": "nccAdgroupId", "isSelected": true, "filter": {{"value": ["grp-a001-06-000000033815651", "grp-a001-06-000000043582328"]}}, "isGroupBy": true}},
-                  {{"code": "ymd", "isSelected": true, "filter": {{"value": {{"from": "{target_date}", "to": "{target_date}"}}}}, "isGroupBy": false}},
-                  {{"code": "expKeyword", "isSelected": true, "filter": {{}}, "sort": "-", "isGroupBy": true}}
+        # 2. Place Ads Clicked Keywords (admng_exp_keyword for both campaigns)
+        place_groups = [
+            ("grp-a001-06-000000033815651", "2. 플레이스(법인)", "인디 스마트플레이스"),
+            ("grp-a001-06-000000043582328", "3. 플레이스(상가 사무실)", "플레이스(상가사무실)_그룹#1")
+        ]
+        place_kw_records = []
+        for ag_id, camp_name, group_name in place_groups:
+            js_place = f"""
+            function getCookie(name) {{
+                const value = `; ` + document.cookie;
+                const parts = value.split(`; ` + name + `=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return '';
+            }}
+            const payload = {{
+              "domain": "admng_exp_keyword",
+              "cols": {{
+                "keys": [
+                  {{
+                    "columns": [
+                      {{"code": "customerId", "isSelected": true, "filter": {{"value": "1610516"}}, "isGroupBy": true}},
+                      {{"code": "nccAdgroupId", "isSelected": true, "filter": {{"value": ["{ag_id}"]}}, "isGroupBy": true}},
+                      {{"code": "ymd", "isSelected": true, "filter": {{"value": {{"from": "{target_date}", "to": "{target_date}"}}}}, "isGroupBy": false}},
+                      {{"code": "expKeyword", "isSelected": true, "filter": {{}}, "sort": "-", "isGroupBy": true}}
+                    ]
+                  }}
                 ]
               }}
-            ],
-            "values": [
-              {{
-                "columns": [
-                  {{"code": "clkCnt", "isSelected": true, "sort": "-", "isGroupBy": false}},
-                  {{"code": "impCnt", "isSelected": true, "sort": "-", "isGroupBy": false}}
-                ]
-              }}
-            ]
-          }}
-        }};
-        const res = await fetch('https://ads.naver.com/apis/sa/api/adata/admng_exp_keyword', {{
-            method: 'POST',
-            headers: {{
-                'Content-Type': 'application/json',
-                'X-AD-customer-id': '1610516',
-                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
-            }},
-            body: JSON.stringify(payload)
-        }});
-        return await res.json();
-        """
-        try:
-            place_data = driver.execute_script(f"return (async () => {{ {js_place} }})();")
-            place_kw_records = []
-            for pk in place_data.get("data", []):
-                cl = int(pk.get("clkCnt") or 0)
-                if cl > 0:
-                    imp = int(pk.get("impCnt") or 0)
-                    sp = int(pk.get("salesAmt") or 0)
-                    ag_id = pk.get("nccAdgroupId")
-                    camp_name = "2. 플레이스(법인)" if ag_id == "grp-a001-06-000000033815651" else "3. 플레이스(상가 사무실)"
-                    group_name = "인디 스마트플레이스" if ag_id == "grp-a001-06-000000033815651" else "플레이스 그룹#1"
-                    place_kw_records.append({
-                        "date": target_date,
-                        "keyword": pk.get("expKeyword", ""),
-                        "media": "NAVER_PLACE",
-                        "campaign": camp_name,
-                        "adgroup": group_name,
-                        "impressions": imp,
-                        "clicks": cl,
-                        "spend": sp,
-                        "cpc": round(sp / cl, 1) if cl > 0 else 0,
-                        "ctr": round((cl / imp) * 100, 2) if imp > 0 else 0
-                    })
-            if place_kw_records:
-                save_keyword_records(place_kw_records)
-                logger.info(f"[GFA/Place Collector] Successfully saved {len(place_kw_records)} Place clicked keywords for {target_date}")
-        except Exception as p_err:
-            logger.warning(f"[GFA/Place Collector] Could not extract place keywords: {p_err}")
+            }};
+            const res = await fetch('https://ads.naver.com/apis/sa/api/adata/admng_exp_keyword', {{
+                method: 'POST',
+                headers: {{
+                    'Content-Type': 'application/json',
+                    'X-AD-customer-id': '1610516',
+                    'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
+                }},
+                body: JSON.stringify(payload)
+            }});
+            return await res.json();
+            """
+            try:
+                place_data = driver.execute_script(f"return (async () => {{ {js_place} }})();")
+                for pk in place_data.get("data", []):
+                    cl = int(pk.get("clkCnt") or 0)
+                    if cl > 0:
+                        imp = int(pk.get("impCnt") or 0)
+                        sp = int(pk.get("salesAmt") or 0)
+                        place_kw_records.append({
+                            "date": target_date,
+                            "keyword": pk.get("expKeyword", ""),
+                            "media": "NAVER_PLACE",
+                            "campaign": camp_name,
+                            "adgroup": group_name,
+                            "impressions": imp,
+                            "clicks": cl,
+                            "spend": sp,
+                            "cpc": round(sp / cl, 1) if cl > 0 else 0,
+                            "ctr": round((cl / imp) * 100, 2) if imp > 0 else 0
+                        })
+            except Exception as ag_err:
+                logger.warning(f"[GFA/Place Collector] Error querying group {ag_id}: {ag_err}")
+
+        if place_kw_records:
+            save_keyword_records(place_kw_records)
+            logger.info(f"[GFA/Place Collector] Successfully saved {len(place_kw_records)} Place clicked keywords for {target_date}")
 
         return {
             "success": True,
