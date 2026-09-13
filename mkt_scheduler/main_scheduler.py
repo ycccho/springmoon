@@ -21,6 +21,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from mkt_scheduler.db_manager import init_db, get_period_stats, log_event
 from mkt_scheduler.naver_collector import collect_naver_stats
+from mkt_scheduler.gfa_collector import collect_gfa_stats
 from mkt_scheduler.google_collector import collect_google_stats
 from mkt_scheduler.cloud_syncer import sync_to_cloud
 from mkt_scheduler.kakao_notifier import (
@@ -61,7 +62,7 @@ def execute_daily_routine(target_date: str = None):
     logger.info("=" * 65)
 
     # 1. Collect Naver Ads
-    logger.info("Step 1/4: Collecting Naver Search Ads (PowerLink, PowerContents, Place)...")
+    logger.info("Step 1/5: Collecting Naver Search Ads (PowerLink, PowerContents, Place)...")
     try:
         naver_res = collect_naver_stats(target_date)
         logger.info(f"  Naver Collection: {naver_res.get('success')}")
@@ -69,8 +70,17 @@ def execute_daily_routine(target_date: str = None):
         logger.error(f"  Error in Naver collection: {e}")
         log_event("DAILY_ROUTINE", "ERROR", f"Naver error: {e}")
 
+    # 1-2. Collect Naver GFA (성과형 DA)
+    logger.info("Step 2/5: Collecting Naver GFA (성과형 디스플레이 광고)...")
+    try:
+        gfa_res = collect_gfa_stats(target_date)
+        logger.info(f"  GFA Collection: {gfa_res.get('success')}")
+    except Exception as e:
+        logger.error(f"  Error in GFA collection: {e}")
+        log_event("DAILY_ROUTINE", "ERROR", f"GFA error: {e}")
+
     # 2. Collect Google Ads
-    logger.info("Step 2/4: Collecting Google Search Ads...")
+    logger.info("Step 3/5: Collecting Google Search Ads...")
     try:
         google_res = collect_google_stats(target_date)
         logger.info(f"  Google Collection: {google_res.get('success')}")

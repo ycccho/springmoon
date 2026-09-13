@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-09-13T00:23:55.923009",
+  "updated_at": "2026-09-14T00:49:00.529077",
   "summary": {
-    "total_spend": 1198712,
-    "total_impressions": 46116,
-    "total_clicks": 1336,
-    "avg_cpc": 897,
-    "avg_ctr": 2.9,
-    "naver_spend": 782712,
-    "google_spend": 416000
+    "total_spend": 1179920,
+    "total_impressions": 96132,
+    "total_clicks": 1385,
+    "avg_cpc": 852,
+    "avg_ctr": 1.44,
+    "naver_spend": 801420,
+    "google_spend": 378500
   },
   "daily": {
     "2026-09-01": {
@@ -35,7 +35,17 @@
           "spend": 12000,
           "clicks": 14,
           "impressions": 500
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 24000,
@@ -69,7 +79,17 @@
           "spend": 12000,
           "clicks": 14,
           "impressions": 560
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 28000,
@@ -103,7 +123,17 @@
           "spend": 15000,
           "clicks": 17,
           "impressions": 640
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 33000,
@@ -137,7 +167,17 @@
           "spend": 14000,
           "clicks": 15,
           "impressions": 620
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 31000,
@@ -171,7 +211,17 @@
           "spend": 15000,
           "clicks": 17,
           "impressions": 700
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 36000,
@@ -205,7 +255,17 @@
           "spend": 17000,
           "clicks": 19,
           "impressions": 780
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 42000,
@@ -239,7 +299,17 @@
           "spend": 15000,
           "clicks": 16,
           "impressions": 670
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 36000,
@@ -273,7 +343,17 @@
           "spend": 14000,
           "clicks": 15,
           "impressions": 620
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 33000,
@@ -307,7 +387,17 @@
           "spend": 15000,
           "clicks": 16,
           "impressions": 670
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 35000,
@@ -341,7 +431,17 @@
           "spend": 15500,
           "clicks": 17,
           "impressions": 730
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
       },
       "google": {
         "spend": 37000,
@@ -351,16 +451,16 @@
       }
     },
     "2026-09-11": {
-      "spend": 46552,
-      "impressions": 2160,
-      "clicks": 56,
-      "cpc": 831,
-      "ctr": 2.59,
+      "spend": 55800,
+      "impressions": 23470,
+      "clicks": 106,
+      "cpc": 526,
+      "ctr": 0.45,
       "naver": {
-        "spend": 3052,
-        "impressions": 510,
-        "clicks": 8,
-        "cpc": 382,
+        "spend": 12300,
+        "impressions": 21820,
+        "clicks": 58,
+        "cpc": 212,
         "powerlink": {
           "spend": 308,
           "clicks": 5,
@@ -375,7 +475,17 @@
           "spend": 2744,
           "clicks": 3,
           "impressions": 71
+        },
+        "gfa": {
+          "spend": 9248,
+          "clicks": 50,
+          "impressions": 21310
         }
+      },
+      "gfa": {
+        "spend": 9248,
+        "clicks": 50,
+        "impressions": 21310
       },
       "google": {
         "spend": 43500,
@@ -385,37 +495,91 @@
       }
     },
     "2026-09-12": {
-      "spend": 37660,
-      "impressions": 1946,
-      "clicks": 43,
-      "cpc": 876,
-      "ctr": 2.21,
+      "spend": 160,
+      "impressions": 463,
+      "clicks": 1,
+      "cpc": 160,
+      "ctr": 0.22,
       "naver": {
         "spend": 160,
-        "impressions": 446,
+        "impressions": 463,
         "clicks": 1,
         "cpc": 160,
         "powerlink": {
           "spend": 160,
           "clicks": 1,
-          "impressions": 323
+          "impressions": 331
         },
         "powercontents": {
           "spend": 0,
           "clicks": 0,
-          "impressions": 54
+          "impressions": 56
         },
         "place": {
           "spend": 0,
           "clicks": 0,
-          "impressions": 69
+          "impressions": 76
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
         }
       },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
       "google": {
-        "spend": 37500,
-        "impressions": 1500,
-        "clicks": 42,
-        "cpc": 893
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-13": {
+      "spend": 9460,
+      "impressions": 30189,
+      "clicks": 41,
+      "cpc": 231,
+      "ctr": 0.14,
+      "naver": {
+        "spend": 9460,
+        "impressions": 30189,
+        "clicks": 41,
+        "cpc": 231,
+        "powerlink": {
+          "spend": 153,
+          "clicks": 1,
+          "impressions": 269
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 41
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 72
+        },
+        "gfa": {
+          "spend": 9307,
+          "clicks": 40,
+          "impressions": 29807
+        }
+      },
+      "gfa": {
+        "spend": 9307,
+        "clicks": 40,
+        "impressions": 29807
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
       }
     }
   },
@@ -441,17 +605,6 @@
       "ctr": 4.19,
       "cpc": 1420,
       "spend": 190280
-    },
-    {
-      "keyword": "플레이스 광고 (스마트플레이스)",
-      "media": "네이버 플레이스",
-      "campaign": "부산_플레이스광고",
-      "group": "인디컴퍼니_본점",
-      "impressions": 7800,
-      "clicks": 192,
-      "ctr": 2.46,
-      "cpc": 890,
-      "spend": 170880
     },
     {
       "keyword": "병원 인테리어 전문",
@@ -553,15 +706,103 @@
       "spend": 24360
     },
     {
-      "keyword": "플레이스 광고 (2. 플레이스(법인))",
-      "media": "네이버 플레이스",
+      "keyword": "부산해운대구인테리어",
+      "media": "NAVER_PLACE",
       "campaign": "2. 플레이스(법인)",
-      "group": "스마트플레이스 연동",
-      "impressions": 48,
-      "clicks": 3,
-      "ctr": 6.25,
-      "cpc": 915,
-      "spend": 2744
+      "group": "인디 스마트플레이스",
+      "impressions": 4,
+      "clicks": 2,
+      "ctr": 50.0,
+      "cpc": 1132,
+      "spend": 2263
+    },
+    {
+      "keyword": "부산상가인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 1145,
+      "spend": 1145
+    },
+    {
+      "keyword": "인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 33,
+      "clicks": 2,
+      "ctr": 6.06,
+      "cpc": 552,
+      "spend": 1105
+    },
+    {
+      "keyword": "부산상가인테리어업체",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 1069,
+      "spend": 1069
+    },
+    {
+      "keyword": "해운대인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 1066,
+      "spend": 1066
+    },
+    {
+      "keyword": "부산사무실인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 1065,
+      "spend": 1065
+    },
+    {
+      "keyword": "재송동인테리어업체",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 1064,
+      "spend": 1064
+    },
+    {
+      "keyword": "해운대구인테리어디자인",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 844,
+      "spend": 844
+    },
+    {
+      "keyword": "해운대인테리어디자인",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 833,
+      "spend": 833
     },
     {
       "keyword": "인디컴퍼니",
@@ -575,15 +816,37 @@
       "spend": 242
     },
     {
-      "keyword": "플레이스 광고 (3. 플레이스(상가 사무실))",
-      "media": "네이버 플레이스",
-      "campaign": "3. 플레이스(상가 사무실)",
-      "group": "스마트플레이스 연동",
-      "impressions": 23,
-      "clicks": 0,
-      "ctr": 0.0,
-      "cpc": 0,
-      "spend": 0
+      "keyword": "부산하이엔드인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 210,
+      "spend": 210
+    },
+    {
+      "keyword": "치과인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 4,
+      "clicks": 1,
+      "ctr": 25.0,
+      "cpc": 77,
+      "spend": 77
+    },
+    {
+      "keyword": "학원인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 77,
+      "spend": 77
     }
   ]
 }

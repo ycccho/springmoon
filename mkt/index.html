@@ -821,12 +821,23 @@
       if (refreshBtn) refreshBtn.classList.add('animate-spin');
 
       try {
-        let res = await fetch('/api/mkt');
-        if (res.ok) {
-          const json = await res.json();
-          marketingData = json.data;
-        } else {
-          let fallbackRes = await fetch('/mkt_data.json');
+        let loaded = false;
+        try {
+          const res = await fetch('/api/mkt');
+          const cType = res.headers.get('content-type') || '';
+          if (res.ok && cType.includes('application/json')) {
+            const json = await res.json();
+            if (json && json.data) {
+              marketingData = json.data;
+              loaded = true;
+            }
+          }
+        } catch (e) {
+          console.warn('/api/mkt not available, using /mkt_data.json');
+        }
+
+        if (!loaded) {
+          const fallbackRes = await fetch('/mkt_data.json?t=' + Date.now());
           marketingData = await fallbackRes.json();
         }
 

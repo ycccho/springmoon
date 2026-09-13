@@ -169,20 +169,37 @@ def get_period_stats(start_date, end_date):
         SELECT media, keyword, SUM(clicks) as k_clicks, SUM(spend) as k_spend, SUM(impressions) as k_impr
         FROM keyword_performance
         WHERE date >= ? AND date <= ? AND clicks > 0
+          AND keyword NOT LIKE '플레이스 광고 (%'
         GROUP BY media, keyword
         ORDER BY k_clicks DESC, k_spend DESC
     """, (start_date, end_date))
     kw_rows = cur.fetchall()
     conn.close()
 
+    media_alias_map = {
+        '네이버 파워링크': 'NAVER_POWERLINK',
+        'NAVER_POWERLINK': 'NAVER_POWERLINK',
+        '네이버 파워컨텐츠': 'NAVER_POWERCONTENTS',
+        'NAVER_POWERCONTENTS': 'NAVER_POWERCONTENTS',
+        '네이버 플레이스': 'NAVER_PLACE',
+        'NAVER_PLACE': 'NAVER_PLACE',
+        '네이버 GFA': 'NAVER_GFA',
+        'NAVER_GFA': 'NAVER_GFA',
+        '구글 검색': 'GOOGLE_SA',
+        'GOOGLE_SA': 'GOOGLE_SA',
+        '메타 광고': 'META_ADS',
+        'META_ADS': 'META_ADS'
+    }
+
     keywords_by_media = {}
     for kr in kw_rows:
         km = kr['media']
-        if km not in keywords_by_media:
-            keywords_by_media[km] = []
+        canon_m = media_alias_map.get(km, km)
+        if canon_m not in keywords_by_media:
+            keywords_by_media[canon_m] = []
         c = int(kr['k_clicks'] or 0)
         s = int(kr['k_spend'] or 0)
-        keywords_by_media[km].append({
+        keywords_by_media[canon_m].append({
             'keyword': kr['keyword'],
             'clicks': c,
             'spend': s,
@@ -233,8 +250,10 @@ def build_export_json():
                     'spend': 0, 'impressions': 0, 'clicks': 0, 'cpc': 0,
                     'powerlink': {'spend': 0, 'clicks': 0, 'impressions': 0},
                     'powercontents': {'spend': 0, 'clicks': 0, 'impressions': 0},
-                    'place': {'spend': 0, 'clicks': 0, 'impressions': 0}
+                    'place': {'spend': 0, 'clicks': 0, 'impressions': 0},
+                    'gfa': {'spend': 0, 'clicks': 0, 'impressions': 0}
                 },
+                'gfa': {'spend': 0, 'clicks': 0, 'impressions': 0},
                 'google': {'spend': 0, 'impressions': 0, 'clicks': 0, 'cpc': 0}
             }
 
@@ -261,6 +280,12 @@ def build_export_json():
             daily_dict[d]['naver']['impressions'] += impr
             daily_dict[d]['naver']['clicks'] += clicks
             daily_dict[d]['naver']['place'] = {'spend': spend, 'clicks': clicks, 'impressions': impr}
+        elif m == 'NAVER_GFA':
+            daily_dict[d]['naver']['spend'] += spend
+            daily_dict[d]['naver']['impressions'] += impr
+            daily_dict[d]['naver']['clicks'] += clicks
+            daily_dict[d]['naver']['gfa'] = {'spend': spend, 'clicks': clicks, 'impressions': impr}
+            daily_dict[d]['gfa'] = {'spend': spend, 'clicks': clicks, 'impressions': impr}
         elif m == 'GOOGLE_SA':
             daily_dict[d]['google']['spend'] += spend
             daily_dict[d]['google']['impressions'] += impr
@@ -283,6 +308,7 @@ def build_export_json():
                SUM(clicks) as total_clicks,
                SUM(spend) as total_spend
         FROM keyword_performance
+        WHERE keyword NOT LIKE '플레이스 광고 (%'
         GROUP BY keyword, media, campaign, adgroup
         ORDER BY total_spend DESC
     """)
