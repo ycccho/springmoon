@@ -1,3 +1,1 @@
 # Cloudflare Pages Clean URLs are enabled natively
-/mkt    /mkt.html   200
-/mkt/*  /mkt.html   200
