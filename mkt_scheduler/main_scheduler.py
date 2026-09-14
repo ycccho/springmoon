@@ -79,14 +79,8 @@ def execute_daily_routine(target_date: str = None):
         logger.error(f"  Error in GFA collection: {e}")
         log_event("DAILY_ROUTINE", "ERROR", f"GFA error: {e}")
 
-    # 2. Collect Google Ads
-    logger.info("Step 3/5: Collecting Google Search Ads...")
-    try:
-        google_res = collect_google_stats(target_date)
-        logger.info(f"  Google Collection: {google_res.get('success')}")
-    except Exception as e:
-        logger.error(f"  Error in Google collection: {e}")
-        log_event("DAILY_ROUTINE", "ERROR", f"Google error: {e}")
+    # 2. Collect Google Ads (Disabled until official user authorization)
+    # logger.info("Step 3/5: Collecting Google Search Ads...")
 
     # 3. Synchronize to Cloud & local file
     logger.info("Step 3/4: Synchronizing to website and Cloudflare KV...")
@@ -160,10 +154,34 @@ def execute_daily_routine(target_date: str = None):
     log_event("DAILY_ROUTINE", "FINISHED", f"Completed routine for {target_date}")
     logger.info("🎉 Routine completed successfully.\n")
 
+def has_routine_run_today(today_str: str) -> bool:
+    """
+    Checks whether the morning DAILY_ROUTINE (09:00) has already completed today.
+    Only counts runs that executed after 08:50 AM today, so midnight/previous night tests
+    do not suppress the morning 09:00 report.
+    """
+    try:
+        from mkt_scheduler.db_manager import get_connection
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT 1 FROM sync_logs
+            WHERE type = 'DAILY_ROUTINE' AND status = 'FINISHED'
+              AND timestamp >= ?
+            LIMIT 1
+        """, (f"{today_str}T08:50:00",))
+        row = cur.fetchone()
+        conn.close()
+        return row is not None
+    except Exception as e:
+        logger.error(f"Error checking daily routine log: {e}")
+        return False
+
 def run_scheduler_loop():
     """
     Continuous 24/7 background scheduler loop.
-    Triggers execute_daily_routine() every morning at exactly 09:00 local time.
+    Triggers execute_daily_routine() every morning at 09:00 local time,
+    or immediately upon wake-up/startup if 09:00 has already passed and today's routine has not run.
     """
     init_db()
     logger.info("=================================================================")
@@ -175,23 +193,20 @@ def run_scheduler_loop():
     logger.info(f"  - Dashboard: https://springmoons.pages.dev/mkt")
     logger.info("=================================================================")
 
-    last_executed_day = None
-
     while True:
         try:
             now = datetime.now()
             today_str = now.strftime("%Y-%m-%d")
 
-            # Check if it is 09:00 AM and hasn't run yet today
-            if now.hour == 9 and now.minute == 0 and last_executed_day != today_str:
-                logger.info(f"⏰ 09:00 AM trigger activated for {today_str}!")
+            # Check if it is 09:00 AM or later, and today's routine hasn't executed yet
+            if now.hour >= 9 and not has_routine_run_today(today_str):
+                logger.info(f"⏰ Morning routine trigger activated for {today_str} (Current time: {now.strftime('%H:%M:%S')})")
                 execute_daily_routine()
-                last_executed_day = today_str
-                # Sleep for 65 seconds to prevent double firing in the same minute
-                time.sleep(65)
+                logger.info("Routine completed. Next execution scheduled for tomorrow at 09:00 AM.")
+                time.sleep(60)
             else:
-                # Sleep in short intervals (10 seconds)
-                time.sleep(10)
+                # Sleep in short intervals (15 seconds)
+                time.sleep(15)
         except KeyboardInterrupt:
             logger.info("Scheduler terminated by user (Ctrl+C).")
             break
