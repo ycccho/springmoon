@@ -209,6 +209,8 @@ def collect_naver_stats(target_date: str = None) -> dict:
                 kw_map = {k["nccKeywordId"]: k for k in keywords}
                 kw_stats = fetch_batch_stats(list(kw_map.keys()), target_date)
 
+                ag_added_clicks = 0
+                ag_added_spend = 0
                 for kw_id, kw in kw_map.items():
                     kst = kw_stats.get(kw_id)
                     if kst and (kst["clicks"] > 0 or kst["spend"] > 0):
@@ -224,6 +226,27 @@ def collect_naver_stats(target_date: str = None) -> dict:
                             "cpc": kst["cpc"],
                             "ctr": kst["ctr"]
                         })
+                        ag_added_clicks += kst["clicks"]
+                        ag_added_spend += kst["spend"]
+
+                # If adgroup had clicks not captured at individual keyword level (extension assets, etc.)
+                if ag_st["clicks"] > ag_added_clicks:
+                    diff_clicks = ag_st["clicks"] - ag_added_clicks
+                    diff_spend = max(0, ag_st["spend"] - ag_added_spend)
+                    clean_ag_name = ag_name.split("-")[0].strip()
+                    keyword_records.append({
+                        "date": target_date,
+                        "keyword": f"{clean_ag_name}(확장소재)",
+                        "media": media_label,
+                        "campaign": camp_name,
+                        "adgroup": ag_name,
+                        "impressions": ag_st["impressions"],
+                        "clicks": diff_clicks,
+                        "spend": diff_spend,
+                        "cpc": round(diff_spend / diff_clicks) if diff_clicks > 0 else 0,
+                        "ctr": round((diff_clicks / ag_st["impressions"]) * 100, 2) if ag_st["impressions"] > 0 else 0
+                    })
+
 
     # Save to SQLite
     media_records = [
