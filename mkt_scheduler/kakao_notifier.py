@@ -170,11 +170,20 @@ def _analyze_keyword_shifts(stats: dict, prev_stats: dict) -> tuple:
     lost.sort(key=lambda x: x[1], reverse=True)
     return gained, lost
 
-def _format_item_clicks(items: list, is_gfa: bool = False, max_display: int = 10) -> str:
+def josa_eun_neun(word: str) -> str:
+    """Returns word with correct Korean subject marker (은/는) based on terminal consonant."""
+    if not word:
+        return ""
+    code = ord(word[-1])
+    if 0xAC00 <= code <= 0xD7A3:
+        has_jongseong = (code - 0xAC00) % 28 > 0
+        return f"{word}{'은' if has_jongseong else '는'}"
+    return f"{word}는"
+
+def _format_item_clicks(items: list, is_gfa: bool = False, max_display: int = 15) -> str:
     """
-    Formats clicked keywords or creatives ensuring all clicks are mathematically accounted for.
-    If items exceed max_display, lists top items and explicitly groups remainder into '기타 N개(N클릭)'
-    so the sum ALWAYS equals total clicks.
+    Formats clicked keywords or creatives with each item on its own line for readability.
+    Ensures all clicks are mathematically accounted for.
     """
     if not items:
         return ""
@@ -192,21 +201,23 @@ def _format_item_clicks(items: list, is_gfa: bool = False, max_display: int = 10
 
     total_clicks = sum(cl for _, cl in clean_items)
     label = "소재" if is_gfa else "검색어"
+    lines = [f"  └ {label}(총 {total_clicks}클릭):"]
     if len(clean_items) <= max_display:
-        parts = [f"{name}({cl})" for name, cl in clean_items]
-        return f"  └ {label}(총 {total_clicks}클릭): " + ", ".join(parts)
+        for name, cl in clean_items:
+            lines.append(f"{name}({cl})")
     else:
         top_items = clean_items[:max_display]
         remainder = clean_items[max_display:]
         rem_clicks = sum(cl for _, cl in remainder)
-        parts = [f"{name}({cl})" for name, cl in top_items]
-        parts.append(f"기타 {len(remainder)}개({rem_clicks})")
-        return f"  └ {label}(총 {total_clicks}클릭): " + ", ".join(parts)
+        for name, cl in top_items:
+            lines.append(f"{name}({cl})")
+        lines.append(f"기타 {len(remainder)}개({rem_clicks})")
+    return "\n".join(lines)
 
 def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
     """
     Checks for notable anomalies or issues:
-    1. Irrelevant/Negative keyword detection in PowerLink search queries
+    1. Irrelevant/Negative keyword detection with balanced business judgment
     2. Channel spent budget with 0 clicks
     3. Exceptional CPC surge (> ₩2,500)
     4. Severe click drop compared to previous period (> 50%)
@@ -219,21 +230,29 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
     total_clicks = stats.get("total_clicks", 0)
     avg_cpc = stats.get("avg_cpc", 0)
 
-    # 1. Negative search query rules for interior company
     neg_rules = [
-        ("이미지", "이미지 탐색"),
-        ("사진", "사진 검색"),
-        ("도면", "도면/자료 검색"),
-        ("평면도", "평면도 검색"),
-        ("ppt", "문서 자료 검색"),
-        ("블로그", "블로그 탐색"),
-        ("소품", "소품 구매 목적"),
-        ("전시", "전시회 탐색"),
-        ("채용", "구인/구직"),
-        ("구인", "구인/구직"),
-        ("자격증", "자격증 취득"),
-        ("연봉", "구인/구직"),
-        ("셀프", "DIY 시공"),
+        ("블로그", "블로그 탐색", "목적이 인테리어디자이너의 포트폴리오를 확인하는것으로 보이니 제외키워드 등록을 권장합니다."),
+        ("이미지", "이미지 탐색", "인테리어 진행 전 참고용으로 활용할수도 있으므로 판단하에 제외/보존 중 선택하세요."),
+        ("사진", "사진 검색", "인테리어 시공 사례 사진 참고용일 수 있으나 단순 구경 유입일 가능성도 높아 모니터링 후 제외 여부를 판단하세요."),
+        ("소품", "소품 구매 목적", "소품을 찾는 명확한 키워드가 있으므로 제외키워드 등록을 권장합니다."),
+        ("가구", "가구 구매 목적", "인테리어 공사보다 특정 가구 단품 구매 목적이 강하므로 제외키워드 등록을 권장합니다."),
+        ("의자", "가구 구매 목적", "의자 등 집기류 구매 목적이 강하므로 제외키워드 등록을 권장합니다."),
+        ("조명", "조명 구매 목적", "인테리어 공사보다 조명 자재 단품 구매 목적일 가능성이 높아 제외키워드 등록을 권장합니다."),
+        ("전시", "전시회 탐색", "실내건축전시회를 찾고있으므로 제외키워드 등록을 권장하지만, 키워드가 다양하기 때문에 실내인테리어 포트폴리오를 보고싶어하는 경우도 있으므로 판단이 필요한 키워드입니다."),
+        ("박람회", "박람회 탐색", "건축·인테리어 박람회 행사 탐색 목적이 강하므로 제외키워드 등록을 권장합니다."),
+        ("도면", "도면/자료 검색", "도면 자료 수집 목적일 가능성이 높아 제외를 권장하나, 공간 기획 단계의 잠재 고객일 수도 있으므로 신중한 판단이 필요합니다."),
+        ("평면도", "평면도 검색", "평면도 레이아웃 참고 목적일 수 있어 실제 견적 의뢰로 이어지는지 추이를 보고 판단하세요."),
+        ("ppt", "문서 자료 검색", "문서 및 발표 서식을 찾는 목적으로 시공 문의와 무관하므로 제외키워드 등록을 권장합니다."),
+        ("템플릿", "문서 자료 검색", "템플릿 서식 검색으로 시공 의뢰와 무관하므로 제외키워드 등록을 권장합니다."),
+        ("채용", "구인/구직", "구인·구직 목적의 유입으로 시공 수주와 무관하므로 제외키워드 등록을 권장합니다."),
+        ("구인", "구인/구직", "구인·구직 목적의 유입으로 시공 수주와 무관하므로 제외키워드 등록을 권장합니다."),
+        ("구직", "구인/구직", "구직 목적 유입으로 시공과 무관하므로 제외키워드 등록을 권장합니다."),
+        ("연봉", "구인/구직", "기업 정보 및 연봉 검색으로 시공 문의와 무관하므로 제외키워드 등록을 권장합니다."),
+        ("취업", "구인/구직", "취업 관련 유입이므로 제외키워드 등록을 권장합니다."),
+        ("자격증", "자격증 취득", "실내건축 자격증 취득 목적의 검색이므로 제외키워드 등록을 권장합니다."),
+        ("학원", "학업/강의", "인테리어 학원 수강 목적 유입으로 시공 문의와 무관하므로 제외키워드 등록을 권장합니다."),
+        ("셀프", "DIY 시공", "직접 시공(DIY) 정보를 찾는 유입일 가능성이 높아 전문 시공 계약 전환율이 낮으므로 제외키워드 등록을 권장합니다."),
+        ("diy", "DIY 시공", "자가 시공(DIY) 정보 목적 유입으로 전환율이 낮아 제외키워드 등록을 권장합니다."),
     ]
 
     flagged = []
@@ -243,18 +262,33 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
         kw = k.get("keyword", "")
         cl = k.get("clicks", 0)
         sp = k.get("spend", 0)
-        for term, reason in neg_rules:
+        for term, reason, analysis in neg_rules:
             if term in kw.lower():
-                flagged.append(f"'{kw}'({reason})")
+                analysis_text = f"{josa_eun_neun(kw)} {analysis}"
+                flagged.append({
+                    "kw": kw,
+                    "reason": reason,
+                    "analysis": analysis_text,
+                    "clicks": cl,
+                    "spend": sp
+                })
                 flagged_spend += sp
                 flagged_clicks += cl
                 break
 
     if flagged:
-        kw_list_str = ", ".join(flagged[:4])
-        if len(flagged) > 4:
-            kw_list_str += f" 외 {len(flagged)-4}건"
-        notes.append(f"[제외 키워드 등록 권장]: {kw_list_str} 등 인테리어 시공 문의와 무관한 유입({flagged_clicks}건 / ₩{flagged_spend:,})이 확인되었습니다. 불필요한 예산 낭비를 방지하기 위해 파워링크 [제외 키워드]로 등록하여 차단하세요.")
+        neg_block_lines = [
+            "[제외 키워드 등록 권장]:"
+        ]
+        for f in flagged[:6]:
+            neg_block_lines.append(f"{f['kw']}({f['reason']})")
+        if len(flagged) > 6:
+            neg_block_lines.append(f"외 {len(flagged)-6}건")
+        neg_block_lines.append(f"등 인테리어 시공 문의와 무관한 유입({flagged_clicks}건 / ₩{flagged_spend:,})이 확인되었습니다.")
+        neg_block_lines.append("")
+        for f in flagged[:6]:
+            neg_block_lines.append(f"{f['analysis']}")
+        notes.append("\n".join(neg_block_lines))
 
     # 2. Budget spent with 0 clicks
     for m_label, ch in [("파워링크", bd.get("NAVER_POWERLINK", {})), 
@@ -324,6 +358,7 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
         ("플레이스", bd.get("NAVER_PLACE", {}))
     ]
 
+    ch_blocks = []
     for label, ch in channels:
         s = ch.get("spend", 0)
         c = ch.get("clicks", 0)
@@ -331,14 +366,20 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
         cpc = round(float(ch.get("cpc", 0) or 0))
         kws = ch.get("top_keywords", [])
 
+        ch_lines = []
         if c > 0:
-            lines.append(f"• {label}: ₩{s:,} ({c}클릭 / CPC ₩{cpc:,})")
+            ch_lines.append(f"• {label}: ₩{s:,} ({c}클릭 / CPC ₩{cpc:,})")
             if kws:
-                lines.append(_format_item_clicks(kws, is_gfa=(label == "GFA 배너"), max_display=10))
+                items_str = _format_item_clicks(kws, is_gfa=(label == "GFA 배너"), max_display=15)
+                if items_str:
+                    ch_lines.append(items_str)
         elif s > 0 or i > 0:
-            lines.append(f"• {label}: ₩{s:,} (0클릭 / {i:,}노출)")
+            ch_lines.append(f"• {label}: ₩{s:,} (0클릭 / {i:,}노출)")
         else:
-            lines.append(f"• {label}: ₩0 (미집행)")
+            ch_lines.append(f"• {label}: ₩0 (미집행)")
+        ch_blocks.append("\n".join(ch_lines))
+
+    lines.append("\n\n".join(ch_blocks))
 
     lines.append("────────────────────")
     lines.append("■ 특이사항")
@@ -397,18 +438,25 @@ def format_weekly_report(stats: dict, prev_stats: dict = None) -> str:
         ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {}))
     ]
 
+    ch_blocks = []
     for label, ch in channels:
         s = ch.get("spend", 0)
         c = ch.get("clicks", 0)
         pct = round((s / total_spend) * 100) if total_spend > 0 else 0
         kws = ch.get("top_keywords", [])
 
+        ch_lines = []
         if c > 0 or s > 0:
-            lines.append(f"• {label}: ₩{s:,} ({c}클릭 / {pct}% 비중)")
+            ch_lines.append(f"• {label}: ₩{s:,} ({c}클릭 / {pct}% 비중)")
             if kws:
-                lines.append(_format_item_clicks(kws, is_gfa=(label == "GFA 배너"), max_display=10))
+                items_str = _format_item_clicks(kws, is_gfa=(label == "GFA 배너"), max_display=15)
+                if items_str:
+                    ch_lines.append(items_str)
         else:
-            lines.append(f"• {label}: ₩0 (미집행)")
+            ch_lines.append(f"• {label}: ₩0 (미집행)")
+        ch_blocks.append("\n".join(ch_lines))
+
+    lines.append("\n\n".join(ch_blocks))
 
     lines.append("────────────────────")
     lines.append("■ 특이사항")
