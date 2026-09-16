@@ -79,8 +79,14 @@ def execute_daily_routine(target_date: str = None):
         logger.error(f"  Error in GFA collection: {e}")
         log_event("DAILY_ROUTINE", "ERROR", f"GFA error: {e}")
 
-    # 2. Collect Google Ads (Disabled until official user authorization)
-    # logger.info("Step 3/5: Collecting Google Search Ads...")
+    # 2. Collect Google Search Ads
+    logger.info("Step 3/4: Collecting Google Search Ads...")
+    try:
+        google_res = collect_google_stats(target_date)
+        logger.info(f"  Google Collection: {google_res.get('success')}")
+    except Exception as e:
+        logger.error(f"  Error in Google collection: {e}")
+        log_event("DAILY_ROUTINE", "ERROR", f"Google error: {e}")
 
     # 3. Synchronize to Cloud & local file
     logger.info("Step 3/4: Synchronizing to website and Cloudflare KV...")

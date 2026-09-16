@@ -316,6 +316,7 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
 
     # 2. Budget spent with 0 clicks
     for m_label, ch in [("파워링크", bd.get("NAVER_POWERLINK", {})), 
+                        ("구글 검색", bd.get("GOOGLE_SA", {})),
                         ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {})), 
                         ("플레이스", bd.get("NAVER_PLACE", {})), 
                         ("GFA 배너", bd.get("NAVER_GFA", {}))]:
@@ -378,6 +379,7 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
     channels = [
         ("GFA 배너", bd.get("NAVER_GFA", {})),
         ("파워링크", bd.get("NAVER_POWERLINK", {})),
+        ("구글 검색", bd.get("GOOGLE_SA", {})),
         ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {})),
         ("플레이스", bd.get("NAVER_PLACE", {}))
     ]
@@ -459,6 +461,7 @@ def format_weekly_report(stats: dict, prev_stats: dict = None) -> str:
         ("GFA 배너", bd.get("NAVER_GFA", {})),
         ("플레이스", bd.get("NAVER_PLACE", {})),
         ("파워링크", bd.get("NAVER_POWERLINK", {})),
+        ("구글 검색", bd.get("GOOGLE_SA", {})),
         ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {}))
     ]
 

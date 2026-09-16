@@ -72,6 +72,7 @@ def query_google_ads(query: str, access_token: str) -> list:
     headers = {
         "Authorization": f"Bearer {access_token}",
         "developer-token": GOOGLE_DEVELOPER_TOKEN,
+        "login-customer-id": GOOGLE_CUSTOMER_ID,
         "Content-Type": "application/json"
     }
 
