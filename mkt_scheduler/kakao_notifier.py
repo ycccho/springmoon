@@ -81,6 +81,13 @@ def send_kakao_memo(message_text: str) -> bool:
         log_event("KAKAO_SEND", "SKIPPED", "No access token")
         return False
 
+    # KakaoTalk text template has a strict 1,000-character hard limit.
+    if len(message_text) > 980:
+        logger.warning(f"[Kakao Notifier] Message length ({len(message_text)}) exceeds 980 chars. Trimming gracefully.")
+        link_str = f"\n\n🔗 상세 대시보드: {DASHBOARD_URL}"
+        avail = 970 - len(link_str)
+        message_text = message_text[:avail].rstrip() + "..." + link_str
+
     template_object = {
         "object_type": "text",
         "text": message_text,
@@ -231,28 +238,28 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
     avg_cpc = stats.get("avg_cpc", 0)
 
     neg_rules = [
-        ("블로그", "블로그 탐색", "목적이 인테리어디자이너의 포트폴리오를 확인하는것으로 보이니 제외키워드 등록을 권장합니다."),
-        ("이미지", "이미지 탐색", "인테리어 진행 전 참고용으로 활용할수도 있으므로 판단하에 제외/보존 중 선택하세요."),
-        ("사진", "사진 검색", "인테리어 시공 사례 사진 참고용일 수 있으나 단순 구경 유입일 가능성도 높아 모니터링 후 제외 여부를 판단하세요."),
-        ("소품", "소품 구매 목적", "소품을 찾는 명확한 키워드가 있으므로 제외키워드 등록을 권장합니다."),
-        ("가구", "가구 구매 목적", "인테리어 공사보다 특정 가구 단품 구매 목적이 강하므로 제외키워드 등록을 권장합니다."),
-        ("의자", "가구 구매 목적", "의자 등 집기류 구매 목적이 강하므로 제외키워드 등록을 권장합니다."),
-        ("조명", "조명 구매 목적", "인테리어 공사보다 조명 자재 단품 구매 목적일 가능성이 높아 제외키워드 등록을 권장합니다."),
-        ("전시", "전시회 탐색", "실내건축전시회를 찾고있으므로 제외키워드 등록을 권장하지만, 키워드가 다양하기 때문에 실내인테리어 포트폴리오를 보고싶어하는 경우도 있으므로 판단이 필요한 키워드입니다."),
-        ("박람회", "박람회 탐색", "건축·인테리어 박람회 행사 탐색 목적이 강하므로 제외키워드 등록을 권장합니다."),
-        ("도면", "도면/자료 검색", "도면 자료 수집 목적일 가능성이 높아 제외를 권장하나, 공간 기획 단계의 잠재 고객일 수도 있으므로 신중한 판단이 필요합니다."),
-        ("평면도", "평면도 검색", "평면도 레이아웃 참고 목적일 수 있어 실제 견적 의뢰로 이어지는지 추이를 보고 판단하세요."),
-        ("ppt", "문서 자료 검색", "문서 및 발표 서식을 찾는 목적으로 시공 문의와 무관하므로 제외키워드 등록을 권장합니다."),
-        ("템플릿", "문서 자료 검색", "템플릿 서식 검색으로 시공 의뢰와 무관하므로 제외키워드 등록을 권장합니다."),
-        ("채용", "구인/구직", "구인·구직 목적의 유입으로 시공 수주와 무관하므로 제외키워드 등록을 권장합니다."),
-        ("구인", "구인/구직", "구인·구직 목적의 유입으로 시공 수주와 무관하므로 제외키워드 등록을 권장합니다."),
-        ("구직", "구인/구직", "구직 목적 유입으로 시공과 무관하므로 제외키워드 등록을 권장합니다."),
-        ("연봉", "구인/구직", "기업 정보 및 연봉 검색으로 시공 문의와 무관하므로 제외키워드 등록을 권장합니다."),
-        ("취업", "구인/구직", "취업 관련 유입이므로 제외키워드 등록을 권장합니다."),
-        ("자격증", "자격증 취득", "실내건축 자격증 취득 목적의 검색이므로 제외키워드 등록을 권장합니다."),
-        ("학원", "학업/강의", "인테리어 학원 수강 목적 유입으로 시공 문의와 무관하므로 제외키워드 등록을 권장합니다."),
-        ("셀프", "DIY 시공", "직접 시공(DIY) 정보를 찾는 유입일 가능성이 높아 전문 시공 계약 전환율이 낮으므로 제외키워드 등록을 권장합니다."),
-        ("diy", "DIY 시공", "자가 시공(DIY) 정보 목적 유입으로 전환율이 낮아 제외키워드 등록을 권장합니다."),
+        ("블로그", "블로그", "디자이너 포트폴리오 확인 목적으로 보여 제외 권장"),
+        ("이미지", "이미지", "시공 전 참고용일 수 있어 제외/보존 선택"),
+        ("사진", "사진", "단순 사례 참고 유입 가능성 커 모니터링 후 판단"),
+        ("소품", "소품", "소품 구매 목적이 명확하여 제외 권장"),
+        ("가구", "가구", "가구 단품 구매 목적이 강하여 제외 권장"),
+        ("의자", "의자", "집기 단품 구매 목적이 강하여 제외 권장"),
+        ("조명", "조명", "조명 자재 단품 구매 목적 가능성 높아 제외 권장"),
+        ("전시", "전시", "전시회 탐색이나 시공 포트폴리오 관심 가능성 있어 판단 필요"),
+        ("박람회", "박람회", "박람회 행사 탐색 목적이 강하여 제외 권장"),
+        ("도면", "도면", "설계 자료 수집 목적 가능성 높아 제외 권장 (기획 의뢰 모니터링)"),
+        ("평면도", "평면도", "레이아웃 참고 목적으로 견적 전환 추이 보고 판단"),
+        ("ppt", "문서", "발표 서식 검색으로 시공 문의와 무관하여 제외 권장"),
+        ("템플릿", "문서", "템플릿 서식 검색으로 시공 문의와 무관하여 제외 권장"),
+        ("채용", "구인구직", "구인·구직 유입으로 시공 수주와 무관하여 제외 권장"),
+        ("구인", "구인구직", "구인·구직 유입으로 시공 수주와 무관하여 제외 권장"),
+        ("구직", "구인구직", "구직 목적 유입으로 시공과 무관하여 제외 권장"),
+        ("연봉", "구인구직", "기업/연봉 정보 검색으로 시공 문의와 무관하여 제외 권장"),
+        ("취업", "취업", "취업 관련 유입으로 시공 문의와 무관하여 제외 권장"),
+        ("자격증", "자격증", "자격증 취득 목적 검색으로 시공과 무관하여 제외 권장"),
+        ("학원", "학업", "학원 수강 목적 유입으로 시공과 무관하여 제외 권장"),
+        ("셀프", "셀프", "직접 시공 정보 탐색으로 계약 전환율 낮아 제외 권장"),
+        ("diy", "DIY", "자가 시공 정보 유입으로 전환율 낮아 제외 권장"),
     ]
 
     flagged = []
@@ -262,13 +269,12 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
         kw = k.get("keyword", "")
         cl = k.get("clicks", 0)
         sp = k.get("spend", 0)
-        for term, reason, analysis in neg_rules:
+        for term, tag, analysis in neg_rules:
             if term in kw.lower():
-                analysis_text = f"{josa_eun_neun(kw)} {analysis}"
                 flagged.append({
                     "kw": kw,
-                    "reason": reason,
-                    "analysis": analysis_text,
+                    "tag": tag,
+                    "analysis": analysis,
                     "clicks": cl,
                     "spend": sp
                 })
@@ -278,16 +284,12 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
 
     if flagged:
         neg_block_lines = [
-            "[제외 키워드 등록 권장]:"
+            f"[제외 키워드 등록 권장 ({flagged_clicks}건 / ₩{flagged_spend:,})]:"
         ]
-        for f in flagged[:6]:
-            neg_block_lines.append(f"{f['kw']}({f['reason']})")
-        if len(flagged) > 6:
-            neg_block_lines.append(f"외 {len(flagged)-6}건")
-        neg_block_lines.append(f"등 인테리어 시공 문의와 무관한 유입({flagged_clicks}건 / ₩{flagged_spend:,})이 확인되었습니다.")
-        neg_block_lines.append("")
-        for f in flagged[:6]:
-            neg_block_lines.append(f"{f['analysis']}")
+        for f in flagged[:5]:
+            neg_block_lines.append(f"{f['kw']}({f['tag']}): {f['analysis']}")
+        if len(flagged) > 5:
+            neg_block_lines.append(f"외 {len(flagged)-5}건")
         notes.append("\n".join(neg_block_lines))
 
     # 2. Budget spent with 0 clicks
