@@ -170,32 +170,106 @@ def _analyze_keyword_shifts(stats: dict, prev_stats: dict) -> tuple:
     lost.sort(key=lambda x: x[1], reverse=True)
     return gained, lost
 
+def _format_item_clicks(items: list, is_gfa: bool = False, max_display: int = 10) -> str:
+    """
+    Formats clicked keywords or creatives ensuring all clicks are mathematically accounted for.
+    If items exceed max_display, lists top items and explicitly groups remainder into '기타 N개(N클릭)'
+    so the sum ALWAYS equals total clicks.
+    """
+    if not items:
+        return ""
+    clean_items = []
+    for k in items:
+        name = k.get("keyword", "")
+        if is_gfa:
+            name = name.replace("[소재] ", "")
+        cl = k.get("clicks", 0)
+        if cl > 0:
+            clean_items.append((name, cl))
+
+    if not clean_items:
+        return ""
+
+    total_clicks = sum(cl for _, cl in clean_items)
+    label = "소재" if is_gfa else "검색어"
+    if len(clean_items) <= max_display:
+        parts = [f"{name}({cl})" for name, cl in clean_items]
+        return f"  └ {label}(총 {total_clicks}클릭): " + ", ".join(parts)
+    else:
+        top_items = clean_items[:max_display]
+        remainder = clean_items[max_display:]
+        rem_clicks = sum(cl for _, cl in remainder)
+        parts = [f"{name}({cl})" for name, cl in top_items]
+        parts.append(f"기타 {len(remainder)}개({rem_clicks})")
+        return f"  └ {label}(총 {total_clicks}클릭): " + ", ".join(parts)
+
 def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
     """
     Checks for notable anomalies or issues:
-    - Channel spent budget with 0 clicks
-    - Exceptional CPC surge (> ₩2,500)
-    - Severe click drop compared to previous period (> 50%)
+    1. Irrelevant/Negative keyword detection in PowerLink search queries
+    2. Channel spent budget with 0 clicks
+    3. Exceptional CPC surge (> ₩2,500)
+    4. Severe click drop compared to previous period (> 50%)
     If none, returns ['특이사항 없음.']
     """
     notes = []
     bd = stats.get("breakdown", {})
+    pl = bd.get("NAVER_POWERLINK", {})
+    pl_kws = pl.get("top_keywords", [])
     total_clicks = stats.get("total_clicks", 0)
     avg_cpc = stats.get("avg_cpc", 0)
 
-    # 1. Budget spent with 0 clicks
+    # 1. Negative search query rules for interior company
+    neg_rules = [
+        ("이미지", "이미지 탐색"),
+        ("사진", "사진 검색"),
+        ("도면", "도면/자료 검색"),
+        ("평면도", "평면도 검색"),
+        ("ppt", "문서 자료 검색"),
+        ("블로그", "블로그 탐색"),
+        ("소품", "소품 구매 목적"),
+        ("전시", "전시회 탐색"),
+        ("채용", "구인/구직"),
+        ("구인", "구인/구직"),
+        ("자격증", "자격증 취득"),
+        ("연봉", "구인/구직"),
+        ("셀프", "DIY 시공"),
+    ]
+
+    flagged = []
+    flagged_spend = 0
+    flagged_clicks = 0
+    for k in pl_kws:
+        kw = k.get("keyword", "")
+        cl = k.get("clicks", 0)
+        sp = k.get("spend", 0)
+        for term, reason in neg_rules:
+            if term in kw.lower():
+                flagged.append(f"'{kw}'({reason})")
+                flagged_spend += sp
+                flagged_clicks += cl
+                break
+
+    if flagged:
+        kw_list_str = ", ".join(flagged[:4])
+        if len(flagged) > 4:
+            kw_list_str += f" 외 {len(flagged)-4}건"
+        notes.append(f"[제외 키워드 등록 권장]: {kw_list_str} 등 인테리어 시공 문의와 무관한 유입({flagged_clicks}건 / ₩{flagged_spend:,})이 확인되었습니다. 불필요한 예산 낭비를 방지하기 위해 파워링크 [제외 키워드]로 등록하여 차단하세요.")
+
+    # 2. Budget spent with 0 clicks
     for m_label, ch in [("파워링크", bd.get("NAVER_POWERLINK", {})), 
                         ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {})), 
                         ("플레이스", bd.get("NAVER_PLACE", {})), 
                         ("GFA 배너", bd.get("NAVER_GFA", {}))]:
-        if ch.get("spend", 0) >= 3000 and ch.get("clicks", 0) == 0:
-            notes.append(f"{m_label} 광고에서 ₩{ch['spend']:,} 소진되었으나 유입 클릭이 0건입니다.")
+        sp = ch.get("spend", 0)
+        if sp >= 3000 and ch.get("clicks", 0) == 0:
+            notes.append(f"{m_label} 광고에서 ₩{sp:,} 소진되었으나 유입 클릭이 0건입니다.")
 
-    # 2. Exceptional CPC surge
+    # 3. Exceptional CPC surge
     if avg_cpc >= 2500 and total_clicks > 0:
         notes.append(f"평균 클릭단가(₩{avg_cpc:,})가 비정상적으로 높게 형성되어 점검이 필요합니다.")
 
-    # 3. Severe click drop compared to previous period
+    # 4. Severe click drop compared to previous period
     if prev_stats and prev_stats.get("has_data"):
         p_clicks = prev_stats.get("total_clicks", 0)
         if p_clicks >= 20 and total_clicks <= p_clicks * 0.5:
@@ -260,12 +334,7 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
         if c > 0:
             lines.append(f"• {label}: ₩{s:,} ({c}클릭 / CPC ₩{cpc:,})")
             if kws:
-                if label == "GFA 배너":
-                    cr_str = ", ".join([f"{k['keyword'].replace('[소재] ', '')}({k['clicks']}클릭)" for k in kws[:3]])
-                    lines.append(f"  └ 주요 소재: {cr_str}")
-                else:
-                    kw_str = ", ".join([f"{k['keyword']}({k['clicks']}클릭)" for k in kws[:3]])
-                    lines.append(f"  └ 키워드: {kw_str}")
+                lines.append(_format_item_clicks(kws, is_gfa=(label == "GFA 배너"), max_display=10))
         elif s > 0 or i > 0:
             lines.append(f"• {label}: ₩{s:,} (0클릭 / {i:,}노출)")
         else:
@@ -280,6 +349,7 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
     lines.append("")
     lines.append(f"🔗 상세 대시보드: {DASHBOARD_URL}")
     return "\n".join(lines).strip()
+
 
 def format_weekly_report(stats: dict, prev_stats: dict = None) -> str:
     s_date = stats.get("start_date", "")
@@ -336,12 +406,7 @@ def format_weekly_report(stats: dict, prev_stats: dict = None) -> str:
         if c > 0 or s > 0:
             lines.append(f"• {label}: ₩{s:,} ({c}클릭 / {pct}% 비중)")
             if kws:
-                if label == "GFA 배너":
-                    cr_str = ", ".join([f"{k['keyword'].replace('[소재] ', '')}({k['clicks']}클릭)" for k in kws[:3]])
-                    lines.append(f"  └ 주요 소재: {cr_str}")
-                else:
-                    kw_str = ", ".join([f"{k['keyword']}({k['clicks']}클릭)" for k in kws[:3]])
-                    lines.append(f"  └ 주요 키워드: {kw_str}")
+                lines.append(_format_item_clicks(kws, is_gfa=(label == "GFA 배너"), max_display=10))
         else:
             lines.append(f"• {label}: ₩0 (미집행)")
 
