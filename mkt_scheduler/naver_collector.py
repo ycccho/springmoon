@@ -118,7 +118,78 @@ def fetch_keywords(adgroup_id: str) -> list:
         logger.error(f"Error fetching keywords for {adgroup_id}: {e}")
     return []
 
+def fetch_expanded_keywords(target_date: str) -> list:
+    """
+    Requests and downloads EXPKEYWORD (키워드 확장/검색어 광고효과 보고서) from Naver Search Ads stat-reports API.
+    Provides actual user search terms, impressions, clicks, and spend for PowerLink.
+    """
+    stat_dt = target_date.replace("-", "")
+    path = "/stat-reports"
+    payload = {
+        "reportTp": "EXPKEYWORD",
+        "statDt": stat_dt
+    }
+    headers = get_auth_headers("POST", path)
+    try:
+        res = requests.post(f"{NAVER_BASE_URL}{path}", json=payload, headers=headers, timeout=15)
+        if res.status_code != 200:
+            logger.warning(f"[Naver Collector] Failed to request EXPKEYWORD report: {res.status_code} {res.text}")
+            return []
+
+        job_id = res.json().get("reportJobId")
+        if not job_id:
+            return []
+
+        # Poll for completion (up to 20 seconds)
+        download_url = None
+        for _ in range(10):
+            time.sleep(2)
+            h_get = get_auth_headers("GET", f"/stat-reports/{job_id}")
+            r_get = requests.get(f"{NAVER_BASE_URL}/stat-reports/{job_id}", headers=h_get, timeout=10)
+            if r_get.status_code == 200:
+                s_data = r_get.json()
+                if s_data.get("status") == "BUILT":
+                    download_url = s_data.get("downloadUrl")
+                    break
+                elif s_data.get("status") in ("ERROR", "NONE"):
+                    logger.warning(f"[Naver Collector] EXPKEYWORD job status: {s_data.get('status')}")
+                    break
+
+        if not download_url:
+            return []
+
+        h_dl = get_auth_headers("GET", "/report-download")
+        r_dl = requests.get(download_url, headers=h_dl, timeout=30)
+        if r_dl.status_code != 200:
+            logger.warning(f"[Naver Collector] Failed to download report: {r_dl.status_code}")
+            return []
+
+        results = []
+        for line in r_dl.text.strip().split("\n"):
+            parts = line.split("\t")
+            if len(parts) >= 11:
+                clicks = int(parts[9]) if parts[9].isdigit() else 0
+                spend = int(parts[10]) if parts[10].isdigit() else 0
+                impr = int(parts[7]) if parts[7].isdigit() else 0
+                if clicks > 0 or spend > 0:
+                    results.append({
+                        "date": target_date,
+                        "campaign_id": parts[2],
+                        "adgroup_id": parts[3],
+                        "keyword": parts[4],
+                        "impressions": impr,
+                        "clicks": clicks,
+                        "spend": spend,
+                        "cpc": round(spend / clicks, 1) if clicks > 0 else 0,
+                        "ctr": round((clicks / impr) * 100, 2) if impr > 0 else 0.0
+                    })
+        return results
+    except Exception as e:
+        logger.error(f"[Naver Collector] Exception in fetch_expanded_keywords: {e}")
+        return []
+
 def collect_naver_stats(target_date: str = None) -> dict:
+
     """
     High-performance, batch-optimized collector for Naver Search Ads.
     target_date: 'YYYY-MM-DD'. If None, defaults to yesterday.
@@ -187,11 +258,36 @@ def collect_naver_stats(target_date: str = None) -> dict:
                 "ctr": round((clicks / impr) * 100, 2) if impr > 0 else 0
             })
 
-        # Step 3: For campaigns with clicks/spend, drill into active adgroups and keywords
+        # Step 3: For PowerLink (WEB_SITE) or PowerContents, drill into queries / keywords
         elif camp_type in ("WEB_SITE", "POWER_CONTENTS") and clicks > 0:
+            if camp_type == "WEB_SITE":
+                exp_kws = fetch_expanded_keywords(target_date)
+                if exp_kws:
+                    adgroups = fetch_adgroups(cid)
+                    ag_id_to_name = {ag["nccAdgroupId"]: ag["name"] for ag in adgroups} if adgroups else {}
+                    for ek in exp_kws:
+                        ag_name = ag_id_to_name.get(ek["adgroup_id"], "파워링크")
+                        keyword_records.append({
+                            "date": target_date,
+                            "keyword": ek["keyword"],
+                            "media": media_label,
+                            "campaign": camp_name,
+                            "adgroup": ag_name,
+                            "impressions": ek["impressions"],
+                            "clicks": ek["clicks"],
+                            "spend": ek["spend"],
+                            "cpc": ek["cpc"],
+                            "ctr": ek["ctr"]
+                        })
+                    logger.info(f"[Naver Collector] Successfully recorded {len(exp_kws)} search queries from EXPKEYWORD report.")
+                    continue
+
+            # Fallback for WEB_SITE if EXPKEYWORD empty, or standard drill-down for POWER_CONTENTS
             adgroups = fetch_adgroups(cid)
             if not adgroups:
                 continue
+
+
 
             ag_map = {ag["nccAdgroupId"]: ag for ag in adgroups}
             ag_stats = fetch_batch_stats(list(ag_map.keys()), target_date)

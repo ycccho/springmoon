@@ -170,129 +170,40 @@ def _analyze_keyword_shifts(stats: dict, prev_stats: dict) -> tuple:
     lost.sort(key=lambda x: x[1], reverse=True)
     return gained, lost
 
-def generate_daily_insights(stats: dict, prev_stats: dict = None) -> list:
+def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
+    """
+    Checks for notable anomalies or issues:
+    - Channel spent budget with 0 clicks
+    - Exceptional CPC surge (> ₩2,500)
+    - Severe click drop compared to previous period (> 50%)
+    If none, returns ['특이사항 없음.']
+    """
+    notes = []
     bd = stats.get("breakdown", {})
-    gfa = bd.get("NAVER_GFA", {})
-    pl = bd.get("NAVER_POWERLINK", {})
-    place = bd.get("NAVER_PLACE", {})
-    pc = bd.get("NAVER_POWERCONTENTS", {})
-
-    total_clicks = stats.get("total_clicks", 0)
-    target_date = stats.get("start_date", "")
-
-    insights = []
-
-    # 1. 키워드 증감 동적 분석
-    gained, lost = _analyze_keyword_shifts(stats, prev_stats)
-    kw_parts = []
-    if gained:
-        kw_parts.append("[증가] " + ", ".join([f"{k[0]}(+{k[1]})" for k in gained[:2]]))
-    if lost:
-        clean_lost = lost[0][0].replace("(확장소재)", "")
-        kw_parts.append(f"[감소] {clean_lost}(-{lost[0][1]})")
-
-    if kw_parts:
-        insights.append(f"키워드 증감: {' / '.join(kw_parts)}")
-    elif total_clicks > 0:
-        insights.append("키워드 동향: 전일과 유사한 유입 흐름 유지")
-    else:
-        insights.append("키워드 동향: 클릭 유입 발생 키워드 없음")
-
-    # 2. 뭘 손봐야 하는지 (점검 포인트)
-    checks = []
-    if place.get("clicks", 0) == 0:
-        checks.append("플레이스 광고 0클릭(상권 검색 노출 순위 및 일일 예산 점검 필요)")
-    elif pc.get("clicks", 0) == 0:
-        checks.append("파워컨텐츠 0클릭(블로그 정보형 시공 사례 노출 상태 점검 필요)")
-
-    if gfa.get("clicks", 0) > 0 and gfa.get("clicks", 0) >= total_clicks * 0.7:
-        checks.append(f"GFA 저비용 대량유입({gfa['clicks']}클릭/CPC ₩{round(gfa.get('cpc',0)):,}) 집중→상담 전환율 모니터링 필요")
-
-    if checks:
-        insights.append(f"점검 포인트: {checks[0]}")
-    else:
-        insights.append("점검 포인트: 매체별 유입 흐름 양호, 정상 운영 중")
-
-    # 3. 중요한 팁 (운영 액션 플랜)
-    dow = ""
-    try:
-        dt = datetime.strptime(target_date, "%Y-%m-%d")
-        dow = ["월", "화", "수", "목", "금", "토", "일"][dt.weekday()]
-    except Exception:
-        pass
-
-    if dow in ["일", "월"]:
-        insights.append("운영 팁: 평일 주간은 병원·상가 인테리어 직접 검색이 활발하므로, 주력 검색 키워드(피부과/치과 등) 상위 노출을 방어하고 유입을 극대화하세요.")
-    elif dow in ["금", "토"]:
-        insights.append("운영 팁: 주말에는 모바일 디스플레이(GFA) 탐색 비중이 커지므로 배너 노출을 유지하며 평일 상담으로 유도하세요.")
-    else:
-        insights.append("운영 팁: 고효율 검색 키워드의 상위 순위(3~5위)를 안정적으로 유지하고 불필요한 고비용 키워드 입찰을 관리하세요.")
-
-    return insights
-
-def generate_weekly_insights(stats: dict, prev_stats: dict = None) -> list:
-    bd = stats.get("breakdown", {})
-    gfa = bd.get("NAVER_GFA", {})
-    pl = bd.get("NAVER_POWERLINK", {})
-    place = bd.get("NAVER_PLACE", {})
-
-    total_clicks = stats.get("total_clicks", 0)
-    prev_clicks = prev_stats.get("total_clicks", 0) if prev_stats else 0
-    click_diff = total_clicks - prev_clicks
-
-    insights = []
-
-    # 1. 키워드 추이 동적 분석
-    gained, lost = _analyze_keyword_shifts(stats, prev_stats)
-    kw_parts = []
-    if gained:
-        kw_parts.append("[증가] " + ", ".join([f"{k[0]}(+{k[1]}회)" for k in gained[:3]]))
-    if lost:
-        kw_parts.append("[감소] " + ", ".join([f"{k[0].replace('(확장소재)','')}(-{k[1]}회)" for k in lost[:2]]))
-
-    if kw_parts:
-        insights.append(f"키워드 추이: {' / '.join(kw_parts)}")
-    else:
-        insights.append("키워드 추이: 전주 대비 고른 유입 흐름 유지")
-
-    # 2. 주간 진단
-    if click_diff > 0:
-        insights.append(f"주간 진단: 지난주 총 {total_clicks}회 유입으로 전주(+{click_diff}회) 대비 대폭 성장. GFA 배너 집행으로 전체 트래픽 볼륨을 4배 이상 확대함.")
-    else:
-        insights.append(f"주간 진단: 지난주 총 {total_clicks}회 유입, 총 소진 ₩{stats.get('total_spend', 0):,} 기록.")
-
-    # 3. 다음주 가이드
-    insights.append("다음 주 가이드: 평균 CPC ₩206인 GFA 배너 예산을 현행 유지하여 트래픽 볼륨을 확보하고, 평일 주간에는 병원/상가 고효율 검색 키워드 입찰을 집중해 상담 전환을 극대화할 것을 추천.")
-    return insights
-
-def generate_monthly_insights(stats: dict, prev_stats: dict = None) -> list:
-    total_spend = stats.get("total_spend", 0)
     total_clicks = stats.get("total_clicks", 0)
     avg_cpc = stats.get("avg_cpc", 0)
 
-    insights = []
+    # 1. Budget spent with 0 clicks
+    for m_label, ch in [("파워링크", bd.get("NAVER_POWERLINK", {})), 
+                        ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {})), 
+                        ("플레이스", bd.get("NAVER_PLACE", {})), 
+                        ("GFA 배너", bd.get("NAVER_GFA", {}))]:
+        if ch.get("spend", 0) >= 3000 and ch.get("clicks", 0) == 0:
+            notes.append(f"{m_label} 광고에서 ₩{ch['spend']:,} 소진되었으나 유입 클릭이 0건입니다.")
+
+    # 2. Exceptional CPC surge
+    if avg_cpc >= 2500 and total_clicks > 0:
+        notes.append(f"평균 클릭단가(₩{avg_cpc:,})가 비정상적으로 높게 형성되어 점검이 필요합니다.")
+
+    # 3. Severe click drop compared to previous period
     if prev_stats and prev_stats.get("has_data"):
         p_clicks = prev_stats.get("total_clicks", 0)
-        p_spend = prev_stats.get("total_spend", 0)
-        c_diff = total_clicks - p_clicks
-        s_diff = total_spend - p_spend
-        c_sign = "+" if c_diff >= 0 else "-"
-        s_sign = "+" if s_diff >= 0 else "-"
-        insights.append(f"월간 성과: 총 {total_clicks:,}회 유입(전월 대비 {c_sign}{abs(c_diff):,}회), 총 광고비 ₩{total_spend:,}({s_sign}₩{abs(s_diff):,}) 기록.")
+        if p_clicks >= 20 and total_clicks <= p_clicks * 0.5:
+            notes.append(f"전체 클릭수({total_clicks}회)가 전기({p_clicks}회) 대비 50% 이상 급감했습니다.")
 
-        gained, lost = _analyze_keyword_shifts(stats, prev_stats)
-        if gained or lost:
-            parts = []
-            if gained:
-                parts.append("[증가] " + ", ".join([f"{k[0]}(+{k[1]}회)" for k in gained[:2]]))
-            if lost:
-                parts.append("[감소] " + ", ".join([f"{k[0]}(-{k[1]}회)" for k in lost[:2]]))
-            insights.append(f"키워드 추이: {' / '.join(parts)}")
-    else:
-        insights.append(f"월간 진단: 총 {total_clicks:,}회 유입, 평균 클릭단가 ₩{avg_cpc:,} 기록. (이전 달 데이터 누적 시 전월 대비 증감 분석이 자동 제공됩니다)")
-
-    insights.append("운영 전략: 상위 전환 키워드(병원/상가) 집중과 가성비 배너(GFA) 믹스를 지속 유지하여 CPA 최적화를 도모하세요.")
-    return insights
+    if not notes:
+        return ["특이사항 없음."]
+    return notes
 
 def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
     target_date = stats.get("start_date", "")
@@ -349,18 +260,22 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
         if c > 0:
             lines.append(f"• {label}: ₩{s:,} ({c}클릭 / CPC ₩{cpc:,})")
             if kws:
-                kw_str = ", ".join([f"{k['keyword']}({k['clicks']}클릭)" for k in kws[:3]])
-                lines.append(f"  └ 키워드: {kw_str}")
+                if label == "GFA 배너":
+                    cr_str = ", ".join([f"{k['keyword'].replace('[소재] ', '')}({k['clicks']}클릭)" for k in kws[:3]])
+                    lines.append(f"  └ 주요 소재: {cr_str}")
+                else:
+                    kw_str = ", ".join([f"{k['keyword']}({k['clicks']}클릭)" for k in kws[:3]])
+                    lines.append(f"  └ 키워드: {kw_str}")
         elif s > 0 or i > 0:
             lines.append(f"• {label}: ₩{s:,} (0클릭 / {i:,}노출)")
         else:
             lines.append(f"• {label}: ₩0 (미집행)")
 
     lines.append("────────────────────")
-    lines.append("💡 [성과 분석 & 최적화 액션 플랜]")
-    insights = generate_daily_insights(stats, prev_stats)
-    for ins in insights:
-        lines.append(f"• {ins}")
+    lines.append("■ 특이사항")
+    notes = generate_special_notes(stats, prev_stats)
+    for n in notes:
+        lines.append(f"• {n}")
 
     lines.append("")
     lines.append(f"🔗 상세 대시보드: {DASHBOARD_URL}")
@@ -421,16 +336,20 @@ def format_weekly_report(stats: dict, prev_stats: dict = None) -> str:
         if c > 0 or s > 0:
             lines.append(f"• {label}: ₩{s:,} ({c}클릭 / {pct}% 비중)")
             if kws:
-                kw_str = ", ".join([f"{k['keyword']}({k['clicks']}클릭)" for k in kws[:3]])
-                lines.append(f"  └ 주요 키워드: {kw_str}")
+                if label == "GFA 배너":
+                    cr_str = ", ".join([f"{k['keyword'].replace('[소재] ', '')}({k['clicks']}클릭)" for k in kws[:3]])
+                    lines.append(f"  └ 주요 소재: {cr_str}")
+                else:
+                    kw_str = ", ".join([f"{k['keyword']}({k['clicks']}클릭)" for k in kws[:3]])
+                    lines.append(f"  └ 주요 키워드: {kw_str}")
         else:
             lines.append(f"• {label}: ₩0 (미집행)")
 
     lines.append("────────────────────")
-    lines.append("💡 [주간 성과 분석 & 최적화 가이드]")
-    insights = generate_weekly_insights(stats, prev_stats)
-    for ins in insights:
-        lines.append(f"• {ins}")
+    lines.append("■ 특이사항")
+    notes = generate_special_notes(stats, prev_stats)
+    for n in notes:
+        lines.append(f"• {n}")
 
     lines.append("")
     lines.append(f"🔗 상세 대시보드: {DASHBOARD_URL}")
@@ -464,14 +383,15 @@ def format_monthly_report(stats: dict, prev_stats: dict = None) -> str:
         f"• 평균 클릭단가: ₩{avg_cpc:,}{cpc_diff_str}",
         f"• 클릭률(CTR): {avg_ctr}%",
         "────────────────────",
-        "💡 [월간 성과 분석 & 전략 가이드]"
+        "■ 특이사항"
     ]
 
-    insights = generate_monthly_insights(stats, prev_stats)
-    for ins in insights:
-        lines.append(f"• {ins}")
+    notes = generate_special_notes(stats, prev_stats)
+    for n in notes:
+        lines.append(f"• {n}")
 
     lines.append("")
     lines.append(f"🔗 상세 대시보드: {DASHBOARD_URL}")
     return "\n".join(lines).strip()
+
 

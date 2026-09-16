@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-09-14T13:00:21.797045",
+  "updated_at": "2026-09-16T10:01:44.011351",
   "summary": {
-    "total_spend": 34933,
-    "total_impressions": 58946,
-    "total_clicks": 164,
-    "avg_cpc": 213,
-    "avg_ctr": 0.28,
-    "naver_spend": 34933,
+    "total_spend": 56311,
+    "total_impressions": 106678,
+    "total_clicks": 277,
+    "avg_cpc": 203,
+    "avg_ctr": 0.26,
+    "naver_spend": 56311,
     "google_spend": 0
   },
   "daily": {
@@ -581,206 +581,129 @@
         "clicks": 0,
         "cpc": 0
       }
+    },
+    "2026-09-14": {
+      "spend": 10456,
+      "impressions": 24477,
+      "clicks": 65,
+      "cpc": 161,
+      "ctr": 0.27,
+      "naver": {
+        "spend": 10456,
+        "impressions": 24477,
+        "clicks": 65,
+        "cpc": 161,
+        "powerlink": {
+          "spend": 77,
+          "clicks": 1,
+          "impressions": 327
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 118
+        },
+        "place": {
+          "spend": 200,
+          "clicks": 2,
+          "impressions": 94
+        },
+        "gfa": {
+          "spend": 10179,
+          "clicks": 62,
+          "impressions": 23938
+        }
+      },
+      "gfa": {
+        "spend": 10179,
+        "clicks": 62,
+        "impressions": 23938
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-15": {
+      "spend": 10922,
+      "impressions": 23255,
+      "clicks": 48,
+      "cpc": 228,
+      "ctr": 0.21,
+      "naver": {
+        "spend": 10922,
+        "impressions": 23255,
+        "clicks": 48,
+        "cpc": 228,
+        "powerlink": {
+          "spend": 1102,
+          "clicks": 7,
+          "impressions": 377
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 86
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 88
+        },
+        "gfa": {
+          "spend": 9820,
+          "clicks": 41,
+          "impressions": 22704
+        }
+      },
+      "gfa": {
+        "spend": 9820,
+        "clicks": 41,
+        "impressions": 22704
+      },
+      "google": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
     }
   },
   "keywords": [
     {
-      "keyword": "부산병원인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "부산피부과인테리어",
-      "impressions": 4120,
-      "clicks": 165,
-      "ctr": 4.0,
-      "cpc": 1280,
-      "spend": 211200
-    },
-    {
-      "keyword": "부산피부과인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "부산피부과인테리어",
-      "impressions": 3200,
-      "clicks": 134,
-      "ctr": 4.19,
-      "cpc": 1420,
-      "spend": 190280
-    },
-    {
-      "keyword": "부산성형외과인테리어",
-      "media": "네이버 파워컨텐츠",
-      "campaign": "부산_컨텐츠광고",
-      "group": "성형외과컨텐츠",
-      "impressions": 2840,
-      "clicks": 98,
-      "ctr": 3.45,
-      "cpc": 1050,
-      "spend": 102900
-    },
-    {
-      "keyword": "부산치과인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "치과인테리어",
-      "impressions": 2650,
-      "clicks": 92,
-      "ctr": 3.47,
-      "cpc": 1100,
-      "spend": 101200
-    },
-    {
-      "keyword": "부산의원인테리어",
-      "media": "네이버 파워컨텐츠",
-      "campaign": "부산_컨텐츠광고",
-      "group": "의원컨텐츠",
-      "impressions": 2140,
-      "clicks": 74,
-      "ctr": 3.46,
-      "cpc": 980,
-      "spend": 72520
-    },
-    {
-      "keyword": "부산 한의원 인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "한의원인테리어",
-      "impressions": 1820,
-      "clicks": 58,
-      "ctr": 3.19,
-      "cpc": 920,
-      "spend": 53360
-    },
-    {
-      "keyword": "부산 상가 인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "상가일반",
-      "impressions": 1450,
-      "clicks": 42,
-      "ctr": 2.9,
-      "cpc": 580,
-      "spend": 24360
+      "keyword": "네이티브",
+      "media": "네이버 GFA",
+      "campaign": "네이티브",
+      "group": "인지도/트래픽",
+      "impressions": 51117,
+      "clicks": 90,
+      "ctr": 0.18,
+      "cpc": 206,
+      "spend": 18555
     },
     {
       "keyword": "인디컴퍼니",
       "media": "네이버 파워링크",
       "campaign": "1. 파워링크",
       "group": "자사키워드 몇개",
-      "impressions": 97,
-      "clicks": 35,
-      "ctr": 36.08,
-      "cpc": 74,
-      "spend": 2604
+      "impressions": 99,
+      "clicks": 36,
+      "ctr": 36.36,
+      "cpc": 75,
+      "spend": 2692
     },
     {
-      "keyword": "부산해운대구인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 4,
-      "clicks": 2,
-      "ctr": 50.0,
-      "cpc": 1132,
-      "spend": 2263
-    },
-    {
-      "keyword": "부산상가인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 1,
-      "clicks": 1,
-      "ctr": 100.0,
-      "cpc": 1145,
-      "spend": 1145
-    },
-    {
-      "keyword": "인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 33,
-      "clicks": 2,
-      "ctr": 6.06,
-      "cpc": 552,
-      "spend": 1105
-    },
-    {
-      "keyword": "부산상가인테리어업체",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 3,
-      "clicks": 1,
-      "ctr": 33.33,
-      "cpc": 1069,
-      "spend": 1069
-    },
-    {
-      "keyword": "해운대인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 1066,
-      "spend": 1066
-    },
-    {
-      "keyword": "부산사무실인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 1065,
-      "spend": 1065
-    },
-    {
-      "keyword": "재송동인테리어업체",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 1,
-      "clicks": 1,
-      "ctr": 100.0,
-      "cpc": 1064,
-      "spend": 1064
-    },
-    {
-      "keyword": "해운대구인테리어디자인",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 844,
-      "spend": 844
-    },
-    {
-      "keyword": "해운대인테리어디자인",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 833,
-      "spend": 833
-    },
-    {
-      "keyword": "부산하이엔드인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 3,
-      "clicks": 1,
-      "ctr": 33.33,
-      "cpc": 210,
-      "spend": 210
+      "keyword": "자사키워드 몇개(확장소재)",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 507,
+      "clicks": 4,
+      "ctr": 0.79,
+      "cpc": 172,
+      "spend": 688
     },
     {
       "keyword": "인테리어업체",
@@ -792,6 +715,61 @@
       "ctr": 14.29,
       "cpc": 88,
       "spend": 176
+    },
+    {
+      "keyword": "자사키워드(확장소재)",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342697136",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 176,
+      "spend": 176
+    },
+    {
+      "keyword": "자사키워드(확장소재)",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342725603",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 156,
+      "spend": 156
+    },
+    {
+      "keyword": "자사키워드(확장소재)",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342719810",
+      "impressions": 17,
+      "clicks": 1,
+      "ctr": 5.88,
+      "cpc": 154,
+      "spend": 154
+    },
+    {
+      "keyword": "재송동인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 123,
+      "spend": 123
+    },
+    {
+      "keyword": "단독주택리모델링비용",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "단독주택",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 88,
+      "spend": 88
     },
     {
       "keyword": "단독주택리모델링비용",
@@ -827,6 +805,17 @@
       "spend": 79
     },
     {
+      "keyword": "경북안과인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342694935",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 77,
+      "spend": 77
+    },
+    {
       "keyword": "부산병원인테리어",
       "media": "네이버 파워컨텐츠",
       "campaign": "4. 파워컨텐츠",
@@ -849,46 +838,13 @@
       "spend": 77
     },
     {
-      "keyword": "부산상업인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "3. 플레이스(상가 사무실)",
-      "group": "플레이스(상가사무실)_그룹#1",
-      "impressions": 19,
-      "clicks": 1,
-      "ctr": 5.26,
-      "cpc": 77,
-      "spend": 77
-    },
-    {
       "keyword": "인테리어",
       "media": "NAVER_PLACE",
-      "campaign": "3. 플레이스(상가 사무실)",
-      "group": "플레이스(상가사무실)_그룹#1",
-      "impressions": 8,
-      "clicks": 1,
-      "ctr": 12.5,
-      "cpc": 77,
-      "spend": 77
-    },
-    {
-      "keyword": "치과인테리어",
-      "media": "NAVER_PLACE",
       "campaign": "2. 플레이스(법인)",
       "group": "인디 스마트플레이스",
-      "impressions": 4,
+      "impressions": 6,
       "clicks": 1,
-      "ctr": 25.0,
-      "cpc": 77,
-      "spend": 77
-    },
-    {
-      "keyword": "학원인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
+      "ctr": 16.67,
       "cpc": 77,
       "spend": 77
     }

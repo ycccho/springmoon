@@ -85,8 +85,64 @@ def collect_gfa_stats(target_date: str) -> dict:
             save_daily_media_records(rec)
             log_event("GFA_COLLECTOR", "SUCCESS", f"Collected ₩{gfa_spend:,} ({gfa_clicks} clicks)")
             logger.info(f"[GFA Collector] Successfully saved NAVER_GFA: ₩{gfa_spend:,} / {gfa_clicks} clicks / {gfa_impr:,} impr")
+
+            # 1-1. Collect GFA creative performance (소재별 클릭/비용)
+            try:
+                js_gfa_creatives = f"""
+                let gfaCreatives = [];
+                try {{
+                    const resC = await fetch('https://ads.naver.com/apis/gfa/v1/adAccounts/225690/creatives/draft/searchCreativesByAdSetNo?adSetNo=4035171&page=0&size=100&inspectionStatus=PENDING&inspectionStatus=REJECT&inspectionStatus=ACCEPT&inspectionStatus=PENDING_IN_OPERATION&inspectionStatus=REJECT_IN_OPERATION&onOffs=1&onOffs=0');
+                    const cData = await resC.json();
+                    const realNos = [];
+                    const cMap = {{}};
+                    for (const c of (cData.content || [])) {{
+                        const rNo = c.realCreativeNo || c.no;
+                        realNos.push(rNo);
+                        cMap[rNo] = {{ name: c.name, message: c.message }};
+                    }}
+                    if (realNos.length > 0) {{
+                        const params = realNos.map(no => 'creativeNoList=' + no).join('&');
+                        const resStats = await fetch(`https://ads.naver.com/apis/gfa/v2/adAccounts/225690/stats/creativeStats?${{params}}&startDate={target_date}&endDate={target_date}`);
+                        const sData = await resStats.json();
+                        for (const [rNo, st] of Object.entries(sData)) {{
+                            if (st && st.clickCount > 0) {{
+                                gfaCreatives.push({{
+                                    no: rNo,
+                                    name: cMap[rNo] ? cMap[rNo].name : ('소재 #' + rNo),
+                                    clicks: st.clickCount,
+                                    spend: st.sales || 0,
+                                    impr: st.impCount || 0,
+                                    cpc: st.cpc || 0
+                                }});
+                            }}
+                        }}
+                    }}
+                }} catch(e) {{}}
+                return gfaCreatives;
+                """
+                gfa_cr_list = driver.execute_script(f"return (async () => {{ {js_gfa_creatives} }})();")
+                if gfa_cr_list:
+                    gfa_kw_records = []
+                    for cr in gfa_cr_list:
+                        gfa_kw_records.append({
+                            "date": target_date,
+                            "keyword": f"[소재] {cr['name']}",
+                            "media": "NAVER_GFA",
+                            "campaign": "네이티브",
+                            "adgroup": "네이티브",
+                            "impressions": cr["impr"],
+                            "clicks": cr["clicks"],
+                            "spend": cr["spend"],
+                            "cpc": cr["cpc"],
+                            "ctr": round((cr["clicks"] / cr["impr"]) * 100, 2) if cr["impr"] > 0 else 0.0
+                        })
+                    save_keyword_records(gfa_kw_records)
+                    logger.info(f"[GFA Collector] Successfully saved {len(gfa_kw_records)} GFA creative records for {target_date}")
+            except Exception as cr_err:
+                logger.warning(f"[GFA Collector] Failed to fetch GFA creatives: {cr_err}")
         else:
             logger.info(f"[GFA Collector] No GFA spend recorded on {target_date}.")
+
 
         # 2. Place Ads Clicked Keywords (admng_exp_keyword for both campaigns)
         place_groups = [
