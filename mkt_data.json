@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-09-16T22:04:55.121376",
+  "updated_at": "2026-09-16T22:40:31.450106",
   "summary": {
-    "total_spend": 70548,
-    "total_impressions": 111706,
-    "total_clicks": 384,
-    "avg_cpc": 184,
+    "total_spend": 70768,
+    "total_impressions": 111919,
+    "total_clicks": 386,
+    "avg_cpc": 183,
     "avg_ctr": 0.34,
     "naver_spend": 56311,
-    "google_spend": 14237
+    "google_spend": 14457
   },
   "daily": {
     "2026-09-01": {
@@ -669,6 +669,50 @@
         "clicks": 3,
         "cpc": 110
       }
+    },
+    "2026-09-16": {
+      "spend": 220,
+      "impressions": 213,
+      "clicks": 2,
+      "cpc": 110,
+      "ctr": 0.94,
+      "naver": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0,
+        "powerlink": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        },
+        "gfa": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 0
+        }
+      },
+      "gfa": {
+        "spend": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "google": {
+        "spend": 220,
+        "impressions": 213,
+        "clicks": 2,
+        "cpc": 110
+      }
     }
   },
   "keywords": [
@@ -684,15 +728,15 @@
       "spend": 18555
     },
     {
-      "keyword": "디자인 인테리어",
+      "keyword": "기타 검색어",
       "media": "구글 검색광고",
-      "campaign": "검색광고_홈페이지",
-      "group": "광고그룹 1",
-      "impressions": 3797,
-      "clicks": 80,
-      "ctr": 2.11,
-      "cpc": 137,
-      "spend": 10954
+      "campaign": "Google Ads",
+      "group": "Privacy Masked",
+      "impressions": 0,
+      "clicks": 42,
+      "ctr": 0.0,
+      "cpc": 158,
+      "spend": 6625
     },
     {
       "keyword": "[소재] 네이티브 1_배너형(PC)",
@@ -726,17 +770,6 @@
       "ctr": 0.18,
       "cpc": 592,
       "spend": 2367
-    },
-    {
-      "keyword": "리모델링 인테리어",
-      "media": "구글 검색광고",
-      "campaign": "검색광고_홈페이지",
-      "group": "광고그룹 1",
-      "impressions": 477,
-      "clicks": 15,
-      "ctr": 3.14,
-      "cpc": 121,
-      "spend": 1819
     },
     {
       "keyword": "[소재] 네이티브 3_배너형(PC)",
@@ -783,6 +816,28 @@
       "spend": 572
     },
     {
+      "keyword": "부산 인테리어 디자인",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 3,
+      "clicks": 2,
+      "ctr": 66.67,
+      "cpc": 258,
+      "spend": 516
+    },
+    {
+      "keyword": "시골집 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 14,
+      "clicks": 4,
+      "ctr": 28.57,
+      "cpc": 105,
+      "spend": 420
+    },
+    {
       "keyword": "[소재] 네이티브 7_스퀘어형",
       "media": "NAVER_GFA",
       "campaign": "네이티브",
@@ -794,7 +849,29 @@
       "spend": 376
     },
     {
-      "keyword": "인디컴퍼니",
+      "keyword": "북유럽 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 5,
+      "clicks": 3,
+      "ctr": 60.0,
+      "cpc": 113,
+      "spend": 340
+    },
+    {
+      "keyword": "아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 10,
+      "clicks": 3,
+      "ctr": 30.0,
+      "cpc": 106,
+      "spend": 319
+    },
+    {
+      "keyword": "인디 컴퍼니",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
       "group": "광고그룹 1",
@@ -805,18 +882,29 @@
       "spend": 309
     },
     {
-      "keyword": "인테리어 추천",
+      "keyword": "인테리어 디자인",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
       "group": "광고그룹 1",
-      "impressions": 18,
-      "clicks": 2,
-      "ctr": 11.11,
-      "cpc": 114,
-      "spend": 228
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 309,
+      "spend": 309
     },
     {
-      "keyword": "카페 인테리어 디자인",
+      "keyword": "인테리어 디자이너",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 2,
+      "ctr": 50.0,
+      "cpc": 112,
+      "spend": 223
+    },
+    {
+      "keyword": "예쁜 카페 인테리어",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
       "group": "광고그룹 1",
@@ -825,6 +913,39 @@
       "ctr": 200.0,
       "cpc": 108,
       "spend": 216
+    },
+    {
+      "keyword": "디자인 새움",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 6,
+      "clicks": 2,
+      "ctr": 33.33,
+      "cpc": 107,
+      "spend": 214
+    },
+    {
+      "keyword": "아트홀 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 2,
+      "ctr": 50.0,
+      "cpc": 106,
+      "spend": 213
+    },
+    {
+      "keyword": "집 꾸미기 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 8,
+      "clicks": 2,
+      "ctr": 25.0,
+      "cpc": 94,
+      "spend": 187
     },
     {
       "keyword": "부산강의실인테리어소품",
@@ -915,17 +1036,6 @@
       "spend": 154
     },
     {
-      "keyword": "식당인테리어",
-      "media": "구글 검색광고",
-      "campaign": "검색광고_홈페이지",
-      "group": "광고그룹 1",
-      "impressions": 4,
-      "clicks": 2,
-      "ctr": 50.0,
-      "cpc": 77,
-      "spend": 154
-    },
-    {
       "keyword": "재송동인테리어",
       "media": "NAVER_PLACE",
       "campaign": "2. 플레이스(법인)",
@@ -937,59 +1047,433 @@
       "spend": 123
     },
     {
-      "keyword": "사무실인테리어",
+      "keyword": "집 가구 배치",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
       "group": "광고그룹 1",
-      "impressions": 11,
+      "impressions": 2,
       "clicks": 1,
-      "ctr": 9.09,
+      "ctr": 50.0,
       "cpc": 122,
       "spend": 122
     },
     {
-      "keyword": "주거공간 디자인",
+      "keyword": "도배 장판 추천",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
       "group": "광고그룹 1",
-      "impressions": 5,
+      "impressions": 2,
       "clicks": 1,
-      "ctr": 20.0,
-      "cpc": 118,
-      "spend": 118
+      "ctr": 50.0,
+      "cpc": 121,
+      "spend": 121
     },
     {
-      "keyword": "인테리어 전문",
+      "keyword": "전통 찻집 인테리어",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
       "group": "광고그룹 1",
-      "impressions": 9,
+      "impressions": 4,
       "clicks": 1,
-      "ctr": 11.11,
-      "cpc": 110,
-      "spend": 110
+      "ctr": 25.0,
+      "cpc": 121,
+      "spend": 121
     },
     {
-      "keyword": "상가 리모델링",
+      "keyword": "건강한 디자인",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
       "group": "광고그룹 1",
       "impressions": 1,
       "clicks": 1,
       "ctr": 100.0,
-      "cpc": 106,
-      "spend": 106
+      "cpc": 120,
+      "spend": 120
     },
     {
-      "keyword": "리모델링 디자인",
+      "keyword": "구축 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 120,
+      "spend": 120
+    },
+    {
+      "keyword": "템바 보드 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 6,
+      "clicks": 1,
+      "ctr": 16.67,
+      "cpc": 120,
+      "spend": 120
+    },
+    {
+      "keyword": "24 평 아파트 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 119,
+      "spend": 119
+    },
+    {
+      "keyword": "투 베이 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 119,
+      "spend": 119
+    },
+    {
+      "keyword": "해운대 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 119,
+      "spend": 119
+    },
+    {
+      "keyword": "50 평 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 118,
+      "spend": 118
+    },
+    {
+      "keyword": "원룸 인테리어 배치",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 118,
+      "spend": 118
+    },
+    {
+      "keyword": "고급 주택 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 117,
+      "spend": 117
+    },
+    {
+      "keyword": "목욕탕 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 116,
+      "spend": 116
+    },
+    {
+      "keyword": "벽면 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 113,
+      "spend": 113
+    },
+    {
+      "keyword": "17 평 아파트 가구 배치",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 112,
+      "spend": 112
+    },
+    {
+      "keyword": "구축 아파트 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 112,
+      "spend": 112
+    },
+    {
+      "keyword": "아파트 현관 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 111,
+      "spend": 111
+    },
+    {
+      "keyword": "중문 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 1,
+      "ctr": 25.0,
+      "cpc": 111,
+      "spend": 111
+    },
+    {
+      "keyword": "호프 집 인테리어",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
       "group": "광고그룹 1",
       "impressions": 5,
       "clicks": 1,
       "ctr": 20.0,
+      "cpc": 111,
+      "spend": 111
+    },
+    {
+      "keyword": "붙박이 장 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 6,
+      "clicks": 1,
+      "ctr": 16.67,
+      "cpc": 110,
+      "spend": 110
+    },
+    {
+      "keyword": "25 평 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 6,
+      "clicks": 1,
+      "ctr": 16.67,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "비 확장 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "호텔 같은 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 1,
+      "ctr": 25.0,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "호프 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "시골집 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 108,
+      "spend": 108
+    },
+    {
+      "keyword": "애견 호텔 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 108,
+      "spend": 108
+    },
+    {
+      "keyword": "부산 미용실 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 107,
+      "spend": 107
+    },
+    {
+      "keyword": "엔틱 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 107,
+      "spend": 107
+    },
+    {
+      "keyword": "리모델링 비용",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 104,
+      "spend": 104
+    },
+    {
+      "keyword": "국밥 집 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 103,
+      "spend": 103
+    },
+    {
+      "keyword": "지산 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 103,
+      "spend": 103
+    },
+    {
+      "keyword": "웨인스 코팅 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 102,
+      "spend": 102
+    },
+    {
+      "keyword": "33 평 아파트 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
       "cpc": 101,
       "spend": 101
+    },
+    {
+      "keyword": "신축 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 101,
+      "spend": 101
+    },
+    {
+      "keyword": "24 평형 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 96,
+      "spend": 96
+    },
+    {
+      "keyword": "40 평대 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 95,
+      "spend": 95
+    },
+    {
+      "keyword": "50 평대 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 94,
+      "spend": 94
+    },
+    {
+      "keyword": "시골 집 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 94,
+      "spend": 94
+    },
+    {
+      "keyword": "작은 평수 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 94,
+      "spend": 94
     },
     {
       "keyword": "단독주택리모델링비용",
@@ -1023,6 +1507,28 @@
       "ctr": 33.33,
       "cpc": 88,
       "spend": 88
+    },
+    {
+      "keyword": "인테리어 카페",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 85,
+      "spend": 85
+    },
+    {
+      "keyword": "행가 집",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 84,
+      "spend": 84
     },
     {
       "keyword": "부산인테리어",
@@ -1078,6 +1584,28 @@
       "ctr": 16.67,
       "cpc": 77,
       "spend": 77
+    },
+    {
+      "keyword": "22 평 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 61,
+      "spend": 61
+    },
+    {
+      "keyword": "홈 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 53,
+      "spend": 53
     }
   ]
 }

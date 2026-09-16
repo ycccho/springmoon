@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import logging
 from datetime import datetime
 import requests
@@ -228,6 +229,11 @@ def _format_item_clicks(items: list, is_gfa: bool = False, max_display: int = 15
     if not clean_items:
         return ""
 
+    # Ensure "기타" items appear at the end
+    named_items = [x for x in clean_items if "기타" not in x[0]]
+    etc_items = [x for x in clean_items if "기타" in x[0]]
+    clean_items = named_items + etc_items
+
     total_clicks = sum(cl for _, cl in clean_items)
     label = "소재" if is_gfa else "검색어"
     lines = [f"  └ {label}(총 {total_clicks}클릭):"]
@@ -254,8 +260,10 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
     """
     notes = []
     bd = stats.get("breakdown", {})
-    pl = bd.get("NAVER_POWERLINK", {})
-    pl_kws = pl.get("top_keywords", [])
+    search_kws = []
+    for ch_name in ["NAVER_POWERLINK", "GOOGLE_SA"]:
+        ch = bd.get(ch_name, {})
+        search_kws.extend(ch.get("top_keywords", []))
     total_clicks = stats.get("total_clicks", 0)
     avg_cpc = stats.get("avg_cpc", 0)
 
@@ -287,10 +295,12 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
     flagged = []
     flagged_spend = 0
     flagged_clicks = 0
-    for k in pl_kws:
+    for k in search_kws:
         kw = k.get("keyword", "")
         cl = k.get("clicks", 0)
         sp = k.get("spend", 0)
+        if kw == "기타 검색어":
+            continue
         for term, tag, analysis in neg_rules:
             if term in kw.lower():
                 flagged.append({

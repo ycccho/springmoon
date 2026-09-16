@@ -186,6 +186,7 @@ def get_period_stats(start_date, end_date):
         '네이버 GFA': 'NAVER_GFA',
         'NAVER_GFA': 'NAVER_GFA',
         '구글 검색': 'GOOGLE_SA',
+        '구글 검색광고': 'GOOGLE_SA',
         'GOOGLE_SA': 'GOOGLE_SA',
         '메타 광고': 'META_ADS',
         'META_ADS': 'META_ADS'

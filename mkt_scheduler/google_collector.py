@@ -12,7 +12,7 @@ from .config import (
     GOOGLE_API_VERSION,
     GOOGLE_TOKENS_PATH
 )
-from .db_manager import save_daily_media_records, save_keyword_records, log_event
+from .db_manager import save_daily_media_records, save_keyword_records, log_event, get_connection
 
 logger = logging.getLogger(__name__)
 
@@ -133,26 +133,28 @@ def collect_google_stats(target_date: str = None) -> dict:
             total_impressions += impr
             total_clicks += clicks
 
-    # 2. Keyword Level Query
-    keyword_query = f"""
+    # 2. Search Term Level Query (Google Ads 검색어 탭)
+    search_term_query = f"""
     SELECT
-      ad_group_criterion.keyword.text,
+      search_term_view.search_term,
       campaign.name,
       ad_group.name,
       metrics.cost_micros,
       metrics.impressions,
       metrics.clicks,
       metrics.average_cpc
-    FROM keyword_view
+    FROM search_term_view
     WHERE segments.date = '{target_date}'
     """
 
-    kw_results = query_google_ads(keyword_query, access_token)
-    keyword_records = []
+    st_results = query_google_ads(search_term_query, access_token)
+    st_dict = {}
 
-    for batch in kw_results:
+    for batch in st_results:
         for row in batch.get("results", []):
-            kw_text = row.get("adGroupCriterion", {}).get("keyword", {}).get("text", "")
+            st_text = row.get("searchTermView", {}).get("searchTerm", "").strip()
+            if not st_text:
+                continue
             camp_name = row.get("campaign", {}).get("name", "")
             ag_name = row.get("adGroup", {}).get("name", "")
             m = row.get("metrics", {})
@@ -161,22 +163,54 @@ def collect_google_stats(target_date: str = None) -> dict:
             spend = round(cost_micros / 1000000)
             impr = int(m.get("impressions") or 0)
             clicks = int(m.get("clicks") or 0)
-            avg_cpc = round(int(m.get("averageCpc") or 0) / 1000000)
-            ctr = round((clicks / impr) * 100, 2) if impr > 0 else 0.0
 
             if clicks > 0 or spend > 0:
-                keyword_records.append({
-                    "date": target_date,
-                    "keyword": kw_text,
-                    "media": "구글 검색광고",
-                    "campaign": camp_name,
-                    "adgroup": ag_name,
-                    "impressions": impr,
-                    "clicks": clicks,
-                    "spend": spend,
-                    "cpc": avg_cpc,
-                    "ctr": ctr
-                })
+                if st_text not in st_dict:
+                    st_dict[st_text] = {
+                        "date": target_date,
+                        "keyword": st_text,
+                        "media": "구글 검색광고",
+                        "campaign": camp_name,
+                        "adgroup": ag_name,
+                        "impressions": 0,
+                        "clicks": 0,
+                        "spend": 0,
+                    }
+                st_dict[st_text]["impressions"] += impr
+                st_dict[st_text]["clicks"] += clicks
+                st_dict[st_text]["spend"] += spend
+
+    keyword_records = []
+    for st_text, data in st_dict.items():
+        c = data["clicks"]
+        s = data["spend"]
+        i = data["impressions"]
+        data["cpc"] = round(s / c) if c > 0 else 0
+        data["ctr"] = round((c / i) * 100, 2) if i > 0 else 0.0
+        keyword_records.append(data)
+
+    # Reconcile with total campaign clicks to handle Google's privacy masking
+    sum_st_clicks = sum(r["clicks"] for r in keyword_records)
+    sum_st_spend = sum(r["spend"] for r in keyword_records)
+    rem_clicks = total_clicks - sum_st_clicks
+    rem_spend = total_spend - sum_st_spend
+
+    if rem_clicks > 0:
+        keyword_records.append({
+            "date": target_date,
+            "keyword": "기타 검색어",
+            "media": "구글 검색광고",
+            "campaign": "Google Ads",
+            "adgroup": "Privacy Masked",
+            "impressions": 0,
+            "clicks": rem_clicks,
+            "spend": max(0, rem_spend),
+            "cpc": round(rem_spend / rem_clicks) if rem_spend > 0 else 0,
+            "ctr": 0.0
+        })
+
+    # Sort keywords by clicks DESC, spend DESC
+    keyword_records.sort(key=lambda x: (x["clicks"], x["spend"]), reverse=True)
 
     # Save to SQLite
     media_record = [{
@@ -189,6 +223,14 @@ def collect_google_stats(target_date: str = None) -> dict:
 
     save_daily_media_records(media_record)
     if keyword_records:
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("DELETE FROM keyword_performance WHERE date = ? AND (media = '구글 검색광고' OR media = 'GOOGLE_SA')", (target_date,))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning(f"Error cleaning previous keywords for {target_date}: {e}")
         save_keyword_records(keyword_records)
 
     log_event(
