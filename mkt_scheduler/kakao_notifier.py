@@ -71,33 +71,16 @@ def refresh_kakao_access_token() -> str:
         logger.error(f"[Kakao Notifier] Exception refreshing token: {e}")
     return tokens.get("access_token", "")
 
-def send_kakao_memo(message_text: str) -> bool:
-    """
-    Sends a memo to myself via KakaoTalk Memo API.
-    """
-    access_token = refresh_kakao_access_token()
-    if not access_token:
-        logger.warning("[Kakao Notifier] Skipping message dispatch (No access token).")
-        log_event("KAKAO_SEND", "SKIPPED", "No access token")
-        return False
-
-    # KakaoTalk text template has a strict 1,000-character hard limit.
-    if len(message_text) > 980:
-        logger.warning(f"[Kakao Notifier] Message length ({len(message_text)}) exceeds 980 chars. Trimming gracefully.")
-        link_str = f"\n\n🔗 상세 대시보드: {DASHBOARD_URL}"
-        avail = 970 - len(link_str)
-        message_text = message_text[:avail].rstrip() + "..." + link_str
-
+def _send_single_memo(access_token: str, text: str) -> bool:
     template_object = {
         "object_type": "text",
-        "text": message_text,
+        "text": text,
         "link": {
             "web_url": DASHBOARD_URL,
             "mobile_web_url": DASHBOARD_URL
         },
         "button_title": "📊 대시보드 바로가기"
     }
-
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
@@ -105,21 +88,60 @@ def send_kakao_memo(message_text: str) -> bool:
     data = {
         "template_object": json.dumps(template_object, ensure_ascii=False)
     }
-
     try:
         res = requests.post(KAKAO_MEMO_SEND_URL, headers=headers, data=data, timeout=15)
         if res.status_code == 200:
-            logger.info("[Kakao Notifier] Message successfully sent to KakaoTalk Memo!")
-            log_event("KAKAO_SEND", "SUCCESS", "Memo message delivered")
             return True
-        else:
-            logger.error(f"[Kakao Notifier] Send failed ({res.status_code}): {res.text}")
-            log_event("KAKAO_SEND", "ERROR", f"Send failed: {res.text}")
-            return False
+        logger.error(f"[Kakao Notifier] Send failed ({res.status_code}): {res.text}")
+        return False
     except Exception as e:
         logger.error(f"[Kakao Notifier] Exception sending memo: {e}")
-        log_event("KAKAO_SEND", "ERROR", str(e))
         return False
+
+def send_kakao_memo(message_text: str) -> bool:
+    """
+    Sends a memo to myself via KakaoTalk Memo API.
+    If message exceeds 950 chars (due to heavy keyword/creative volume),
+    automatically splits and sends 2 consecutive messages so nothing is truncated.
+    """
+    access_token = refresh_kakao_access_token()
+    if not access_token:
+        logger.warning("[Kakao Notifier] Skipping message dispatch (No access token).")
+        log_event("KAKAO_SEND", "SKIPPED", "No access token")
+        return False
+
+    # Only when text exceeds 950 characters: split into 2 messages
+    if len(message_text) > 950:
+        logger.info(f"[Kakao Notifier] Message length ({len(message_text)}) exceeds 950 chars. Splitting into 2 messages.")
+        sep = "────────────────────\n■ 특이사항"
+        if sep in message_text:
+            p1, p2 = message_text.split(sep, 1)
+            p1_text = p1.strip() + "\n\n(👉 [2/2] 특이사항 및 링크로 계속)"
+            p2_text = "📢 [광고 성과 리포트 2/2 | 특이사항]\n────────────────────\n■ 특이사항" + p2
+            
+            ok1 = _send_single_memo(access_token, p1_text)
+            time.sleep(0.5)
+            ok2 = _send_single_memo(access_token, p2_text)
+            if ok1 and ok2:
+                log_event("KAKAO_SEND", "SUCCESS", "2-part memo delivered")
+                return True
+            return False
+        else:
+            lines = message_text.split("\n")
+            mid = len(lines) // 2
+            p1_text = "\n".join(lines[:mid]) + "\n\n(👉 2/2로 계속)"
+            p2_text = "(이어짐)\n" + "\n".join(lines[mid:])
+            ok1 = _send_single_memo(access_token, p1_text)
+            time.sleep(0.5)
+            ok2 = _send_single_memo(access_token, p2_text)
+            return ok1 and ok2
+
+    # Standard case: 1 single message
+    ok = _send_single_memo(access_token, message_text)
+    if ok:
+        logger.info("[Kakao Notifier] Message successfully sent to KakaoTalk Memo!")
+        log_event("KAKAO_SEND", "SUCCESS", "Memo message delivered")
+    return ok
 
 def _format_diff(curr_val: int, prev_val: int, unit: str = "원", is_cpc: bool = False) -> str:
     diff = curr_val - prev_val
