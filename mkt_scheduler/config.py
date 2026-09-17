@@ -49,3 +49,16 @@ KAKAO_CLIENT_SECRET = _kakao.get("client_secret", "")
 KAKAO_REDIRECT_URI = _kakao.get("redirect_uri", "http://localhost:5000/oauth")
 KAKAO_MEMO_SEND_URL = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
+
+# Naver Works Bot API Credentials
+_nw = _creds.get("naverworks", {})
+NAVERWORKS_DOMAIN_ID = _nw.get("domain_id", "")
+NAVERWORKS_CLIENT_ID = _nw.get("client_id", "")
+NAVERWORKS_CLIENT_SECRET = _nw.get("client_secret", "")
+NAVERWORKS_SERVICE_ACCOUNT = _nw.get("service_account", "")
+NAVERWORKS_PRIVATE_KEY_PATH = BASE_DIR / _nw.get("private_key_file", "naverworks_private.key")
+NAVERWORKS_BOT_ID = _nw.get("bot_id", "")
+NAVERWORKS_USER_ID = _nw.get("user_id", "")
+NAVERWORKS_CHANNEL_ID = _nw.get("channel_id", "")
+NAVERWORKS_TOKEN_URL = "https://auth.worksmobile.com/oauth2/v2.0/token"
+NAVERWORKS_API_BASE_URL = "https://www.worksapis.com/v1.0"

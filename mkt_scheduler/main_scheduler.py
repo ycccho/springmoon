@@ -25,11 +25,11 @@ from mkt_scheduler.gfa_collector import collect_gfa_stats
 from mkt_scheduler.google_collector import collect_google_stats
 from mkt_scheduler.cloud_syncer import sync_to_cloud
 from mkt_scheduler.kakao_notifier import (
-    send_kakao_memo,
     format_daily_report,
     format_weekly_report,
     format_monthly_report
 )
+from mkt_scheduler.naverworks_notifier import send_naverworks_message
 
 # Configure logging
 LOG_FILE = BASE_DIR / "scheduler.log"
@@ -97,8 +97,8 @@ def execute_daily_routine(target_date: str = None):
         logger.error(f"  Error in Cloud sync: {e}")
         log_event("DAILY_ROUTINE", "ERROR", f"Sync error: {e}")
 
-    # 4. KakaoTalk Notifications
-    logger.info("Step 4/4: Dispatching KakaoTalk Notifications...")
+    # 4. Notifications Dispatch (Naver Works 단체방)
+    logger.info("Step 4/4: Dispatching Naver Works Notifications (유료광고 데이터 기록방)...")
 
     # 4-1. Daily Report (Yesterday vs Day before yesterday)
     try:
@@ -106,13 +106,13 @@ def execute_daily_routine(target_date: str = None):
         prev_day = (datetime.strptime(target_date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
         prev_daily_stats = get_period_stats(prev_day, prev_day)
         daily_msg = format_daily_report(daily_stats, prev_daily_stats)
-        send_res = send_kakao_memo(daily_msg)
+        send_res = send_naverworks_message(daily_msg)
         if send_res:
-            logger.info("  ✅ Daily memo delivered to KakaoTalk.")
+            logger.info("  ✅ Daily report delivered to Naver Works (유료광고 데이터 기록방).")
         else:
-            logger.warning("  ⚠️ Daily memo could not be sent (Check token).")
+            logger.warning("  ⚠️ Daily report could not be sent to Naver Works.")
     except Exception as e:
-        logger.error(f"  Error sending daily memo: {e}")
+        logger.error(f"  Error sending daily report to Naver Works: {e}")
 
     # 4-2. Weekly Report (Every Monday 09:00: Last Mon ~ Sun vs 2-weeks ago Mon ~ Sun)
     if today.weekday() == 0 or "--weekly" in sys.argv:
@@ -129,10 +129,10 @@ def execute_daily_routine(target_date: str = None):
             logger.info(f"  Triggering Weekly Report for {s_str} ~ {e_str}...")
             weekly_stats = get_period_stats(s_str, e_str)
             weekly_msg = format_weekly_report(weekly_stats, prev_weekly_stats)
-            send_kakao_memo(weekly_msg)
-            logger.info("  ✅ Weekly memo delivered to KakaoTalk.")
+            send_naverworks_message(weekly_msg)
+            logger.info("  ✅ Weekly report delivered to Naver Works (유료광고 데이터 기록방).")
         except Exception as e:
-            logger.error(f"  Error sending weekly memo: {e}")
+            logger.error(f"  Error sending weekly report to Naver Works: {e}")
 
     # 4-3. Monthly Report (Every 1st 09:00: Last month vs 2-months ago)
     if today.day == 1 or "--monthly" in sys.argv:
@@ -152,10 +152,10 @@ def execute_daily_routine(target_date: str = None):
             logger.info(f"  Triggering Monthly Report for {ms_str} ~ {me_str}...")
             monthly_stats = get_period_stats(ms_str, me_str)
             monthly_msg = format_monthly_report(monthly_stats, prev_monthly_stats)
-            send_kakao_memo(monthly_msg)
-            logger.info("  ✅ Monthly memo delivered to KakaoTalk.")
+            send_naverworks_message(monthly_msg)
+            logger.info("  ✅ Monthly report delivered to Naver Works (유료광고 데이터 기록방).")
         except Exception as e:
-            logger.error(f"  Error sending monthly memo: {e}")
+            logger.error(f"  Error sending monthly report to Naver Works: {e}")
 
     log_event("DAILY_ROUTINE", "FINISHED", f"Completed routine for {target_date}")
     logger.info("🎉 Routine completed successfully.\n")

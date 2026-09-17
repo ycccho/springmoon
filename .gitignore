@@ -31,3 +31,5 @@ mkt_scheduler/credentials.json
 *.csv
 *.pdf
 소상공인 사업자정보/
+*.key
+mkt_scheduler/*.key
