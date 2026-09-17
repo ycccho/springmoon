@@ -62,3 +62,11 @@ NAVERWORKS_USER_ID = _nw.get("user_id", "")
 NAVERWORKS_CHANNEL_ID = _nw.get("channel_id", "")
 NAVERWORKS_TOKEN_URL = "https://auth.worksmobile.com/oauth2/v2.0/token"
 NAVERWORKS_API_BASE_URL = "https://www.worksapis.com/v1.0"
+
+# Meta Marketing API Credentials
+_meta = _creds.get("meta", {})
+META_APP_ID = _meta.get("app_id", "")
+META_APP_SECRET = _meta.get("app_secret", "")
+META_AD_ACCOUNT_ID = _meta.get("ad_account_id", "")
+META_ACCESS_TOKEN = _meta.get("access_token", "")
+META_API_VERSION = "v20.0"

@@ -23,6 +23,7 @@ from mkt_scheduler.db_manager import init_db, get_period_stats, log_event
 from mkt_scheduler.naver_collector import collect_naver_stats
 from mkt_scheduler.gfa_collector import collect_gfa_stats
 from mkt_scheduler.google_collector import collect_google_stats
+from mkt_scheduler.meta_collector import collect_meta_stats
 from mkt_scheduler.cloud_syncer import sync_to_cloud
 from mkt_scheduler.kakao_notifier import (
     format_daily_report,
@@ -80,7 +81,7 @@ def execute_daily_routine(target_date: str = None):
         log_event("DAILY_ROUTINE", "ERROR", f"GFA error: {e}")
 
     # 2. Collect Google Search Ads
-    logger.info("Step 3/4: Collecting Google Search Ads...")
+    logger.info("Step 3/6: Collecting Google Search Ads...")
     try:
         google_res = collect_google_stats(target_date)
         logger.info(f"  Google Collection: {google_res.get('success')}")
@@ -88,8 +89,17 @@ def execute_daily_routine(target_date: str = None):
         logger.error(f"  Error in Google collection: {e}")
         log_event("DAILY_ROUTINE", "ERROR", f"Google error: {e}")
 
-    # 3. Synchronize to Cloud & local file
-    logger.info("Step 3/4: Synchronizing to website and Cloudflare KV...")
+    # 3. Collect Meta Ads (Instagram / Facebook)
+    logger.info("Step 4/6: Collecting Meta Ads (Instagram & Facebook)...")
+    try:
+        meta_res = collect_meta_stats(target_date)
+        logger.info(f"  Meta Collection: {meta_res.get('success')}")
+    except Exception as e:
+        logger.error(f"  Error in Meta collection: {e}")
+        log_event("DAILY_ROUTINE", "ERROR", f"Meta error: {e}")
+
+    # 4. Synchronize to Cloud & local file
+    logger.info("Step 5/6: Synchronizing to website and Cloudflare KV...")
     try:
         sync_res = sync_to_cloud()
         logger.info(f"  Cloud Sync: {sync_res.get('success')}")
@@ -97,8 +107,8 @@ def execute_daily_routine(target_date: str = None):
         logger.error(f"  Error in Cloud sync: {e}")
         log_event("DAILY_ROUTINE", "ERROR", f"Sync error: {e}")
 
-    # 4. Notifications Dispatch (Naver Works 단체방)
-    logger.info("Step 4/4: Dispatching Naver Works Notifications (유료광고 데이터 기록방)...")
+    # 5. Notifications Dispatch (Naver Works 단체방)
+    logger.info("Step 6/6: Dispatching Naver Works Notifications (유료광고 데이터 기록방)...")
 
     # 4-1. Daily Report (Yesterday vs Day before yesterday)
     try:

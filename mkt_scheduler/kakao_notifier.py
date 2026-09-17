@@ -325,6 +325,7 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
     # 2. Budget spent with 0 clicks
     for m_label, ch in [("파워링크", bd.get("NAVER_POWERLINK", {})), 
                         ("구글 검색", bd.get("GOOGLE_SA", {})),
+                        ("인스타그램/페이스북", bd.get("META_ADS", {})),
                         ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {})), 
                         ("플레이스", bd.get("NAVER_PLACE", {})), 
                         ("GFA 배너", bd.get("NAVER_GFA", {}))]:
@@ -423,13 +424,21 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
         ("구글 검색광고", bd.get("GOOGLE_SA", {}))
     ]
 
+    meta_channels = [
+        ("인스타그램/페이스북", bd.get("META_ADS", {}))
+    ]
+
     naver_blocks = [_build_channel_block(label, ch) for label, ch in naver_channels]
     google_blocks = [_build_channel_block(label, ch) for label, ch in google_channels]
+    meta_blocks = [_build_channel_block(label, ch) for label, ch in meta_channels]
 
     lines.append("\n\n".join(naver_blocks))
     lines.append("")
     lines.append("□구글")
     lines.append("\n\n".join(google_blocks))
+    lines.append("")
+    lines.append("□메타")
+    lines.append("\n\n".join(meta_blocks))
 
     lines.append("")
     lines.append("────────────────────")
@@ -483,6 +492,7 @@ def format_weekly_report(stats: dict, prev_stats: dict = None) -> str:
 
     bd = stats.get("breakdown", {})
     channels = [
+        ("인스타그램/페이스북", bd.get("META_ADS", {})),
         ("GFA 배너", bd.get("NAVER_GFA", {})),
         ("플레이스", bd.get("NAVER_PLACE", {})),
         ("파워링크", bd.get("NAVER_POWERLINK", {})),

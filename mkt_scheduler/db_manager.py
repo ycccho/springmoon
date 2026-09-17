@@ -255,7 +255,8 @@ def build_export_json():
                     'gfa': {'spend': 0, 'clicks': 0, 'impressions': 0}
                 },
                 'gfa': {'spend': 0, 'clicks': 0, 'impressions': 0},
-                'google': {'spend': 0, 'impressions': 0, 'clicks': 0, 'cpc': 0}
+                'google': {'spend': 0, 'impressions': 0, 'clicks': 0, 'cpc': 0},
+                'meta': {'spend': 0, 'impressions': 0, 'clicks': 0, 'cpc': 0}
             }
 
         spend = int(r['spend'] or 0)
@@ -292,6 +293,11 @@ def build_export_json():
             daily_dict[d]['google']['impressions'] += impr
             daily_dict[d]['google']['clicks'] += clicks
             daily_dict[d]['google']['cpc'] = round(spend / clicks) if clicks > 0 else 0
+        elif m == 'META_ADS':
+            daily_dict[d]['meta']['spend'] += spend
+            daily_dict[d]['meta']['impressions'] += impr
+            daily_dict[d]['meta']['clicks'] += clicks
+            daily_dict[d]['meta']['cpc'] = round(spend / clicks) if clicks > 0 else 0
 
     # Recalculate daily totals and averages
     for d, item in daily_dict.items():
@@ -341,6 +347,7 @@ def build_export_json():
     total_clicks = sum(x['clicks'] for x in daily_dict.values())
     naver_spend = sum(x['naver']['spend'] for x in daily_dict.values())
     google_spend = sum(x['google']['spend'] for x in daily_dict.values())
+    meta_spend = sum(x.get('meta', {}).get('spend', 0) for x in daily_dict.values())
 
     payload = {
         'updated_at': datetime.now().isoformat(),
@@ -351,7 +358,8 @@ def build_export_json():
             'avg_cpc': round(total_spend / total_clicks) if total_clicks > 0 else 0,
             'avg_ctr': round((total_clicks / total_impr) * 100, 2) if total_impr > 0 else 0.0,
             'naver_spend': naver_spend,
-            'google_spend': google_spend
+            'google_spend': google_spend,
+            'meta_spend': meta_spend
         },
         'daily': daily_dict,
         'keywords': keywords_list
