@@ -144,7 +144,7 @@
         </div>
         <div class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white" id="kpiTotalSpend">₩0</div>
         <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400 font-mono">
-          네이버 검색·플레이스·GFA
+          네이버·구글·메타 통합
         </div>
       </div>
 
@@ -268,8 +268,8 @@
           </div>
         </div>
 
-        <!-- 4 Channel Breakdown Columns -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+        <!-- 6 Channel Breakdown Columns -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
           <!-- Naver PowerLink -->
           <div class="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1.5">
             <div class="flex items-center justify-between text-slate-300 font-medium">
@@ -323,6 +323,34 @@
               <span><b id="detailGfaClicks" class="text-slate-200">0</b>클릭</span>
               <span><b id="detailGfaImpr" class="text-slate-200">0</b>노출</span>
               <span id="detailGfaCpc" class="text-slate-200">₩0</span>
+            </div>
+          </div>
+
+          <!-- Google Ads -->
+          <div class="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-300 font-medium">
+              <span>구글 검색광고</span>
+              <span class="text-[10px] font-mono text-slate-400" id="detailGoogleWeight">-</span>
+            </div>
+            <div class="text-sm font-bold font-mono text-white" id="detailGoogleSpend">₩0</div>
+            <div class="text-[10px] text-slate-400 font-mono flex justify-between border-t border-slate-700/40 pt-1">
+              <span><b id="detailGoogleClicks" class="text-slate-200">0</b>클릭</span>
+              <span><b id="detailGoogleImpr" class="text-slate-200">0</b>노출</span>
+              <span id="detailGoogleCpc" class="text-slate-200">₩0</span>
+            </div>
+          </div>
+
+          <!-- Meta Ads -->
+          <div class="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1.5">
+            <div class="flex items-center justify-between text-slate-300 font-medium">
+              <span>메타 (인스타/FB)</span>
+              <span class="text-[10px] font-mono text-slate-400" id="detailMetaWeight">-</span>
+            </div>
+            <div class="text-sm font-bold font-mono text-white" id="detailMetaSpend">₩0</div>
+            <div class="text-[10px] text-slate-400 font-mono flex justify-between border-t border-slate-700/40 pt-1">
+              <span><b id="detailMetaClicks" class="text-slate-200">0</b>클릭</span>
+              <span><b id="detailMetaImpr" class="text-slate-200">0</b>노출</span>
+              <span id="detailMetaCpc" class="text-slate-200">₩0</span>
             </div>
           </div>
         </div>
@@ -487,47 +515,75 @@
           </div>
         </div>
 
-        <!-- [5] 구글 검색광고 (연동 준비 중 / 미집계) -->
-        <div class="bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs flex flex-col justify-between space-y-3 opacity-75">
+        <!-- [5] 구글 검색광고 -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col justify-between space-y-3">
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-slate-400"></span> 구글 검색광고 (Google)
+              <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#4285F4]"></span> 구글 검색광고 (Google)
               </span>
-              <span class="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">연동 대기</span>
+              <span class="text-[10px] font-bold text-[#4285F4] bg-[#4285F4]/10 px-2 py-0.5 rounded">집행 중</span>
             </div>
             <div class="flex justify-between items-baseline pt-1">
               <span class="text-xs text-slate-400">소진액</span>
-              <span class="text-lg font-bold font-mono text-slate-400">₩0</span>
+              <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardGoogleSpend">₩0</span>
             </div>
-            <div class="py-2.5 text-center text-[11px] text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-lg">
-              계정 인증 후 집계 예정 (미집계)
+            <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">클릭</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardGoogleClicks">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">노출</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardGoogleImpr">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">평균 CPC</span>
+                <span class="font-bold text-[#4285F4]" id="cardGoogleCpc">₩0</span>
+              </div>
             </div>
           </div>
-          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 font-mono">
-            계정 ID: 808-696-6013
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] flex items-center justify-between">
+            <span class="text-slate-400">캠페인</span>
+            <div class="flex gap-1 text-blue-600 dark:text-blue-400 font-mono text-[10px]">
+              <span class="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/60 rounded">Google Search Ads</span>
+            </div>
           </div>
         </div>
 
-        <!-- [6] 메타 광고 (Instagram / FB - 연동 준비 중 / 미집계) -->
-        <div class="bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs flex flex-col justify-between space-y-3 opacity-75">
+        <!-- [6] 메타 광고 (Instagram / FB) -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col justify-between space-y-3">
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-slate-400"></span> 메타 광고 (Instagram/FB)
+              <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#E1306C]"></span> 메타 광고 (인스타/FB)
               </span>
-              <span class="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">연동 대기</span>
+              <span class="text-[10px] font-bold text-[#E1306C] bg-[#E1306C]/10 px-2 py-0.5 rounded">집행 중</span>
             </div>
             <div class="flex justify-between items-baseline pt-1">
               <span class="text-xs text-slate-400">소진액</span>
-              <span class="text-lg font-bold font-mono text-slate-400">₩0</span>
+              <span class="text-xl font-bold font-mono text-slate-900 dark:text-white" id="cardMetaSpend">₩0</span>
             </div>
-            <div class="py-2.5 text-center text-[11px] text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-lg">
-              비즈니스 API 연동 후 집계 예정 (미집계)
+            <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-mono">
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">링크 클릭</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardMetaClicks">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">노출</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200" id="cardMetaImpr">0</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg">
+                <span class="text-[10px] text-slate-400 block">평균 CPC</span>
+                <span class="font-bold text-[#E1306C]" id="cardMetaCpc">₩0</span>
+              </div>
             </div>
           </div>
-          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 font-mono">
-            인스타그램/페이스북 피드 광고 예정
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] flex items-center justify-between">
+            <span class="text-slate-400">캠페인</span>
+            <div class="flex gap-1 text-pink-600 dark:text-pink-400 font-mono text-[10px]">
+              <span class="px-1.5 py-0.5 bg-pink-50 dark:bg-pink-950/60 rounded">슬라이드_최적이동</span>
+            </div>
           </div>
         </div>
 
@@ -594,6 +650,8 @@
             <option value="파워컨텐츠">네이버 파워컨텐츠</option>
             <option value="플레이스">네이버 플레이스</option>
             <option value="GFA">네이버 GFA</option>
+            <option value="GOOGLE">구글 검색광고</option>
+            <option value="META">메타 광고 (인스타/FB)</option>
           </select>
 
           <!-- Export Excel Button -->
@@ -1743,21 +1801,37 @@
       let startDate = keys[0];
       let endDate = keys[keys.length - 1];
 
-      const todayStr = '2026-09-13';
-      const yesterdayStr = '2026-09-12';
+      const todayStr = keys[keys.length - 1];
+      let yesterdayStr = todayStr;
+      if (keys.length > 1) {
+        yesterdayStr = keys[keys.length - 2];
+      }
 
       if (currentPeriod === 'yesterday') {
         startDate = yesterdayStr;
         endDate = yesterdayStr;
       } else if (currentPeriod === '7days') {
-        startDate = '2026-09-07';
+        const last7 = keys.slice(-7);
+        startDate = last7[0];
         endDate = todayStr;
       } else if (currentPeriod === 'thisMonth') {
-        startDate = '2026-09-01';
-        endDate = '2026-09-30';
+        const ym = todayStr.slice(0, 7);
+        const thisMonthKeys = keys.filter(k => k.startsWith(ym));
+        startDate = thisMonthKeys[0] || `${ym}-01`;
+        endDate = todayStr;
       } else if (currentPeriod === 'lastMonth') {
-        startDate = '2026-08-01';
-        endDate = '2026-08-31';
+        const [curY, curM] = todayStr.split('-').map(Number);
+        const prevM = curM === 1 ? 12 : curM - 1;
+        const prevY = curM === 1 ? curY - 1 : curY;
+        const prevYm = `${prevY}-${String(prevM).padStart(2, '0')}`;
+        const prevMonthKeys = keys.filter(k => k.startsWith(prevYm));
+        if (prevMonthKeys.length > 0) {
+          startDate = prevMonthKeys[0];
+          endDate = prevMonthKeys[prevMonthKeys.length - 1];
+        } else {
+          startDate = `${prevYm}-01`;
+          endDate = `${prevYm}-31`;
+        }
       } else if (currentPeriod === 'custom' && customStart && customEnd) {
         startDate = customStart;
         endDate = customEnd;
@@ -1786,7 +1860,7 @@
       filterKeywordsTable();
     }
 
-    // Render Top KPIs (Strictly Real Naver Data Only)
+    // Render Top KPIs (Naver + Google + Meta Integrated)
     function renderKPIs(dailyRecords) {
       let totalSpend = 0;
       let totalImpressions = 0;
@@ -1813,9 +1887,19 @@
         const gfaI = n.gfa?.impressions || 0;
         const dayNaverImpr = plI + pcI + placeI + gfaI;
 
-        totalSpend += dayNaverSpend;
-        totalClicks += dayNaverClicks;
-        totalImpressions += dayNaverImpr;
+        const g = item.google || {};
+        const dayGoogleSpend = g.spend || 0;
+        const dayGoogleClicks = g.clicks || 0;
+        const dayGoogleImpr = g.impressions || 0;
+
+        const m = item.meta || {};
+        const dayMetaSpend = m.spend || 0;
+        const dayMetaClicks = m.clicks || 0;
+        const dayMetaImpr = m.impressions || 0;
+
+        totalSpend += dayNaverSpend + dayGoogleSpend + dayMetaSpend;
+        totalClicks += dayNaverClicks + dayGoogleClicks + dayMetaClicks;
+        totalImpressions += dayNaverImpr + dayGoogleImpr + dayMetaImpr;
       }
 
       const avgCpc = totalClicks > 0 ? Math.round(totalSpend / totalClicks) : 0;
@@ -1845,9 +1929,24 @@
     }
 
     function goToCurrentMonth() {
-      calendarYear = 2026;
-      calendarMonth = 8;
+      if (marketingData && marketingData.daily) {
+        const dateKeys = Object.keys(marketingData.daily).sort();
+        if (dateKeys.length > 0) {
+          const latest = dateKeys[dateKeys.length - 1];
+          const [y, m, d] = latest.split('-').map(Number);
+          calendarYear = y;
+          calendarMonth = m - 1;
+          selectedCalendarDate = latest;
+          renderCalendar();
+          renderDayDetail();
+          return;
+        }
+      }
+      const now = new Date();
+      calendarYear = now.getFullYear();
+      calendarMonth = now.getMonth();
       renderCalendar();
+      renderDayDetail();
     }
 
     function renderCalendar() {
@@ -1867,6 +1966,8 @@
       }
 
       const dailyData = marketingData?.daily || {};
+      const dateKeys = Object.keys(dailyData).sort();
+      const latestDateKey = dateKeys.length > 0 ? dateKeys[dateKeys.length - 1] : new Date().toISOString().slice(0, 10);
 
       for (let d = 1; d <= lastDate; d++) {
         const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -1874,7 +1975,7 @@
 
         const cell = document.createElement('div');
         const isSelected = selectedCalendarDate === dateStr;
-        const isToday = dateStr === '2026-09-13';
+        const isToday = dateStr === latestDateKey;
 
         cell.className = `calendar-cell p-2.5 rounded-xl border flex flex-col justify-between cursor-pointer ${
           isSelected
@@ -1898,8 +1999,10 @@
         let contentHtml = '';
         if (dayRecord) {
           const n = dayRecord.naver || {};
-          const dispSpend = (n.powerlink?.spend || 0) + (n.powercontents?.spend || 0) + (n.place?.spend || 0) + (n.gfa?.spend || 0);
-          const dispClicks = (n.powerlink?.clicks || 0) + (n.powercontents?.clicks || 0) + (n.place?.clicks || 0) + (n.gfa?.clicks || 0);
+          const g = dayRecord.google || {};
+          const m = dayRecord.meta || {};
+          const dispSpend = (n.powerlink?.spend || 0) + (n.powercontents?.spend || 0) + (n.place?.spend || 0) + (n.gfa?.spend || 0) + (g.spend || 0) + (m.spend || 0);
+          const dispClicks = (n.powerlink?.clicks || 0) + (n.powercontents?.clicks || 0) + (n.place?.clicks || 0) + (n.gfa?.clicks || 0) + (g.clicks || 0) + (m.clicks || 0);
 
           contentHtml = `
             <div class="space-y-0.5 mt-1">
@@ -1935,6 +2038,16 @@
         document.getElementById('detailPcSpend').textContent = '₩0';
         document.getElementById('detailPlaceSpend').textContent = '₩0';
         document.getElementById('detailGfaSpend').textContent = '₩0';
+        if (document.getElementById('detailGoogleSpend')) document.getElementById('detailGoogleSpend').textContent = '₩0';
+        if (document.getElementById('detailGoogleClicks')) document.getElementById('detailGoogleClicks').textContent = '0';
+        if (document.getElementById('detailGoogleImpr')) document.getElementById('detailGoogleImpr').textContent = '0';
+        if (document.getElementById('detailGoogleCpc')) document.getElementById('detailGoogleCpc').textContent = '₩0';
+        if (document.getElementById('detailGoogleWeight')) document.getElementById('detailGoogleWeight').textContent = '-';
+        if (document.getElementById('detailMetaSpend')) document.getElementById('detailMetaSpend').textContent = '₩0';
+        if (document.getElementById('detailMetaClicks')) document.getElementById('detailMetaClicks').textContent = '0';
+        if (document.getElementById('detailMetaImpr')) document.getElementById('detailMetaImpr').textContent = '0';
+        if (document.getElementById('detailMetaCpc')) document.getElementById('detailMetaCpc').textContent = '₩0';
+        if (document.getElementById('detailMetaWeight')) document.getElementById('detailMetaWeight').textContent = '-';
         return;
       }
 
@@ -1948,14 +2061,18 @@
       const pc = n.powercontents || {};
       const place = n.place || {};
       const gfa = n.gfa || {};
+      const g = d.google || {};
+      const m = d.meta || {};
 
       const plSpend = pl.spend || 0;
       const pcSpend = pc.spend || 0;
       const placeSpend = place.spend || 0;
       const gfaSpend = gfa.spend || 0;
+      const googleSpend = g.spend || 0;
+      const metaSpend = m.spend || 0;
 
-      const dayTotalSpend = plSpend + pcSpend + placeSpend + gfaSpend;
-      const dayTotalClicks = (pl.clicks || 0) + (pc.clicks || 0) + (place.clicks || 0) + (gfa.clicks || 0);
+      const dayTotalSpend = plSpend + pcSpend + placeSpend + gfaSpend + googleSpend + metaSpend;
+      const dayTotalClicks = (pl.clicks || 0) + (pc.clicks || 0) + (place.clicks || 0) + (gfa.clicks || 0) + (g.clicks || 0) + (m.clicks || 0);
 
       document.getElementById('detailDateTitle').textContent = `${selectedCalendarDate} (${dow}) 광고 실적`;
       document.getElementById('detailTotalSpend').textContent = `₩${dayTotalSpend.toLocaleString()}`;
@@ -1990,6 +2107,24 @@
       document.getElementById('detailGfaImpr').textContent = `${(gfa.impressions || 0).toLocaleString()}`;
       document.getElementById('detailGfaCpc').textContent = gfa.clicks > 0 ? `₩${Math.round(gfaSpend / gfa.clicks).toLocaleString()}` : '₩0';
       document.getElementById('detailGfaWeight').textContent = `${Math.round((gfaSpend / denom) * 100)}% 비중`;
+
+      // Google Search Ads
+      if (document.getElementById('detailGoogleSpend')) {
+        document.getElementById('detailGoogleSpend').textContent = `₩${googleSpend.toLocaleString()}`;
+        document.getElementById('detailGoogleClicks').textContent = `${g.clicks || 0}`;
+        document.getElementById('detailGoogleImpr').textContent = `${(g.impressions || 0).toLocaleString()}`;
+        document.getElementById('detailGoogleCpc').textContent = g.clicks > 0 ? `₩${Math.round(googleSpend / g.clicks).toLocaleString()}` : '₩0';
+        document.getElementById('detailGoogleWeight').textContent = `${Math.round((googleSpend / denom) * 100)}% 비중`;
+      }
+
+      // Meta Ads
+      if (document.getElementById('detailMetaSpend')) {
+        document.getElementById('detailMetaSpend').textContent = `₩${metaSpend.toLocaleString()}`;
+        document.getElementById('detailMetaClicks').textContent = `${m.clicks || 0}`;
+        document.getElementById('detailMetaImpr').textContent = `${(m.impressions || 0).toLocaleString()}`;
+        document.getElementById('detailMetaCpc').textContent = m.clicks > 0 ? `₩${Math.round(metaSpend / m.clicks).toLocaleString()}` : '₩0';
+        document.getElementById('detailMetaWeight').textContent = `${Math.round((metaSpend / denom) * 100)}% 비중`;
+      }
     }
 
     // Render 6 Media Cards
@@ -1998,6 +2133,8 @@
       let pcS = 0, pcC = 0, pcI = 0;
       let placeS = 0, placeC = 0, placeI = 0;
       let gfaS = 0, gfaC = 0, gfaI = 0;
+      let googleS = 0, googleC = 0, googleI = 0;
+      let metaS = 0, metaC = 0, metaI = 0;
 
       for (const [date, item] of Object.entries(dailyRecords)) {
         const n = item.naver || {};
@@ -2012,6 +2149,12 @@
 
         const gfa = n.gfa || {};
         gfaS += gfa.spend || 0; gfaC += gfa.clicks || 0; gfaI += gfa.impressions || 0;
+
+        const g = item.google || {};
+        googleS += g.spend || 0; googleC += g.clicks || 0; googleI += g.impressions || 0;
+
+        const m = item.meta || {};
+        metaS += m.spend || 0; metaC += m.clicks || 0; metaI += m.impressions || 0;
       }
 
       // Update PowerLink Card
@@ -2037,6 +2180,22 @@
       document.getElementById('cardGfaClicks').textContent = gfaC.toLocaleString();
       document.getElementById('cardGfaImpr').textContent = gfaI.toLocaleString();
       document.getElementById('cardGfaCpc').textContent = gfaC > 0 ? `₩${Math.round(gfaS / gfaC).toLocaleString()}` : '₩0';
+
+      // Update Google Card
+      if (document.getElementById('cardGoogleSpend')) {
+        document.getElementById('cardGoogleSpend').textContent = `₩${googleS.toLocaleString()}`;
+        document.getElementById('cardGoogleClicks').textContent = googleC.toLocaleString();
+        document.getElementById('cardGoogleImpr').textContent = googleI.toLocaleString();
+        document.getElementById('cardGoogleCpc').textContent = googleC > 0 ? `₩${Math.round(googleS / googleC).toLocaleString()}` : '₩0';
+      }
+
+      // Update Meta Card
+      if (document.getElementById('cardMetaSpend')) {
+        document.getElementById('cardMetaSpend').textContent = `₩${metaS.toLocaleString()}`;
+        document.getElementById('cardMetaClicks').textContent = metaC.toLocaleString();
+        document.getElementById('cardMetaImpr').textContent = metaI.toLocaleString();
+        document.getElementById('cardMetaCpc').textContent = metaC > 0 ? `₩${Math.round(metaS / metaC).toLocaleString()}` : '₩0';
+      }
     }
 
     // Charts
@@ -2045,7 +2204,7 @@
       const spends = [];
       const clicks = [];
 
-      let plTotal = 0, pcTotal = 0, placeTotal = 0, gfaTotal = 0;
+      let plTotal = 0, pcTotal = 0, placeTotal = 0, gfaTotal = 0, googleTotal = 0, metaTotal = 0;
 
       for (const dt of dates) {
         const item = dailyRecords[dt];
@@ -2054,17 +2213,21 @@
         const pc = n.powercontents?.spend || 0;
         const place = n.place?.spend || 0;
         const gfa = n.gfa?.spend || 0;
+        const g = item.google || {};
+        const m = item.meta || {};
 
-        const dayNaverSpend = pl + pc + place + gfa;
-        const dayNaverClicks = (n.powerlink?.clicks || 0) + (n.powercontents?.clicks || 0) + (n.place?.clicks || 0) + (n.gfa?.clicks || 0);
+        const daySpend = pl + pc + place + gfa + (g.spend || 0) + (m.spend || 0);
+        const dayClicks = (n.powerlink?.clicks || 0) + (n.powercontents?.clicks || 0) + (n.place?.clicks || 0) + (n.gfa?.clicks || 0) + (g.clicks || 0) + (m.clicks || 0);
 
-        spends.push(dayNaverSpend);
-        clicks.push(dayNaverClicks);
+        spends.push(daySpend);
+        clicks.push(dayClicks);
 
         plTotal += pl;
         pcTotal += pc;
         placeTotal += place;
         gfaTotal += gfa;
+        googleTotal += (g.spend || 0);
+        metaTotal += (m.spend || 0);
       }
 
       const isDark = document.documentElement.classList.contains('dark');
@@ -2122,16 +2285,16 @@
       const ctxShare = document.getElementById('shareChart').getContext('2d');
       if (shareChartInstance) shareChartInstance.destroy();
 
-      const shareData = [plTotal, pcTotal, placeTotal, gfaTotal];
+      const shareData = [plTotal, pcTotal, placeTotal, gfaTotal, googleTotal, metaTotal];
       const hasShareData = shareData.some(v => v > 0);
 
       shareChartInstance = new Chart(ctxShare, {
         type: 'doughnut',
         data: {
-          labels: ['파워링크', '파워컨텐츠', '플레이스', 'GFA 디스플레이'],
+          labels: ['파워링크', '파워컨텐츠', '플레이스', 'GFA 디스플레이', '구글 검색광고', '메타 광고'],
           datasets: [{
-            data: hasShareData ? shareData : [1, 1, 1, 1],
-            backgroundColor: ['#03C75A', '#14b8a6', '#06b6d4', '#a855f7'],
+            data: hasShareData ? shareData : [1, 1, 1, 1, 1, 1],
+            backgroundColor: ['#03C75A', '#14b8a6', '#06b6d4', '#a855f7', '#4285F4', '#E1306C'],
             borderWidth: 2,
             borderColor: isDark ? '#0f172a' : '#ffffff'
           }]
@@ -2155,12 +2318,22 @@
       let items = marketingData?.keywords || [];
 
       filteredKeywords = items.filter(item => {
-        // Exclude google / meta keywords
-        if (item.media && (item.media.includes('구글') || item.media.includes('메타') || item.media.includes('GOOGLE') || item.media.includes('META'))) {
-          return false;
+        const matchesQuery = !q ||
+          (item.keyword || '').toLowerCase().includes(q) ||
+          (item.campaign || '').toLowerCase().includes(q) ||
+          (item.group || item.adgroup || '').toLowerCase().includes(q);
+
+        let matchesMedia = true;
+        if (mediaFilter !== 'ALL') {
+          const mUpper = (item.media || '').toUpperCase();
+          if (mediaFilter === 'GOOGLE') {
+            matchesMedia = mUpper.includes('구글') || mUpper.includes('GOOGLE');
+          } else if (mediaFilter === 'META') {
+            matchesMedia = mUpper.includes('메타') || mUpper.includes('META');
+          } else {
+            matchesMedia = (item.media || '').includes(mediaFilter);
+          }
         }
-        const matchesQuery = !q || (item.keyword || '').toLowerCase().includes(q) || (item.campaign || '').toLowerCase().includes(q);
-        const matchesMedia = mediaFilter === 'ALL' || (item.media || '').includes(mediaFilter);
         return matchesQuery && matchesMedia;
       });
 
@@ -2206,17 +2379,26 @@
 
       tbody.innerHTML = filteredKeywords.map((item, idx) => {
         let mediaBadge = '';
-        if (item.media?.includes('파워링크')) {
+        const m = item.media || '';
+        const mUpper = m.toUpperCase();
+
+        if (m.includes('파워링크')) {
           mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#03C75A]/10 text-[#03C75A]">파워링크</span>';
-        } else if (item.media?.includes('파워컨텐츠')) {
+        } else if (m.includes('파워컨텐츠')) {
           mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">파워컨텐츠</span>';
-        } else if (item.media?.includes('플레이스')) {
+        } else if (m.includes('플레이스')) {
           mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">플레이스</span>';
-        } else if (item.media?.includes('GFA')) {
+        } else if (m.includes('GFA')) {
           mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">GFA</span>';
+        } else if (mUpper.includes('구글') || mUpper.includes('GOOGLE')) {
+          mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">구글 검색광고</span>';
+        } else if (mUpper.includes('META') || mUpper.includes('메타')) {
+          mediaBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-pink-50 text-pink-700 dark:bg-pink-950/60 dark:text-pink-300">메타 광고</span>';
         } else {
-          mediaBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${item.media || '-'}</span>`;
+          mediaBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${m || '-'}</span>`;
         }
+
+        const adGroupName = item.adgroup || item.group || '-';
 
         return `
           <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
@@ -2225,8 +2407,8 @@
               ${item.keyword || '-'}
             </td>
             <td class="py-2.5 px-3 whitespace-nowrap">${mediaBadge}</td>
-            <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400 text-[11px] truncate max-w-[200px]" title="${item.campaign || '-'} / ${item.adgroup || '-'}">
-              ${item.campaign || '-'} <span class="text-slate-300 dark:text-slate-700">/</span> ${item.adgroup || '-'}
+            <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400 text-[11px] truncate max-w-[200px]" title="${item.campaign || '-'} / ${adGroupName}">
+              ${item.campaign || '-'} <span class="text-slate-300 dark:text-slate-700">/</span> ${adGroupName}
             </td>
             <td class="py-2.5 px-3 font-mono text-right text-slate-600 dark:text-slate-300">${(item.impressions || 0).toLocaleString()}</td>
             <td class="py-2.5 px-3 font-mono text-right font-bold text-slate-900 dark:text-white">${(item.clicks || 0).toLocaleString()}</td>
@@ -2249,7 +2431,7 @@
         "키워드/항목": k.keyword,
         "광고 매체": k.media,
         "캠페인명": k.campaign || '',
-        "광고그룹명": k.adgroup || '',
+        "광고그룹명": k.adgroup || k.group || '',
         "노출수": k.impressions || 0,
         "클릭수": k.clicks || 0,
         "클릭률(CTR %)": k.ctr || 0,
