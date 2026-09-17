@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-09-16T22:40:31.450106",
+  "updated_at": "2026-09-17T14:03:38.849950",
   "summary": {
-    "total_spend": 70768,
-    "total_impressions": 111919,
-    "total_clicks": 386,
-    "avg_cpc": 183,
+    "total_spend": 82262,
+    "total_impressions": 132342,
+    "total_clicks": 447,
+    "avg_cpc": 184,
     "avg_ctr": 0.34,
-    "naver_spend": 56311,
-    "google_spend": 14457
+    "naver_spend": 67696,
+    "google_spend": 14566
   },
   "daily": {
     "2026-09-01": {
@@ -671,46 +671,46 @@
       }
     },
     "2026-09-16": {
-      "spend": 220,
-      "impressions": 213,
-      "clicks": 2,
-      "cpc": 110,
-      "ctr": 0.94,
+      "spend": 11714,
+      "impressions": 20636,
+      "clicks": 63,
+      "cpc": 186,
+      "ctr": 0.31,
       "naver": {
-        "spend": 0,
-        "impressions": 0,
-        "clicks": 0,
-        "cpc": 0,
+        "spend": 11385,
+        "impressions": 20389,
+        "clicks": 60,
+        "cpc": 190,
         "powerlink": {
-          "spend": 0,
-          "clicks": 0,
-          "impressions": 0
+          "spend": 316,
+          "clicks": 3,
+          "impressions": 276
         },
         "powercontents": {
-          "spend": 0,
-          "clicks": 0,
-          "impressions": 0
+          "spend": 88,
+          "clicks": 1,
+          "impressions": 146
         },
         "place": {
-          "spend": 0,
-          "clicks": 0,
-          "impressions": 0
+          "spend": 721,
+          "clicks": 2,
+          "impressions": 119
         },
         "gfa": {
-          "spend": 0,
-          "clicks": 0,
-          "impressions": 0
+          "spend": 10260,
+          "clicks": 54,
+          "impressions": 19848
         }
       },
       "gfa": {
-        "spend": 0,
-        "clicks": 0,
-        "impressions": 0
+        "spend": 10260,
+        "clicks": 54,
+        "impressions": 19848
       },
       "google": {
-        "spend": 220,
-        "impressions": 213,
-        "clicks": 2,
+        "spend": 329,
+        "impressions": 247,
+        "clicks": 3,
         "cpc": 110
       }
     }
@@ -739,6 +739,28 @@
       "spend": 6625
     },
     {
+      "keyword": "[소재] (PC)사무실 342x288",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 11519,
+      "clicks": 33,
+      "ctr": 0.29,
+      "cpc": 152,
+      "spend": 5015
+    },
+    {
+      "keyword": "[소재] 네이티브 3_배너형(PC)",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 12244,
+      "clicks": 21,
+      "ctr": 0.17,
+      "cpc": 221,
+      "spend": 4637
+    },
+    {
       "keyword": "[소재] 네이티브 1_배너형(PC)",
       "media": "NAVER_GFA",
       "campaign": "네이티브",
@@ -755,10 +777,10 @@
       "campaign": "1. 파워링크",
       "group": "자사키워드 몇개",
       "impressions": 97,
-      "clicks": 36,
-      "ctr": 37.11,
-      "cpc": 75,
-      "spend": 2692
+      "clicks": 37,
+      "ctr": 38.14,
+      "cpc": 74,
+      "spend": 2755
     },
     {
       "keyword": "[소재] 네이티브 2_배너형(PC)",
@@ -772,15 +794,26 @@
       "spend": 2367
     },
     {
-      "keyword": "[소재] 네이티브 3_배너형(PC)",
+      "keyword": "[소재] 네이티브 1_배너형(모바일)",
       "media": "NAVER_GFA",
       "campaign": "네이티브",
       "group": "네이티브",
-      "impressions": 6590,
-      "clicks": 8,
-      "ctr": 0.12,
-      "cpc": 215,
-      "spend": 1720
+      "impressions": 524,
+      "clicks": 7,
+      "ctr": 1.34,
+      "cpc": 261,
+      "spend": 1827
+    },
+    {
+      "keyword": "[소재] 네이티브 2_배너형(모바일)",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 371,
+      "clicks": 5,
+      "ctr": 1.35,
+      "cpc": 298,
+      "spend": 1489
     },
     {
       "keyword": "[소재] 네이티브 8_피드형(2:3)",
@@ -794,26 +827,26 @@
       "spend": 783
     },
     {
-      "keyword": "[소재] 네이티브 2_배너형(모바일)",
+      "keyword": "[소재] 네이티브 7_스퀘어형",
       "media": "NAVER_GFA",
       "campaign": "네이티브",
       "group": "네이티브",
-      "impressions": 146,
-      "clicks": 3,
-      "ctr": 2.05,
-      "cpc": 257,
-      "spend": 770
+      "impressions": 404,
+      "clicks": 2,
+      "ctr": 0.5,
+      "cpc": 365,
+      "spend": 730
     },
     {
-      "keyword": "[소재] 네이티브 1_배너형(모바일)",
-      "media": "NAVER_GFA",
-      "campaign": "네이티브",
-      "group": "네이티브",
-      "impressions": 211,
+      "keyword": "인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 15,
       "clicks": 2,
-      "ctr": 0.95,
-      "cpc": 286,
-      "spend": 572
+      "ctr": 13.33,
+      "cpc": 275,
+      "spend": 550
     },
     {
       "keyword": "부산 인테리어 디자인",
@@ -838,17 +871,6 @@
       "spend": 420
     },
     {
-      "keyword": "[소재] 네이티브 7_스퀘어형",
-      "media": "NAVER_GFA",
-      "campaign": "네이티브",
-      "group": "네이티브",
-      "impressions": 173,
-      "clicks": 1,
-      "ctr": 0.58,
-      "cpc": 376,
-      "spend": 376
-    },
-    {
       "keyword": "북유럽 인테리어",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
@@ -858,6 +880,17 @@
       "ctr": 60.0,
       "cpc": 113,
       "spend": 340
+    },
+    {
+      "keyword": "자사키워드 몇개(확장소재)",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 450,
+      "clicks": 2,
+      "ctr": 0.44,
+      "cpc": 162,
+      "spend": 325
     },
     {
       "keyword": "아파트 인테리어",
@@ -891,6 +924,17 @@
       "ctr": 33.33,
       "cpc": 309,
       "spend": 309
+    },
+    {
+      "keyword": "부산매장인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 248,
+      "spend": 248
     },
     {
       "keyword": "인테리어 디자이너",
@@ -1003,15 +1047,15 @@
       "spend": 176
     },
     {
-      "keyword": "자사키워드 몇개(확장소재)",
+      "keyword": "사무실입구벽면시안인테리어",
       "media": "네이버 파워링크",
       "campaign": "1. 파워링크",
       "group": "자사키워드 몇개",
-      "impressions": 208,
+      "impressions": 1,
       "clicks": 1,
-      "ctr": 0.48,
-      "cpc": 160,
-      "spend": 160
+      "ctr": 100.0,
+      "cpc": 165,
+      "spend": 165
     },
     {
       "keyword": "부산인포데스크제작",
@@ -1278,6 +1322,17 @@
       "spend": 109
     },
     {
+      "keyword": "27 평 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
       "keyword": "비 확장 아파트 인테리어",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
@@ -1509,6 +1564,17 @@
       "spend": 88
     },
     {
+      "keyword": "인테리어디자인",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "4. 파워컨텐츠",
+      "group": "별하랑 준공사진 - 상가/학원",
+      "impressions": 10,
+      "clicks": 1,
+      "ctr": 10.0,
+      "cpc": 88,
+      "spend": 88
+    },
+    {
       "keyword": "인테리어 카페",
       "media": "구글 검색광고",
       "campaign": "검색광고_홈페이지",
@@ -1571,17 +1637,6 @@
       "impressions": 12,
       "clicks": 1,
       "ctr": 8.33,
-      "cpc": 77,
-      "spend": 77
-    },
-    {
-      "keyword": "인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 6,
-      "clicks": 1,
-      "ctr": 16.67,
       "cpc": 77,
       "spend": 77
     },

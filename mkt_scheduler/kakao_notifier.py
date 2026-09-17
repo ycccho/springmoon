@@ -2,7 +2,7 @@ import os
 import json
 import time
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 
 from .config import (
@@ -234,9 +234,7 @@ def _format_item_clicks(items: list, is_gfa: bool = False, max_display: int = 15
     etc_items = [x for x in clean_items if "기타" in x[0]]
     clean_items = named_items + etc_items
 
-    total_clicks = sum(cl for _, cl in clean_items)
-    label = "소재" if is_gfa else "검색어"
-    lines = [f"  └ {label}(총 {total_clicks}클릭):"]
+    lines = []
     if len(clean_items) <= max_display:
         for name, cl in clean_items:
             lines.append(f"{name}({cl})")
@@ -350,12 +348,18 @@ def generate_special_notes(stats: dict, prev_stats: dict = None) -> list:
 
 def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
     target_date = stats.get("start_date", "")
+    dow_map = ["월", "화", "수", "목", "금", "토", "일"]
     try:
         dt = datetime.strptime(target_date, "%Y-%m-%d")
-        dow = ["월", "화", "수", "목", "금", "토", "일"][dt.weekday()]
-        date_label = f"{target_date} ({dow})"
+        target_dow = dow_map[dt.weekday()]
+        target_label = f"{target_date} ({target_dow})"
+
+        send_dt = dt + timedelta(days=1)
+        send_dow = dow_map[send_dt.weekday()]
+        send_label = f"{send_dt.strftime('%Y-%m-%d')} ({send_dow})"
     except Exception:
-        date_label = target_date
+        send_label = target_date
+        target_label = target_date
 
     total_spend = stats.get("total_spend", 0)
     total_clicks = stats.get("total_clicks", 0)
@@ -373,29 +377,22 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
     cpc_diff_str = f" ({_format_diff(avg_cpc, p_cpc, '원', is_cpc=True)})" if has_prev else ""
 
     lines = [
-        f"📢 [일간 광고 성과 리포트 | {date_label}]",
+        f"📢 [일간 광고 성과 리포트 | {send_label}]",
         "────────────────────",
-        "■ 핵심 실적 (전일 대비)",
-        f"• 소진 광고비: ₩{total_spend:,}{spend_diff_str}",
-        f"• 유입 클릭수: {total_clicks:,}회{clicks_diff_str}",
+        f"■ {target_label} 합계 (전일 대비)",
+        f"• 총 광고비용: ₩{total_spend:,}{spend_diff_str}",
+        f"• 총 클릭수: {total_clicks:,}회{clicks_diff_str}",
         f"• 총 노출수: {total_impr:,}회",
         f"• 평균 클릭단가: ₩{avg_cpc:,}{cpc_diff_str}",
         f"• 클릭률(CTR): {avg_ctr}%",
         "────────────────────",
-        "■ 매체별 실적 & 유입 키워드"
+        "■ 매체별 실적 & 유입 키워드",
+        "□네이버"
     ]
 
     bd = stats.get("breakdown", {})
-    channels = [
-        ("GFA 배너", bd.get("NAVER_GFA", {})),
-        ("파워링크", bd.get("NAVER_POWERLINK", {})),
-        ("구글 검색", bd.get("GOOGLE_SA", {})),
-        ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {})),
-        ("플레이스", bd.get("NAVER_PLACE", {}))
-    ]
 
-    ch_blocks = []
-    for label, ch in channels:
+    def _build_channel_block(label: str, ch: dict) -> str:
         s = ch.get("spend", 0)
         c = ch.get("clicks", 0)
         i = ch.get("impressions", 0)
@@ -406,17 +403,35 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
         if c > 0:
             ch_lines.append(f"• {label}: ₩{s:,} ({c}클릭 / CPC ₩{cpc:,})")
             if kws:
-                items_str = _format_item_clicks(kws, is_gfa=(label == "GFA 배너"), max_display=15)
+                items_str = _format_item_clicks(kws, is_gfa=("GFA" in label), max_display=15)
                 if items_str:
                     ch_lines.append(items_str)
         elif s > 0 or i > 0:
             ch_lines.append(f"• {label}: ₩{s:,} (0클릭 / {i:,}노출)")
         else:
             ch_lines.append(f"• {label}: ₩0 (미집행)")
-        ch_blocks.append("\n".join(ch_lines))
+        return "\n".join(ch_lines)
 
-    lines.append("\n\n".join(ch_blocks))
+    naver_channels = [
+        ("GFA 배너", bd.get("NAVER_GFA", {})),
+        ("파워링크", bd.get("NAVER_POWERLINK", {})),
+        ("파워컨텐츠", bd.get("NAVER_POWERCONTENTS", {})),
+        ("플레이스", bd.get("NAVER_PLACE", {}))
+    ]
 
+    google_channels = [
+        ("구글 검색광고", bd.get("GOOGLE_SA", {}))
+    ]
+
+    naver_blocks = [_build_channel_block(label, ch) for label, ch in naver_channels]
+    google_blocks = [_build_channel_block(label, ch) for label, ch in google_channels]
+
+    lines.append("\n\n".join(naver_blocks))
+    lines.append("")
+    lines.append("□구글")
+    lines.append("\n\n".join(google_blocks))
+
+    lines.append("")
     lines.append("────────────────────")
     lines.append("■ 특이사항")
     notes = generate_special_notes(stats, prev_stats)
