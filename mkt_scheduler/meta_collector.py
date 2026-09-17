@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 def collect_meta_stats(target_date: str) -> dict:
     """
     Collects Meta Ads (Instagram / Facebook) performance for target_date.
+    Uses 'inline_link_clicks' (링크 클릭) as the standard click metric to match Meta Ads Manager.
+    Dynamically queries all active ads so any newly added or renamed ads are automatically tracked.
     Saves account-level summary to daily_media_summary and ad-level performance
     to keyword_performance under media='META_ADS'.
     """
@@ -28,17 +30,43 @@ def collect_meta_stats(target_date: str) -> dict:
         log_event("META_COLLECTOR", "ERROR", err_msg)
         return {"success": False, "error": err_msg}
 
-    base_url = f"https://graph.facebook.com/{META_API_VERSION}/{META_AD_ACCOUNT_ID}/insights"
     time_range_json = json.dumps({"since": target_date, "until": target_date})
 
-    # 1. Account-level summary insights
+    # 1. Fetch live active ads from the ad account (dynamic naming & newly created ads)
+    active_ads_map = {}
+    try:
+        ads_url = f"https://graph.facebook.com/{META_API_VERSION}/{META_AD_ACCOUNT_ID}/ads"
+        ads_params = {
+            "access_token": META_ACCESS_TOKEN,
+            "effective_status": '["ACTIVE"]',
+            "fields": "id,name,campaign_id,campaign{name},adset_id,adset{name},created_time",
+            "limit": 100
+        }
+        res_ads = requests.get(ads_url, params=ads_params, timeout=20)
+        if res_ads.status_code == 200:
+            for ad in res_ads.json().get("data", []):
+                active_ads_map[ad["id"]] = ad
+            logger.info(f"[Meta Collector] Discovered {len(active_ads_map)} live active ads from Meta.")
+        else:
+            logger.warning(f"[Meta Collector] Could not list active ads ({res_ads.status_code}): {res_ads.text}")
+    except Exception as e:
+        logger.warning(f"[Meta Collector] Exception querying active ads: {e}")
+
+    # 2. Account-level summary insights (using inline_link_clicks)
+    insights_base_url = f"https://graph.facebook.com/{META_API_VERSION}/{META_AD_ACCOUNT_ID}/insights"
+    spend = 0
+    impressions = 0
+    link_clicks = 0
+    cpc = 0.0
+    ctr = 0.0
+
     try:
         summary_params = {
             "access_token": META_ACCESS_TOKEN,
             "time_range": time_range_json,
-            "fields": "spend,impressions,clicks,cpc,ctr"
+            "fields": "spend,impressions,inline_link_clicks,cost_per_inline_link_click,ctr"
         }
-        res = requests.get(base_url, params=summary_params, timeout=15)
+        res = requests.get(insights_base_url, params=summary_params, timeout=15)
         if res.status_code != 200:
             err = f"Meta API summary query failed ({res.status_code}): {res.text}"
             logger.error(f"[Meta Collector] {err}")
@@ -46,39 +74,25 @@ def collect_meta_stats(target_date: str) -> dict:
             return {"success": False, "error": err}
 
         data = res.json().get("data", [])
-        if not data:
-            logger.info(f"[Meta Collector] No Meta Ads spend recorded on {target_date}.")
-            # Save 0 record so summary reflects no spend
-            rec = [{
-                "date": target_date,
-                "media": "META_ADS",
-                "spend": 0,
-                "impressions": 0,
-                "clicks": 0,
-                "cpc": 0.0,
-                "ctr": 0.0
-            }]
-            save_daily_media_records(rec)
-            return {"success": True, "spend": 0, "clicks": 0, "impressions": 0}
-
-        row = data[0]
-        spend = round(float(row.get("spend", 0)))
-        impressions = int(row.get("impressions", 0))
-        clicks = int(row.get("clicks", 0))
-        cpc = float(row.get("cpc", 0) or (round(spend / clicks, 1) if clicks > 0 else 0.0))
-        ctr = float(row.get("ctr", 0) or (round((clicks / impressions) * 100, 2) if impressions > 0 else 0.0))
+        if data:
+            row = data[0]
+            spend = round(float(row.get("spend", 0)))
+            impressions = int(row.get("impressions", 0))
+            link_clicks = int(row.get("inline_link_clicks", 0))
+            cpc = float(row.get("cost_per_inline_link_click", 0) or (round(spend / link_clicks, 1) if link_clicks > 0 else 0.0))
+            ctr = float(round((link_clicks / impressions) * 100, 2) if impressions > 0 else 0.0)
 
         rec = [{
             "date": target_date,
             "media": "META_ADS",
             "spend": spend,
             "impressions": impressions,
-            "clicks": clicks,
+            "clicks": link_clicks,
             "cpc": cpc,
             "ctr": ctr
         }]
         save_daily_media_records(rec)
-        logger.info(f"[Meta Collector] Saved META_ADS summary: ₩{spend:,} / {clicks} clicks / {impressions:,} impr / CPC ₩{round(cpc):,}")
+        logger.info(f"[Meta Collector] Saved META_ADS summary: ₩{spend:,} / {link_clicks} link clicks / {impressions:,} impr / CPC ₩{round(cpc):,}")
 
     except Exception as e:
         err = f"Exception fetching Meta summary: {e}"
@@ -86,53 +100,64 @@ def collect_meta_stats(target_date: str) -> dict:
         log_event("META_COLLECTOR", "ERROR", err)
         return {"success": False, "error": err}
 
-    # 2. Ad-level breakdown insights
+    # 3. Ad-level breakdown insights
     try:
         ad_params = {
             "access_token": META_ACCESS_TOKEN,
             "time_range": time_range_json,
             "level": "ad",
-            "fields": "ad_name,campaign_name,spend,impressions,clicks,cpc,ctr"
+            "fields": "ad_id,ad_name,campaign_name,adset_name,spend,impressions,inline_link_clicks,cost_per_inline_link_click"
         }
-        res_ad = requests.get(base_url, params=ad_params, timeout=20)
+        res_ad = requests.get(insights_base_url, params=ad_params, timeout=20)
+        ins_by_id = {}
         if res_ad.status_code == 200:
-            ad_data = res_ad.json().get("data", [])
-            ad_records = []
-            for ad in ad_data:
-                ad_name = ad.get("ad_name", "알 수 없는 소재")
-                camp_name = ad.get("campaign_name", "")
-                ad_spend = round(float(ad.get("spend", 0)))
-                ad_clicks = int(ad.get("clicks", 0))
-                ad_impr = int(ad.get("impressions", 0))
-                ad_cpc = float(ad.get("cpc", 0) or (round(ad_spend / ad_clicks, 1) if ad_clicks > 0 else 0.0))
-                ad_ctr = float(ad.get("ctr", 0) or (round((ad_clicks / ad_impr) * 100, 2) if ad_impr > 0 else 0.0))
-
-                ad_records.append({
-                    "date": target_date,
-                    "keyword": ad_name,
-                    "media": "META_ADS",
-                    "campaign": camp_name,
-                    "adgroup": "",
-                    "impressions": ad_impr,
-                    "clicks": ad_clicks,
-                    "spend": ad_spend,
-                    "cpc": ad_cpc,
-                    "ctr": ad_ctr
-                })
-
-            if ad_records:
-                save_keyword_records(ad_records)
-                logger.info(f"[Meta Collector] Successfully saved {len(ad_records)} ad-level records for {target_date}")
+            for ad_ins in res_ad.json().get("data", []):
+                ins_by_id[ad_ins["ad_id"]] = ad_ins
         else:
-            logger.warning(f"[Meta Collector] Failed to fetch ad-level breakdown: {res_ad.text}")
+            logger.warning(f"[Meta Collector] Failed to fetch ad-level insights: {res_ad.text}")
+
+        # Merge all active ads + any ad that had spend on target_date
+        all_tracked_ids = set(active_ads_map.keys()) | set(ins_by_id.keys())
+        ad_records = []
+
+        for aid in all_tracked_ids:
+            act_info = active_ads_map.get(aid, {})
+            ins_info = ins_by_id.get(aid, {})
+
+            ad_name = act_info.get("name") or ins_info.get("ad_name", "알 수 없는 광고")
+            camp_name = act_info.get("campaign", {}).get("name") or ins_info.get("campaign_name", "")
+            adset_name = act_info.get("adset", {}).get("name") or ins_info.get("adset_name", "")
+
+            ad_spend = round(float(ins_info.get("spend", 0)))
+            ad_clicks = int(ins_info.get("inline_link_clicks", 0))
+            ad_impr = int(ins_info.get("impressions", 0))
+            ad_cpc = float(ins_info.get("cost_per_inline_link_click", 0) or (round(ad_spend / ad_clicks, 1) if ad_clicks > 0 else 0.0))
+            ad_ctr = float(round((ad_clicks / ad_impr) * 100, 2) if ad_impr > 0 else 0.0)
+
+            ad_records.append({
+                "date": target_date,
+                "keyword": ad_name,
+                "media": "META_ADS",
+                "campaign": camp_name,
+                "adgroup": adset_name,
+                "impressions": ad_impr,
+                "clicks": ad_clicks,
+                "spend": ad_spend,
+                "cpc": ad_cpc,
+                "ctr": ad_ctr
+            })
+
+        if ad_records:
+            save_keyword_records(ad_records)
+            logger.info(f"[Meta Collector] Successfully saved {len(ad_records)} ads for {target_date} (Active & Insight merged)")
 
     except Exception as e:
-        logger.warning(f"[Meta Collector] Exception fetching ad breakdown: {e}")
+        logger.warning(f"[Meta Collector] Exception processing ad breakdown: {e}")
 
-    log_event("META_COLLECTOR", "SUCCESS", f"Collected ₩{spend:,} ({clicks} clicks)")
+    log_event("META_COLLECTOR", "SUCCESS", f"Collected ₩{spend:,} ({link_clicks} link clicks)")
     return {
         "success": True,
         "spend": spend,
-        "clicks": clicks,
+        "clicks": link_clicks,
         "impressions": impressions
     }

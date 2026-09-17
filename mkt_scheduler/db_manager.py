@@ -166,11 +166,15 @@ def get_period_stats(start_date, end_date):
         }
 
     cur.execute("""
-        SELECT media, keyword, SUM(clicks) as k_clicks, SUM(spend) as k_spend, SUM(impressions) as k_impr
+        SELECT media, campaign, adgroup, keyword,
+               SUM(clicks) as k_clicks,
+               SUM(spend) as k_spend,
+               SUM(impressions) as k_impr
         FROM keyword_performance
-        WHERE date >= ? AND date <= ? AND clicks > 0
+        WHERE date >= ? AND date <= ?
+          AND (clicks > 0 OR media = 'META_ADS')
           AND keyword NOT LIKE '플레이스 광고 (%'
-        GROUP BY media, keyword
+        GROUP BY media, campaign, adgroup, keyword
         ORDER BY k_clicks DESC, k_spend DESC
     """, (start_date, end_date))
     kw_rows = cur.fetchall()
@@ -202,6 +206,8 @@ def get_period_stats(start_date, end_date):
         s = int(kr['k_spend'] or 0)
         keywords_by_media[canon_m].append({
             'keyword': kr['keyword'],
+            'campaign': kr['campaign'],
+            'adgroup': kr['adgroup'],
             'clicks': c,
             'spend': s,
             'cpc': round(s / c) if c > 0 else 0

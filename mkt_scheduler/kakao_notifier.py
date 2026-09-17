@@ -424,13 +424,51 @@ def format_daily_report(stats: dict, prev_stats: dict = None) -> str:
         ("구글 검색광고", bd.get("GOOGLE_SA", {}))
     ]
 
-    meta_channels = [
-        ("인스타그램/페이스북", bd.get("META_ADS", {}))
-    ]
+    # Build Meta block dynamically grouped by campaign
+    meta_ch = bd.get("META_ADS", {})
+    meta_ads = meta_ch.get("top_keywords", [])
+    meta_blocks = []
+
+    if meta_ads or meta_ch.get("spend", 0) > 0:
+        # Group by campaign
+        campaigns = {}
+        for ad in meta_ads:
+            cname = ad.get("campaign") or "기본 캠페인"
+            if cname not in campaigns:
+                campaigns[cname] = []
+            campaigns[cname].append(ad)
+
+        for cname, c_ads in campaigns.items():
+            c_spend = sum(a.get("spend", 0) for a in c_ads)
+            c_clicks = sum(a.get("clicks", 0) for a in c_ads)
+            c_cpc = round(c_spend / c_clicks) if c_clicks > 0 else 0
+
+            c_lines = [f"• 캠페인 {cname}: ₩{c_spend:,} ({c_clicks}클릭 / CPC ₩{c_cpc:,})"]
+
+            # Sort order: '기타' adset first, then '학원', then custom/alphabetical
+            order_gita = {'사무실': 1, '사옥': 2, '프루아즈': 3, '병원': 4}
+            order_hakwon = {'251223 슬라이드 10장 추가': 1, '별하랑': 2, 'EM': 3, 'MBC로 변경 MODE수학': 4}
+
+            def ad_sort_key(x):
+                ag = x.get("adgroup", "")
+                aname = x.get("keyword", "")
+                ag_rank = 0 if ag == "기타" else (1 if ag == "학원" else 2)
+                sub_rank = order_gita.get(aname, 99) if ag == "기타" else order_hakwon.get(aname, 99)
+                return (ag_rank, sub_rank, aname)
+
+            sorted_c_ads = sorted(c_ads, key=ad_sort_key)
+            for a in sorted_c_ads:
+                aname = a.get("keyword", "")
+                acl = a.get("clicks", 0)
+                asp = a.get("spend", 0)
+                c_lines.append(f"{aname}({acl} / ₩{asp:,})")
+
+            meta_blocks.append("\n".join(c_lines))
+    else:
+        meta_blocks.append("• 인스타그램/페이스북: ₩0 (미집행)")
 
     naver_blocks = [_build_channel_block(label, ch) for label, ch in naver_channels]
     google_blocks = [_build_channel_block(label, ch) for label, ch in google_channels]
-    meta_blocks = [_build_channel_block(label, ch) for label, ch in meta_channels]
 
     lines.append("\n\n".join(naver_blocks))
     lines.append("")

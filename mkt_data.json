@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-09-17T14:50:41.170829",
+  "updated_at": "2026-09-17T15:10:10.504893",
   "summary": {
     "total_spend": 92103,
     "total_impressions": 134828,
-    "total_clicks": 498,
-    "avg_cpc": 185,
-    "avg_ctr": 0.37,
+    "total_clicks": 487,
+    "avg_cpc": 189,
+    "avg_ctr": 0.36,
     "naver_spend": 67696,
     "google_spend": 14566,
     "meta_spend": 9841
@@ -764,9 +764,9 @@
     "2026-09-16": {
       "spend": 21555,
       "impressions": 23122,
-      "clicks": 114,
-      "cpc": 189,
-      "ctr": 0.49,
+      "clicks": 103,
+      "cpc": 209,
+      "ctr": 0.45,
       "naver": {
         "spend": 11385,
         "impressions": 20389,
@@ -807,8 +807,8 @@
       "meta": {
         "spend": 9841,
         "impressions": 2486,
-        "clicks": 51,
-        "cpc": 193
+        "clicks": 40,
+        "cpc": 246
       }
     }
   },
@@ -861,22 +861,22 @@
       "keyword": "251223 슬라이드 10장 추가",
       "media": "META_ADS",
       "campaign": "2025-02-10_슬라이드_최적이동",
-      "group": "",
+      "group": "학원",
       "impressions": 1025,
-      "clicks": 23,
-      "ctr": 2.24,
-      "cpc": 177,
+      "clicks": 16,
+      "ctr": 1.56,
+      "cpc": 254,
       "spend": 4061
     },
     {
       "keyword": "사옥",
       "media": "META_ADS",
       "campaign": "2025-02-10_슬라이드_최적이동",
-      "group": "",
+      "group": "기타",
       "impressions": 937,
-      "clicks": 22,
-      "ctr": 2.35,
-      "cpc": 181,
+      "clicks": 20,
+      "ctr": 2.13,
+      "cpc": 199,
       "spend": 3988
     },
     {
@@ -938,11 +938,11 @@
       "keyword": "사무실",
       "media": "META_ADS",
       "campaign": "2025-02-10_슬라이드_최적이동",
-      "group": "",
+      "group": "기타",
       "impressions": 324,
-      "clicks": 5,
-      "ctr": 1.54,
-      "cpc": 229,
+      "clicks": 4,
+      "ctr": 1.23,
+      "cpc": 286,
       "spend": 1146
     },
     {
@@ -1004,7 +1004,7 @@
       "keyword": "EM",
       "media": "META_ADS",
       "campaign": "2025-02-10_슬라이드_최적이동",
-      "group": "",
+      "group": "학원",
       "impressions": 135,
       "clicks": 0,
       "ctr": 0.0,
@@ -1136,11 +1136,11 @@
       "keyword": "병원",
       "media": "META_ADS",
       "campaign": "2025-02-10_슬라이드_최적이동",
-      "group": "",
+      "group": "기타",
       "impressions": 49,
-      "clicks": 1,
-      "ctr": 2.04,
-      "cpc": 183,
+      "clicks": 0,
+      "ctr": 0.0,
+      "cpc": 0,
       "spend": 183
     },
     {
@@ -1818,7 +1818,7 @@
       "keyword": "별하랑",
       "media": "META_ADS",
       "campaign": "2025-02-10_슬라이드_최적이동",
-      "group": "",
+      "group": "학원",
       "impressions": 12,
       "clicks": 0,
       "ctr": 0.0,
@@ -1829,12 +1829,23 @@
       "keyword": "프루아즈",
       "media": "META_ADS",
       "campaign": "2025-02-10_슬라이드_최적이동",
-      "group": "",
+      "group": "기타",
       "impressions": 4,
       "clicks": 0,
       "ctr": 0.0,
       "cpc": 0,
       "spend": 9
+    },
+    {
+      "keyword": "MBC로 변경 MODE수학",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "학원",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0.0,
+      "cpc": 0,
+      "spend": 0
     }
   ]
 }
