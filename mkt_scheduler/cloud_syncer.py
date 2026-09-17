@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from datetime import datetime
 import requests
 
@@ -16,13 +17,29 @@ def sync_to_cloud() -> dict:
     logger.info("[Cloud Syncer] Compiling export payload from SQLite...")
     payload = build_export_json()
 
-    # 1. Update local static JSON file
+    # 1. Update local static JSON file & embedded snapshot in mkt.html
     try:
         with open(STATIC_JSON_PATH, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, ensure_ascii=False)
         logger.info(f"[Cloud Syncer] Updated local file: {STATIC_JSON_PATH}")
     except Exception as e:
         logger.error(f"[Cloud Syncer] Failed to write local JSON file: {e}")
+
+    try:
+        html_path = STATIC_JSON_PATH.parent / "mkt.html"
+        if html_path.exists():
+            with open(html_path, "r", encoding="utf-8") as f:
+                html_content = f.read()
+            json_str = json.dumps(payload, indent=2, ensure_ascii=False)
+            pattern = r'const EMBEDDED_MKT_DATA = \{[\s\S]*?\};\s*let marketingData = EMBEDDED_MKT_DATA;'
+            replacement = f'const EMBEDDED_MKT_DATA = {json_str};\n    let marketingData = EMBEDDED_MKT_DATA;'
+            new_html, count = re.subn(pattern, replacement, html_content)
+            if count == 1:
+                with open(html_path, "w", encoding="utf-8") as f:
+                    f.write(new_html)
+                logger.info(f"[Cloud Syncer] Updated embedded snapshot in {html_path}")
+    except Exception as e:
+        logger.warning(f"[Cloud Syncer] Could not update embedded snapshot in mkt.html: {e}")
 
     # 2. Push to Cloudflare Pages Functions KV API
     headers = {

@@ -63,41 +63,44 @@
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
 
   <!-- Top Navigation Bar -->
-  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors text-xs font-medium">
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-2 sm:gap-4">
+      <!-- Left: Brand / Home Link -->
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+        <a href="/" class="flex items-center gap-1 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors text-xs font-medium whitespace-nowrap shrink-0">
           <i class="ph ph-arrow-left text-sm"></i>
-          <span>메인 홈</span>
+          <span class="hidden sm:inline">메인 홈</span>
         </a>
-        <span class="text-slate-300 dark:text-slate-700">|</span>
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#dd5828] to-[#f97554] flex items-center justify-center text-white font-bold shadow-sm shadow-[#dd5828]/30">
+        <span class="text-slate-300 dark:text-slate-700 shrink-0">|</span>
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#dd5828] to-[#f97554] flex items-center justify-center text-white font-bold shadow-sm shadow-[#dd5828]/30 shrink-0">
             <i class="ph ph-chart-line-up text-base"></i>
           </div>
-          <h1 class="text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            마케팅 광고 성과 대시보드
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#dd5828]/10 text-[#dd5828] dark:bg-[#dd5828]/20 dark:text-[#f97554] font-semibold">/MKT</span>
+          <h1 class="text-xs sm:text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
+            <span class="hidden sm:inline">마케팅 광고 성과 대시보드</span>
+            <span class="sm:hidden">마케팅 대시보드</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#dd5828]/10 text-[#dd5828] dark:bg-[#dd5828]/20 dark:text-[#f97554] font-semibold shrink-0">/MKT</span>
           </h1>
         </div>
       </div>
 
-      <div class="flex items-center gap-2.5">
+      <!-- Right: Sync Status & Action Controls -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         <!-- Live Status Badge -->
-        <div id="syncStatusBadge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-mono">
-          <span class="w-2 h-2 rounded-full bg-[#dd5828] animate-pulse"></span>
-          <span id="syncStatusText">동기화 완료</span>
-          <span class="text-slate-400">·</span>
+        <div id="syncStatusBadge" class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] sm:text-xs font-mono whitespace-nowrap">
+          <span class="w-2 h-2 rounded-full bg-[#dd5828] animate-pulse shrink-0"></span>
+          <span id="syncStatusText" class="hidden sm:inline">동기화 완료</span>
+          <span class="hidden sm:inline text-slate-400">·</span>
           <span id="syncTimeText">-</span>
         </div>
 
         <!-- Refresh Button -->
-        <button id="refreshBtn" onclick="fetchMarketingData(true)" title="데이터 새로고침" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
+        <button id="refreshBtn" onclick="fetchMarketingData(true)" title="데이터 새로고침" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shrink-0">
           <i class="ph ph-arrows-clockwise text-base"></i>
         </button>
 
         <!-- Dark Mode Toggle -->
-        <button id="themeToggleBtn" onclick="toggleDarkMode()" title="테마 전환" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
+        <button id="themeToggleBtn" onclick="toggleDarkMode()" title="테마 전환" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shrink-0">
           <i class="ph ph-moon dark:hidden text-base"></i>
           <i class="ph ph-sun hidden dark:inline text-base"></i>
         </button>
@@ -106,13 +109,13 @@
   </header>
 
   <!-- Main Container -->
-  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5 flex-1">
+  <main class="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-4 sm:space-y-5 flex-1">
 
     <!-- Controls & Period Filter Toolbar -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-sm space-y-2.5 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-3">
       <!-- Period Preset Pills -->
-      <div class="flex flex-wrap items-center gap-1.5">
-        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1">
+      <div class="flex flex-wrap items-center gap-1 sm:gap-1.5">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1 shrink-0">
           <i class="ph ph-calendar-blank text-[#dd5828]"></i> 기간:
         </span>
         <button onclick="setPeriod('yesterday')" id="btn-period-yesterday" class="period-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">어제</button>
@@ -122,13 +125,15 @@
         <button onclick="setPeriod('all')" id="btn-period-all" class="period-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">전체 기간</button>
       </div>
 
-      <!-- Custom Date Range -->
-      <div class="flex items-center gap-2 text-xs">
-        <input type="date" id="customStartDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#dd5828]" />
-        <span class="text-slate-400">~</span>
-        <input type="date" id="customEndDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#dd5828]" />
-        <button onclick="applyCustomDateRange()" class="px-2.5 py-1 bg-[#dd5828] hover:bg-[#c44519] text-white rounded-lg font-medium transition-colors cursor-pointer">조회</button>
-        <span id="activePeriodLabel" class="hidden sm:inline font-mono text-[11px] text-slate-500 dark:text-slate-400 ml-1">2026-09-01 ~ 2026-09-30</span>
+      <!-- Custom Date Range & Active Range Display -->
+      <div class="flex items-center gap-1.5 sm:gap-2 text-xs flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800 justify-between sm:justify-end">
+        <div class="flex items-center gap-1">
+          <input type="date" id="customStartDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#dd5828] w-[118px] sm:w-[130px]" />
+          <span class="text-slate-400">~</span>
+          <input type="date" id="customEndDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#dd5828] w-[118px] sm:w-[130px]" />
+          <button onclick="applyCustomDateRange()" class="px-2.5 py-1 bg-[#dd5828] hover:bg-[#c44519] text-white rounded-lg font-medium transition-colors cursor-pointer shrink-0">조회</button>
+        </div>
+        <span id="activePeriodLabel" class="font-mono text-[11px] text-[#dd5828] dark:text-[#f97554] font-semibold whitespace-nowrap">2026-09-01 ~ 2026-09-30</span>
       </div>
     </div>
 
@@ -707,7 +712,7 @@
           총 <span id="tableFilteredCount" class="font-bold text-slate-800 dark:text-slate-200">0</span>개 키워드
         </div>
         <div class="text-[11px] text-slate-400">
-          * 네이버 검색광고 공식 데이터
+          * 네이버 · 구글 · 메타 공식 광고 데이터
         </div>
       </div>
     </div>
@@ -723,23 +728,24 @@
   <script>
     // State Store
     const EMBEDDED_MKT_DATA = {
-  "updated_at": "2026-09-14T01:23:18.953268",
+  "updated_at": "2026-09-17T15:26:57.534074",
   "summary": {
-    "total_spend": 34933,
-    "total_impressions": 58946,
-    "total_clicks": 164,
-    "avg_cpc": 213,
-    "avg_ctr": 0.28,
-    "naver_spend": 34933,
-    "google_spend": 0
+    "total_spend": 92103,
+    "total_impressions": 134828,
+    "total_clicks": 487,
+    "avg_cpc": 189,
+    "avg_ctr": 0.36,
+    "naver_spend": 67696,
+    "google_spend": 14566,
+    "meta_spend": 9841
   },
   "daily": {
     "2026-09-01": {
-      "spend": 2662,
-      "impressions": 863,
-      "clicks": 7,
-      "cpc": 380,
-      "ctr": 0.81,
+      "spend": 3564,
+      "impressions": 1170,
+      "clicks": 15,
+      "cpc": 238,
+      "ctr": 1.28,
       "naver": {
         "spend": 2662,
         "impressions": 863,
@@ -772,6 +778,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 902,
+        "impressions": 307,
+        "clicks": 8,
+        "cpc": 113
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -779,11 +791,11 @@
       }
     },
     "2026-09-02": {
-      "spend": 1779,
-      "impressions": 780,
-      "clicks": 9,
-      "cpc": 198,
-      "ctr": 1.15,
+      "spend": 2732,
+      "impressions": 1107,
+      "clicks": 17,
+      "cpc": 161,
+      "ctr": 1.54,
       "naver": {
         "spend": 1779,
         "impressions": 780,
@@ -816,6 +828,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 953,
+        "impressions": 327,
+        "clicks": 8,
+        "cpc": 119
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -823,11 +841,11 @@
       }
     },
     "2026-09-03": {
-      "spend": 535,
-      "impressions": 640,
-      "clicks": 7,
-      "cpc": 76,
-      "ctr": 1.09,
+      "spend": 1436,
+      "impressions": 971,
+      "clicks": 16,
+      "cpc": 90,
+      "ctr": 1.65,
       "naver": {
         "spend": 535,
         "impressions": 640,
@@ -860,6 +878,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 901,
+        "impressions": 331,
+        "clicks": 9,
+        "cpc": 100
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -867,11 +891,11 @@
       }
     },
     "2026-09-04": {
-      "spend": 409,
-      "impressions": 638,
-      "clicks": 3,
-      "cpc": 136,
-      "ctr": 0.47,
+      "spend": 1016,
+      "impressions": 967,
+      "clicks": 7,
+      "cpc": 145,
+      "ctr": 0.72,
       "naver": {
         "spend": 409,
         "impressions": 638,
@@ -904,6 +928,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 607,
+        "impressions": 329,
+        "clicks": 4,
+        "cpc": 152
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -911,11 +941,11 @@
       }
     },
     "2026-09-05": {
-      "spend": 339,
-      "impressions": 618,
-      "clicks": 2,
-      "cpc": 170,
-      "ctr": 0.32,
+      "spend": 1402,
+      "impressions": 1005,
+      "clicks": 12,
+      "cpc": 117,
+      "ctr": 1.19,
       "naver": {
         "spend": 339,
         "impressions": 618,
@@ -948,6 +978,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 1063,
+        "impressions": 387,
+        "clicks": 10,
+        "cpc": 106
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -955,11 +991,11 @@
       }
     },
     "2026-09-06": {
-      "spend": 88,
-      "impressions": 475,
-      "clicks": 1,
-      "cpc": 88,
-      "ctr": 0.21,
+      "spend": 2159,
+      "impressions": 884,
+      "clicks": 13,
+      "cpc": 166,
+      "ctr": 1.47,
       "naver": {
         "spend": 88,
         "impressions": 475,
@@ -992,6 +1028,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 2071,
+        "impressions": 409,
+        "clicks": 12,
+        "cpc": 173
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -999,11 +1041,11 @@
       }
     },
     "2026-09-07": {
-      "spend": 1039,
-      "impressions": 576,
-      "clicks": 10,
-      "cpc": 104,
-      "ctr": 1.74,
+      "spend": 1581,
+      "impressions": 911,
+      "clicks": 15,
+      "cpc": 105,
+      "ctr": 1.65,
       "naver": {
         "spend": 1039,
         "impressions": 576,
@@ -1036,6 +1078,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 542,
+        "impressions": 335,
+        "clicks": 5,
+        "cpc": 108
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -1043,11 +1091,11 @@
       }
     },
     "2026-09-08": {
-      "spend": 1121,
-      "impressions": 663,
-      "clicks": 14,
-      "cpc": 80,
-      "ctr": 2.11,
+      "spend": 1533,
+      "impressions": 975,
+      "clicks": 16,
+      "cpc": 96,
+      "ctr": 1.64,
       "naver": {
         "spend": 1121,
         "impressions": 663,
@@ -1080,6 +1128,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 412,
+        "impressions": 312,
+        "clicks": 2,
+        "cpc": 206
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -1087,11 +1141,11 @@
       }
     },
     "2026-09-09": {
-      "spend": 2502,
-      "impressions": 554,
-      "clicks": 5,
-      "cpc": 500,
-      "ctr": 0.9,
+      "spend": 3030,
+      "impressions": 872,
+      "clicks": 8,
+      "cpc": 379,
+      "ctr": 0.92,
       "naver": {
         "spend": 2502,
         "impressions": 554,
@@ -1124,6 +1178,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 528,
+        "impressions": 318,
+        "clicks": 3,
+        "cpc": 176
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -1131,11 +1191,11 @@
       }
     },
     "2026-09-10": {
-      "spend": 2539,
-      "impressions": 655,
-      "clicks": 6,
-      "cpc": 423,
-      "ctr": 0.92,
+      "spend": 3060,
+      "impressions": 948,
+      "clicks": 11,
+      "cpc": 278,
+      "ctr": 1.16,
       "naver": {
         "spend": 2539,
         "impressions": 655,
@@ -1168,6 +1228,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 521,
+        "impressions": 293,
+        "clicks": 5,
+        "cpc": 104
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -1175,11 +1241,11 @@
       }
     },
     "2026-09-11": {
-      "spend": 12300,
-      "impressions": 21820,
-      "clicks": 58,
-      "cpc": 212,
-      "ctr": 0.27,
+      "spend": 13314,
+      "impressions": 22160,
+      "clicks": 65,
+      "cpc": 205,
+      "ctr": 0.29,
       "naver": {
         "spend": 12300,
         "impressions": 21820,
@@ -1212,6 +1278,12 @@
         "impressions": 21310
       },
       "google": {
+        "spend": 1014,
+        "impressions": 340,
+        "clicks": 7,
+        "cpc": 145
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -1219,11 +1291,11 @@
       }
     },
     "2026-09-12": {
-      "spend": 160,
-      "impressions": 463,
-      "clicks": 1,
-      "cpc": 160,
-      "ctr": 0.22,
+      "spend": 1258,
+      "impressions": 831,
+      "clicks": 9,
+      "cpc": 140,
+      "ctr": 1.08,
       "naver": {
         "spend": 160,
         "impressions": 463,
@@ -1256,6 +1328,12 @@
         "impressions": 0
       },
       "google": {
+        "spend": 1098,
+        "impressions": 368,
+        "clicks": 8,
+        "cpc": 137
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
@@ -1263,11 +1341,11 @@
       }
     },
     "2026-09-13": {
-      "spend": 9460,
-      "impressions": 30201,
-      "clicks": 41,
-      "cpc": 231,
-      "ctr": 0.14,
+      "spend": 12112,
+      "impressions": 30586,
+      "clicks": 60,
+      "cpc": 202,
+      "ctr": 0.2,
       "naver": {
         "spend": 9460,
         "impressions": 30201,
@@ -1300,90 +1378,246 @@
         "impressions": 29807
       },
       "google": {
+        "spend": 2652,
+        "impressions": 385,
+        "clicks": 19,
+        "cpc": 140
+      },
+      "meta": {
         "spend": 0,
         "impressions": 0,
         "clicks": 0,
         "cpc": 0
       }
+    },
+    "2026-09-14": {
+      "spend": 11098,
+      "impressions": 24745,
+      "clicks": 69,
+      "cpc": 161,
+      "ctr": 0.28,
+      "naver": {
+        "spend": 10456,
+        "impressions": 24477,
+        "clicks": 65,
+        "cpc": 161,
+        "powerlink": {
+          "spend": 77,
+          "clicks": 1,
+          "impressions": 327
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 118
+        },
+        "place": {
+          "spend": 200,
+          "clicks": 2,
+          "impressions": 94
+        },
+        "gfa": {
+          "spend": 10179,
+          "clicks": 62,
+          "impressions": 23938
+        }
+      },
+      "gfa": {
+        "spend": 10179,
+        "clicks": 62,
+        "impressions": 23938
+      },
+      "google": {
+        "spend": 642,
+        "impressions": 268,
+        "clicks": 4,
+        "cpc": 160
+      },
+      "meta": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-15": {
+      "spend": 11253,
+      "impressions": 23574,
+      "clicks": 51,
+      "cpc": 221,
+      "ctr": 0.22,
+      "naver": {
+        "spend": 10922,
+        "impressions": 23255,
+        "clicks": 48,
+        "cpc": 228,
+        "powerlink": {
+          "spend": 1102,
+          "clicks": 7,
+          "impressions": 377
+        },
+        "powercontents": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 86
+        },
+        "place": {
+          "spend": 0,
+          "clicks": 0,
+          "impressions": 88
+        },
+        "gfa": {
+          "spend": 9820,
+          "clicks": 41,
+          "impressions": 22704
+        }
+      },
+      "gfa": {
+        "spend": 9820,
+        "clicks": 41,
+        "impressions": 22704
+      },
+      "google": {
+        "spend": 331,
+        "impressions": 319,
+        "clicks": 3,
+        "cpc": 110
+      },
+      "meta": {
+        "spend": 0,
+        "impressions": 0,
+        "clicks": 0,
+        "cpc": 0
+      }
+    },
+    "2026-09-16": {
+      "spend": 21555,
+      "impressions": 23122,
+      "clicks": 103,
+      "cpc": 209,
+      "ctr": 0.45,
+      "naver": {
+        "spend": 11385,
+        "impressions": 20389,
+        "clicks": 60,
+        "cpc": 190,
+        "powerlink": {
+          "spend": 316,
+          "clicks": 3,
+          "impressions": 276
+        },
+        "powercontents": {
+          "spend": 88,
+          "clicks": 1,
+          "impressions": 146
+        },
+        "place": {
+          "spend": 721,
+          "clicks": 2,
+          "impressions": 119
+        },
+        "gfa": {
+          "spend": 10260,
+          "clicks": 54,
+          "impressions": 19848
+        }
+      },
+      "gfa": {
+        "spend": 10260,
+        "clicks": 54,
+        "impressions": 19848
+      },
+      "google": {
+        "spend": 329,
+        "impressions": 247,
+        "clicks": 3,
+        "cpc": 110
+      },
+      "meta": {
+        "spend": 9841,
+        "impressions": 2486,
+        "clicks": 40,
+        "cpc": 246
+      }
     }
   },
   "keywords": [
     {
-      "keyword": "부산병원인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "부산피부과인테리어",
-      "impressions": 4120,
-      "clicks": 165,
-      "ctr": 4.0,
-      "cpc": 1280,
-      "spend": 211200
+      "keyword": "네이티브",
+      "media": "네이버 GFA",
+      "campaign": "네이티브",
+      "group": "인지도/트래픽",
+      "impressions": 51117,
+      "clicks": 90,
+      "ctr": 0.18,
+      "cpc": 206,
+      "spend": 18555
     },
     {
-      "keyword": "부산피부과인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "부산피부과인테리어",
-      "impressions": 3200,
-      "clicks": 134,
-      "ctr": 4.19,
-      "cpc": 1420,
-      "spend": 190280
-    },
-    {
-      "keyword": "부산성형외과인테리어",
-      "media": "네이버 파워컨텐츠",
-      "campaign": "부산_컨텐츠광고",
-      "group": "성형외과컨텐츠",
-      "impressions": 2840,
-      "clicks": 98,
-      "ctr": 3.45,
-      "cpc": 1050,
-      "spend": 102900
-    },
-    {
-      "keyword": "부산치과인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "치과인테리어",
-      "impressions": 2650,
-      "clicks": 92,
-      "ctr": 3.47,
-      "cpc": 1100,
-      "spend": 101200
-    },
-    {
-      "keyword": "부산의원인테리어",
-      "media": "네이버 파워컨텐츠",
-      "campaign": "부산_컨텐츠광고",
-      "group": "의원컨텐츠",
-      "impressions": 2140,
-      "clicks": 74,
-      "ctr": 3.46,
-      "cpc": 980,
-      "spend": 72520
-    },
-    {
-      "keyword": "부산 한의원 인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "한의원인테리어",
-      "impressions": 1820,
-      "clicks": 58,
-      "ctr": 3.19,
-      "cpc": 920,
-      "spend": 53360
-    },
-    {
-      "keyword": "부산 상가 인테리어",
-      "media": "네이버 파워링크",
-      "campaign": "부산_병원인테리어_파워링크",
-      "group": "상가일반",
-      "impressions": 1450,
+      "keyword": "기타 검색어",
+      "media": "구글 검색광고",
+      "campaign": "Google Ads",
+      "group": "Privacy Masked",
+      "impressions": 0,
       "clicks": 42,
-      "ctr": 2.9,
-      "cpc": 580,
-      "spend": 24360
+      "ctr": 0.0,
+      "cpc": 158,
+      "spend": 6625
+    },
+    {
+      "keyword": "[소재] (PC)사무실 342x288",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 11519,
+      "clicks": 33,
+      "ctr": 0.29,
+      "cpc": 152,
+      "spend": 5015
+    },
+    {
+      "keyword": "[소재] 네이티브 3_배너형(PC)",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 12244,
+      "clicks": 21,
+      "ctr": 0.17,
+      "cpc": 221,
+      "spend": 4637
+    },
+    {
+      "keyword": "251223 슬라이드 10장 추가",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "학원",
+      "impressions": 1025,
+      "clicks": 16,
+      "ctr": 1.56,
+      "cpc": 254,
+      "spend": 4061
+    },
+    {
+      "keyword": "사옥",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "기타",
+      "impressions": 937,
+      "clicks": 20,
+      "ctr": 2.13,
+      "cpc": 199,
+      "spend": 3988
+    },
+    {
+      "keyword": "[소재] 네이티브 1_배너형(PC)",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 12938,
+      "clicks": 21,
+      "ctr": 0.16,
+      "cpc": 154,
+      "spend": 3232
     },
     {
       "keyword": "인디컴퍼니",
@@ -1391,120 +1625,296 @@
       "campaign": "1. 파워링크",
       "group": "자사키워드 몇개",
       "impressions": 97,
-      "clicks": 35,
-      "ctr": 36.08,
+      "clicks": 37,
+      "ctr": 38.14,
       "cpc": 74,
-      "spend": 2604
+      "spend": 2755
     },
     {
-      "keyword": "부산해운대구인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 4,
+      "keyword": "[소재] 네이티브 2_배너형(PC)",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 2278,
+      "clicks": 4,
+      "ctr": 0.18,
+      "cpc": 592,
+      "spend": 2367
+    },
+    {
+      "keyword": "[소재] 네이티브 1_배너형(모바일)",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 524,
+      "clicks": 7,
+      "ctr": 1.34,
+      "cpc": 261,
+      "spend": 1827
+    },
+    {
+      "keyword": "[소재] 네이티브 2_배너형(모바일)",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 371,
+      "clicks": 5,
+      "ctr": 1.35,
+      "cpc": 298,
+      "spend": 1489
+    },
+    {
+      "keyword": "사무실",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "기타",
+      "impressions": 324,
+      "clicks": 4,
+      "ctr": 1.23,
+      "cpc": 286,
+      "spend": 1146
+    },
+    {
+      "keyword": "[소재] 네이티브 8_피드형(2:3)",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 98,
       "clicks": 2,
-      "ctr": 50.0,
-      "cpc": 1132,
-      "spend": 2263
+      "ctr": 2.04,
+      "cpc": 392,
+      "spend": 783
     },
     {
-      "keyword": "부산상가인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 1,
-      "clicks": 1,
-      "ctr": 100.0,
-      "cpc": 1145,
-      "spend": 1145
+      "keyword": "[소재] 네이티브 7_스퀘어형",
+      "media": "NAVER_GFA",
+      "campaign": "네이티브",
+      "group": "네이티브",
+      "impressions": 404,
+      "clicks": 2,
+      "ctr": 0.5,
+      "cpc": 365,
+      "spend": 730
     },
     {
       "keyword": "인테리어",
       "media": "NAVER_PLACE",
       "campaign": "2. 플레이스(법인)",
       "group": "인디 스마트플레이스",
-      "impressions": 33,
+      "impressions": 15,
       "clicks": 2,
-      "ctr": 6.06,
-      "cpc": 552,
-      "spend": 1105
+      "ctr": 13.33,
+      "cpc": 275,
+      "spend": 550
     },
     {
-      "keyword": "부산상가인테리어업체",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
+      "keyword": "부산 인테리어 디자인",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
       "impressions": 3,
-      "clicks": 1,
-      "ctr": 33.33,
-      "cpc": 1069,
-      "spend": 1069
+      "clicks": 2,
+      "ctr": 66.67,
+      "cpc": 258,
+      "spend": 516
     },
     {
-      "keyword": "해운대인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 1066,
-      "spend": 1066
+      "keyword": "시골집 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 14,
+      "clicks": 4,
+      "ctr": 28.57,
+      "cpc": 105,
+      "spend": 420
     },
     {
-      "keyword": "부산사무실인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 1065,
-      "spend": 1065
+      "keyword": "EM",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "학원",
+      "impressions": 135,
+      "clicks": 0,
+      "ctr": 0.0,
+      "cpc": 0,
+      "spend": 417
     },
     {
-      "keyword": "재송동인테리어업체",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
+      "keyword": "북유럽 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 5,
+      "clicks": 3,
+      "ctr": 60.0,
+      "cpc": 113,
+      "spend": 340
+    },
+    {
+      "keyword": "자사키워드 몇개(확장소재)",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 450,
+      "clicks": 2,
+      "ctr": 0.44,
+      "cpc": 162,
+      "spend": 325
+    },
+    {
+      "keyword": "아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 10,
+      "clicks": 3,
+      "ctr": 30.0,
+      "cpc": 106,
+      "spend": 319
+    },
+    {
+      "keyword": "인디 컴퍼니",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
       "impressions": 1,
       "clicks": 1,
       "ctr": 100.0,
-      "cpc": 1064,
-      "spend": 1064
+      "cpc": 309,
+      "spend": 309
     },
     {
-      "keyword": "해운대구인테리어디자인",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
+      "keyword": "인테리어 디자인",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 3,
       "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 844,
-      "spend": 844
+      "ctr": 33.33,
+      "cpc": 309,
+      "spend": 309
     },
     {
-      "keyword": "해운대인테리어디자인",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 833,
-      "spend": 833
-    },
-    {
-      "keyword": "부산하이엔드인테리어",
+      "keyword": "부산매장인테리어",
       "media": "NAVER_PLACE",
       "campaign": "2. 플레이스(법인)",
       "group": "인디 스마트플레이스",
       "impressions": 3,
       "clicks": 1,
       "ctr": 33.33,
-      "cpc": 210,
-      "spend": 210
+      "cpc": 248,
+      "spend": 248
+    },
+    {
+      "keyword": "인테리어 디자이너",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 2,
+      "ctr": 50.0,
+      "cpc": 112,
+      "spend": 223
+    },
+    {
+      "keyword": "예쁜 카페 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 2,
+      "ctr": 200.0,
+      "cpc": 108,
+      "spend": 216
+    },
+    {
+      "keyword": "디자인 새움",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 6,
+      "clicks": 2,
+      "ctr": 33.33,
+      "cpc": 107,
+      "spend": 214
+    },
+    {
+      "keyword": "아트홀 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 2,
+      "ctr": 50.0,
+      "cpc": 106,
+      "spend": 213
+    },
+    {
+      "keyword": "집 꾸미기 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 8,
+      "clicks": 2,
+      "ctr": 25.0,
+      "cpc": 94,
+      "spend": 187
+    },
+    {
+      "keyword": "병원",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "기타",
+      "impressions": 49,
+      "clicks": 0,
+      "ctr": 0.0,
+      "cpc": 0,
+      "spend": 183
+    },
+    {
+      "keyword": "부산강의실인테리어소품",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342697136",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 176,
+      "spend": 176
+    },
+    {
+      "keyword": "사무실입구파사드",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 176,
+      "spend": 176
+    },
+    {
+      "keyword": "업무겸교육사무실이미지",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 176,
+      "spend": 176
+    },
+    {
+      "keyword": "인테리어디자이너블로그",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 176,
+      "spend": 176
     },
     {
       "keyword": "인테리어업체",
@@ -1516,6 +1926,501 @@
       "ctr": 14.29,
       "cpc": 88,
       "spend": 176
+    },
+    {
+      "keyword": "사무실입구벽면시안인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드 몇개",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 165,
+      "spend": 165
+    },
+    {
+      "keyword": "부산인포데스크제작",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342725603",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 156,
+      "spend": 156
+    },
+    {
+      "keyword": "부산실내건축전시",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342719810",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 154,
+      "spend": 154
+    },
+    {
+      "keyword": "재송동인테리어",
+      "media": "NAVER_PLACE",
+      "campaign": "2. 플레이스(법인)",
+      "group": "인디 스마트플레이스",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 123,
+      "spend": 123
+    },
+    {
+      "keyword": "집 가구 배치",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 122,
+      "spend": 122
+    },
+    {
+      "keyword": "도배 장판 추천",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 121,
+      "spend": 121
+    },
+    {
+      "keyword": "전통 찻집 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 1,
+      "ctr": 25.0,
+      "cpc": 121,
+      "spend": 121
+    },
+    {
+      "keyword": "건강한 디자인",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 120,
+      "spend": 120
+    },
+    {
+      "keyword": "구축 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 120,
+      "spend": 120
+    },
+    {
+      "keyword": "템바 보드 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 6,
+      "clicks": 1,
+      "ctr": 16.67,
+      "cpc": 120,
+      "spend": 120
+    },
+    {
+      "keyword": "24 평 아파트 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 119,
+      "spend": 119
+    },
+    {
+      "keyword": "투 베이 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 119,
+      "spend": 119
+    },
+    {
+      "keyword": "해운대 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 119,
+      "spend": 119
+    },
+    {
+      "keyword": "50 평 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 118,
+      "spend": 118
+    },
+    {
+      "keyword": "원룸 인테리어 배치",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 118,
+      "spend": 118
+    },
+    {
+      "keyword": "고급 주택 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 117,
+      "spend": 117
+    },
+    {
+      "keyword": "목욕탕 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 116,
+      "spend": 116
+    },
+    {
+      "keyword": "벽면 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 113,
+      "spend": 113
+    },
+    {
+      "keyword": "17 평 아파트 가구 배치",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 112,
+      "spend": 112
+    },
+    {
+      "keyword": "구축 아파트 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 112,
+      "spend": 112
+    },
+    {
+      "keyword": "아파트 현관 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 111,
+      "spend": 111
+    },
+    {
+      "keyword": "중문 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 1,
+      "ctr": 25.0,
+      "cpc": 111,
+      "spend": 111
+    },
+    {
+      "keyword": "호프 집 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 5,
+      "clicks": 1,
+      "ctr": 20.0,
+      "cpc": 111,
+      "spend": 111
+    },
+    {
+      "keyword": "붙박이 장 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 6,
+      "clicks": 1,
+      "ctr": 16.67,
+      "cpc": 110,
+      "spend": 110
+    },
+    {
+      "keyword": "25 평 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 6,
+      "clicks": 1,
+      "ctr": 16.67,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "27 평 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "비 확장 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "호텔 같은 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 4,
+      "clicks": 1,
+      "ctr": 25.0,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "호프 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 109,
+      "spend": 109
+    },
+    {
+      "keyword": "시골집 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 108,
+      "spend": 108
+    },
+    {
+      "keyword": "애견 호텔 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 3,
+      "clicks": 1,
+      "ctr": 33.33,
+      "cpc": 108,
+      "spend": 108
+    },
+    {
+      "keyword": "부산 미용실 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 107,
+      "spend": 107
+    },
+    {
+      "keyword": "엔틱 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 107,
+      "spend": 107
+    },
+    {
+      "keyword": "리모델링 비용",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 104,
+      "spend": 104
+    },
+    {
+      "keyword": "국밥 집 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 103,
+      "spend": 103
+    },
+    {
+      "keyword": "지산 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 103,
+      "spend": 103
+    },
+    {
+      "keyword": "웨인스 코팅 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 102,
+      "spend": 102
+    },
+    {
+      "keyword": "33 평 아파트 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 101,
+      "spend": 101
+    },
+    {
+      "keyword": "신축 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 2,
+      "clicks": 1,
+      "ctr": 50.0,
+      "cpc": 101,
+      "spend": 101
+    },
+    {
+      "keyword": "24 평형 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 96,
+      "spend": 96
+    },
+    {
+      "keyword": "40 평대 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 95,
+      "spend": 95
+    },
+    {
+      "keyword": "50 평대 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 94,
+      "spend": 94
+    },
+    {
+      "keyword": "시골 집 리모델링",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 94,
+      "spend": 94
+    },
+    {
+      "keyword": "작은 평수 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 94,
+      "spend": 94
+    },
+    {
+      "keyword": "단독주택리모델링비용",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "단독주택",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 88,
+      "spend": 88
     },
     {
       "keyword": "단독주택리모델링비용",
@@ -1540,6 +2445,39 @@
       "spend": 88
     },
     {
+      "keyword": "인테리어디자인",
+      "media": "네이버 파워컨텐츠",
+      "campaign": "4. 파워컨텐츠",
+      "group": "별하랑 준공사진 - 상가/학원",
+      "impressions": 10,
+      "clicks": 1,
+      "ctr": 10.0,
+      "cpc": 88,
+      "spend": 88
+    },
+    {
+      "keyword": "인테리어 카페",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 85,
+      "spend": 85
+    },
+    {
+      "keyword": "행가 집",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 84,
+      "spend": 84
+    },
+    {
       "keyword": "부산인테리어",
       "media": "네이버 파워컨텐츠",
       "campaign": "4. 파워컨텐츠",
@@ -1549,6 +2487,17 @@
       "ctr": 1.64,
       "cpc": 79,
       "spend": 79
+    },
+    {
+      "keyword": "경북안과인테리어",
+      "media": "네이버 파워링크",
+      "campaign": "1. 파워링크",
+      "group": "자사키워드-1751267620_1751342694935",
+      "impressions": 1,
+      "clicks": 1,
+      "ctr": 100.0,
+      "cpc": 77,
+      "spend": 77
     },
     {
       "keyword": "부산병원인테리어",
@@ -1573,48 +2522,59 @@
       "spend": 77
     },
     {
-      "keyword": "부산상업인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "3. 플레이스(상가 사무실)",
-      "group": "플레이스(상가사무실)_그룹#1",
-      "impressions": 19,
+      "keyword": "22 평 아파트 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 1,
       "clicks": 1,
-      "ctr": 5.26,
-      "cpc": 77,
-      "spend": 77
+      "ctr": 100.0,
+      "cpc": 61,
+      "spend": 61
     },
     {
-      "keyword": "인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "3. 플레이스(상가 사무실)",
-      "group": "플레이스(상가사무실)_그룹#1",
-      "impressions": 8,
+      "keyword": "홈 인테리어",
+      "media": "구글 검색광고",
+      "campaign": "검색광고_홈페이지",
+      "group": "광고그룹 1",
+      "impressions": 3,
       "clicks": 1,
-      "ctr": 12.5,
-      "cpc": 77,
-      "spend": 77
+      "ctr": 33.33,
+      "cpc": 53,
+      "spend": 53
     },
     {
-      "keyword": "치과인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
+      "keyword": "별하랑",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "학원",
+      "impressions": 12,
+      "clicks": 0,
+      "ctr": 0.0,
+      "cpc": 0,
+      "spend": 37
+    },
+    {
+      "keyword": "프루아즈",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "기타",
       "impressions": 4,
-      "clicks": 1,
-      "ctr": 25.0,
-      "cpc": 77,
-      "spend": 77
+      "clicks": 0,
+      "ctr": 0.0,
+      "cpc": 0,
+      "spend": 9
     },
     {
-      "keyword": "학원인테리어",
-      "media": "NAVER_PLACE",
-      "campaign": "2. 플레이스(법인)",
-      "group": "인디 스마트플레이스",
-      "impressions": 2,
-      "clicks": 1,
-      "ctr": 50.0,
-      "cpc": 77,
-      "spend": 77
+      "keyword": "MBC로 변경 MODE수학",
+      "media": "META_ADS",
+      "campaign": "2025-02-10_슬라이드_최적이동",
+      "group": "학원",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0.0,
+      "cpc": 0,
+      "spend": 0
     }
   ]
 };
@@ -1712,10 +2672,11 @@
 
         if (marketingData && marketingData.updated_at) {
           const dt = new Date(marketingData.updated_at);
-          document.getElementById('syncTimeText').textContent = dt.toLocaleDateString('ko-KR', {
-            month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-          });
-          document.getElementById('syncStatusBadge').classList.remove('hidden');
+          const m = String(dt.getMonth() + 1).padStart(2, '0');
+          const d = String(dt.getDate()).padStart(2, '0');
+          const hh = String(dt.getHours()).padStart(2, '0');
+          const mm = String(dt.getMinutes()).padStart(2, '0');
+          document.getElementById('syncTimeText').textContent = `${m}.${d} ${hh}:${mm}`;
         }
 
         const dateKeys = Object.keys(marketingData?.daily || {}).sort();
@@ -1748,7 +2709,7 @@
       }
       marketingData = {
         updated_at: new Date().toISOString(),
-        summary: { total_spend: 34933, total_impressions: 58946, total_clicks: 164, avg_cpc: 213, avg_ctr: 0.28 },
+        summary: { total_spend: 0, total_impressions: 0, total_clicks: 0, avg_cpc: 0, avg_ctr: 0 },
         daily: {},
         keywords: []
       };
@@ -1798,29 +2759,53 @@
       const keys = Object.keys(allDaily).sort();
       if (keys.length === 0) return {};
 
-      let startDate = keys[0];
-      let endDate = keys[keys.length - 1];
+      // 1. Current real-world KST date calculations
+      const now = new Date();
+      const kstTime = new Date(now.getTime() + (9 * 60 + now.getTimezoneOffset()) * 60000);
+      const kstToday = kstTime.toISOString().slice(0, 10);
+      
+      const kstYestDate = new Date(kstTime);
+      kstYestDate.setDate(kstYestDate.getDate() - 1);
+      const kstYesterday = kstYestDate.toISOString().slice(0, 10);
 
-      const todayStr = keys[keys.length - 1];
-      let yesterdayStr = todayStr;
-      if (keys.length > 1) {
-        yesterdayStr = keys[keys.length - 2];
+      const latestKey = keys[keys.length - 1];
+
+      // In daily ad management, 'yesterday' is the primary reporting day.
+      // If DB has kstYesterday, yesterdayTarget is kstYesterday.
+      // If DB already has today's record (intraday), yesterdayTarget is the day before.
+      // Otherwise, the latest collected date in DB is yesterdayTarget.
+      let yesterdayTarget = latestKey;
+      if (keys.includes(kstYesterday)) {
+        yesterdayTarget = kstYesterday;
+      } else if (latestKey >= kstToday && keys.length > 1) {
+        yesterdayTarget = keys[keys.length - 2];
       }
 
+      let startDate = keys[0];
+      let endDate = latestKey;
+
       if (currentPeriod === 'yesterday') {
-        startDate = yesterdayStr;
-        endDate = yesterdayStr;
+        startDate = yesterdayTarget;
+        endDate = yesterdayTarget;
+        selectedCalendarDate = yesterdayTarget;
       } else if (currentPeriod === '7days') {
-        const last7 = keys.slice(-7);
-        startDate = last7[0];
-        endDate = todayStr;
+        const endIdx = keys.indexOf(yesterdayTarget);
+        if (endIdx >= 0) {
+          const startIdx = Math.max(0, endIdx - 6);
+          startDate = keys[startIdx];
+          endDate = yesterdayTarget;
+        } else {
+          const last7 = keys.slice(-7);
+          startDate = last7[0];
+          endDate = latestKey;
+        }
       } else if (currentPeriod === 'thisMonth') {
-        const ym = todayStr.slice(0, 7);
+        const ym = yesterdayTarget.slice(0, 7);
         const thisMonthKeys = keys.filter(k => k.startsWith(ym));
         startDate = thisMonthKeys[0] || `${ym}-01`;
-        endDate = todayStr;
+        endDate = thisMonthKeys[thisMonthKeys.length - 1] || latestKey;
       } else if (currentPeriod === 'lastMonth') {
-        const [curY, curM] = todayStr.split('-').map(Number);
+        const [curY, curM] = yesterdayTarget.split('-').map(Number);
         const prevM = curM === 1 ? 12 : curM - 1;
         const prevY = curM === 1 ? curY - 1 : curY;
         const prevYm = `${prevY}-${String(prevM).padStart(2, '0')}`;
@@ -1832,13 +2817,26 @@
           startDate = `${prevYm}-01`;
           endDate = `${prevYm}-31`;
         }
+      } else if (currentPeriod === 'all') {
+        startDate = keys[0];
+        endDate = latestKey;
       } else if (currentPeriod === 'custom' && customStart && customEnd) {
         startDate = customStart;
         endDate = customEnd;
       }
 
+      // Sync active date range label & date picker inputs
       const activeLabel = document.getElementById('activePeriodLabel');
-      if (activeLabel) activeLabel.textContent = `${startDate} ~ ${endDate}`;
+      if (activeLabel) {
+        activeLabel.textContent = startDate === endDate ? startDate : `${startDate} ~ ${endDate}`;
+      }
+
+      const sInput = document.getElementById('customStartDate');
+      const eInput = document.getElementById('customEndDate');
+      if (sInput && eInput && currentPeriod !== 'custom') {
+        sInput.value = startDate;
+        eInput.value = endDate;
+      }
 
       const filtered = {};
       for (const k of keys) {
@@ -1969,13 +2967,19 @@
       const dateKeys = Object.keys(dailyData).sort();
       const latestDateKey = dateKeys.length > 0 ? dateKeys[dateKeys.length - 1] : new Date().toISOString().slice(0, 10);
 
+      // KST today
+      const now = new Date();
+      const kstTime = new Date(now.getTime() + (9 * 60 + now.getTimezoneOffset()) * 60000);
+      const kstToday = kstTime.toISOString().slice(0, 10);
+
       for (let d = 1; d <= lastDate; d++) {
         const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayRecord = dailyData[dateStr];
 
         const cell = document.createElement('div');
         const isSelected = selectedCalendarDate === dateStr;
-        const isToday = dateStr === latestDateKey;
+        const isToday = dateStr === kstToday;
+        const isLatest = dateStr === latestDateKey && !isToday;
 
         cell.className = `calendar-cell p-2.5 rounded-xl border flex flex-col justify-between cursor-pointer ${
           isSelected
@@ -1989,10 +2993,17 @@
           renderDayDetail();
         };
 
+        let badgeHtml = '';
+        if (isToday) {
+          badgeHtml = '<span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[#dd5828]/20 text-[#dd5828]">TODAY</span>';
+        } else if (isLatest) {
+          badgeHtml = '<span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">최신</span>';
+        }
+
         let dayHeaderHtml = `
           <div class="flex items-center justify-between">
             <span class="text-xs font-mono font-bold ${isToday ? 'text-[#dd5828]' : 'text-slate-700 dark:text-slate-300'}">${d}</span>
-            ${isToday ? '<span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[#dd5828]/20 text-[#dd5828]">TODAY</span>' : ''}
+            ${badgeHtml}
           </div>
         `;
 
