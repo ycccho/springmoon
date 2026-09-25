@@ -71,6 +71,7 @@
     .drag-over-blog-flip { border-color: #ec4899 !important; background-color: #fdf2f8 !important; }
     .drag-over-imweb-800 { border-color: #ea580c !important; background-color: #fff7ed !important; }
     .drag-over-imweb-1200 { border-color: #4f46e5 !important; background-color: #eef2ff !important; }
+    .drag-over-insta { border-color: #e1306c !important; background-color: #fdf2f8 !important; }
   </style>
 
 </head>
@@ -1555,6 +1556,35 @@
           </div>
         </div>
 
+        <!-- 9번 기능: 인스타그램 피드 업로드용 최적화 -->
+        <div class="mb-12">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white text-sm font-bold px-3 py-1 rounded-full shadow-xs">9번 기능</span>
+            <h2 class="text-2xl font-bold text-gray-800">인스타그램 피드 업로드용 최적화 <span class="text-lg font-medium text-gray-500">(1080px 규격 / 4:5 피드 황금비율 / 고화질 JPG)</span></h2>
+          </div>
+          <div class="bg-gradient-to-br from-pink-50/70 via-purple-50/60 to-amber-50/70 p-5 rounded-xl border border-pink-200 mb-6">
+            <ul class="text-sm text-gray-800 list-disc list-inside space-y-1.5">
+              <li><span class="font-bold text-pink-900">가로/세로/정사각 자동 지능형 리사이징:</span> 가로 사진은 <span class="font-bold text-pink-700">가로 1080px 비율 유지</span>, 세로 사진은 인스타그램 피드에서 화면 노출 면적이 가장 넓은 <span class="font-bold text-purple-700">4:5 황금비율(최대 1080x1350px)</span> 규격으로 자동 최적화됩니다. (스마트폰 9:16 등 긴 세로 사진도 피드에서 잘림 없이 자동 맞춤)</li>
+              <li><span class="font-bold text-purple-900">인스타 공식 표준 JPG 포맷 & 뭉개짐 방지:</span> 인스타그램 서버 업로드 시 화질 깨짐 및 호환성 오류가 없는 <span class="font-bold text-purple-700">고화질 JPG(.jpg)</span>로 변환하며, 모바일 OLED/레티나 화면에서 선명하게 돋보이도록 <span class="font-bold text-pink-700">스마트 샤프닝(선명도 향상)</span> 필터를 적용합니다.</li>
+              <li><span class="font-bold text-amber-900">EXIF 메타데이터 100% 제거 & 1px 미세 크롭:</span> 촬영 기기/위치(GPS) 정보 완전 삭제 및 AI 비전 알고리즘의 중복 이미지 판정을 방어하는 1px 크롭이 자동 적용됩니다.</li>
+            </ul>
+          </div>
+          <div id="drop-zone-insta" class="border-2 border-dashed border-pink-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-pink-50/50 group bg-white">
+            <div class="text-pink-400 mb-4 group-hover:text-pink-500 transition-colors flex justify-center gap-2">
+              <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <svg class="h-12 w-12 text-purple-500 group-hover:text-purple-600 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke-width="1.8"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" stroke-width="1.8"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2" stroke-linecap="round"></line>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">인스타그램 업로드용 사진 일괄 업로드</h3>
+            <p class="text-sm text-pink-600 font-medium mb-1">가로/세로 방향 상관없이 드래그 (1080px / 4:5 피드 규격 + 고화질 JPG 변환 + 샤프닝)</p>
+            <input type="file" id="file-insta" multiple accept=".jpg, .jpeg, .png, .webp" class="hidden">
+          </div>
+        </div>
 
         <div id="progress-container" class="hidden mb-8">
           <div class="flex justify-between text-sm font-medium text-gray-700 mb-1">
@@ -2815,6 +2845,96 @@
         });
     }
 
+    // [9번 기능] 인스타그램 피드 업로드용 최적화 (1080px / 4:5 피드 규격 + 1px 크롭 + 고화질 JPG 변환 + 샤프닝)
+    function processInstagramOptimized(file, quality = 0.94, flip = false) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            
+            img.onload = async () => {
+                const originalWidth = img.width;
+                const originalHeight = img.height;
+                
+                // 1px 크롭 설정 (유사 문서/중복 회피)
+                let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
+                if (originalWidth > 2 && originalHeight > 2) {
+                    cropX = 1; cropY = 1;
+                    cropW = originalWidth - 2; cropH = originalHeight - 2;
+                }
+
+                let orientation = 'square';
+                if (cropW > cropH) orientation = 'landscape';
+                else if (cropH > cropW) orientation = 'portrait';
+
+                // 인스타그램 공식 피드 규격:
+                // 1. 가로 (Landscape): 폭 1080px 기준 원본 비율 유지
+                // 2. 세로 (Portrait): 피드 최대 허용 높이 1350px (4:5 황금비율)
+                //    - 비율이 4:5 이내(cropH / cropW <= 1.25)인 경우: 폭 1080px 기준 높이 비율 유지 (<= 1350px)
+                //    - 4:5보다 긴 세로 사진(9:16 등)인 경우: 피드에서 상하 잘림 방지를 위해 높이 1350px 한도 내 폭 비율 유지
+                // 3. 정사각형 (Square): 1080 x 1080 px
+                let targetW = 1080;
+                let targetH = 1080;
+
+                if (orientation === 'landscape') {
+                    targetW = 1080;
+                    targetH = Math.max(1, Math.round((cropH / cropW) * 1080));
+                } else if (orientation === 'portrait') {
+                    const ratio = cropH / cropW;
+                    if (ratio <= 1.25) { // 4:5(1.25) 이하
+                        targetW = 1080;
+                        targetH = Math.round(1080 * ratio);
+                    } else { // 4:5 초과 (예: 스마트폰 9:16 사진 등)
+                        targetH = 1350;
+                        targetW = Math.max(1, Math.round(1350 / ratio));
+                    }
+                } else {
+                    targetW = 1080;
+                    targetH = 1080;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
+                const ctx = canvas.getContext('2d');
+
+                // 투명 배경 방지용 순백색 배경
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, targetW, targetH);
+
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+
+                if (flip) {
+                    ctx.translate(targetW, 0);
+                    ctx.scale(-1, 1);
+                }
+
+                ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
+
+                // 모바일 레티나/OLED 화면 최적화 디테일 샤프닝
+                sharpenCanvas(canvas, ctx, 0.15);
+
+                canvas.toBlob((blob) => {
+                    URL.revokeObjectURL(objectUrl);
+                    if (blob) {
+                        resolve({ 
+                            blob: blob, 
+                            width: targetW, 
+                            height: targetH, 
+                            originalWidth: originalWidth, 
+                            originalHeight: originalHeight,
+                            orientation: orientation
+                        });
+                    } else {
+                        reject(new Error('인스타그램 이미지 변환 실패'));
+                    }
+                }, 'image/jpeg', quality);
+            };
+            img.onerror = (e) => { URL.revokeObjectURL(objectUrl); reject(e); };
+            img.src = objectUrl;
+        });
+    }
+
     function setupWebP() {
 
       const dropHq = document.getElementById('drop-zone-hq');
@@ -2833,8 +2953,10 @@
       const fileImweb800 = document.getElementById('file-imweb-800');
       const dropImweb1200 = document.getElementById('drop-zone-imweb-1200');
       const fileImweb1200 = document.getElementById('file-imweb-1200');
+      const dropInsta = document.getElementById('drop-zone-insta');
+      const fileInsta = document.getElementById('file-insta');
 
-      if (!dropHq || !fileHq || !dropBlog || !fileBlog || !dropHqFlip || !fileHqFlip || !dropBlogFlip || !fileBlogFlip || !dropJpg || !fileJpg || !dropJpgResize || !fileJpgResize || !dropImweb800 || !fileImweb800 || !dropImweb1200 || !fileImweb1200) return;
+      if (!dropHq || !fileHq || !dropBlog || !fileBlog || !dropHqFlip || !fileHqFlip || !dropBlogFlip || !fileBlogFlip || !dropJpg || !fileJpg || !dropJpgResize || !fileJpgResize || !dropImweb800 || !fileImweb800 || !dropImweb1200 || !fileImweb1200 || !dropInsta || !fileInsta) return;
 
       const progressContainer = document.getElementById('progress-container');
       const progressBar = document.getElementById('progress-bar');
@@ -2871,6 +2993,7 @@
       bindEvents(dropJpgResize, fileJpgResize, 'jpg-resize', 'drag-over-jpg-resize');
       bindEvents(dropImweb800, fileImweb800, 'imweb-800', 'drag-over-imweb-800');
       bindEvents(dropImweb1200, fileImweb1200, 'imweb-1200', 'drag-over-imweb-1200');
+      bindEvents(dropInsta, fileInsta, 'insta', 'drag-over-insta');
 
       clearBtn.addEventListener('click', () => {
           convertedFiles = [];
@@ -2884,6 +3007,7 @@
           fileJpgResize.value = '';
           fileImweb800.value = '';
           fileImweb1200.value = '';
+          fileInsta.value = '';
       });
 
       // ZIP 다운로드
@@ -2927,9 +3051,9 @@
 
       // 메인 핸들러
       async function handleFiles(files, mode) {
-          const imageFiles = Array.from(files).filter(file => file.type.match(/image\/(jpeg|png)/i));
+          const imageFiles = Array.from(files).filter(file => file.type.match(/image\/(jpeg|png|webp)/i));
           if (imageFiles.length === 0) {
-              alert("JPG 또는 PNG 파일만 처리할 수 있습니다."); return;
+              alert("JPG, PNG 또는 WEBP 파일만 처리할 수 있습니다."); return;
           }
 
           resultSection.classList.remove('hidden');
@@ -2951,6 +3075,8 @@
               progressStatusText.textContent = `[아임웹 썸네일용 800px] 100KB 내외 고효율 JPG 압축 진행 중...`;
           } else if (mode === 'imweb-1200') {
               progressStatusText.textContent = `[아임웹 게시글용 1200px] 150~200KB 이하 고효율 JPG 압축 진행 중...`;
+          } else if (mode === 'insta') {
+              progressStatusText.textContent = `[인스타그램용] 1080px 규격, 1px 크롭 및 고화질 JPG 변환 진행 중...`;
           }
           
           const total = imageFiles.length;
@@ -2979,6 +3105,8 @@
                       resultData = await processImwebThumbnail800(file, false);
                   } else if (mode === 'imweb-1200') {
                       resultData = await processImwebContent1200(file, false);
+                  } else if (mode === 'insta') {
+                      resultData = await processInstagramOptimized(file, 0.94, false);
                   }
                   
                   const isLandscape = resultData.orientation === 'landscape';
@@ -2987,28 +3115,37 @@
                   
                   if (mode === 'hq') {
                       badgeText = isLandscape ? '홈 가로 (1px크롭)' : '홈 세로 (1px크롭)';
-                      badgeClass = isLandscape ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800';
+                      badgeClass = 'bg-green-100 text-green-800';
                   } else if (mode === 'hq-flip') {
                       badgeText = isLandscape ? '홈 가로 (반전+크롭)' : '홈 세로 (반전+크롭)';
-                      badgeClass = isLandscape ? 'bg-purple-100 text-purple-800' : 'bg-fuchsia-100 text-fuchsia-800';
+                      badgeClass = 'bg-purple-100 text-purple-800';
                   } else if (mode === 'blog') {
                       badgeText = isLandscape ? '블로그 가로 (1px크롭)' : '블로그 세로 (1px크롭)';
-                      badgeClass = isLandscape ? 'bg-blue-100 text-blue-800' : 'bg-indigo-100 text-indigo-800';
+                      badgeClass = 'bg-blue-100 text-blue-800';
                   } else if (mode === 'blog-flip') {
                       badgeText = isLandscape ? '블로그 가로 (반전+크롭)' : '블로그 세로 (반전+크롭)';
-                      badgeClass = isLandscape ? 'bg-pink-100 text-pink-800' : 'bg-rose-100 text-rose-800';
+                      badgeClass = 'bg-pink-100 text-pink-800';
                   } else if (mode === 'jpg') {
                       badgeText = isLandscape ? 'JPG 가로 (히스토리삭제)' : 'JPG 세로 (히스토리삭제)';
-                      badgeClass = isLandscape ? 'bg-amber-100 text-amber-800' : 'bg-yellow-100 text-yellow-800';
+                      badgeClass = 'bg-amber-100 text-amber-800';
                   } else if (mode === 'jpg-resize') {
                       badgeText = isLandscape ? 'JPG 가로 (1920x1080)' : 'JPG 세로 (1080x1920)';
-                      badgeClass = isLandscape ? 'bg-teal-100 text-teal-800' : 'bg-cyan-100 text-cyan-800';
+                      badgeClass = 'bg-teal-100 text-teal-800';
                   } else if (mode === 'imweb-800') {
                       badgeText = isLandscape ? '아임웹 썸네일 (가로 800)' : '아임웹 썸네일 (세로 800)';
                       badgeClass = 'bg-orange-100 text-orange-800 border border-orange-200 font-bold';
                   } else if (mode === 'imweb-1200') {
                       badgeText = isLandscape ? '아임웹 게시글 (가로 1200)' : '아임웹 게시글 (세로 1200)';
                       badgeClass = 'bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold';
+                  } else if (mode === 'insta') {
+                      if (resultData.orientation === 'landscape') {
+                          badgeText = `인스타 가로 (${resultData.width}x${resultData.height})`;
+                      } else if (resultData.orientation === 'portrait') {
+                          badgeText = `인스타 세로 (${resultData.width}x${resultData.height})`;
+                      } else {
+                          badgeText = `인스타 정사각 (1080x1080)`;
+                      }
+                      badgeClass = 'bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white font-bold shadow-xs';
                   }
 
                   let baseName = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase()
@@ -3024,8 +3161,9 @@
                   else if (mode === 'jpg-resize') suffix = '-jpg-resized';
                   else if (mode === 'imweb-800') suffix = '-imweb-thumb-800';
                   else if (mode === 'imweb-1200') suffix = '-imweb-post-1200';
+                  else if (mode === 'insta') suffix = '-insta';
 
-                  const ext = (mode === 'jpg' || mode === 'jpg-resize' || mode === 'imweb-800' || mode === 'imweb-1200') ? '.jpg' : '.webp';
+                  const ext = (mode === 'jpg' || mode === 'jpg-resize' || mode === 'imweb-800' || mode === 'imweb-1200' || mode === 'insta') ? '.jpg' : '.webp';
                   const newName = baseName + suffix + ext;
                   
                   const result = {
@@ -3060,6 +3198,7 @@
               fileJpgResize.value = '';
               fileImweb800.value = '';
               fileImweb1200.value = '';
+              fileInsta.value = '';
           }, 500);
       }
 
@@ -3075,8 +3214,8 @@
 
           let resChangeHtml = '';
           // 원본 해상도와 결과 해상도가 다르면 변경된 것으로 표시 (1px 크롭 포함)
-          if (result.originalWidth !== result.finalWidth) {
-              resChangeHtml = `<div class="text-[10px] text-gray-500 mt-1">해상도 변경: <span class="line-through">${result.originalWidth}px</span> ➔ <span class="font-bold text-blue-600">${result.finalWidth}px</span></div>`;
+          if (result.originalWidth !== result.finalWidth || result.originalHeight !== result.finalHeight) {
+              resChangeHtml = `<div class="text-[10px] text-gray-500 mt-1">해상도 변경: <span class="line-through">${result.originalWidth}x${result.originalHeight}px</span> ➔ <span class="font-bold text-blue-600">${result.finalWidth}x${result.finalHeight}px</span></div>`;
               if (result.badgeText.includes('블로그')) {
                   // 블로그용인데 너비가 원본 - 2px 보다 작으면 20MB 제한에 걸려 미세 축소된 것
                   if (result.finalWidth < result.originalWidth - 2) {
@@ -3084,6 +3223,8 @@
                   } else {
                       resChangeHtml += `<div class="text-[10px] text-indigo-500 font-bold mt-1">※ 유사 회피 (1px 크롭 완료)</div>`;
                   }
+              } else if (result.badgeText.includes('인스타')) {
+                  resChangeHtml += `<div class="text-[10px] text-pink-600 font-bold mt-1">※ 인스타그램 최적 규격 & 선명도 보정 완료</div>`;
               }
           } else {
               resChangeHtml = `<div class="text-[10px] text-gray-500 mt-1">해상도 100% 보존됨</div>`;
