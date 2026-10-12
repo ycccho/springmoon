@@ -297,6 +297,7 @@ export async function onRequestGet(context) {
 
   return new Response(JSON.stringify({
     status: 'online',
+    version: 'fhd_1920x1080',
     bot: '렌더링 BOT (13365560)',
     active_channel: NW_RENDER_CHANNEL,
     timestamp: new Date().toISOString()
