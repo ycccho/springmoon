@@ -17,8 +17,8 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Active Tier-1 Paid Key
-    const fallbackKey = atob("QVEuQWI4Uk42SzJLOTZWb2FTOVNSYlU5NWZPV21CYUJpZnp0ZnlidWhXbmJkM0RwSmpxelE=");
+    // Active Working Key
+    const fallbackKey = atob("QVEuQWI4Uk42Sno4TUk3UTR2U1N5bDRMNlJ4d0E3aUZwWHBFalFNcFY0M2pkRHNfWC0wM1E=");
     let apiKey = clientApiKey || context.env?.GEMINI_API_KEY || fallbackKey;
 
     // Clean base64 image data
@@ -141,7 +141,15 @@ NEGATIVE: sketch outlines, black contour lines, CAD wireframe edges, flat polygo
 
     if (!imageRes.ok) {
       const imgErrText = await imageRes.text();
-      throw new Error(`실사 이미지 생성 API 오류 (${imageRes.status}): ${imgErrText}`);
+      let errorMsg = imgErrText;
+      try {
+        const parsed = JSON.parse(imgErrText);
+        errorMsg = parsed.error?.message || imgErrText;
+      } catch (e) {}
+      if (imageRes.status === 402 || imageRes.status === 429) {
+        throw new Error(`Google AI 이미지 생성 할당량 오류 (${imageRes.status}): Google 무료 티어에서는 이미지 생성 모델 호출이 차단/제한됩니다. 상단 'API 키 설정'에서 크레딧이 충전된 Google Gemini API 키를 등록해 주세요. (상세: ${errorMsg})`);
+      }
+      throw new Error(`실사 이미지 생성 API 오류 (${imageRes.status}): ${errorMsg}`);
     }
 
     const imgData = await imageRes.json();

@@ -263,37 +263,6 @@ export async function onRequestOptions() {
 }
 
 export async function onRequestGet(context) {
-  const url = new URL(context.request.url);
-  if (url.searchParams.get('test') === '1') {
-    try {
-      const token = await getNaverWorksAccessToken();
-      const sendRes = await fetch(`https://www.worksapis.com/v1.0/bots/${NW_BOT_ID}/channels/${NW_RENDER_CHANNEL}/messages`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          content: {
-            type: 'text',
-            text: '🔔 [진단 테스트] Cloudflare Pages에서 네이버웍스 API 통신 정상 확인!'
-          }
-        })
-      });
-      const sendText = await sendRes.text();
-      return new Response(JSON.stringify({
-        test: 'success',
-        token_preview: token ? token.substring(0, 10) + '...' : null,
-        send_status: sendRes.status,
-        send_response: sendText
-      }), { status: 200, headers: CORS_HEADERS });
-    } catch (e) {
-      return new Response(JSON.stringify({ test: 'error', message: e.message, stack: e.stack }), {
-        status: 500,
-        headers: CORS_HEADERS
-      });
-    }
-  }
 
   return new Response(JSON.stringify({
     status: 'online',
