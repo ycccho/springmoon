@@ -116,21 +116,36 @@ async function downloadNaverWorksAttachment(token, botId, fileId) {
     redirect: 'manual'
   });
 
+  if (initialRes.status === 200 || initialRes.status === 201) {
+    return await initialRes.arrayBuffer();
+  }
+
   let fileUrl = initialRes.headers.get('location');
-  if (!fileUrl && (initialRes.status === 200 || initialRes.status === 201)) {
-    const fileBytes = await initialRes.arrayBuffer();
-    return fileBytes;
+  if (!fileUrl) {
+    const errText = await initialRes.text();
+    throw new Error(`No redirect location from attachments API (${initialRes.status}): ${errText}`);
   }
 
-  if (fileUrl) {
-    const downloadRes = await fetch(fileUrl);
-    if (!downloadRes.ok) {
-      throw new Error(`Attachment download failed from redirect URL: ${downloadRes.status}`);
+  // Resolve relative URL if needed
+  if (!fileUrl.startsWith('http')) {
+    fileUrl = new URL(fileUrl, 'https://www.worksapis.com').toString();
+  }
+
+  // Try 1: with Bearer token (required by worksapis)
+  let downloadRes = await fetch(fileUrl, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  // Try 2: without Bearer token if Try 1 failed
+  if (!downloadRes.ok) {
+    const fallbackRes = await fetch(fileUrl);
+    if (fallbackRes.ok) {
+      return await fallbackRes.arrayBuffer();
     }
-    return await downloadRes.arrayBuffer();
+    throw new Error(`Attachment download failed: with-token(${downloadRes.status}), no-token(${fallbackRes.status})`);
   }
 
-  throw new Error(`Failed to resolve attachment redirect: status ${initialRes.status}`);
+  return await downloadRes.arrayBuffer();
 }
 
 // Upload and Send Rendered Image to Naver Works
