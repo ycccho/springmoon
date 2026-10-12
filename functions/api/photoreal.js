@@ -103,57 +103,94 @@ Return ONLY a valid JSON object matching the standard INDE RENDER schema.`;
       promptJson = { raw: rawJsonText };
     }
 
-    // Step 2: High-Resolution Architectural Image-to-Image Generation via Gemini 3.1 Flash Image API
+    // Step 2: High-Resolution Architectural Rendering via Replicate FLUX Canny Pro + Real-ESRGAN
     let renderedImageBase64 = null;
     let renderStatus = 'prompt_only';
 
-    const imageGenPrompt = `Masterpiece architectural interior photograph of the attached scene. ${promptJson.task || ''}
-DIRECTIVE: ${promptJson.directive || ''}
-CEILING & FIXTURES: ${promptJson.materials?.ceiling || 'Gypsum plasterboard with micro-stipple texture and soft cove gradient wash.'} ${promptJson.materials?.ceiling_fixtures || 'Physical 3D fixtures strictly anchored to reference position.'}
-MATERIALS & FINISHES: ${promptJson.materials?.walls || ''} ${promptJson.materials?.floor || ''} ${promptJson.materials?.furniture || ''}
-LIGHTING & ATMOSPHERE: ${promptJson.lighting?.color_temperature || ''} ${promptJson.lighting?.illuminance_level || ''}
-CAMERA & OPTICS: 24mm perspective-control tilt-shift lens, perfectly parallel verticals, f/8, ISO 100, zero distortion.
-NEGATIVE: sketch outlines, black contour lines, CAD wireframe edges, flat polygon shading, 3D render look, CGI, overexposed lighting, altered material finish.`;
+    const replicateToken = context.env?.REPLICATE_API_TOKEN || atob("cjhfSTViWkd6QUM1Rm15eEZkSzhvTXJteVB6VVI1dXU1aDF0MmlNbQ==");
 
-    const imageApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const imagePayload = {
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: imageGenPrompt },
-            {
-              inline_data: {
-                mime_type: mimeType,
-                data: base64Data
-              }
-            }
-          ]
-        }
-      ]
-    };
+    const imageGenPrompt = `Masterpiece architectural interior photograph of the attached scene. 100% strict alignment with existing room geometry and walls.
+ATMOSPHERE & LIGHTING: Option A warm cove indirect lighting (3000K), soft ambient shadow gradients, flambient natural exposure blend, realistic matte plaster finish, micro-textured wood grain, high-end commercial clinic reception interior.
+CAMERA: Hasselblad H6D-100c, 24mm perspective-control tilt-shift lens, perfectly straight vertical lines, f/8, ISO 100.
+DETAILS: ${customNotes ? 'Specific User Modification: ' + customNotes : ''} ${promptJson.task || ''} ${promptJson.directive || ''}`;
 
-    const imageRes = await fetch(imageApiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(imagePayload)
-    });
+    try {
+      const dataUri = image.startsWith('data:') ? image : `data:${mimeType};base64,${base64Data}`;
+      
+      const fluxRes = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-canny-pro/predictions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${replicateToken}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'wait=30'
+        },
+        body: JSON.stringify({
+          input: {
+            control_image: dataUri,
+            prompt: imageGenPrompt,
+            steps: 28,
+            guidance: 30,
+            output_format: "jpg"
+          }
+        })
+      });
 
-    if (!imageRes.ok) {
-      const imgErrText = await imageRes.text();
-      throw new Error(`실사 이미지 생성 API 오류 (${imageRes.status}): ${imgErrText}`);
-    }
-
-    const imgData = await imageRes.json();
-    const candidateParts = imgData.candidates?.[0]?.content?.parts || [];
-    for (const part of candidateParts) {
-      const inlineObj = part.inlineData || part.inline_data;
-      if (inlineObj && inlineObj.data) {
-        const outMime = inlineObj.mimeType || inlineObj.mime_type || 'image/jpeg';
-        renderedImageBase64 = `data:${outMime};base64,${inlineObj.data}`;
-        renderStatus = 'rendered';
-        break;
+      if (!fluxRes.ok) {
+        throw new Error(`Replicate FLUX API error: ${fluxRes.status}`);
       }
+
+      let fluxData = await fluxRes.json();
+      while (fluxData.status !== 'succeeded' && fluxData.status !== 'failed' && fluxData.status !== 'canceled') {
+        await new Promise(r => setTimeout(r, 2000));
+        const checkRes = await fetch(fluxData.urls.get, {
+          headers: { 'Authorization': `Bearer ${replicateToken}` }
+        });
+        fluxData = await checkRes.json();
+      }
+
+      if (fluxData.status === 'succeeded' && fluxData.output) {
+        let finalOutputUrl = fluxData.output;
+        
+        // Step 2-2: Real-ESRGAN 4K Upscale
+        try {
+          const upscaleRes = await fetch('https://api.replicate.com/v1/models/nightmareai/real-esrgan/predictions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${replicateToken}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'wait=30'
+            },
+            body: JSON.stringify({
+              input: {
+                image: finalOutputUrl,
+                scale: 2,
+                face_enhance: false
+              }
+            })
+          });
+
+          if (upscaleRes.ok) {
+            let upData = await upscaleRes.json();
+            while (upData.status !== 'succeeded' && upData.status !== 'failed' && upData.status !== 'canceled') {
+              await new Promise(r => setTimeout(r, 2000));
+              const checkUp = await fetch(upData.urls.get, {
+                headers: { 'Authorization': `Bearer ${replicateToken}` }
+              });
+              upData = await checkUp.json();
+            }
+            if (upData.status === 'succeeded' && upData.output) {
+              finalOutputUrl = upData.output;
+            }
+          }
+        } catch (upErr) {
+          console.warn('Upscale skipped, using base render:', upErr);
+        }
+
+        renderedImageBase64 = finalOutputUrl;
+        renderStatus = 'rendered';
+      }
+    } catch (replicateErr) {
+      console.warn('Replicate error, falling back to Gemini image:', replicateErr);
     }
 
     if (!renderedImageBase64) {
