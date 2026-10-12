@@ -82,11 +82,23 @@ Return ONLY a valid JSON object matching the standard INDE RENDER schema.`;
       }
     };
 
-    const visionRes = await fetch(geminiVisionUrl, {
+    let visionRes = await fetch(geminiVisionUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(analysisPayload)
     });
+
+    if (!visionRes.ok && (visionRes.status === 503 || visionRes.status === 429)) {
+      const fallbackVisionUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const retryRes = await fetch(fallbackVisionUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(analysisPayload)
+      });
+      if (retryRes.ok) {
+        visionRes = retryRes;
+      }
+    }
 
     if (!visionRes.ok) {
       const errText = await visionRes.text();
