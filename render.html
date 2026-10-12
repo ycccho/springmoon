@@ -856,6 +856,11 @@
           <a href="/reference" class="nav-link">레퍼런스 AI <span style="font-size: 0.65rem; font-weight: 700; background: #eff6ff; color: #2563eb; padding: 1px 5px; border-radius: 9999px; border: 1px solid #bfdbfe; margin-left: 2px;">NEW</span></a>
         </nav>
       </div>
+      <div class="header-actions">
+        <button class="btn-secondary" id="btnApiKeyModal" style="font-size: 0.8rem; padding: 6px 12px;">
+          API 키 설정 (선택)
+        </button>
+      </div>
     </div>
   </header>
 
@@ -990,8 +995,12 @@
         </div>
 
         <div class="result-actions">
-          <a href="#" class="btn-download" id="btnDownload" download="inde_render_photoreal.jpg">
-            선택 사진 고화질 다운로드
+          <button type="button" class="btn-download" id="btnDownload">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            1920×1080 (FHD) 다운로드
+          </button>
+          <a href="#" class="btn-secondary" id="btnDownloadOriginal" download="inde_render_original.jpg" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+            원본 다운로드
           </a>
           <button class="btn-secondary" id="btnViewPrompt">
             JSON 프롬프트 보기
@@ -1013,6 +1022,26 @@
       </div>
       <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
         <button class="btn-secondary" id="btnCopyJson">복사하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Key Modal -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 0.95rem; font-weight: 700;">Google Gemini API 키 설정</h3>
+        <button class="btn-secondary" id="btnCloseApiKeyModal" style="padding: 4px 8px;">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
+        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+          기본 서버 키 대신 본인의 개인/무료 API 키를 등록하여 사용하시려면 입력해 주세요. (브라우저 로컬 저장, 무료 토큰 사용)
+        </p>
+        <input type="password" id="inputApiKey" class="text-input" placeholder="Google Gemini API 키 입력 (AIzaSy...)">
+      </div>
+      <div style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-secondary" id="btnClearApiKey" style="padding: 8px 16px; font-size: 0.88rem;">초기화 (기본키)</button>
+        <button class="btn-submit" id="btnSaveApiKey" style="padding: 8px 16px; font-size: 0.88rem; margin: 0;">저장</button>
       </div>
     </div>
   </div>
@@ -1048,6 +1077,7 @@
     const sliderHandle = document.getElementById('sliderHandle');
     const compSlider = document.getElementById('compSlider');
     const btnDownload = document.getElementById('btnDownload');
+    const btnDownloadOriginal = document.getElementById('btnDownloadOriginal');
 
     // Drag & Drop
     ['dragenter', 'dragover'].forEach(eventName => {
@@ -1201,11 +1231,93 @@
         sliderWrapper.style.display = 'flex';
         imgBefore.src = item.originalBase64;
         imgAfter.src = item.renderedBase64;
-        btnDownload.href = item.renderedBase64;
-        btnDownload.download = `inde_render_${selectedIndex + 1}_${item.name || 'render.jpg'}`;
+        
+        const rawName = (item.name || `view_${selectedIndex + 1}`).replace(/\.[^/.]+$/, "");
+        if (btnDownloadOriginal) {
+          btnDownloadOriginal.href = item.renderedBase64;
+          btnDownloadOriginal.download = `${rawName}_original.jpg`;
+        }
+
         setSliderPosition(compSlider.getBoundingClientRect().left + (compSlider.offsetWidth / 2));
       }
     }
+
+    async function downloadImage1920x1080(base64Data, filename) {
+      showToast('1920×1080 고화질 처리 중...');
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('이미지 로드에 실패했습니다.'));
+          img.src = base64Data;
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+
+        // Apply high-quality smoothing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        const targetAspect = 1920 / 1080;
+        const srcAspect = img.naturalWidth / img.naturalHeight;
+
+        // If aspect ratio is close to 16:9, scale directly
+        if (Math.abs(srcAspect - targetAspect) < 0.25) {
+          ctx.drawImage(img, 0, 0, 1920, 1080);
+        } else {
+          // Center-crop (cover) to preserve true architectural proportions without distortion
+          let sWidth = img.naturalWidth;
+          let sHeight = img.naturalHeight;
+          let sx = 0;
+          let sy = 0;
+
+          if (srcAspect > targetAspect) {
+            sWidth = Math.round(img.naturalHeight * targetAspect);
+            sx = Math.round((img.naturalWidth - sWidth) / 2);
+          } else {
+            sHeight = Math.round(img.naturalWidth / targetAspect);
+            sy = Math.round((img.naturalHeight - sHeight) / 2);
+          }
+          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 1920, 1080);
+        }
+
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            showToast('이미지 변환 중 오류가 발생했습니다.');
+            return;
+          }
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = filename || 'inde_render_1920x1080.jpg';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+          showToast('1920×1080 고화질 다운로드가 완료되었습니다!');
+        }, 'image/jpeg', 0.96);
+
+      } catch (err) {
+        console.error('Download 1920x1080 error:', err);
+        showToast(`다운로드 오류: ${err.message}`);
+      }
+    }
+
+    btnDownload.addEventListener('click', (e) => {
+      e.preventDefault();
+      const item = imageQueue[selectedIndex];
+      if (!item || !item.renderedBase64) {
+        showToast('다운로드할 실사 렌더링 이미지가 없습니다.');
+        return;
+      }
+      const rawName = (item.name || `view_${selectedIndex + 1}`).replace(/\.[^/.]+$/, "");
+      downloadImage1920x1080(item.renderedBase64, `${rawName}_1920x1080.jpg`);
+    });
 
     // Before & After Slider Logic
     let isSliding = false;
@@ -1278,11 +1390,13 @@
         updateProgress(basePct + 10, `[${i + 1}/${total}] 도면 분석 및 천장 설비 고정 중...`, 1);
 
         try {
+          const savedApiKey = localStorage.getItem('inde_render_api_key') || '';
           const response = await fetch('/api/photoreal', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               image: item.originalBase64,
+              apiKey: savedApiKey,
               options: options,
               action: 'render'
             })
@@ -1357,9 +1471,49 @@
       showToast('JSON 프롬프트가 클립보드에 복사되었습니다.');
     });
 
-    // Automatically purge any old keys to strictly use the dedicated server Tier-1 key
-    localStorage.removeItem('inde_render_api_key');
-    localStorage.removeItem('ppok_gemini_api_key');
+    // API Key Modal Event Handlers
+    const apiKeyModal = document.getElementById('apiKeyModal');
+    const inputApiKey = document.getElementById('inputApiKey');
+    const btnApiKeyModal = document.getElementById('btnApiKeyModal');
+    const btnCloseApiKeyModal = document.getElementById('btnCloseApiKeyModal');
+    const btnSaveApiKey = document.getElementById('btnSaveApiKey');
+    const btnClearApiKey = document.getElementById('btnClearApiKey');
+
+    if (btnApiKeyModal) {
+      btnApiKeyModal.addEventListener('click', () => {
+        inputApiKey.value = localStorage.getItem('inde_render_api_key') || '';
+        apiKeyModal.style.display = 'flex';
+      });
+    }
+
+    if (btnCloseApiKeyModal) {
+      btnCloseApiKeyModal.addEventListener('click', () => {
+        apiKeyModal.style.display = 'none';
+      });
+    }
+
+    if (btnSaveApiKey) {
+      btnSaveApiKey.addEventListener('click', () => {
+        const keyVal = inputApiKey.value.trim();
+        if (keyVal) {
+          localStorage.setItem('inde_render_api_key', keyVal);
+          showToast('개인 API 키가 저장되었습니다.');
+        } else {
+          localStorage.removeItem('inde_render_api_key');
+          showToast('기본 서버 키로 설정되었습니다.');
+        }
+        apiKeyModal.style.display = 'none';
+      });
+    }
+
+    if (btnClearApiKey) {
+      btnClearApiKey.addEventListener('click', () => {
+        localStorage.removeItem('inde_render_api_key');
+        inputApiKey.value = '';
+        apiKeyModal.style.display = 'none';
+        showToast('기본 서버 키로 초기화되었습니다.');
+      });
+    }
 
     function showToast(msg) {
       const toast = document.getElementById('toastMsg');

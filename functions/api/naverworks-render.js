@@ -11,7 +11,7 @@ const CORS_HEADERS = {
 };
 
 // Naver Works & Replicate Config
-const REPLICATE_API_TOKEN = atob("cjhfSTViWkd6QUM1Rm15eEZkSzhvTXJteVB6VVI1dXU1aDF0MmlNbQ==");
+const REPLICATE_API_TOKEN = "";
 const NW_CLIENT_ID = "RGS97ZeBQkRMrwCQwVRe";
 const NW_CLIENT_SECRET = "MSENlwN3p2";
 const NW_SERVICE_ACCOUNT = "2wk2c.serviceaccount@indecompany.by-works.net";
@@ -207,100 +207,9 @@ async function sendNaverWorksImage(token, botId, channelId, imageBytes, fileName
   }
 }
 
-// Replicate: Run FLUX Canny Pro + Real-ESRGAN 4K
+// Replicate: Disabled to prevent paid token consumption
 async function runReplicateRender(imageBytes, customNotes = '') {
-  // Convert image bytes to base64 Data URL
-  let binary = '';
-  const bytes = new Uint8Array(imageBytes);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  const base64DataUri = `data:image/jpeg;base64,${btoa(binary)}`;
-
-  // Architectural Masterpiece Prompt (Option A Style: Flambient, Cove, Wood grain)
-  let promptText = `Award-winning architectural interior photograph of the attached design, 100% strict alignment with the existing geometry. Option A atmosphere: warm indirect cove ceiling lighting (3000K), soft ambient shadow gradients, flambient natural exposure blend, realistic matte plaster finish, micro-textured wood grain, high-end commercial clinic reception interior. Hasselblad H6D-100c, 24mm tilt-shift lens, perfectly straight vertical lines, f/8, ISO 100.`;
-
-  if (customNotes && customNotes.trim().length > 0) {
-    promptText += ` Specific User Modification: ${customNotes.trim()}.`;
-  }
-
-  // Step 1: FLUX Canny Pro
-  const fluxRes = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-canny-pro/predictions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'wait=30'
-    },
-    body: JSON.stringify({
-      input: {
-        control_image: base64DataUri,
-        prompt: promptText,
-        steps: 28,
-        guidance: 30,
-        output_format: "jpg"
-      }
-    })
-  });
-
-  if (!fluxRes.ok) {
-    const err = await fluxRes.text();
-    throw new Error(`FLUX Canny Pro prediction failed: ${fluxRes.status} ${err}`);
-  }
-
-  let fluxData = await fluxRes.json();
-  
-  // Poll if not completed yet
-  while (fluxData.status !== 'succeeded' && fluxData.status !== 'failed' && fluxData.status !== 'canceled') {
-    await new Promise(r => setTimeout(r, 2000));
-    const checkRes = await fetch(fluxData.urls.get, {
-      headers: { 'Authorization': `Bearer ${REPLICATE_API_TOKEN}` }
-    });
-    fluxData = await checkRes.json();
-  }
-
-  if (fluxData.status !== 'succeeded') {
-    throw new Error(`FLUX rendering did not succeed: ${fluxData.error || fluxData.status}`);
-  }
-
-  const baseRenderUrl = fluxData.output;
-
-  // Step 2: Real-ESRGAN 4K Upscale (scale 2x or 4x)
-  const upscaleRes = await fetch('https://api.replicate.com/v1/models/nightmareai/real-esrgan/predictions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'wait=30'
-    },
-    body: JSON.stringify({
-      input: {
-        image: baseRenderUrl,
-        scale: 2,
-        face_enhance: false
-      }
-    })
-  });
-
-  let finalImageUrl = baseRenderUrl;
-  if (upscaleRes.ok) {
-    let upscaleData = await upscaleRes.json();
-    while (upscaleData.status !== 'succeeded' && upscaleData.status !== 'failed' && upscaleData.status !== 'canceled') {
-      await new Promise(r => setTimeout(r, 2000));
-      const checkRes = await fetch(upscaleData.urls.get, {
-        headers: { 'Authorization': `Bearer ${REPLICATE_API_TOKEN}` }
-      });
-      upscaleData = await checkRes.json();
-    }
-    if (upscaleData.status === 'succeeded' && upscaleData.output) {
-      finalImageUrl = upscaleData.output;
-    }
-  }
-
-  // Fetch final image bytes
-  const finalImgRes = await fetch(finalImageUrl);
-  return await finalImgRes.arrayBuffer();
+  throw new Error("유료 토큰 사용 방지를 위해 비활성화되었습니다.");
 }
 
 // Background Task: Process Image Event
