@@ -42,8 +42,8 @@ export async function onRequestPost(context) {
     // Step 1: Vision analysis via Gemini 3.7 Flash
     const systemInstruction = `You are the specialized INDE RENDER Master Architectural AI.
 Analyze the attached SketchUp viewport capture / CAD perspective image and generate an exhaustive, production-grade JSON photoreal conversion prompt following the 6 absolute rules:
-1. STRUCTURE & CEILING APPARATUS LOCK (100%): Never add AC units where none exist in the reference. If AC exists, strictly preserve its exact position and type (1-way/2-way rectangular vs 4-way square). Do NOT move, add, or delete lighting fixtures (pendants, downlights, track rails).
-2. MATERIAL ANCHORING (100%): Strictly inherit all original material identities (wood species/tones like dark walnut or light oak, tile patterns, leather colors, paint) from the attached image without altering them. Upgrade ONLY their physical micro-roughness, open pores, weave relief, and edge bevel reflections.
+1. STRUCTURE & CEILING APPARATUS LOCK: Never add AC units where none exist in the reference. If AC exists, strictly preserve its exact position and type (1-way/2-way rectangular vs 4-way square). Do NOT move, add, or delete lighting fixtures (pendants, downlights, track rails).
+2. MATERIAL ANCHORING: Strictly inherit all original material identities (wood species/tones like dark walnut or light oak, tile patterns, leather colors, paint) from the attached image without altering them. Upgrade ONLY their physical micro-roughness, open pores, weave relief, and edge bevel reflections.
 3. COLOR TEMPERATURE & ILLUMINANCE FIDELITY: Maintain the authentic lighting mood and color temperatures (daylight 5000K, neutral white 4000K, warm cove 3000K). Preserve low-key/moody shadows without artificial over-brightening.
 4. FULL CEILING 3D RECONSTRUCTION: Eliminate all flat 2D untextured slabs, black CAD outline strokes, flat 2D fan cutouts, and flat track lines. Reconstruct realistic gypsum plasterboard stipple texture, physical 3D fan blades, 3D cylindrical track spotlights, and smooth continuous cove gradient washes.
 5. CROSS-SCENE CONSISTENCY: Ensure materials, floor tiles, and fixtures are unified across all project views.
@@ -51,7 +51,7 @@ Analyze the attached SketchUp viewport capture / CAD perspective image and gener
 
 User Selected Options:
 - Lock Ceiling & Apparatus: ${lockCeiling}
-- Anchor Materials 100%: ${anchorMaterials}
+- Anchor Materials: ${anchorMaterials}
 - Color Temperature Mode: ${colorTemp}
 - Preserve Original Exposure & Low-key Mood: ${preserveExposure}
 - Cross-Scene Sync: ${crossSceneSync}
