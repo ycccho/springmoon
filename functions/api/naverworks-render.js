@@ -357,12 +357,43 @@ export async function onRequestPost(context) {
 
     const channelId = source?.channelId || NW_RENDER_CHANNEL;
 
-    // Handle Text Message (Save as pending instruction)
-    if (content?.type === 'text') {
-      const text = content.text?.trim() || '';
-      latestInstructions.set(channelId, text);
-      
-      // Auto-reply to let user know instruction is recorded
+    const kv = context.env?.POWER_CONTENT_KV;
+
+    // Helper to get pending image fileId
+    async function getPendingFile(chId) {
+      if (kv) {
+        try {
+          return await kv.get(`render_pending:${chId}`, 'text');
+        } catch (e) {}
+      }
+      return latestInstructions.get(`pending:${chId}`) || null;
+    }
+
+    // Helper to save pending image fileId
+    async function setPendingFile(chId, fId) {
+      if (kv) {
+        try {
+          await kv.put(`render_pending:${chId}`, fId, { expirationTtl: 3600 });
+        } catch (e) {}
+      }
+      latestInstructions.set(`pending:${chId}`, fId);
+    }
+
+    // Helper to clear pending image fileId
+    async function clearPendingFile(chId) {
+      if (kv) {
+        try {
+          await kv.delete(`render_pending:${chId}`);
+        } catch (e) {}
+      }
+      latestInstructions.delete(`pending:${chId}`);
+    }
+
+    // 1. Handle Image or File Upload
+    if (content?.type === 'image' || content?.type === 'file') {
+      const fileId = content.fileId;
+      await setPendingFile(channelId, fileId);
+
       context.waitUntil((async () => {
         try {
           const token = await getNaverWorksAccessToken();
@@ -370,29 +401,92 @@ export async function onRequestPost(context) {
             token,
             NW_BOT_ID,
             channelId,
-            `📝 렌더링 요청사항 접수: "${text}"\n이제 스케치업 도면 이미지를 올려주시면 위 내용을 반영하여 4K 실사 렌더링을 시작합니다!`
+            `📸 스케치업 도면 이미지를 확인했습니다!\n\n추가 요청사항(가구 색상 변경, 조명 톤 등)이 있으신가요?\n\n👉 [Y + 요청사항] 입력\n예시: Y 소파는 파란색으로 변경해줘\n\n👉 [N] 입력\n추가 요청 없이 기본 옵션 A 4K 실사 렌더링 즉시 시작`
           );
         } catch (e) {
-          console.error('Text ack error:', e);
+          console.error('Image prompt ack error:', e);
         }
       })());
 
-      return new Response(JSON.stringify({ success: true, action: 'instruction_saved' }), {
+      return new Response(JSON.stringify({ success: true, action: 'image_prompted' }), {
         status: 200,
         headers: CORS_HEADERS
       });
     }
 
-    // Handle Image or File
-    if (content?.type === 'image' || content?.type === 'file') {
-      const fileId = content.fileId;
-      const userInstruction = latestInstructions.get(channelId) || '';
-      latestInstructions.delete(channelId); // Consume instruction
+    // 2. Handle Text Message (Y / N or direct instruction)
+    if (content?.type === 'text') {
+      const rawText = content.text?.trim() || '';
+      const pendingFileId = await getPendingFile(channelId);
 
-      // Run async background processing
-      context.waitUntil(processImageRender(channelId, fileId, userInstruction));
+      if (!pendingFileId) {
+        // No image pending
+        context.waitUntil((async () => {
+          try {
+            const token = await getNaverWorksAccessToken();
+            await sendNaverWorksText(
+              token,
+              NW_BOT_ID,
+              channelId,
+              `💡 현재 대기 중인 스케치업 도면이 없습니다.\n먼저 렌더링할 스케치업 도면 이미지를 이 방에 올려주세요!`
+            );
+          } catch (e) {
+            console.error('No pending ack error:', e);
+          }
+        })());
 
-      return new Response(JSON.stringify({ success: true, action: 'render_started' }), {
+        return new Response(JSON.stringify({ success: true, action: 'no_pending_image' }), {
+          status: 200,
+          headers: CORS_HEADERS
+        });
+      }
+
+      // Check if user answered N (no modifications)
+      const isNo = /^(n|ㄴ|아니오|아니|없음|없어)$/i.test(rawText);
+      if (isNo) {
+        await clearPendingFile(channelId);
+        context.waitUntil(processImageRender(channelId, pendingFileId, ''));
+        return new Response(JSON.stringify({ success: true, action: 'render_default_started' }), {
+          status: 200,
+          headers: CORS_HEADERS
+        });
+      }
+
+      // Check if user answered Y (with modification)
+      const isY = /^(y|ㅇ|네)\b/i.test(rawText) || /^(y|ㅇ|네)\s+/i.test(rawText);
+      if (isY) {
+        const cleanInstruction = rawText.replace(/^(y|ㅇ|네)\s*/i, '').trim();
+        if (!cleanInstruction) {
+          // User only typed 'Y' without details
+          context.waitUntil((async () => {
+            try {
+              const token = await getNaverWorksAccessToken();
+              await sendNaverWorksText(
+                token,
+                NW_BOT_ID,
+                channelId,
+                `💡 구체적인 요청사항 내용을 함께 적어주세요!\n예시: Y 소파를 파란색으로, 바닥을 화이트 대리석으로 해줘`
+              );
+            } catch (e) {}
+          })());
+          return new Response(JSON.stringify({ success: true, action: 'y_needs_details' }), {
+            status: 200,
+            headers: CORS_HEADERS
+          });
+        }
+
+        await clearPendingFile(channelId);
+        context.waitUntil(processImageRender(channelId, pendingFileId, cleanInstruction));
+        return new Response(JSON.stringify({ success: true, action: 'render_custom_started' }), {
+          status: 200,
+          headers: CORS_HEADERS
+        });
+      }
+
+      // Direct instruction fallback (user typed instruction without Y prefix)
+      await clearPendingFile(channelId);
+      context.waitUntil(processImageRender(channelId, pendingFileId, rawText));
+      return new Response(JSON.stringify({ success: true, action: 'render_direct_started' }), {
         status: 200,
         headers: CORS_HEADERS
       });
