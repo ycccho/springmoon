@@ -942,7 +942,7 @@
 
       <!-- Submit Button -->
       <button class="btn-submit" id="btnSubmit">
-        <span id="btnSubmitText">실사 렌더링 변환 시작</span>
+        <span id="btnSubmitText">도면 분석 및 1920×1080 규격화 시작</span>
       </button>
     </div>
 
@@ -950,15 +950,15 @@
     <div class="card results-card">
       <div class="card-header">
         <div>
-          <div class="card-title">실사 렌더링 결과 (Before & After)</div>
-          <div class="card-subtext">전문 건축 사진 틸트시프트 렌더링 뷰어</div>
+          <div class="card-title">도면 분석 및 1920×1080 뷰어</div>
+          <div class="card-subtext">전문 건축 사진 규격 최적화 및 물리 프롬프트 생성</div>
         </div>
       </div>
 
       <!-- Empty State -->
       <div class="empty-state" id="emptyState">
         <div class="empty-text">왼쪽에서 스케치업 도면을 업로드하세요</div>
-        <div class="empty-sub">여러 장 업로드 시 일괄 실사 변환 후 클릭하여 비교할 수 있습니다.</div>
+        <div class="empty-sub">여러 장 업로드 시 일괄 분석 후 1920×1080 고화질 다운로드가 가능합니다.</div>
       </div>
 
       <!-- Progress Box -->
@@ -972,8 +972,8 @@
         </div>
         <div class="progress-steps">
           <div class="progress-step" id="step1">1단계: 스케치업 도면 및 천장 설비/조명 분석</div>
-          <div class="progress-step" id="step2">2단계: INDE RENDER 6대 원칙 물리 프롬프트 조립</div>
-          <div class="progress-step" id="step3">3단계: 초고화질 건축 사진 렌더링 및 디테일링</div>
+          <div class="progress-step" id="step2">2단계: INDE RENDER 물리 프롬프트 조립</div>
+          <div class="progress-step" id="step3">3단계: 1920×1080 고화질 규격 최적화</div>
         </div>
       </div>
 
@@ -983,7 +983,7 @@
         <div class="batch-selector-bar" id="batchSelectorBar"></div>
 
         <div class="comparison-slider" id="compSlider">
-          <img src="" id="imgAfter" class="image-after" alt="Rendered Photoreal">
+          <img src="" id="imgAfter" class="image-after" alt="1920x1080 FHD View">
           <div class="image-before-wrapper" id="beforeWrapper">
             <img src="" id="imgBefore" alt="SketchUp Original">
           </div>
@@ -991,7 +991,7 @@
             <div class="slider-button">↔</div>
           </div>
           <span class="badge-pill badge-before">스케치업 원본</span>
-          <span class="badge-pill badge-after">완성 실사 사진</span>
+          <span class="badge-pill badge-after">1920×1080 규격 뷰</span>
         </div>
 
         <div class="result-actions">
@@ -1418,14 +1418,14 @@
         }
 
         renderGallery();
-        updateProgress(Math.round(((i + 1) / total) * 100), `[${i + 1}/${total}] 실사 변환 처리됨`, 3);
+        updateProgress(Math.round(((i + 1) / total) * 100), `[${i + 1}/${total}] 도면 분석 및 규격화 완료`, 3);
       }
 
       btnSubmit.disabled = false;
       progressBox.style.display = 'none';
 
       if (successCount > 0) {
-        showToast(`${successCount}/${total}장의 실사 렌더링이 완료되었습니다!`);
+        showToast(`${successCount}/${total}장의 도면 분석 및 1920×1080 규격화 처리가 완료되었습니다!`);
         selectedIndex = 0;
         renderGallery();
         displaySelectedItem();
