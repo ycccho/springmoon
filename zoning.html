@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HOSPITAL ZONING AI | 대한민국 병원·의원 8대안 도면 조닝 시스템</title>
-  <meta name="description" content="외곽 벽체와 입구를 100% 고정한 채 진료과목과 실 개수 맞춤형으로 8가지 최신 병원 인테리어 조닝 대안을 산출하는 전문 의료 건축 AI">
+  <meta name="description" content="외곽 벽체와 입구를 정밀 고정한 채 진료과목과 실 개수 맞춤형으로 8가지 최신 병원 인테리어 조닝 대안을 산출하는 전문 의료 건축 AI">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -895,6 +895,9 @@
         </nav>
       </div>
       <div class="header-actions">
+        <button class="btn-secondary" onclick="loadOfficeSample()" style="background:#0f172a;color:#38bdf8;border-color:#38bdf8;">
+          🏢 오피스 샘플 3대안 보기
+        </button>
         <button class="btn-secondary" onclick="openApiKeyModal()">
           API 키 설정
         </button>
@@ -908,7 +911,7 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title">병원 도면 업로드 및 실 구성 설정</div>
-        <div class="card-subtext">외곽 벽체 100% 고정 · 출입구 진입 시퀀스 엄수 · 8대안 동시 산출</div>
+        <div class="card-subtext">외곽 벽체 정밀 고정 · 출입구 진입 시퀀스 엄수 · 8대안 동시 산출</div>
       </div>
 
       <!-- Floor Plan Upload Zone -->
@@ -974,7 +977,7 @@
       <div class="form-group" style="margin-top: 4px;">
         <label class="form-label" for="selectEntrance">주출입구(E.N.T) 위치</label>
         <select id="selectEntrance" class="select-input">
-          <option value="도면 표시 위치 (기본)" selected>도면 표시 위치 (AI 자동 감지 100% 고정)</option>
+          <option value="도면 표시 위치 (기본)" selected>도면 표시 위치 (AI 자동 감지 정밀 고정)</option>
           <option value="하단 좌측 (9시~8시 방향)">하단 좌측 (9시~8시 방향)</option>
           <option value="하단 중앙 (6시 방향)">하단 중앙 (6시 방향)</option>
           <option value="하단 우측 (4시~5시 방향)">하단 우측 (4시~5시 방향)</option>
@@ -1643,6 +1646,113 @@
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
+
+    window.loadOfficeSample = function() {
+      emptyState.style.display = 'none';
+      zoningResultSection.style.display = 'flex';
+      
+      conceptsData = [
+        {
+          name: "안 1: 임원실 & VIP 대회의실 창가 조망형",
+          conceptDescription: "우측 사선 파노라마 뷰에 대표이사실과 대회의실을 집중 배치하여 내방객 응대와 임원 집무 환경의 프리미엄 가치를 극대화한 구조",
+          circulationSummary: "주출입구 진입 ➡️ 웰컴 라운지 및 탕비/OA 코어 ➡️ 오픈 업무존 ➡️ 창가 VIP 임원실 및 코너 대회의실 직결",
+          diagramImage: "/office_zoning_opt1.png",
+          zones: [
+            {
+              zoneName: "임원/집무 존",
+              color: "#3b82f6",
+              rooms: [
+                { roomName: "대표이사실 (CEO)", areaM2: "28.1", areaPyung: "8.5", percentage: 23, description: "오션/시티 파노라마 뷰 확보, 최고급 독립 집무공간" }
+              ]
+            },
+            {
+              zoneName: "회의/접견 존",
+              color: "#8b5cf6",
+              rooms: [
+                { roomName: "메인 대회의실 (8~10인)", areaM2: "24.8", areaPyung: "7.5", percentage: 20, description: "사선 코너 뷰 글라스월, 내방객 PT 및 전략회의 최적화" }
+              ]
+            },
+            {
+              zoneName: "업무/협업 존",
+              color: "#10b981",
+              rooms: [
+                { roomName: "오픈 워크스테이션 (10~12인)", areaM2: "46.9", areaPyung: "14.2", percentage: 38, description: "효율적 책상 모듈 배치, 자연 채광 유입 및 팀 협업 동선" }
+              ]
+            },
+            {
+              zoneName: "지원/휴게 존",
+              color: "#f59e0b",
+              rooms: [
+                { roomName: "웰컴 라운지 & OA/탕비", areaM2: "22.5", areaPyung: "6.8", percentage: 18, description: "출입구 웰컴월, 탕비바 및 복합기 집중 배치로 소음 차단" }
+              ]
+            }
+          ]
+        },
+        {
+          name: "안 2: 오픈 협업 스마트오피스형",
+          conceptDescription: "가장 전망이 좋은 동측 사선 파노라마 창가 전면부를 전 직원이 공유하는 핫데스크 오픈 업무존으로 개방하고 회의실을 중앙 기둥에 통합",
+          circulationSummary: "주출입구 진입 ➡️ 타운홀 라운지 ➡️ 중앙 글라스 미팅룸 ➡️ 동측 파노라마 오픈 데스크 및 포커스룸",
+          diagramImage: "/office_zoning_opt2.png",
+          zones: [
+            {
+              zoneName: "업무/협업 존",
+              color: "#06b6d4",
+              rooms: [
+                { roomName: "파노라마 오픈 업무존 (14~18인)", areaM2: "61.1", areaPyung: "18.5", percentage: 50, description: "사선 파노라마 창가 전면 개방, 쾌적성 극대화 및 유연근무" }
+              ]
+            },
+            {
+              zoneName: "회의/집중 존",
+              color: "#6366f1",
+              rooms: [
+                { roomName: "중앙 글라스 미팅룸 (6~8인)", areaM2: "21.5", areaPyung: "6.5", percentage: 18, description: "중앙 기둥을 벽체에 흡수한 디자인, 4면 글라스 파티션" },
+                { roomName: "포커스룸 / 폰부스 (2실)", areaM2: "12.6", areaPyung: "3.8", percentage: 10, description: "방음 시공, 1인 화상미팅 및 집중 업무 전용 부스" }
+              ]
+            },
+            {
+              zoneName: "지원/휴게 존",
+              color: "#f97316",
+              rooms: [
+                { roomName: "타운홀 라운지 & 카페테리아", areaM2: "27.1", areaPyung: "8.2", percentage: 22, description: "입구 진입 시 환대 분위기, 사내 소통 및 캐주얼 티타임 공간" }
+              ]
+            }
+          ]
+        },
+        {
+          name: "안 3: 부서별 분리 & 브릿지 회의실형",
+          conceptDescription: "업무 성격이 다른 2개 부서를 북측과 남측으로 분리하고, 두 팀의 접점에 공유 대회의실을 브릿지 형태로 둔 구조",
+          circulationSummary: "주출입구 진입 ➡️ 공용 리셉션 분기점 ➡️ 제1/제2 업무공간 또는 중앙 브릿지 회의실",
+          diagramImage: "/office_zoning_opt3.png",
+          zones: [
+            {
+              zoneName: "부서 독립 업무존",
+              color: "#3b82f6",
+              rooms: [
+                { roomName: "제1 업무공간 (기획 6~8인)", areaM2: "34.7", areaPyung: "10.5", percentage: 28, description: "채광이 풍부한 북측 창가, 독립 업무가 필요한 팀 전용" },
+                { roomName: "제2 업무공간 (개발 6~8인)", areaM2: "33.7", areaPyung: "10.2", percentage: 28, description: "남측 뷰 확보, 개발·디자인 집중 워크스테이션" }
+              ]
+            },
+            {
+              zoneName: "공유 회의 존",
+              color: "#a855f7",
+              rooms: [
+                { roomName: "중앙 브릿지 대회의실 (8~10인)", areaM2: "29.1", areaPyung: "8.8", percentage: 24, description: "두 부서가 공유하는 중앙 허브 회의실, 전면 글라스월" }
+              ]
+            },
+            {
+              zoneName: "지원/코어 존",
+              color: "#eab308",
+              rooms: [
+                { roomName: "공용 리셉션 & OA 센터", areaM2: "24.8", areaPyung: "7.5", percentage: 20, description: "출입구에서 두 부서로 나뉘는 분기점, 공용 복합기 및 탕비" }
+              ]
+            }
+          ]
+        }
+      ];
+      selectedConceptIndex = 0;
+      renderConceptsView();
+      showToast('오피스 조닝 3대안 샘플을 불러왔습니다.');
+    };
   </script>
 </body>
 </html>
