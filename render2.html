@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REDRAW STUDIO 2.0 | Image to Render</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #dd5828;
+      --primary-hover: #c44a1d;
+      --primary-light: rgba(221, 88, 40, 0.12);
+      --bg: #090a0f;
+      --panel-bg: #12141c;
+      --card-bg: #181b26;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(221, 88, 40, 0.5);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* TOP HEADER */
+    header {
+      height: 64px;
+      background: rgba(18, 20, 28, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 16px;
+      box-shadow: 0 4px 14px rgba(221, 88, 40, 0.4);
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(221, 88, 40, 0.3);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    .api-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    .btn-icon {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* MAIN STUDIO LAYOUT */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      height: calc(100vh - 64px);
+      overflow: hidden;
+    }
+
+    /* SIDEBAR CONTROLS */
+    .sidebar {
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .form-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* UPLOAD ZONE */
+    .dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.12);
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--primary);
+      background: rgba(221, 88, 40, 0.05);
+    }
+
+    .dropzone-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .dropzone-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .dropzone-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .preview-thumb-box {
+      display: none;
+      position: relative;
+      width: 99.9%;
+      height: 180px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .preview-thumb {
+      width: 99.9%;
+      height: 99.9%;
+      object-fit: cover;
+    }
+
+    .btn-remove-thumb {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    /* PRESET PILLS */
+    .pills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+    }
+
+    .pill-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-btn:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .pill-btn.active {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* INPUTS */
+    textarea, select {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 99.9%;
+    }
+
+    textarea:focus, select:focus {
+      border-color: var(--border-focus);
+    }
+
+    textarea {
+      resize: none;
+      height: 70px;
+    }
+
+    /* GENERATE BUTTON */
+    .btn-render {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 15px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 18px rgba(221, 88, 40, 0.35);
+      margin-top: 4px;
+    }
+
+    .btn-render:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(221, 88, 40, 0.45);
+    }
+
+    .btn-render:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* CANVAS WORKSPACE */
+    .workspace {
+      background: #0d0f16;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .workspace-header {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(18, 20, 28, 0.4);
+    }
+
+    .view-mode-tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--panel-bg);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .view-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .view-tab.active {
+      background: var(--card-bg);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .workspace-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      position: relative;
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      max-width: 440px;
+      padding: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--panel-bg);
+    }
+
+    .empty-icon {
+      font-size: 42px;
+      margin-bottom: 14px;
+      opacity: 0.8;
+    }
+
+    .empty-state h3 {
+      font-size: 17px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* LOADING OVERLAY */
+    .loading-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 10, 15, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 20;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 46px;
+      height: 46px;
+      border: 3.5px solid rgba(221, 88, 40, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-status {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .loading-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* BEFORE / AFTER SLIDER */
+    .comparison-container {
+      display: none;
+      position: relative;
+      width: 99.9%;
+      max-width: 960px;
+      height: calc(100vh - 160px);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      user-select: none;
+    }
+
+    .compare-img {
+      position: absolute;
+      inset: 0;
+      width: 99.9%;
+      height: 99.9%;
+      object-fit: contain;
+      background: #050608;
+    }
+
+    .compare-after-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 99.9%;
+      width: 50%;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .compare-after-box img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 99.9%;
+      width: 99.9%;
+      object-fit: contain;
+      background: #050608;
+    }
+
+    .slider-handle {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 99.9%;
+      background: #fff;
+      z-index: 5;
+      cursor: ew-resize;
+      box-shadow: 0 0 12px rgba(0,0,0,0.6);
+    }
+
+    .slider-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #fff;
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .badge-label {
+      position: absolute;
+      bottom: 16px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      backdrop-filter: blur(6px);
+      z-index: 6;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .badge-before { right: 16px; }
+    .badge-after { left: 16px; color: var(--primary); }
+
+    /* SINGLE VIEW CONTAINER */
+    .single-view-container {
+      display: none;
+      width: 99.9%;
+      max-width: 960px;
+      height: calc(100vh - 160px);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      position: relative;
+      background: #050608;
+    }
+
+    .single-view-container img {
+      width: 99.9%;
+      height: 99.9%;
+      object-fit: contain;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 460px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .btn-modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow-y: auto;
+      }
+      .workspace {
+        min-height: 480px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <a href="/" class="brand">
+      <div class="brand-logo">R</div>
+      <div class="brand-title">REDRAW STUDIO</div>
+      <span class="brand-tag">Image to Render</span>
+    </a>
+
+    <div class="header-actions">
+      <div class="api-status">
+        <span class="api-dot"></span>
+        <span>Gemini AI Engine 연결됨</span>
+      </div>
+      <button class="btn-icon" id="btnSettings" title="API 설정">⚙️</button>
+    </div>
+  </header>
+
+  <!-- MAIN STUDIO -->
+  <main>
+    <!-- LEFT CONTROLS -->
+    <div class="sidebar">
+      <!-- 1. UPLOAD -->
+      <div class="form-group">
+        <div class="form-label">
+          <span>01. 원본 스케치 / 3D 뷰 업로드</span>
+        </div>
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+          <div class="dropzone-icon">📐</div>
+          <div class="dropzone-text">이미지를 드래그하거나 클릭하여 업로드</div>
+          <div class="dropzone-hint">CAD 평면도, 스케치업 뷰포트, 스케치 지원 (JPG, PNG)</div>
+        </div>
+
+        <div class="preview-thumb-box" id="thumbBox">
+          <img class="preview-thumb" id="thumbImg" src="" alt="업로드 이미지" />
+          <button class="btn-remove-thumb" id="btnRemoveThumb" title="이미지 삭제">✕</button>
+        </div>
+      </div>
+
+      <!-- 2. SPACE TYPE -->
+      <div class="form-group">
+        <div class="form-label">
+          <span>02. 공간 유형 선택</span>
+        </div>
+        <select id="spaceType">
+          <option value="거실 (Living Room)">거실 (Living Room)</option>
+          <option value="침실 (Master Bedroom)">침실 (Master Bedroom)</option>
+          <option value="주방 & 다이닝 (Kitchen & Dining)">주방 & 다이닝 (Kitchen & Dining)</option>
+          <option value="욕실 (Bathroom)">욕실 (Bathroom)</option>
+          <option value="상업공간 / 카페 (Cafe & Commercial)">상업공간 / 카페 (Cafe & Commercial)</option>
+          <option value="오피스 / 사무실 (Office Workstation)">오피스 / 사무실 (Office Workstation)</option>
+          <option value="건축 외관 (Exterior Architecture)">건축 외관 (Exterior Architecture)</option>
+        </select>
+      </div>
+
+      <!-- 3. STYLE PRESET -->
+      <div class="form-group">
+        <div class="form-label">
+          <span>03. 렌더링 스타일 프리셋</span>
+        </div>
+        <div class="pills-grid" id="stylePills">
+          <button type="button" class="pill-btn active" data-style="모던 미니멀, 깔끔한 화이트톤, 히든 조명, 매립등, 매트한 바닥">✨ 모던 미니멀</button>
+          <button type="button" class="pill-btn" data-style="따뜻한 원목 마루, 베이지톤 패브릭 소파, 은은한 간접조명, 웜 코지 분위기">🪵 웜 우드 & 베이지</button>
+          <button type="button" class="pill-btn" data-style="대리석 바닥, 골드 메탈 포인트, 대형 샹들리에 조명, 하이엔드 럭셔리">🏛️ 럭셔리 하이엔드</button>
+          <button type="button" class="pill-btn" data-style="노출 콘크리트 벽면, 블랙 트랙조명, 인더스트리얼 빈티지 메탈 가구">🏭 인더스트리얼</button>
+        </div>
+      </div>
+
+      <!-- 4. CUSTOM PROMPT -->
+      <div class="form-group">
+        <div class="form-label">
+          <span>04. 세부 연출 요청 (선택)</span>
+          <span class="form-desc">소재, 조명, 시간대 등</span>
+        </div>
+        <textarea id="customPrompt" placeholder="예: 큰 창문으로 들어오는 오후 햇살, 실내 관엽식물 추가, 바닥은 밝은 포세린 타일"></textarea>
+      </div>
+
+      <!-- 5. GENERATE BUTTON -->
+      <button class="btn-render" id="btnRender" disabled>
+        <span>✨ AI 포토리얼 렌더링 시작</span>
+      </button>
+    </div>
+
+    <!-- RIGHT WORKSPACE -->
+    <div class="workspace">
+      <div class="workspace-header">
+        <div class="view-mode-tabs" id="viewModeTabs">
+          <button class="view-tab active" data-mode="compare">Before / After 비교</button>
+          <button class="view-tab" data-mode="result">실사 렌더링 결과</button>
+          <button class="view-tab" data-mode="original">원본 스케치</button>
+        </div>
+
+        <button class="btn-primary" id="btnDownload" style="display:none; padding:6px 14px; font-size:12px;">
+          ⬇️ 고해상도 다운로드
+        </button>
+      </div>
+
+      <div class="workspace-body">
+        <!-- EMPTY -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">🎨</div>
+          <h3>스케치를 업로드하고 렌더링을 시작하세요</h3>
+          <p>좌측 패널에서 인테리어 스케치나 3D 캡처 이미지를 올린 뒤 [포토리얼 렌더링 시작] 버튼을 누르면 AI가 실제 촬영 사진처럼 사실적으로 구현합니다.</p>
+        </div>
+
+        <!-- LOADING -->
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+          <div class="loading-status" id="loadingStatusText">AI 실사 렌더링을 생성하는 중...</div>
+          <div class="loading-desc">스케치의 카메라 구도와 구조를 정밀하게 계승하고 있습니다 (약 8~12초 소요)</div>
+        </div>
+
+        <!-- BEFORE / AFTER COMPARISON SLIDER -->
+        <div class="comparison-container" id="compareBox">
+          <img class="compare-img" id="compareOriginalImg" src="" alt="Before Sketch" />
+          <div class="compare-after-box" id="compareAfterBox">
+            <img id="compareRenderedImg" src="" alt="After Render" />
+          </div>
+          <div class="slider-handle" id="sliderHandle">
+            <div class="slider-button">⇄</div>
+          </div>
+          <div class="badge-label badge-before">BEFORE (원본 스케치)</div>
+          <div class="badge-label badge-after">AFTER (AI 실사 렌더)</div>
+        </div>
+
+        <!-- SINGLE VIEW -->
+        <div class="single-view-container" id="singleBox">
+          <img id="singleImg" src="" alt="View" />
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">API 설정</div>
+        <button class="btn-modal-close" id="btnCloseModal">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Google AI Studio API Key</label>
+        <input type="text" id="apiKeyInput" style="background:var(--card-bg); border:1px solid var(--border); color:#fff; padding:10px; border-radius:6px; font-size:12px; width:99.9%;" />
+        <span class="form-desc">기본값으로 대표님의 발급 키가 적용되어 있습니다.</span>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-primary" id="btnSaveKey">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // PRE-CONFIGURED API KEY PROVIDED BY USER
+    const DEFAULT_API_KEY = atob("QVEuQWI4Uk42S0REZG8tMmNqeENXNzd2aEFxUnVPNUFkdFAwRk5aNm9tOTFYdXlXcC1FVmc=");
+
+    let currentApiKey = localStorage.getItem("gemini_api_key") || DEFAULT_API_KEY;
+    let selectedFile = null;
+    let originalBase64 = null;
+    let originalMime = "image/png";
+    let renderedBase64 = null;
+    let selectedStyle = "모던 미니멀, 깔끔한 화이트톤, 히든 조명, 매립등, 매트한 바닥";
+
+    // DOM ELEMENTS
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const thumbBox = document.getElementById("thumbBox");
+    const thumbImg = document.getElementById("thumbImg");
+    const btnRemoveThumb = document.getElementById("btnRemoveThumb");
+    const btnRender = document.getElementById("btnRender");
+    const stylePills = document.querySelectorAll(".pill-btn");
+    const spaceTypeSelect = document.getElementById("spaceType");
+    const customPromptTextarea = document.getElementById("customPrompt");
+
+    const emptyState = document.getElementById("emptyState");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const loadingStatusText = document.getElementById("loadingStatusText");
+
+    const compareBox = document.getElementById("compareBox");
+    const compareOriginalImg = document.getElementById("compareOriginalImg");
+    const compareAfterBox = document.getElementById("compareAfterBox");
+    const compareRenderedImg = document.getElementById("compareRenderedImg");
+    const sliderHandle = document.getElementById("sliderHandle");
+
+    const singleBox = document.getElementById("singleBox");
+    const singleImg = document.getElementById("singleImg");
+    const viewTabs = document.querySelectorAll(".view-tab");
+    const btnDownload = document.getElementById("btnDownload");
+
+    const btnSettings = document.getElementById("btnSettings");
+    const settingsModal = document.getElementById("settingsModal");
+    const btnCloseModal = document.getElementById("btnCloseModal");
+    const apiKeyInput = document.getElementById("apiKeyInput");
+    const btnSaveKey = document.getElementById("btnSaveKey");
+
+    // INIT SETTINGS
+    apiKeyInput.value = currentApiKey;
+    btnSettings.addEventListener("click", () => settingsModal.style.display = "flex");
+    btnCloseModal.addEventListener("click", () => settingsModal.style.display = "none");
+    btnSaveKey.addEventListener("click", () => {
+      currentApiKey = apiKeyInput.value.trim() || DEFAULT_API_KEY;
+      localStorage.setItem("gemini_api_key", currentApiKey);
+      settingsModal.style.display = "none";
+      alert("API 키가 저장되었습니다.");
+    });
+
+    // STYLE PILL SELECTOR
+    stylePills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        stylePills.forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        selectedStyle = pill.dataset.style;
+      });
+    });
+
+    // DROPZONE & FILE UPLOAD
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("dragover", e => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+    fileInput.addEventListener("change", e => {
+      if (e.target.files && e.target.files[0]) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 업로드할 수 있습니다.");
+        return;
+      }
+      selectedFile = file;
+      originalMime = file.type;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const fullDataUrl = e.target.result;
+        originalBase64 = fullDataUrl.split(",")[1];
+        thumbImg.src = fullDataUrl;
+        dropzone.style.display = "none";
+        thumbBox.style.display = "block";
+        btnRender.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    btnRemoveThumb.addEventListener("click", e => {
+      e.stopPropagation();
+      selectedFile = null;
+      originalBase64 = null;
+      thumbImg.src = "";
+      fileInput.value = "";
+      thumbBox.style.display = "none";
+      dropzone.style.display = "block";
+      btnRender.disabled = true;
+    });
+
+    // RENDER GENERATION CALL
+    btnRender.addEventListener("click", async () => {
+      if (!originalBase64) return;
+
+      btnRender.disabled = true;
+      loadingOverlay.style.display = "flex";
+      loadingStatusText.innerText = "스케치 구도 분석 및 조명 계산 중...";
+
+      const space = spaceTypeSelect.value;
+      const extraPrompt = customPromptTextarea.value.trim();
+
+      const promptText = `
+Act as an elite architectural and interior design 3D visualization rendering engine (similar to V-Ray/Corona + Midjourney Photorealism).
+Task: Transform the attached input interior/architectural sketch, CAD plan, or 3D viewport preview into an ultra-high-end photorealistic 8K architectural interior photograph.
+
+Strict Rules:
+1. GEOMETRY & PERSPECTIVE ANCHORING: Keep the camera viewpoint, perspective angle, walls, ceiling height, windows, and structural door positions identical to the input image.
+2. MATERIAL & LIGHTING:
+   - Space Category: ${space}
+   - Aesthetic Style: ${selectedStyle}
+   ${extraPrompt ? `- Custom Requests: ${extraPrompt}` : ''}
+   - Lighting: Natural daylight bleeding from windows with soft realistic ambient falloff, warm indirect cove ceiling LED lights (3000K), realistic contact shadows, reflections on floor.
+   - Textures: Hyper-realistic tactile textures (grain in wood, micro-imperfections in matte paint, soft fabric weave on furniture, realistic glass refraction).
+3. Output ONLY the resulting high-resolution photorealistic rendering image.
+`;
+
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${currentApiKey}`;
+
+      const payload = {
+        contents: [{
+          parts: [
+            { text: promptText },
+            {
+              inlineData: {
+                mimeType: originalMime,
+                data: originalBase64
+              }
+            }
+          ]
+        }]
+      };
+
+      try {
+        const resp = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.error?.message || `HTTP ${resp.status}`);
+        }
+
+        const data = await resp.json();
+        const candidate = data.candidates && data.candidates[0];
+        let foundImage = null;
+
+        if (candidate && candidate.content && candidate.content.parts) {
+          for (const part of candidate.content.parts) {
+            if (part.inlineData && part.inlineData.data) {
+              foundImage = part.inlineData;
+              break;
+            }
+          }
+        }
+
+        if (!foundImage) {
+          throw new Error("AI 응답에서 이미지 데이터를 찾지 못했습니다.");
+        }
+
+        renderedBase64 = foundImage.data;
+        const renderedUrl = `data:${foundImage.mimeType};base64,${renderedBase64}`;
+        const originalUrl = `data:${originalMime};base64,${originalBase64}`;
+
+        // Populate Views
+        compareOriginalImg.src = originalUrl;
+        compareRenderedImg.src = renderedUrl;
+        singleImg.src = renderedUrl;
+
+        // Switch workspace display
+        emptyState.style.display = "none";
+        singleBox.style.display = "none";
+        compareBox.style.display = "block";
+        btnDownload.style.display = "block";
+
+        // Reset compare slider to 50%
+        setSliderPosition(50);
+
+        // Update active tab
+        viewTabs.forEach(t => t.classList.remove("active"));
+        document.querySelector('[data-mode="compare"]').classList.add("active");
+
+      } catch (err) {
+        alert("렌더링 생성 중 오류가 발생했습니다: " + err.message);
+      } finally {
+        loadingOverlay.style.display = "none";
+        btnRender.disabled = false;
+      }
+    });
+
+    // BEFORE / AFTER SLIDER LOGIC
+    let isDragging = false;
+
+    function setSliderPosition(percent) {
+      if (percent < 0) percent = 0;
+      if (percent > 100) percent = 100;
+      compareAfterBox.style.width = percent + "%";
+      sliderHandle.style.left = percent + "%";
+    }
+
+    sliderHandle.addEventListener("mousedown", () => isDragging = true);
+    window.addEventListener("mouseup", () => isDragging = false);
+    window.addEventListener("mousemove", e => {
+      if (!isDragging) return;
+      const rect = compareBox.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percent = (x / rect.width) * 100;
+      setSliderPosition(percent);
+    });
+
+    // Touch support
+    sliderHandle.addEventListener("touchstart", () => isDragging = true, { passive: true });
+    window.addEventListener("touchend", () => isDragging = false);
+    window.addEventListener("touchmove", e => {
+      if (!isDragging || !e.touches[0]) return;
+      const rect = compareBox.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      const percent = (x / rect.width) * 100;
+      setSliderPosition(percent);
+    }, { passive: true });
+
+    // VIEW MODE TABS
+    viewTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        viewTabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        const mode = tab.dataset.mode;
+
+        if (mode === "compare") {
+          singleBox.style.display = "none";
+          compareBox.style.display = "block";
+        } else if (mode === "result") {
+          compareBox.style.display = "none";
+          singleImg.src = `data:image/png;base64,${renderedBase64}`;
+          singleBox.style.display = "block";
+        } else if (mode === "original") {
+          compareBox.style.display = "none";
+          singleImg.src = `data:${originalMime};base64,${originalBase64}`;
+          singleBox.style.display = "block";
+        }
+      });
+    });
+
+    // DOWNLOAD
+    btnDownload.addEventListener("click", () => {
+      if (!renderedBase64) return;
+      const link = document.createElement("a");
+      link.href = `data:image/png;base64,${renderedBase64}`;
+      link.download = `redraw_render_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>
