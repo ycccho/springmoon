@@ -723,9 +723,16 @@
             <button class="view-btn" data-view="before">원본 스케치</button>
           </div>
 
-          <button class="btn-dl" id="btnDownload">
-            <span>⬇️ 고해상도 다운로드</span>
-          </button>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <select id="dlResolution" style="background:var(--card-dark); border:1px solid var(--border-dark); color:var(--text-main); border-radius:8px; padding:6px 10px; font-size:12px; outline:none; cursor:pointer;">
+              <option value="original">원본 해상도 유지</option>
+              <option value="2k" selected>2K QHD (2560px)</option>
+              <option value="4k">4K UHD (3840px)</option>
+            </select>
+            <button class="btn-dl" id="btnDownload">
+              <span>⬇️ 다운로드</span>
+            </button>
+          </div>
         </div>
 
         <div class="canvas-stage">
@@ -887,20 +894,26 @@
         const reader = new FileReader();
         reader.onload = e => {
           const full = e.target.result;
-          batchFiles.push({
-            file,
-            name: file.name,
-            mime: file.type,
-            originalBase64: full.split(",")[1],
-            renderedBase64: null,
-            status: "ready",
-            errorMsg: ""
-          });
-          readCount++;
-          if (readCount === toAdd.length) {
-            renderBatchList();
-            selectItem(batchFiles.length - toAdd.length);
-          }
+          const img = new Image();
+          img.onload = () => {
+            batchFiles.push({
+              file,
+              name: file.name,
+              mime: file.type,
+              originalBase64: full.split(",")[1],
+              renderedBase64: null,
+              origWidth: img.naturalWidth || 1484,
+              origHeight: img.naturalHeight || 704,
+              status: "ready",
+              errorMsg: ""
+            });
+            readCount++;
+            if (readCount === toAdd.length) {
+              renderBatchList();
+              selectItem(batchFiles.length - toAdd.length);
+            }
+          };
+          img.src = full;
         };
         reader.readAsDataURL(file);
       });
@@ -1007,22 +1020,31 @@
 
       const customInstructions = promptInput.value.trim();
 
-      const prompt = `A magazine-quality professional architectural photograph of this modern corporate interior space.
-Directly replicate the aesthetic of high-end architectural photography:
-1. LIGHTING (CRITICAL):
-   - Strong, warm late-morning/golden-hour sunlight streaming in directly through the windows.
-   - The sunlight must cast distinct, dramatic diagonal sunbeams and sharp window-frame contact shadows across the textured floor.
-   - Ceiling: The ceiling linear slots and channels are passive recessed architectural reveals, NOT glowing neon lights. Keep them off or subtle warm ambient downlights. Absolutely no harsh white light bars or neon glow on the ceiling.
-2. MATERIALS & COLOR ACCURACY:
-   - Wood elements: Premium natural wood veneer panels with visible grain and satin sheen.
-   - Partitions: Minimalist powder-coated aluminum and steel metal frame with transparent glass panels and realistic reflections.
-   - Solid accent walls: Solid corporate painted drywall wall with crisp brand logo/graphics intact. NOT a backlit glowing LED box.
-   - Floor: Fine-textured commercial modular carpet tiles or matte porcelain tiles with natural light falloff.
-3. CAMERA & DETAILS:
-   - Eliminate all black Sketchup wireframe outlines and unshaded flat polygons.
-   - Preserve all spatial architecture, camera angle, furniture placement, display screens, and wall art.
-   - Shot on Hasselblad H6D-100c, 28mm architectural tilt-shift lens, ISO 64, natural light exposure blending.
-${customInstructions ? `- Custom details: ${customInstructions}` : ''}`;
+      const prompt = `Professional real-world architectural photograph of the EXACT interior room shown in the reference image.
+DO NOT RE-DESIGN. DO NOT SUBSTITUTE ANY OBJECTS. DO NOT ALTER EXISTING COLORS OR MATERIAL TONES.
+
+CRITICAL 1:1 IDENTITY & OBJECT PRESERVATION (ABSOLUTE FIDELITY):
+1. ZERO OBJECT SUBSTITUTION (NEVER INVENT OR CHANGE OBJECTS):
+   - Every piece of equipment, furniture, appliance, and accessory in the reference image must remain EXACTLY what it is.
+   - The white office printer, scanner, and copier machine on top of the cabinet MUST strictly remain a white office printer/copier. NEVER substitute it with plants, greenery, planters, or wood blocks.
+   - Keep all display screens, posters, and brand logos (e.g. SKF logo) in their exact design, shape, and original position.
+
+2. STRICT COLOR & MATERIAL ANCHORING (NO COLOR DRIFT):
+   - Wall colors: Maintain the EXACT original color of every wall. A rich cobalt blue accent wall MUST remain rich cobalt blue; NEVER turn it into beige, cream, white, or any other tone.
+   - Wood tones: Keep the EXACT light, natural, pale bleached oak/birch wood tone from the reference. DO NOT oversaturate, do NOT make it dark, orange, or heavy golden honey wood.
+   - Partition frames: Keep the slim light-grey powder-coated metal frame. DO NOT turn it into wood.
+   - Structural ceiling joints: Preserve the authentic architectural center seam/joint groove running along the ceiling. DO NOT erase it.
+   - Floor: Low-pile commercial loop carpet tiles matching the reference neutral grey.
+
+3. NATURAL PHOTOGRAPHIC LIGHTING:
+   - Soft, warm natural sunlight streaming in through the windows, casting gentle diagonal window-frame shadows on the floor.
+   - Ceiling: Keep the linear ceiling channels and slots passive, unlit, or subtle dark architectural reveals. NEVER create glaring white neon light bars or glowing strips.
+   - Completely natural, balanced exposure without artificial fantasy glow or over-contrasted orange casts.
+
+4. PHOTOGRAPHIC REALISM:
+   - Eliminate only 3D CAD vector polygon edges, but preserve all real physical joints, bevels, and seams.
+   - Shot with Sony A7R V with 24mm tilt-shift lens, f/8, ISO 100, flambient interior photography style.
+${customInstructions ? `- User custom details: ${customInstructions}` : ''}`;
 
       const primaryEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent?key=${apiKey}`;
       const fallbackEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
@@ -1171,17 +1193,49 @@ ${customInstructions ? `- Custom details: ${customInstructions}` : ''}`;
       });
     });
 
-    // DOWNLOAD (ACTIVE HIGH RESOLUTION IMAGE)
+    // DOWNLOAD (ACTIVE HIGH RESOLUTION IMAGE WITH MULTI-RES EXPORT)
     btnDownload.addEventListener("click", () => {
       const active = batchFiles[activeIdx];
       if (!active || !active.renderedBase64) return;
-      const a = document.createElement("a");
-      a.href = `data:image/png;base64,${active.renderedBase64}`;
-      const safeName = (active.name || "render").replace(/\.[^/.]+$/, "");
-      a.download = `redraw_${safeName}_${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+
+      const resSelect = document.getElementById("dlResolution");
+      const resMode = resSelect ? resSelect.value : "2k";
+
+      const img = new Image();
+      img.onload = () => {
+        let targetW = img.naturalWidth;
+        let targetH = img.naturalHeight;
+        const aspect = targetH / targetW;
+
+        if (resMode === "original" && active.origWidth) {
+          targetW = active.origWidth;
+          targetH = active.origHeight || Math.round(targetW * aspect);
+        } else if (resMode === "2k") {
+          targetW = 2560;
+          targetH = Math.round(2560 * aspect);
+        } else if (resMode === "4k") {
+          targetW = 3840;
+          targetH = Math.round(3840 * aspect);
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+
+        const upscaledUrl = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = upscaledUrl;
+        const safeName = (active.name || "render").replace(/\.[^/.]+$/, "");
+        a.download = `redraw_${safeName}_${resMode.toUpperCase()}_${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+      img.src = `data:image/png;base64,${active.renderedBase64}`;
     });
   </script>
 </body>
