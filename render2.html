@@ -853,23 +853,16 @@
       const customInstructions = promptInput.value.trim();
 
       // High-precision Architectural Photoreal Instruction
-      const prompt = `
-Generate an award-winning real-world architectural interior photograph based on this sketch layout.
+      const prompt = `A real-world architectural photograph of this room.
+Transform the provided 3D Sketchup interior model into an authentic professional architectural photograph.
+- Preserve the exact architecture, camera angle, furniture placement, bookshelves, desk, partitions, doors, windows, and ceiling lighting fixture locations without altering the geometry.
+- Material replacement: Replace all flat unshaded polygon materials and wireframes with authentic physical materials: real natural wood veneer with visible grain and satin sheen, real painted drywall texture, authentic flooring with subtle micro-reflections, crystal-clear glass with natural reflections and bevels.
+- Photographic lighting: Eliminate all black Sketchup wireframe outlines. Cast soft directional natural daylight from the windows creating realistic contact ambient occlusion, natural window reflections, and realistic soft shadows.
+- Camera and Optics: Shot on Sony A7R V with 24mm tilt-shift lens, ISO 100, f/8, professional Flambient architectural photography style.
+${customInstructions ? `- Custom details: ${customInstructions}` : ''}`;
 
-Requirements:
-1. Exact composition and perspective: match the exact room geometry, partition lines, doors, windows, ceiling height, and furniture layout in the reference image.
-2. Photographic Realism: This must look like an authentic, high-resolution photograph taken with a professional full-frame camera (Sony A7R V with 24mm tilt-shift lens). Absolutely no CGI, no 3D rendering lines, no sketchup outlines.
-3. Realistic Materials & Lighting:
-   - Partitions: Real glass partition with realistic natural reflections, bevels, and crystal transparency.
-   - Furniture: Realistic tactile materials, wood grain with subtle micro-reflections, real padded upholstery, and matte metal frames.
-   - Flooring: Authentic commercial woven carpet tile or porcelain tile with realistic depth, texture, and light falloff.
-   - Ceiling & Lighting: Realistic acoustic ceiling panels with recessed downlights casting warm 3500K soft ambient light, realistic soft contact shadows.
-   ${customInstructions ? `- User Custom Details: ${customInstructions}` : ''}
-
-Output ONLY the resulting high-resolution photorealistic rendering image.
-`;
-
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+      const primaryEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent?key=${apiKey}`;
+      const fallbackEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
 
       const payload = {
         contents: [{
@@ -886,11 +879,20 @@ Output ONLY the resulting high-resolution photorealistic rendering image.
       };
 
       try {
-        const resp = await fetch(endpoint, {
+        let resp = await fetch(primaryEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
+
+        if (!resp.ok) {
+          console.warn("Primary gemini-3-pro-image returned status " + resp.status + ", trying fallback...");
+          resp = await fetch(fallbackEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+        }
 
         if (!resp.ok) {
           const errData = await resp.json().catch(() => ({}));
