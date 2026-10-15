@@ -224,39 +224,81 @@
       color: var(--text-muted);
     }
 
-    /* THUMBNAIL */
-    .thumb-wrapper {
+    /* BATCH THUMBNAIL LIST */
+    .batch-list {
       display: none;
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border-dark);
-      background: #000;
-      height: 200px;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 240px;
+      overflow-y: auto;
     }
 
-    .thumb-img {
-      width: 99.9%;
-      height: 99.9%;
-      object-fit: contain;
-    }
-
-    .btn-delete-thumb {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
+    .batch-item {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 10px;
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 10px;
+      padding: 8px 10px;
       cursor: pointer;
-      font-size: 13px;
+      transition: all 0.2s;
     }
+
+    .batch-item:hover, .batch-item.active {
+      border-color: var(--primary);
+      background: rgba(221, 88, 40, 0.08);
+    }
+
+    .batch-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #000;
+      flex-shrink: 0;
+    }
+
+    .batch-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .batch-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .batch-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    .badge-ready { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+    .badge-running { background: rgba(221, 88, 40, 0.2); color: var(--primary); }
+    .badge-done { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .badge-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+    .btn-remove-item {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+    }
+    .btn-remove-item:hover { color: #fff; }
 
     /* INSTRUCTIONS INPUT */
     .instruction-box {
@@ -646,30 +688,29 @@
       <div class="control-panel">
         <!-- 1. UPLOAD -->
         <div class="instruction-box">
-          <div class="panel-section-title">스케치 / 3D 뷰 업로드</div>
+          <div class="panel-section-title">스케치 / 3D 뷰 업로드 (최대 5장 일괄 가능)</div>
           
           <div class="dropzone" id="dropzone">
-            <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+            <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" />
             <div class="dropzone-icon">📐</div>
             <div class="dropzone-text">이미지를 드래그하거나 클릭하여 업로드</div>
-            <div class="dropzone-sub">스케치업 뷰포트, CAD 도면, 건축/인테리어 스케치 지원</div>
+            <div class="dropzone-sub">스케치업 뷰포트, CAD 도면 (최대 5장 동시 선택 가능)</div>
           </div>
 
-          <div class="thumb-wrapper" id="thumbWrapper">
-            <img class="thumb-img" id="thumbImg" src="" alt="Thumbnail" />
-            <button class="btn-delete-thumb" id="btnDeleteThumb" title="삭제">✕</button>
-          </div>
+          <div class="batch-list" id="batchList"></div>
+          
+          <button id="btnAddMore" style="display:none; background:transparent; border:1px dashed var(--border-dark); color:var(--text-muted); border-radius:8px; padding:6px; font-size:12px; cursor:pointer; width:99.9%;">+ 추가 이미지 등록</button>
         </div>
 
         <!-- 2. INSTRUCTIONS -->
         <div class="instruction-box">
           <div class="panel-section-title">추가 지시사항 (선택사항)</div>
-          <textarea class="textarea-prompt" id="promptInput" placeholder="추가하고 싶은 소재, 조명 분위기, 디테일을 입력하세요. (비워둘 경우 AI가 스케치 구도를 기반으로 최적의 건축 실사 사진으로 자동 렌더링합니다.)"></textarea>
+          <textarea class="textarea-prompt" id="promptInput" placeholder="추가하고 싶은 소재, 조명 분위기, 디테일을 입력하세요. (비워둘 경우 황금빛 창가 자연광과 PBR 건축 실사 사진으로 자동 렌더링됩니다.)"></textarea>
         </div>
 
         <!-- 3. RENDER BUTTON -->
         <button class="btn-submit" id="btnSubmit" disabled>
-          <span>✨ 포토리얼 렌더링 시작</span>
+          <span id="btnSubmitText">✨ 포토리얼 렌더링 시작</span>
         </button>
       </div>
 
@@ -792,8 +833,18 @@
       alert("API 키가 저장되었습니다.");
     });
 
+    // BATCH STATE
+    let batchFiles = []; // { file, name, mime, originalBase64, renderedBase64, status: 'ready'|'running'|'done'|'error', errorMsg }
+    let activeIdx = 0;
+
+    const batchList = document.getElementById("batchList");
+    const btnAddMore = document.getElementById("btnAddMore");
+    const btnSubmitText = document.getElementById("btnSubmitText");
+
     // UPLOAD INTERACTIONS
     dropzone.addEventListener("click", () => fileInput.click());
+    btnAddMore.addEventListener("click", () => fileInput.click());
+
     dropzone.addEventListener("dragover", e => {
       e.preventDefault();
       dropzone.classList.add("dragover");
@@ -802,148 +853,265 @@
     dropzone.addEventListener("drop", e => {
       e.preventDefault();
       dropzone.classList.remove("dragover");
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        processFile(e.dataTransfer.files[0]);
-      }
-    });
-    fileInput.addEventListener("change", e => {
-      if (e.target.files && e.target.files[0]) {
-        processFile(e.target.files[0]);
+      if (e.dataTransfer.files && e.dataTransfer.files.length) {
+        handleFiles(e.dataTransfer.files);
       }
     });
 
-    function processFile(file) {
-      if (!file.type.startsWith("image/")) {
+    fileInput.addEventListener("change", e => {
+      if (e.target.files && e.target.files.length) {
+        handleFiles(e.target.files);
+      }
+    });
+
+    function handleFiles(files) {
+      const imgFiles = Array.from(files).filter(f => f.type.startsWith("image/"));
+      if (!imgFiles.length) {
         alert("이미지 파일만 업로드할 수 있습니다.");
         return;
       }
-      selectedFile = file;
-      originalMime = file.type;
 
-      const reader = new FileReader();
-      reader.onload = e => {
-        const full = e.target.result;
-        originalBase64 = full.split(",")[1];
-        thumbImg.src = full;
-        dropzone.style.display = "none";
-        thumbWrapper.style.display = "block";
-        btnSubmit.disabled = false;
-      };
-      reader.readAsDataURL(file);
+      const availableSlots = 5 - batchFiles.length;
+      if (availableSlots <= 0) {
+        alert("Google AI Studio 무료 티어 안정성을 위해 한 번에 최대 5장까지 등록할 수 있습니다.");
+        return;
+      }
+
+      const toAdd = imgFiles.slice(0, availableSlots);
+      if (imgFiles.length > availableSlots) {
+        alert("최대 5장까지만 한 번에 등록됩니다. (남은 슬롯: " + availableSlots + "장)");
+      }
+
+      let readCount = 0;
+      toAdd.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const full = e.target.result;
+          batchFiles.push({
+            file,
+            name: file.name,
+            mime: file.type,
+            originalBase64: full.split(",")[1],
+            renderedBase64: null,
+            status: "ready",
+            errorMsg: ""
+          });
+          readCount++;
+          if (readCount === toAdd.length) {
+            renderBatchList();
+            selectItem(batchFiles.length - toAdd.length);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+      fileInput.value = "";
     }
 
-    btnDeleteThumb.addEventListener("click", e => {
-      e.stopPropagation();
-      selectedFile = null;
-      originalBase64 = null;
-      thumbImg.src = "";
-      fileInput.value = "";
-      thumbWrapper.style.display = "none";
-      dropzone.style.display = "block";
-      btnSubmit.disabled = true;
-    });
+    function renderBatchList() {
+      if (!batchFiles.length) {
+        dropzone.style.display = "block";
+        batchList.style.display = "none";
+        btnAddMore.style.display = "none";
+        btnSubmit.disabled = true;
+        btnSubmitText.textContent = "✨ 포토리얼 렌더링 시작";
+        return;
+      }
 
-    // SUBMIT RENDER REQUEST (ROBUST ARCHITECTURAL PHOTOREAL PROMPT)
+      dropzone.style.display = "none";
+      batchList.style.display = "flex";
+      batchList.innerHTML = "";
+      if (batchFiles.length < 5) {
+        btnAddMore.style.display = "block";
+      } else {
+        btnAddMore.style.display = "none";
+      }
+
+      batchFiles.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = `batch-item ${idx === activeIdx ? "active" : ""}`;
+
+        let badgeHtml = "";
+        if (item.status === "ready") {
+          badgeHtml = '<span class="batch-badge badge-ready">대기</span>';
+        } else if (item.status === "running") {
+          badgeHtml = '<span class="batch-badge badge-running">렌더링 중...</span>';
+        } else if (item.status === "done") {
+          badgeHtml = '<span class="batch-badge badge-done">완료</span>';
+        } else if (item.status === "error") {
+          badgeHtml = '<span class="batch-badge badge-error">실패</span>';
+        }
+
+        div.innerHTML = `
+          <img class="batch-thumb" src="data:${item.mime};base64,${item.originalBase64}" alt="Thumb" />
+          <div class="batch-info">
+            <span class="batch-name">${item.name}</span>
+            ${badgeHtml}
+          </div>
+          <button class="btn-remove-item" title="제거">✕</button>
+        `;
+
+        div.addEventListener("click", e => {
+          if (e.target.classList.contains("btn-remove-item")) {
+            e.stopPropagation();
+            batchFiles.splice(idx, 1);
+            if (activeIdx >= batchFiles.length) activeIdx = Math.max(0, batchFiles.length - 1);
+            renderBatchList();
+            if (batchFiles.length) selectItem(activeIdx);
+            return;
+          }
+          selectItem(idx);
+        });
+
+        batchList.appendChild(div);
+      });
+
+      const readyCount = batchFiles.filter(b => b.status === "ready").length;
+      btnSubmit.disabled = readyCount === 0;
+      btnSubmitText.textContent = readyCount > 0 ? `✨ 포토리얼 일괄 렌더링 (${readyCount}장)` : `✨ 렌더링 완료 (${batchFiles.length}장)`;
+    }
+
+    function selectItem(idx) {
+      if (idx < 0 || idx >= batchFiles.length) return;
+      activeIdx = idx;
+      renderBatchList();
+
+      const item = batchFiles[idx];
+      const originalUrl = `data:${item.mime};base64,${item.originalBase64}`;
+      imgBefore.src = originalUrl;
+
+      if (item.renderedBase64) {
+        const renderedUrl = `data:image/png;base64,${item.renderedBase64}`;
+        imgAfter.src = renderedUrl;
+        singleImg.src = renderedUrl;
+        canvasEmpty.style.display = "none";
+        singleViewport.style.display = "none";
+        sliderViewport.style.display = "block";
+        btnDownload.style.display = "flex";
+        updateDivider(50);
+      } else {
+        singleImg.src = originalUrl;
+        canvasEmpty.style.display = "none";
+        sliderViewport.style.display = "none";
+        singleViewport.style.display = "block";
+        btnDownload.style.display = "none";
+      }
+    }
+
+    // SUBMIT RENDER REQUEST (REFINED BATCH ARCHITECTURAL PHOTOREAL PROMPT)
     btnSubmit.addEventListener("click", async () => {
-      if (!originalBase64) return;
+      const itemsToProcess = batchFiles.filter(b => b.status === "ready");
+      if (!itemsToProcess.length) return;
 
       btnSubmit.disabled = true;
       loadingBox.style.display = "flex";
 
       const customInstructions = promptInput.value.trim();
 
-      // High-precision Architectural Photoreal Instruction
-      const prompt = `A real-world architectural photograph of this room.
-Transform the provided 3D Sketchup interior model into an authentic professional architectural photograph.
-- Preserve the exact architecture, camera angle, furniture placement, bookshelves, desk, partitions, doors, windows, and ceiling lighting fixture locations without altering the geometry.
-- Material replacement: Replace all flat unshaded polygon materials and wireframes with authentic physical materials: real natural wood veneer with visible grain and satin sheen, real painted drywall texture, authentic flooring with subtle micro-reflections, crystal-clear glass with natural reflections and bevels.
-- Photographic lighting: Eliminate all black Sketchup wireframe outlines. Cast soft directional natural daylight from the windows creating realistic contact ambient occlusion, natural window reflections, and realistic soft shadows.
-- Camera and Optics: Shot on Sony A7R V with 24mm tilt-shift lens, ISO 100, f/8, professional Flambient architectural photography style.
+      const prompt = `A magazine-quality professional architectural photograph of this modern corporate interior space.
+Directly replicate the aesthetic of high-end architectural photography:
+1. LIGHTING (CRITICAL):
+   - Strong, warm late-morning/golden-hour sunlight streaming in directly through the windows.
+   - The sunlight must cast distinct, dramatic diagonal sunbeams and sharp window-frame contact shadows across the textured floor.
+   - Ceiling: The ceiling linear slots and channels are passive recessed architectural reveals, NOT glowing neon lights. Keep them off or subtle warm ambient downlights. Absolutely no harsh white light bars or neon glow on the ceiling.
+2. MATERIALS & COLOR ACCURACY:
+   - Wood elements: Premium natural wood veneer panels with visible grain and satin sheen.
+   - Partitions: Minimalist powder-coated aluminum and steel metal frame with transparent glass panels and realistic reflections.
+   - Solid accent walls: Solid corporate painted drywall wall with crisp brand logo/graphics intact. NOT a backlit glowing LED box.
+   - Floor: Fine-textured commercial modular carpet tiles or matte porcelain tiles with natural light falloff.
+3. CAMERA & DETAILS:
+   - Eliminate all black Sketchup wireframe outlines and unshaded flat polygons.
+   - Preserve all spatial architecture, camera angle, furniture placement, display screens, and wall art.
+   - Shot on Hasselblad H6D-100c, 28mm architectural tilt-shift lens, ISO 64, natural light exposure blending.
 ${customInstructions ? `- Custom details: ${customInstructions}` : ''}`;
 
       const primaryEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent?key=${apiKey}`;
       const fallbackEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
 
-      const payload = {
-        contents: [{
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: originalMime,
-                data: originalBase64
+      for (let i = 0; i < batchFiles.length; i++) {
+        const item = batchFiles[i];
+        if (item.status === "done") continue;
+
+        item.status = "running";
+        activeIdx = i;
+        renderBatchList();
+        selectItem(i);
+
+        document.querySelector(".loading-msg").textContent = `AI가 포토리얼 렌더링을 생성 중입니다... (${i + 1}/${batchFiles.length}장)`;
+
+        const payload = {
+          contents: [{
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: item.mime,
+                  data: item.originalBase64
+                }
               }
-            }
-          ]
-        }]
-      };
+            ]
+          }]
+        };
 
-      try {
-        let resp = await fetch(primaryEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if (!resp.ok) {
-          console.warn("Primary gemini-3-pro-image returned status " + resp.status + ", trying fallback...");
-          resp = await fetch(fallbackEndpoint, {
+        try {
+          let resp = await fetch(primaryEndpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
           });
-        }
 
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.error?.message || `HTTP ${resp.status}`);
-        }
+          if (!resp.ok) {
+            console.warn("Primary returned status " + resp.status + ", trying fallback...");
+            resp = await fetch(fallbackEndpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+          }
 
-        const data = await resp.json();
-        const candidate = data.candidates && data.candidates[0];
-        let foundImage = null;
+          if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({}));
+            throw new Error(errData.error?.message || `HTTP ${resp.status}`);
+          }
 
-        if (candidate && candidate.content && candidate.content.parts) {
-          for (const part of candidate.content.parts) {
-            if (part.inlineData && part.inlineData.data) {
-              foundImage = part.inlineData;
-              break;
+          const data = await resp.json();
+          const candidate = data.candidates && data.candidates[0];
+          let foundImage = null;
+
+          if (candidate && candidate.content && candidate.content.parts) {
+            for (const part of candidate.content.parts) {
+              if (part.inlineData && part.inlineData.data) {
+                foundImage = part.inlineData;
+                break;
+              }
             }
           }
+
+          if (!foundImage) {
+            throw new Error("AI 응답에서 이미지 데이터를 찾지 못했습니다.");
+          }
+
+          item.renderedBase64 = foundImage.data;
+          item.status = "done";
+          renderBatchList();
+          selectItem(i);
+
+          const remaining = batchFiles.filter((b, idx) => idx > i && b.status === "ready");
+          if (remaining.length > 0) {
+            document.querySelector(".loading-msg").textContent = `무료 티어 쿼터 보호 중... (5초 후 다음 장 진행)`;
+            await new Promise(r => setTimeout(r, 5000));
+          }
+
+        } catch (err) {
+          console.error("Render failed for item " + i, err);
+          item.status = "error";
+          item.errorMsg = err.message;
+          renderBatchList();
         }
-
-        if (!foundImage) {
-          throw new Error("AI 응답에서 이미지 데이터를 찾지 못했습니다.");
-        }
-
-        renderedBase64 = foundImage.data;
-        const renderedUrl = `data:${foundImage.mimeType};base64,${renderedBase64}`;
-        const originalUrl = `data:${originalMime};base64,${originalBase64}`;
-
-        // Populate Views
-        imgBefore.src = originalUrl;
-        imgAfter.src = renderedUrl;
-        singleImg.src = renderedUrl;
-
-        // Display Comparison
-        canvasEmpty.style.display = "none";
-        singleViewport.style.display = "none";
-        sliderViewport.style.display = "block";
-        btnDownload.style.display = "flex";
-
-        // Reset Slider to center
-        updateDivider(50);
-
-        // Reset tab
-        viewBtns.forEach(b => b.classList.remove("active"));
-        document.querySelector('[data-view="compare"]').classList.add("active");
-
-      } catch (err) {
-        alert("렌더링 실패: " + err.message);
-      } finally {
-        loadingBox.style.display = "none";
-        btnSubmit.disabled = false;
       }
+
+      loadingBox.style.display = "none";
+      btnSubmit.disabled = false;
+      renderBatchList();
     });
 
     // MATHEMATICALLY PERFECT BEFORE/AFTER SLIDER (USING CLIP-PATH INSET)
@@ -983,27 +1151,34 @@ ${customInstructions ? `- Custom details: ${customInstructions}` : ''}`;
         btn.classList.add("active");
         const view = btn.dataset.view;
 
+        const active = batchFiles[activeIdx];
         if (view === "compare") {
           singleViewport.style.display = "none";
           sliderViewport.style.display = "block";
         } else if (view === "after") {
           sliderViewport.style.display = "none";
-          singleImg.src = `data:image/png;base64,${renderedBase64}`;
+          if (active && active.renderedBase64) {
+            singleImg.src = `data:image/png;base64,${active.renderedBase64}`;
+          }
           singleViewport.style.display = "block";
         } else if (view === "before") {
           sliderViewport.style.display = "none";
-          singleImg.src = `data:${originalMime};base64,${originalBase64}`;
+          if (active && active.originalBase64) {
+            singleImg.src = `data:${active.mime};base64,${active.originalBase64}`;
+          }
           singleViewport.style.display = "block";
         }
       });
     });
 
-    // DOWNLOAD
+    // DOWNLOAD (ACTIVE HIGH RESOLUTION IMAGE)
     btnDownload.addEventListener("click", () => {
-      if (!renderedBase64) return;
+      const active = batchFiles[activeIdx];
+      if (!active || !active.renderedBase64) return;
       const a = document.createElement("a");
-      a.href = `data:image/png;base64,${renderedBase64}`;
-      a.download = `redraw_render_${Date.now()}.png`;
+      a.href = `data:image/png;base64,${active.renderedBase64}`;
+      const safeName = (active.name || "render").replace(/\.[^/.]+$/, "");
+      a.download = `redraw_${safeName}_${Date.now()}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
