@@ -723,16 +723,9 @@
             <button class="view-btn" data-view="before">원본 스케치</button>
           </div>
 
-          <div style="display:flex; align-items:center; gap:8px;">
-            <select id="dlResolution" style="background:var(--card-dark); border:1px solid var(--border-dark); color:var(--text-main); border-radius:8px; padding:6px 10px; font-size:12px; outline:none; cursor:pointer;">
-              <option value="original">원본 해상도 유지</option>
-              <option value="2k" selected>2K QHD (2560px)</option>
-              <option value="4k">4K UHD (3840px)</option>
-            </select>
-            <button class="btn-dl" id="btnDownload">
-              <span>⬇️ 다운로드</span>
-            </button>
-          </div>
+          <button class="btn-dl" id="btnDownload">
+            <span>⬇️ 원본 고화질 다운로드</span>
+          </button>
         </div>
 
         <div class="canvas-stage">
@@ -1036,10 +1029,11 @@ CRITICAL 1:1 IDENTITY & OBJECT PRESERVATION (ABSOLUTE FIDELITY):
    - Structural ceiling joints: Preserve the authentic architectural center seam/joint groove running along the ceiling. DO NOT erase it.
    - Floor: Low-pile commercial loop carpet tiles matching the reference neutral grey.
 
-3. NATURAL PHOTOGRAPHIC LIGHTING:
-   - Soft, warm natural sunlight streaming in through the windows, casting gentle diagonal window-frame shadows on the floor.
-   - Ceiling: Keep the linear ceiling channels and slots passive, unlit, or subtle dark architectural reveals. NEVER create glaring white neon light bars or glowing strips.
-   - Completely natural, balanced exposure without artificial fantasy glow or over-contrasted orange casts.
+3. HIGH-KEY BRIGHT COMMERCIAL PHOTOGRAPHIC LIGHTING:
+   - Bright, airy, and luminous commercial interior photography with clean, well-lit ambient daylight (EV +0.7).
+   - Generous, clean ambient daylight filling the entire room; pristine bright white ceiling and clean reflective walls.
+   - Warm golden sunlight streaming in from the windows on the right, casting sharp, distinct diagonal sunbeam patches and soft window-frame contact shadows across the floor.
+   - Absolutely no dark, dingy, underexposed, or moody shadows. The space must feel bright, open, and professionally lit.
 
 4. PHOTOGRAPHIC REALISM:
    - Eliminate only 3D CAD vector polygon edges, but preserve all real physical joints, bevels, and seams.
@@ -1193,49 +1187,18 @@ ${customInstructions ? `- User custom details: ${customInstructions}` : ''}`;
       });
     });
 
-    // DOWNLOAD (ACTIVE HIGH RESOLUTION IMAGE WITH MULTI-RES EXPORT)
+    // DOWNLOAD (PURE SHARP NATIVE PNG - NO CANVAS BLUR)
     btnDownload.addEventListener("click", () => {
       const active = batchFiles[activeIdx];
       if (!active || !active.renderedBase64) return;
 
-      const resSelect = document.getElementById("dlResolution");
-      const resMode = resSelect ? resSelect.value : "2k";
-
-      const img = new Image();
-      img.onload = () => {
-        let targetW = img.naturalWidth;
-        let targetH = img.naturalHeight;
-        const aspect = targetH / targetW;
-
-        if (resMode === "original" && active.origWidth) {
-          targetW = active.origWidth;
-          targetH = active.origHeight || Math.round(targetW * aspect);
-        } else if (resMode === "2k") {
-          targetW = 2560;
-          targetH = Math.round(2560 * aspect);
-        } else if (resMode === "4k") {
-          targetW = 3840;
-          targetH = Math.round(3840 * aspect);
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = targetW;
-        canvas.height = targetH;
-        const ctx = canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-        ctx.drawImage(img, 0, 0, targetW, targetH);
-
-        const upscaledUrl = canvas.toDataURL("image/png");
-        const a = document.createElement("a");
-        a.href = upscaledUrl;
-        const safeName = (active.name || "render").replace(/\.[^/.]+$/, "");
-        a.download = `redraw_${safeName}_${resMode.toUpperCase()}_${Date.now()}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      };
-      img.src = `data:image/png;base64,${active.renderedBase64}`;
+      const a = document.createElement("a");
+      a.href = `data:image/png;base64,${active.renderedBase64}`;
+      const safeName = (active.name || "render").replace(/\.[^/.]+$/, "");
+      a.download = `redraw_${safeName}_${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     });
   </script>
 </body>
