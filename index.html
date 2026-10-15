@@ -1120,6 +1120,7 @@
     // ============================================
     // 패널 렌더링
     // ============================================
+    let renderPanelsTimer = null;
     function renderPanels() {
       const main = document.getElementById("main-content");
       main.innerHTML = `<div class="absolute top-4 right-4 z-10">
@@ -1150,8 +1151,11 @@
         selectMenu(defaultMenu);
       }
 
-      // Initialize scripts for different panels
-      setTimeout(() => {
+      // Initialize scripts for different panels (Debounced to prevent double execution)
+      if (renderPanelsTimer) {
+        clearTimeout(renderPanelsTimer);
+      }
+      renderPanelsTimer = setTimeout(() => {
         setupKeywordCombiner();
         setupWebP();
         setupKeywordSearchCount();
@@ -1173,10 +1177,6 @@
         setupAdDashboard();
         setupCompetitorBlog();
         setupPlaceStatistics();
-        setupTotalStatistics();
-        setupMetaStatistics();
-        setupGoogleSAStatistics();
-        setupGfaStatistics();
         setupTotalStatistics();
         setupMetaStatistics();
         setupGoogleSAStatistics();
@@ -3056,6 +3056,12 @@
 
       if (!dropHq || !fileHq || !dropBlog || !fileBlog || !dropPdf || !filePdf || !dropJpg || !fileJpg || !dropJpgResize || !fileJpgResize || !dropImweb800 || !fileImweb800 || !dropImweb1200 || !fileImweb1200 || !dropInsta || !fileInsta) return;
 
+      // [핵심 방어 1] 이미 이벤트 리스너가 등록된 DOM 요소인 경우 중복 등록 즉시 차단
+      if (dropHq.dataset.webpInitialized === 'true') {
+        return;
+      }
+      dropHq.dataset.webpInitialized = 'true';
+
       const progressContainer = document.getElementById('progress-container');
       const progressBar = document.getElementById('progress-bar');
       const progressText = document.getElementById('progress-text');
@@ -3067,19 +3073,35 @@
       const downloadZipBtn = document.getElementById('download-zip-btn');
       const clearBtn = document.getElementById('clear-btn');
 
+      let isProcessingFiles = false;
+      let isZipping = false;
+
       // 이벤트 바인딩 헬퍼
       function bindEvents(dropZone, fileInput, mode, hoverClass) {
-          dropZone.addEventListener('click', () => fileInput.click());
+          // [핵심 방어 2] input 클릭 시 부모 dropZone으로의 click 이벤트 버블링 원천 차단
+          fileInput.addEventListener('click', (e) => e.stopPropagation());
+
+          // dropZone 클릭 시 fileInput 직접 클릭이 아닌 경우에만 fileInput.click() 호출
+          dropZone.addEventListener('click', (e) => {
+              if (e.target !== fileInput) {
+                  fileInput.click();
+              }
+          });
+
           dropZone.addEventListener('dragover', (e) => {
               e.preventDefault(); dropZone.classList.add(hoverClass);
           });
           dropZone.addEventListener('dragleave', () => dropZone.classList.remove(hoverClass));
           dropZone.addEventListener('drop', (e) => {
               e.preventDefault(); dropZone.classList.remove(hoverClass);
-              if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files, mode);
+              if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                  handleFiles(e.dataTransfer.files, mode);
+              }
           });
           fileInput.addEventListener('change', (e) => {
-              if (e.target.files.length > 0) handleFiles(e.target.files, mode);
+              if (e.target.files && e.target.files.length > 0) {
+                  handleFiles(e.target.files, mode);
+              }
           });
       }
 
@@ -3108,7 +3130,8 @@
 
       // ZIP 다운로드
       downloadZipBtn.addEventListener('click', async () => {
-          if (convertedFiles.length === 0) return;
+          if (isZipping || convertedFiles.length === 0) return;
+          isZipping = true;
           
           const zip = new JSZip();
           const fileNames = new Set();
@@ -3142,171 +3165,192 @@
           } finally {
               downloadZipBtn.innerHTML = originalBtnText;
               downloadZipBtn.disabled = false;
+              isZipping = false;
           }
       });
 
       // 메인 핸들러
       async function handleFiles(files, mode) {
-          let targetFiles = [];
-          if (mode === 'pdf') {
-              targetFiles = Array.from(files).filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
-              if (targetFiles.length === 0) {
-                  alert("PDF (.pdf) 파일만 처리할 수 있습니다."); return;
-              }
-          } else {
-              targetFiles = Array.from(files).filter(file => file.type.match(/image\/(jpeg|png|webp)/i) || file.name.toLowerCase().match(/\.(jpe?g|png|webp)$/i));
-              if (targetFiles.length === 0) {
-                  alert("JPG, PNG 또는 WEBP 파일만 처리할 수 있습니다."); return;
-              }
+          // [핵심 방어 3] 이전 작업이 진행 중이면 동시 중복 실행 원천 차단
+          if (isProcessingFiles) {
+              console.warn("이미 파일 변환 작업이 진행 중입니다.");
+              return;
           }
+          isProcessingFiles = true;
 
-          resultSection.classList.remove('hidden');
-          progressContainer.classList.remove('hidden');
-          
-          if (mode === 'hq') {
-              progressStatusText.textContent = `[홈페이지용] 1px 크롭 및 리사이징 진행 중...`;
-          } else if (mode === 'blog') {
-              progressStatusText.textContent = `[블로그용] 1px 크롭 및 WEBP 변환 진행 중...`;
-          } else if (mode === 'pdf') {
-              progressStatusText.textContent = `[포트폴리오 PDF] 원본 색감 보존 초고화질 최적화 준비 중...`;
-          } else if (mode === 'jpg') {
-              progressStatusText.textContent = `[히스토리삭제+JPG] 1px 크롭, 히스토리 삭제 및 JPG 변환 진행 중...`;
-          } else if (mode === 'jpg-resize') {
-              progressStatusText.textContent = `[히스토리삭제+리사이징+JPG] 1920/1080 규격, 1px 크롭 및 JPG 변환 진행 중...`;
-          } else if (mode === 'imweb-800') {
-              progressStatusText.textContent = `[아임웹 썸네일용 800px] 100KB 내외 고효율 JPG 압축 진행 중...`;
-          } else if (mode === 'imweb-1200') {
-              progressStatusText.textContent = `[아임웹 게시글용 1200px] 150~200KB 이하 고효율 JPG 압축 진행 중...`;
-          } else if (mode === 'insta') {
-              progressStatusText.textContent = `[인스타그램용] 1080px 규격, 1px 크롭 및 고화질 JPG 변환 진행 중...`;
-          }
-          
-          const total = targetFiles.length;
-
-          for (let i = 0; i < total; i++) {
-              const file = targetFiles[i];
-              progressText.textContent = `${i + 1} / ${total}`;
-              progressBar.style.width = `${((i + 1) / total) * 100}%`;
-
-              try {
-                  let resultData;
-                  
-                  if (mode === 'hq') {
-                      resultData = await processWebpResizedAuto(file, 1.0, 1920, 1080, false);
-                  } else if (mode === 'blog') {
-                      resultData = await processWebpBlogOriginal(file, 1.0, false);
-                  } else if (mode === 'pdf') {
-                      resultData = await processPdfCompress(file, (currPage, totalPages) => {
-                          progressStatusText.textContent = `[포트폴리오 PDF] ${file.name} (${currPage}/${totalPages} 페이지 색감 보존 최적화 중...)`;
-                          const pageFraction = (totalPages > 0) ? (currPage / totalPages) : 1;
-                          const overallPercent = ((i + pageFraction) / total) * 100;
-                          progressBar.style.width = `${Math.min(100, Math.round(overallPercent))}%`;
-                      });
-                  } else if (mode === 'jpg') {
-                      resultData = await processJpgCleared(file, 0.95, false);
-                  } else if (mode === 'jpg-resize') {
-                      resultData = await processJpgClearedResized(file, 0.95, false);
-                  } else if (mode === 'imweb-800') {
-                      resultData = await processImwebThumbnail800(file, false);
-                  } else if (mode === 'imweb-1200') {
-                      resultData = await processImwebContent1200(file, false);
-                  } else if (mode === 'insta') {
-                      resultData = await processInstagramOptimized(file, 0.94, false);
+          try {
+              let targetFiles = [];
+              if (mode === 'pdf') {
+                  targetFiles = Array.from(files).filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
+                  if (targetFiles.length === 0) {
+                      alert("PDF (.pdf) 파일만 처리할 수 있습니다."); return;
                   }
-                  
-                  const isLandscape = resultData.orientation === 'landscape';
-                  let badgeText = '';
-                  let badgeClass = '';
-                  
-                  if (mode === 'hq') {
-                      badgeText = isLandscape ? '홈 가로 (1px크롭)' : '홈 세로 (1px크롭)';
-                      badgeClass = 'bg-green-100 text-green-800';
-                  } else if (mode === 'blog') {
-                      badgeText = isLandscape ? '블로그 가로 (1px크롭)' : '블로그 세로 (1px크롭)';
-                      badgeClass = 'bg-blue-100 text-blue-800';
-                  } else if (mode === 'pdf') {
-                      badgeText = `인테리어 PDF 최적화 (${resultData.pageCount}p)`;
-                      badgeClass = 'bg-red-100 text-red-800 border border-red-200 font-bold';
-                  } else if (mode === 'jpg') {
-                      badgeText = isLandscape ? 'JPG 가로 (히스토리삭제)' : 'JPG 세로 (히스토리삭제)';
-                      badgeClass = 'bg-amber-100 text-amber-800';
-                  } else if (mode === 'jpg-resize') {
-                      badgeText = isLandscape ? 'JPG 가로 (1920x1080)' : 'JPG 세로 (1080x1920)';
-                      badgeClass = 'bg-teal-100 text-teal-800';
-                  } else if (mode === 'imweb-800') {
-                      badgeText = isLandscape ? '아임웹 썸네일 (가로 800)' : '아임웹 썸네일 (세로 800)';
-                      badgeClass = 'bg-orange-100 text-orange-800 border border-orange-200 font-bold';
-                  } else if (mode === 'imweb-1200') {
-                      badgeText = isLandscape ? '아임웹 게시글 (가로 1200)' : '아임웹 게시글 (세로 1200)';
-                      badgeClass = 'bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold';
-                  } else if (mode === 'insta') {
-                      if (resultData.orientation === 'landscape') {
-                          badgeText = `인스타 가로 (${resultData.width}x${resultData.height})`;
-                      } else if (resultData.orientation === 'portrait') {
-                          badgeText = `인스타 세로 (${resultData.width}x${resultData.height})`;
-                      } else {
-                          badgeText = `인스타 정사각 (1080x1080)`;
+              } else {
+                  targetFiles = Array.from(files).filter(file => file.type.match(/image\/(jpeg|png|webp)/i) || file.name.toLowerCase().match(/\.(jpe?g|png|webp)$/i));
+                  if (targetFiles.length === 0) {
+                      alert("JPG, PNG 또는 WEBP 파일만 처리할 수 있습니다."); return;
+                  }
+              }
+
+              // [핵심 방어 4] 동일 배치 내 중복 파일(동일 이름+크기+수정일) 자동 제거
+              const seenBatchKeys = new Set();
+              targetFiles = targetFiles.filter(file => {
+                  const key = `${file.name}_${file.size}_${file.lastModified || 0}`;
+                  if (seenBatchKeys.has(key)) return false;
+                  seenBatchKeys.add(key);
+                  return true;
+              });
+
+              resultSection.classList.remove('hidden');
+              progressContainer.classList.remove('hidden');
+              
+              if (mode === 'hq') {
+                  progressStatusText.textContent = `[홈페이지용] 1px 크롭 및 리사이징 진행 중...`;
+              } else if (mode === 'blog') {
+                  progressStatusText.textContent = `[블로그용] 1px 크롭 및 WEBP 변환 진행 중...`;
+              } else if (mode === 'pdf') {
+                  progressStatusText.textContent = `[포트폴리오 PDF] 원본 색감 보존 초고화질 최적화 준비 중...`;
+              } else if (mode === 'jpg') {
+                  progressStatusText.textContent = `[히스토리삭제+JPG] 1px 크롭, 히스토리 삭제 및 JPG 변환 진행 중...`;
+              } else if (mode === 'jpg-resize') {
+                  progressStatusText.textContent = `[히스토리삭제+리사이징+JPG] 1920/1080 규격, 1px 크롭 및 JPG 변환 진행 중...`;
+              } else if (mode === 'imweb-800') {
+                  progressStatusText.textContent = `[아임웹 썸네일용 800px] 100KB 내외 고효율 JPG 압축 진행 중...`;
+              } else if (mode === 'imweb-1200') {
+                  progressStatusText.textContent = `[아임웹 게시글용 1200px] 150~200KB 이하 고효율 JPG 압축 진행 중...`;
+              } else if (mode === 'insta') {
+                  progressStatusText.textContent = `[인스타그램용] 1080px 규격, 1px 크롭 및 고화질 JPG 변환 진행 중...`;
+              }
+              
+              const total = targetFiles.length;
+
+              for (let i = 0; i < total; i++) {
+                  const file = targetFiles[i];
+                  progressText.textContent = `${i + 1} / ${total}`;
+                  progressBar.style.width = `${((i + 1) / total) * 100}%`;
+
+                  try {
+                      let resultData;
+                      
+                      if (mode === 'hq') {
+                          resultData = await processWebpResizedAuto(file, 1.0, 1920, 1080, false);
+                      } else if (mode === 'blog') {
+                          resultData = await processWebpBlogOriginal(file, 1.0, false);
+                      } else if (mode === 'pdf') {
+                          resultData = await processPdfCompress(file, (currPage, totalPages) => {
+                              progressStatusText.textContent = `[포트폴리오 PDF] ${file.name} (${currPage}/${totalPages} 페이지 색감 보존 최적화 중...)`;
+                              const pageFraction = (totalPages > 0) ? (currPage / totalPages) : 1;
+                              const overallPercent = ((i + pageFraction) / total) * 100;
+                              progressBar.style.width = `${Math.min(100, Math.round(overallPercent))}%`;
+                          });
+                      } else if (mode === 'jpg') {
+                          resultData = await processJpgCleared(file, 0.95, false);
+                      } else if (mode === 'jpg-resize') {
+                          resultData = await processJpgClearedResized(file, 0.95, false);
+                      } else if (mode === 'imweb-800') {
+                          resultData = await processImwebThumbnail800(file, false);
+                      } else if (mode === 'imweb-1200') {
+                          resultData = await processImwebContent1200(file, false);
+                      } else if (mode === 'insta') {
+                          resultData = await processInstagramOptimized(file, 0.94, false);
                       }
-                      badgeClass = 'bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white font-bold shadow-xs';
+                      
+                      const isLandscape = resultData.orientation === 'landscape';
+                      let badgeText = '';
+                      let badgeClass = '';
+                      
+                      if (mode === 'hq') {
+                          badgeText = isLandscape ? '홈 가로 (1px크롭)' : '홈 세로 (1px크롭)';
+                          badgeClass = 'bg-green-100 text-green-800';
+                      } else if (mode === 'blog') {
+                          badgeText = isLandscape ? '블로그 가로 (1px크롭)' : '블로그 세로 (1px크롭)';
+                          badgeClass = 'bg-blue-100 text-blue-800';
+                      } else if (mode === 'pdf') {
+                          badgeText = `인테리어 PDF 최적화 (${resultData.pageCount}p)`;
+                          badgeClass = 'bg-red-100 text-red-800 border border-red-200 font-bold';
+                      } else if (mode === 'jpg') {
+                          badgeText = isLandscape ? 'JPG 가로 (히스토리삭제)' : 'JPG 세로 (히스토리삭제)';
+                          badgeClass = 'bg-amber-100 text-amber-800';
+                      } else if (mode === 'jpg-resize') {
+                          badgeText = isLandscape ? 'JPG 가로 (1920x1080)' : 'JPG 세로 (1080x1920)';
+                          badgeClass = 'bg-teal-100 text-teal-800';
+                      } else if (mode === 'imweb-800') {
+                          badgeText = isLandscape ? '아임웹 썸네일 (가로 800)' : '아임웹 썸네일 (세로 800)';
+                          badgeClass = 'bg-orange-100 text-orange-800 border border-orange-200 font-bold';
+                      } else if (mode === 'imweb-1200') {
+                          badgeText = isLandscape ? '아임웹 게시글 (가로 1200)' : '아임웹 게시글 (세로 1200)';
+                          badgeClass = 'bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold';
+                      } else if (mode === 'insta') {
+                          if (resultData.orientation === 'landscape') {
+                              badgeText = `인스타 가로 (${resultData.width}x${resultData.height})`;
+                          } else if (resultData.orientation === 'portrait') {
+                              badgeText = `인스타 세로 (${resultData.width}x${resultData.height})`;
+                          } else {
+                              badgeText = `인스타 정사각 (1080x1080)`;
+                          }
+                          badgeClass = 'bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white font-bold shadow-xs';
+                      }
+
+                      let baseName = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase()
+                          .replace(/[\s_]+/g, '-').replace(/[^a-z0-9가-힣-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                      if (!baseName) baseName = (mode === 'pdf') ? `document-${Date.now()}` : `image-${Date.now()}`;
+                      
+                      let suffix = '';
+                      if (mode === 'hq') suffix = '-home';
+                      else if (mode === 'blog') suffix = '-blog';
+                      else if (mode === 'pdf') suffix = '-compressed';
+                      else if (mode === 'jpg') suffix = '-jpg-cleared';
+                      else if (mode === 'jpg-resize') suffix = '-jpg-resized';
+                      else if (mode === 'imweb-800') suffix = '-imweb-thumb-800';
+                      else if (mode === 'imweb-1200') suffix = '-imweb-post-1200';
+                      else if (mode === 'insta') suffix = '-insta';
+
+                      let ext = '.webp';
+                      if (mode === 'pdf') ext = '.pdf';
+                      else if (mode === 'jpg' || mode === 'jpg-resize' || mode === 'imweb-800' || mode === 'imweb-1200' || mode === 'insta') ext = '.jpg';
+                      
+                      const newName = baseName + suffix + ext;
+                      
+                      const result = {
+                          isPdf: (mode === 'pdf'),
+                          pageCount: resultData.pageCount || 1,
+                          badgeText: badgeText,
+                          badgeClass: badgeClass,
+                          newName: newName,
+                          originalSize: file.size,
+                          newSize: resultData.blob.size,
+                          originalWidth: resultData.originalWidth, // 크롭 전 순수 원본
+                          originalHeight: resultData.originalHeight,
+                          finalWidth: resultData.width,
+                          finalHeight: resultData.height,
+                          blob: resultData.blob,
+                          url: URL.createObjectURL(resultData.blob),
+                          thumbnailUrl: resultData.thumbnailUrl || null
+                      };
+                      
+                      convertedFiles.push(result);
+                      addResultToTable(result);
+                  } catch (error) {
+                      console.error("변환 실패:", file.name, error);
+                      alert(`[${file.name}] 변환 중 오류가 발생했습니다: ` + (error.message || error));
                   }
-
-                  let baseName = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase()
-                      .replace(/[\s_]+/g, '-').replace(/[^a-z0-9가-힣-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
-                  if (!baseName) baseName = (mode === 'pdf') ? `document-${Date.now()}` : `image-${Date.now()}`;
-                  
-                  let suffix = '';
-                  if (mode === 'hq') suffix = '-home';
-                  else if (mode === 'blog') suffix = '-blog';
-                  else if (mode === 'pdf') suffix = '-compressed';
-                  else if (mode === 'jpg') suffix = '-jpg-cleared';
-                  else if (mode === 'jpg-resize') suffix = '-jpg-resized';
-                  else if (mode === 'imweb-800') suffix = '-imweb-thumb-800';
-                  else if (mode === 'imweb-1200') suffix = '-imweb-post-1200';
-                  else if (mode === 'insta') suffix = '-insta';
-
-                  let ext = '.webp';
-                  if (mode === 'pdf') ext = '.pdf';
-                  else if (mode === 'jpg' || mode === 'jpg-resize' || mode === 'imweb-800' || mode === 'imweb-1200' || mode === 'insta') ext = '.jpg';
-                  
-                  const newName = baseName + suffix + ext;
-                  
-                  const result = {
-                      isPdf: (mode === 'pdf'),
-                      pageCount: resultData.pageCount || 1,
-                      badgeText: badgeText,
-                      badgeClass: badgeClass,
-                      newName: newName,
-                      originalSize: file.size,
-                      newSize: resultData.blob.size,
-                      originalWidth: resultData.originalWidth, // 크롭 전 순수 원본
-                      originalHeight: resultData.originalHeight,
-                      finalWidth: resultData.width,
-                      finalHeight: resultData.height,
-                      blob: resultData.blob,
-                      url: URL.createObjectURL(resultData.blob),
-                      thumbnailUrl: resultData.thumbnailUrl || null
-                  };
-                  
-                  convertedFiles.push(result);
-                  addResultToTable(result);
-              } catch (error) {
-                  console.error("변환 실패:", file.name, error);
-                  alert(`[${file.name}] 변환 중 오류가 발생했습니다: ` + (error.message || error));
               }
-          }
 
-          setTimeout(() => {
-              progressContainer.classList.add('hidden');
-              resultCount.textContent = convertedFiles.length;
-              fileHq.value = '';
-              fileBlog.value = '';
-              filePdf.value = '';
-              fileJpg.value = '';
-              fileJpgResize.value = '';
-              fileImweb800.value = '';
-              fileImweb1200.value = '';
-              fileInsta.value = '';
-          }, 500);
+              setTimeout(() => {
+                  progressContainer.classList.add('hidden');
+                  resultCount.textContent = convertedFiles.length;
+                  fileHq.value = '';
+                  fileBlog.value = '';
+                  filePdf.value = '';
+                  fileJpg.value = '';
+                  fileJpgResize.value = '';
+                  fileImweb800.value = '';
+                  fileImweb1200.value = '';
+                  fileInsta.value = '';
+              }, 500);
+          } finally {
+              isProcessingFiles = false;
+          }
       }
 
       // 테이블 출력
