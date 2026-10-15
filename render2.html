@@ -1054,7 +1054,26 @@ ${customInstructions ? `- User custom details: ${customInstructions}` : ''}`;
 
         document.querySelector(".loading-msg").textContent = `AI가 포토리얼 렌더링을 생성 중입니다... (${i + 1}/${batchFiles.length}장)`;
 
-        const payload = {
+        const payload2K = {
+          contents: [{
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: item.mime,
+                  data: item.originalBase64
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            imageConfig: {
+              imageSize: "2K"
+            }
+          }
+        };
+
+        const payloadBasic = {
           contents: [{
             parts: [
               { text: prompt },
@@ -1072,15 +1091,24 @@ ${customInstructions ? `- User custom details: ${customInstructions}` : ''}`;
           let resp = await fetch(primaryEndpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload2K)
           });
+
+          if (!resp.ok) {
+            console.warn("2K payload returned status " + resp.status + ", trying basic payload...");
+            resp = await fetch(primaryEndpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payloadBasic)
+            });
+          }
 
           if (!resp.ok) {
             console.warn("Primary returned status " + resp.status + ", trying fallback...");
             resp = await fetch(fallbackEndpoint, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
+              body: JSON.stringify(payloadBasic)
             });
           }
 
