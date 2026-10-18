@@ -1519,11 +1519,11 @@
         <div class="mb-12">
           <div class="flex items-center gap-3 mb-4">
             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-full">7번 기능</span>
-            <h2 class="text-2xl font-bold text-gray-800">아임웹 게시글이미지용 1200사이즈 <span class="text-lg font-medium text-gray-500">(가로 1200px / 150~200KB 이하 고효율 JPG 압축)</span></h2>
+            <h2 class="text-2xl font-bold text-gray-800">아임웹 게시글이미지용 뷰포트 최적화 <span class="text-lg font-medium text-gray-500">(가로 1200px / 세로 800px 한 화면 최적화 / 150~200KB 이하 고효율 JPG)</span></h2>
           </div>
           <div class="bg-indigo-50 p-5 rounded-xl border border-indigo-200 mb-6">
             <ul class="text-sm text-indigo-900 list-disc list-inside space-y-1">
-              <li><span class="font-bold text-indigo-950">아임웹 본문 최적화 1200px 규격:</span> 가로/세로 이미지 모두 비율을 유지하며 <span class="font-bold text-indigo-800">가로 1200px</span>로 선명하게 리사이징합니다.</li>
+              <li><span class="font-bold text-indigo-950">가로/세로 지능형 뷰포트 맞춤 규격:</span> <span class="font-bold text-indigo-800">가로 사진은 폭 1200px(세로 ~800px)</span>로 시원하게 채우고, <span class="font-bold text-indigo-800">세로 사진은 세로 800px(폭 ~533px)</span>로 리사이징하여 스크롤 없이 한 화면에 온전히 쏙 들어오도록 비율을 유지합니다.</li>
               <li><span class="font-bold text-indigo-950">TinyPNG급 고효율 JPG 압축:</span> 본문용 고화질을 유지하면서 용량을 <span class="font-bold text-indigo-800">150~200KB 이하</span>로 지능형 초고효율 압축합니다.</li>
               <li><span class="font-bold text-indigo-950">EXIF 메타데이터 100% 제거 & 1px 크롭:</span> 촬영 위치, 편집 이력 삭제 및 AI 중복 패널티 회피 방어선이 포함됩니다.</li>
             </ul>
@@ -1532,8 +1532,8 @@
             <div class="text-indigo-400 mb-4 group-hover:text-indigo-500 transition-colors flex justify-center gap-2">
               <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             </div>
-            <h3 class="text-xl font-bold text-indigo-800 mb-2">아임웹 게시글용 (1200px / 150~200KB) 업로드</h3>
-            <p class="text-sm text-indigo-600 font-medium mb-1">사진 드래그 (가로 1200px 비율 유지 + 150~200KB 이하 고효율 JPG 압축)</p>
+            <h3 class="text-xl font-bold text-indigo-800 mb-2">아임웹 게시글용 (가로 1200 / 세로 800) 업로드</h3>
+            <p class="text-sm text-indigo-600 font-medium mb-1">사진 드래그 (가로사진 1200px / 세로사진 800px 한 화면 맞춤 + 150~200KB 이하 고효율 JPG 압축)</p>
             <input type="file" id="file-imweb-1200" multiple accept=".jpg, .jpeg, .png" class="hidden">
           </div>
         </div>
@@ -2766,9 +2766,17 @@
 
                 const orientation = (cropW > cropH) ? 'landscape' : 'portrait';
                 
-                // 가로 1200px 비율 유지 리사이징
-                const targetW = 1200;
-                const targetH = Math.max(1, Math.round((cropH / cropW) * 1200));
+                // 가로/세로 지능형 뷰포트 규격 계산
+                // 1) 가로 사진(landscape): 가로 1200px 고정, 세로는 원본 비율 유지 (3:2 비율 기준 1200x800px)
+                // 2) 세로 사진(portrait/정사각): 한 화면에 쏙 들어오도록 세로 800px 고정, 가로는 원본 비율 유지 (2:3 비율 기준 533x800px)
+                let targetW, targetH;
+                if (orientation === 'landscape') {
+                    targetW = 1200;
+                    targetH = Math.max(1, Math.round((cropH / cropW) * 1200));
+                } else {
+                    targetH = 800;
+                    targetW = Math.max(1, Math.round((cropW / cropH) * 800));
+                }
 
                 const generateBlob = (q) => {
                     return new Promise((res) => {
@@ -3217,7 +3225,7 @@
               } else if (mode === 'imweb-800') {
                   progressStatusText.textContent = `[아임웹 썸네일용 800px] 100KB 내외 고효율 JPG 압축 진행 중...`;
               } else if (mode === 'imweb-1200') {
-                  progressStatusText.textContent = `[아임웹 게시글용 1200px] 150~200KB 이하 고효율 JPG 압축 진행 중...`;
+                  progressStatusText.textContent = `[아임웹 게시글용] 가로 1200 / 세로 800 한 화면 최적화 JPG 압축 진행 중...`;
               } else if (mode === 'insta') {
                   progressStatusText.textContent = `[인스타그램용] 1080px 규격, 1px 크롭 및 고화질 JPG 변환 진행 중...`;
               }
@@ -3278,7 +3286,7 @@
                           badgeText = isLandscape ? '아임웹 썸네일 (가로 800)' : '아임웹 썸네일 (세로 800)';
                           badgeClass = 'bg-orange-100 text-orange-800 border border-orange-200 font-bold';
                       } else if (mode === 'imweb-1200') {
-                          badgeText = isLandscape ? '아임웹 게시글 (가로 1200)' : '아임웹 게시글 (세로 1200)';
+                          badgeText = isLandscape ? '아임웹 게시글 (가로 1200)' : '아임웹 게시글 (세로 800)';
                           badgeClass = 'bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold';
                       } else if (mode === 'insta') {
                           if (resultData.orientation === 'landscape') {
