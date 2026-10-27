@@ -33,10 +33,20 @@ body {
   line-height: 1.6 !important;
 }
 
-/* 폰트가 1사이즈 커짐에 따라 좌측 카테고리 바 폭을 여유 있게 확보 */
+/* 데스크톱 레이아웃: 좌측 카테고리 바와 우측 본문 영역 모두 독립 및 전체 마우스 휠 스크롤 완벽 작동 */
 @media (min-width: 768px) {
+  .desktop-split-container {
+    height: calc(100vh - 49px) !important;
+    max-height: calc(100vh - 49px) !important;
+  }
   #vendors-cats {
     width: 210px !important;
+    height: calc(100vh - 49px) !important;
+    overflow-y: auto !important;
+  }
+  #vendors-main {
+    height: calc(100vh - 49px) !important;
+    overflow-y: auto !important;
   }
 }
 
@@ -109,7 +119,7 @@ body {
 
     <!-- 메인 본문 레이아웃 (원본 koreainteriormap.com/links 동일 구조) -->
     <main class="flex-1 w-full">
-      <div class="flex flex-col md:h-[calc(100vh-49px)] md:flex-row">
+      <div class="desktop-split-container flex flex-col md:h-[calc(100vh-45px)] md:flex-row">
         <!-- 좌측 카테고리 사이드바 (Desktop) -->
         <aside id="vendors-cats" class="no-scrollbar hidden w-[210px] shrink-0 overflow-y-auto overscroll-contain border-r border-line pr-3 pt-2 pb-4 text-xs leading-[1.7] md:block">
 <div class="border-b border-line"><a class="flex w-full items-baseline gap-2 py-0.5 text-left hover:underline underline-offset-2 font-semibold" href="#"><span class="truncate">전체</span><span id="total-count-desktop" class="ml-auto tabular-nums">487</span></a></div>
@@ -1045,7 +1055,6 @@ body {
       return `${catId}::${(item.name || '').trim()}`;
     }
 
-    // 1. 로컬 저장소에 병합된 업데이트 데이터가 있으면 불러와 기준 데이터와 병합
     function loadPersistedUpdates() {
       try {
         const savedNew = localStorage.getItem(NEW_ITEMS_KEY);
@@ -1068,7 +1077,6 @@ body {
       }
     }
 
-    // 2. 두 데이터셋 비교 및 신규 항목 병합
     function mergeDatasets(baseData, incomingData, recordNewKeys) {
       const cloned = JSON.parse(JSON.stringify(baseData));
       const catMap = new Map();
@@ -1127,12 +1135,10 @@ body {
       return { data: cloned, addedCount, addedNames };
     }
 
-    // 3. 전체 화면 다시 그리기 (업데이트 반영 시)
     function renderAll() {
       const total = stateData.categories.reduce((acc, c) => acc + c.items.length, 0);
       stateData.total = total;
 
-      // Desktop Sidebar
       let dHtml = `<div class="border-b border-line"><a class="flex w-full items-baseline gap-2 py-0.5 text-left hover:underline underline-offset-2 ${!activeCategoryId ? 'font-semibold' : ''}" href="#"><span class="truncate">전체</span><span id="total-count-desktop" class="ml-auto tabular-nums">${total}</span></a></div>`;
       for (const c of stateData.categories) {
         const isAct = activeCategoryId === c.id ? 'font-semibold' : '';
@@ -1140,7 +1146,6 @@ body {
       }
       catsDesktopEl.innerHTML = dHtml;
 
-      // Mobile Nav
       let mHtml = `<a class="shrink-0 ${!activeCategoryId ? 'font-semibold' : ''}" href="#">전체 <span id="total-count-mobile" class="tabular-nums opacity-50">${total}</span></a>`;
       for (const c of stateData.categories) {
         const isAct = activeCategoryId === c.id ? 'font-semibold' : '';
@@ -1149,7 +1154,6 @@ body {
       const mInner = catsMobileEl.querySelector('div');
       if (mInner) mInner.innerHTML = mHtml;
 
-      // Main Columns
       let colHtml = '';
       for (const c of stateData.categories) {
         const cid = escapeHtml(c.id);
@@ -1185,7 +1189,6 @@ body {
       columnsEl.innerHTML = colHtml;
     }
 
-    // 4. 원본 FixedPage 카테고리 필터링 & 마우스 휠 연동 로직 (3wyp499l_ya44.js 1:1 복원)
     function applyCategoryHighlight(catId) {
       activeCategoryId = catId;
       const sections = mainScrollEl ? Array.from(mainScrollEl.querySelectorAll('[data-cat]')) : [];
@@ -1236,7 +1239,6 @@ body {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // 빈 배경 클릭 시 카테고리 하이라이트 해제
     document.addEventListener('click', (e) => {
       const t = e.target;
       if (!t) return;
@@ -1248,12 +1250,13 @@ body {
       }
     });
 
-    // 데스크톱 마우스 휠 포워딩
+    // 데스크톱 마우스 휠 포워딩 (화면 어디서든 휠을 굴리면 우측 본문 또는 좌측 카테고리 바가 부드럽게 스크롤됨)
     function setupDesktopWheelForwarding() {
       const isDesktop = window.matchMedia('(min-width: 768px)').matches;
       if (isDesktop) {
         document.body.style.overflow = 'hidden';
         document.body.classList.add('kia-map-page');
+        if (mainScrollEl) mainScrollEl.focus({ preventScroll: true });
       } else {
         document.body.style.overflow = '';
         document.body.classList.remove('kia-map-page');
@@ -1266,12 +1269,14 @@ body {
       if (!window.matchMedia('(min-width: 768px)').matches) return;
       if (!detailModal.classList.contains('hidden') || !addModal.classList.contains('hidden')) return;
       const t = e.target;
-      if ((catsDesktopEl && catsDesktopEl.contains(t)) || (mainScrollEl && mainScrollEl.contains(t))) return;
-      e.preventDefault();
-      mainScrollEl.scrollBy({ top: e.deltaY, left: 0 });
+      if (catsDesktopEl && t && catsDesktopEl.contains(t)) return;
+      if (mainScrollEl && t && mainScrollEl.contains(t)) return;
+      if (mainScrollEl) {
+        e.preventDefault();
+        mainScrollEl.scrollBy({ top: e.deltaY, left: 0 });
+      }
     }, { passive: false });
 
-    // 초기 URL 해시 확인
     if (location.hash.length > 1) {
       const initialHash = location.hash.slice(1);
       if (document.getElementById(initialHash)) {
@@ -1279,7 +1284,6 @@ body {
       }
     }
 
-    // 5. '새 탭에서 모두 열기', '상세정보', '+ 추가' 이벤트 위임
     columnsEl.addEventListener('click', async (e) => {
       const openAllBtn = e.target.closest('[data-open-all]');
       if (openAllBtn) {
@@ -1325,7 +1329,6 @@ body {
       }
     });
 
-    // 6. 상세정보 모달 열기 (실시간 /api/interior-links?action=detail 호출)
     async function openDetailModal(slug, fallbackName, catName, fallbackUrl) {
       detailModalCat.textContent = catName || '자재 업체 정보';
       detailModalTitle.textContent = fallbackName || decodeURIComponent(slug);
@@ -1402,7 +1405,6 @@ body {
       if (e.target === detailModal) closeDetailModal();
     });
 
-    // 7. + 추가 모달 닫기 및 저장
     function closeAddModal() {
       addModal.classList.add('hidden');
       addModal.classList.remove('flex');
@@ -1445,7 +1447,6 @@ body {
       }
     });
 
-    // 8. 핵심 기능: 우측 상단 '업데이트' 버튼 클릭 시 실시간 크롤링 비교 및 자동 업데이트
     function parseHtmlClientFallback(rawHtml) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(rawHtml, 'text/html');
@@ -1485,7 +1486,6 @@ body {
     }
 
     async function fetchLiveSourceData() {
-      // 1차: Cloudflare Pages Function (/api/interior-links?action=sync)
       try {
         const resp = await fetch(`/api/interior-links?action=sync&_t=${Date.now()}`, { cache: 'no-store' });
         if (resp.ok) {
@@ -1496,7 +1496,6 @@ body {
         }
       } catch (_) {}
 
-      // 2차 폴백 (로컬 테스트 등): CORS 프록시 경유 실시간 파싱
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://koreainteriormap.com/links')}&_t=${Date.now()}`;
       const resp2 = await fetch(proxyUrl, { cache: 'no-store' });
       if (!resp2.ok) throw new Error('원본 사이트 연결에 실패했습니다.');
@@ -1538,7 +1537,6 @@ body {
       }
     });
 
-    // 초기화 실행
     loadPersistedUpdates();
   })();
   </script>
