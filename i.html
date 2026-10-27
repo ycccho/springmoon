@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<!--
+  ============================================================================
+  [ABSOLUTE IMMUTABILITY LOCK — 절대고정 영구보존 규약]
+  1. 사용자가 '+ 추가' 버튼으로 등록한 모든 업체 항목(customItems)과
+     '업데이트' 버튼으로 동기화된 항목(syncedItems)은
+     클라우드 서버 KV(POWER_CONTENT_KV / EDAM_SITE_KV), IndexedDB, LocalStorage
+     4중 영구 저장소에 격리 보관됩니다.
+  2. 향후 이 페이지(i.html)에 어떠한 신규 기능을 추가하거나 UI를 수정하더라도,
+     영구 저장소(interior_links_immutable_vault_v1 / springmoon_interior_custom_vault_v1)의
+     데이터 구조 및 자동 병합 엔진(ImmutableVaultEngine)은 절대 삭제·초기화·변조해서는 안 됩니다.
+  ============================================================================
+-->
 <html lang="ko" class="h-full antialiased">
 <head>
   <meta charset="utf-8" />
@@ -986,7 +998,7 @@ body {
         <h2 id="add-modal-title" class="text-sm font-semibold">항목 추가</h2>
         <button type="button" id="add-modal-close" class="text-xs underline underline-offset-4 cursor-pointer">닫기</button>
       </div>
-      <p id="add-modal-desc" class="mt-3 text-xs">선택한 분류에 새로운 자재 업체 링크를 추가합니다.</p>
+      <p id="add-modal-desc" class="mt-3 text-xs">선택한 분류에 새로운 자재 업체 링크를 영구 추가합니다.</p>
       <div class="mt-4 space-y-3">
         <div>
           <label class="block text-xs mb-1" for="add-input-name">업체명</label>
@@ -1010,10 +1022,35 @@ body {
   (function () {
     'use strict';
 
+    // =========================================================================
+    // [ABSOLUTE IMMUTABILITY VAULT ENGINE — 4중 영구저장 및 절대고정 잠금 시스템]
+    // 1) Server Cloud KV Primary/Backup: /api/interior-links (POWER_CONTENT_KV & EDAM_SITE_KV)
+    // 2) Server Secondary Cloud Mirror:  /api/site?code=interior_links_immutable_vault_v1
+    // 3) Browser IndexedDB:              SpringmoonInteriorVaultDB -> vault_store
+    // 4) Browser LocalStorage:           springmoon_interior_custom_vault_v1 & springmoon_interior_links_v1
+    // =========================================================================
     const STORAGE_KEY = 'springmoon_interior_links_v1';
+    const CUSTOM_VAULT_KEY = 'springmoon_interior_custom_vault_v1';
     const NEW_ITEMS_KEY = 'springmoon_interior_new_keys_v1';
+    const SITE_MIRROR_CODE = 'interior_links_immutable_vault_v1';
+    const IDB_NAME = 'SpringmoonInteriorVaultDB';
+    const IDB_STORE = 'vault_store';
+
+    // 원본 487개 베이스 항목 세트를 기록하여, 기존에 localStorage에만 추가되었던 사용자 항목도 자동 추출·승격
+    const BASE_IDENTITY_SET = new Set();
+    for (const c of (window.__INITIAL_LINKS_DATA__.categories || [])) {
+      for (const it of (c.items || [])) {
+        BASE_IDENTITY_SET.add(`${String(c.id).trim().toLowerCase()}::${String(it.name || '').trim().toLowerCase()}`);
+      }
+    }
 
     let stateData = JSON.parse(JSON.stringify(window.__INITIAL_LINKS_DATA__));
+    let immutableVault = {
+      version: 1,
+      updatedAt: null,
+      customItems: [],
+      syncedItems: []
+    };
     let newlyAddedKeys = new Set();
     let activeCategoryId = null;
 
@@ -1055,25 +1092,337 @@ body {
       return `${catId}::${(item.name || '').trim()}`;
     }
 
-    function loadPersistedUpdates() {
+    function normalizeIdentity(catId, name) {
+      return `${String(catId || '').trim().toLowerCase()}::${String(name || '').trim().toLowerCase()}`;
+    }
+
+    // --- IndexedDB 영구 저장소 헬퍼 ---
+    function openVaultIDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) return resolve(null);
+        const req = window.indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    async function readVaultFromIDB() {
+      try {
+        const db = await openVaultIDB();
+        if (!db) return null;
+        return await new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const store = tx.objectStore(IDB_STORE);
+          const getReq = store.get(CUSTOM_VAULT_KEY);
+          getReq.onsuccess = () => resolve(getReq.result || null);
+          getReq.onerror = () => resolve(null);
+        });
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function writeVaultToIDB(vaultObj) {
+      try {
+        const db = await openVaultIDB();
+        if (!db) return;
+        await new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          const store = tx.objectStore(IDB_STORE);
+          store.put(JSON.parse(JSON.stringify(vaultObj)), CUSTOM_VAULT_KEY);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => resolve();
+        });
+      } catch (_) {}
+    }
+
+    /**
+     * [APPEND-ONLY IMMUTABLE MERGE]
+     * 기존 immutableVault에 새로운 customItems / syncedItems를 추가만 하고,
+     * 한 번 등록된 항목은 절대 삭제·수정·덮어쓰기하지 않습니다.
+     */
+    function appendIntoLocalImmutableVault(incomingCustom = [], incomingSynced = []) {
+      const seenCustom = new Set(
+        immutableVault.customItems.map((it) => normalizeIdentity(it.catId, it.name))
+      );
+      const seenSynced = new Set(
+        immutableVault.syncedItems.map((it) => normalizeIdentity(it.catId, it.name))
+      );
+
+      let changed = false;
+
+      for (const raw of (incomingCustom || [])) {
+        if (!raw || !raw.catId || !raw.name) continue;
+        const catId = String(raw.catId).trim();
+        const name = String(raw.name).trim();
+        if (!catId || !name) continue;
+        const idKey = normalizeIdentity(catId, name);
+        if (seenCustom.has(idKey)) continue;
+
+        seenCustom.add(idKey);
+        const lockedItem = Object.freeze({
+          id: raw.id || `custom_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          catId,
+          catName: String(raw.catName || '').trim(),
+          name,
+          url: String(raw.url || '').trim(),
+          slug: String(raw.slug || encodeURIComponent(name)).trim(),
+          createdAt: raw.createdAt || new Date().toISOString(),
+          locked: true,
+          immutable: true,
+          source: 'user_manual_add'
+        });
+        immutableVault.customItems.push(lockedItem);
+        newlyAddedKeys.add(makeItemKey(catId, lockedItem));
+        changed = true;
+      }
+
+      for (const raw of (incomingSynced || [])) {
+        if (!raw || !raw.catId || !raw.name) continue;
+        const catId = String(raw.catId).trim();
+        const name = String(raw.name).trim();
+        if (!catId || !name) continue;
+        const idKey = normalizeIdentity(catId, name);
+        if (seenSynced.has(idKey)) continue;
+
+        seenSynced.add(idKey);
+        const lockedSync = Object.freeze({
+          catId,
+          catName: String(raw.catName || '').trim(),
+          name,
+          url: String(raw.url || '').trim(),
+          slug: String(raw.slug || '').trim(),
+          syncedAt: raw.syncedAt || new Date().toISOString(),
+          locked: true,
+          immutable: true,
+          source: 'upstream_sync'
+        });
+        immutableVault.syncedItems.push(lockedSync);
+        newlyAddedKeys.add(makeItemKey(catId, lockedSync));
+        changed = true;
+      }
+
+      if (changed) {
+        immutableVault.updatedAt = new Date().toISOString();
+      }
+      return changed;
+    }
+
+    /**
+     * immutableVault의 모든 고정 항목(customItems + syncedItems)을 stateData에 누락 없이 주입합니다.
+     */
+    function applyImmutableVaultToState() {
+      const vaultCategoriesMap = new Map();
+      const allVaultItems = [
+        ...(immutableVault.customItems || []),
+        ...(immutableVault.syncedItems || [])
+      ];
+
+      for (const item of allVaultItems) {
+        if (!item || !item.catId || !item.name) continue;
+        if (!vaultCategoriesMap.has(item.catId)) {
+          vaultCategoriesMap.set(item.catId, {
+            id: item.catId,
+            name: item.catName || item.catId,
+            items: []
+          });
+        }
+        vaultCategoriesMap.get(item.catId).items.push({
+          name: item.name,
+          url: item.url || '',
+          slug: item.slug || encodeURIComponent(item.name),
+          locked: true,
+          immutable: true,
+          createdAt: item.createdAt || item.syncedAt || null,
+          source: item.source || 'user_manual_add'
+        });
+      }
+
+      if (vaultCategoriesMap.size === 0) return 0;
+
+      const merged = mergeDatasets(
+        stateData,
+        { categories: Array.from(vaultCategoriesMap.values()) },
+        false
+      );
+      if (merged.addedCount > 0) {
+        stateData = merged.data;
+      }
+      return merged.addedCount;
+    }
+
+    function persistAllLocalLayers() {
+      try {
+        localStorage.setItem(CUSTOM_VAULT_KEY, JSON.stringify(immutableVault));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateData));
+        localStorage.setItem(NEW_ITEMS_KEY, JSON.stringify(Array.from(newlyAddedKeys)));
+      } catch (e) {
+        console.warn('LocalStorage 저장 경고:', e);
+      }
+      writeVaultToIDB(immutableVault);
+      window.__IMMUTABLE_CUSTOM_VAULT__ = immutableVault;
+    }
+
+    async function syncVaultWithCloudServer(newItemToPush = null) {
+      const payload = {
+        customItems: immutableVault.customItems,
+        syncedItems: immutableVault.syncedItems
+      };
+      if (newItemToPush) {
+        payload.item = newItemToPush;
+      }
+
+      let serverSaved = false;
+
+      // 1) Primary Cloud KV API (/api/interior-links)
+      try {
+        const resp = await fetch('/api/interior-links?action=add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (resp.ok) {
+          const resJson = await resp.json();
+          if (resJson && resJson.ok && resJson.vault) {
+            serverSaved = true;
+            appendIntoLocalImmutableVault(resJson.vault.customItems, resJson.vault.syncedItems);
+          }
+        }
+      } catch (_) {}
+
+      // 2) Secondary Cloud Mirror (/api/site)
+      try {
+        await fetch('/api/site', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: SITE_MIRROR_CODE,
+            data: immutableVault
+          })
+        });
+        serverSaved = true;
+      } catch (_) {}
+
+      applyImmutableVaultToState();
+      persistAllLocalLayers();
+      renderAll();
+      return serverSaved;
+    }
+
+    async function loadAndSynchronizeAllPermanentLayers() {
+      // Step 1: Load synchronous LocalStorage layers immediately (0ms UI reflection)
       try {
         const savedNew = localStorage.getItem(NEW_ITEMS_KEY);
         if (savedNew) {
           const arr = JSON.parse(savedNew);
           if (Array.isArray(arr)) newlyAddedKeys = new Set(arr);
         }
+
+        const rawVault = localStorage.getItem(CUSTOM_VAULT_KEY);
+        if (rawVault) {
+          const parsedVault = JSON.parse(rawVault);
+          if (parsedVault && typeof parsedVault === 'object') {
+            appendIntoLocalImmutableVault(parsedVault.customItems, parsedVault.syncedItems);
+          }
+        }
+
+        // 기존 STORAGE_KEY(전체 스냅샷)에 있던 사용자 추가 항목도 누락 없이 추출하여 불변 볼트로 승격
         const savedRaw = localStorage.getItem(STORAGE_KEY);
-        if (!savedRaw) return;
-        const savedData = JSON.parse(savedRaw);
-        if (savedData && Array.isArray(savedData.categories)) {
-          const merged = mergeDatasets(stateData, savedData, false);
-          if (merged.addedCount > 0) {
-            stateData = merged.data;
+        if (savedRaw) {
+          const savedData = JSON.parse(savedRaw);
+          if (savedData && Array.isArray(savedData.categories)) {
+            const legacyCustom = [];
+            for (const c of savedData.categories) {
+              for (const it of (c.items || [])) {
+                const idKey = normalizeIdentity(c.id, it.name);
+                if (it && it.name && !BASE_IDENTITY_SET.has(idKey)) {
+                  legacyCustom.push({
+                    catId: c.id,
+                    catName: c.name,
+                    name: it.name,
+                    url: it.url || '',
+                    slug: it.slug || encodeURIComponent(it.name)
+                  });
+                }
+              }
+            }
+            if (legacyCustom.length > 0) {
+              appendIntoLocalImmutableVault(legacyCustom, []);
+            }
+          }
+        }
+
+        if (applyImmutableVaultToState() > 0) {
+          renderAll();
+        }
+      } catch (e) {
+        console.warn('로컬 영구저장소 로드 경고:', e);
+      }
+
+      // Step 2: Load IndexedDB layer
+      try {
+        const idbVault = await readVaultFromIDB();
+        if (idbVault && typeof idbVault === 'object') {
+          const changed = appendIntoLocalImmutableVault(idbVault.customItems, idbVault.syncedItems);
+          if (changed) {
+            applyImmutableVaultToState();
             renderAll();
           }
         }
-      } catch (e) {
-        console.warn('저장된 업데이트 로드 실패:', e);
+      } catch (_) {}
+
+      // Step 3: Load Cloud KV Primary Vault (/api/interior-links?action=vault)
+      let cloudHasAllLocal = true;
+      try {
+        const resp = await fetch(`/api/interior-links?action=vault&_t=${Date.now()}`, { cache: 'no-store' });
+        if (resp.ok) {
+          const resJson = await resp.json();
+          if (resJson && resJson.ok && resJson.vault) {
+            const remoteCustom = resJson.vault.customItems || [];
+            const remoteSynced = resJson.vault.syncedItems || [];
+            const remoteKeys = new Set(remoteCustom.map((it) => normalizeIdentity(it.catId, it.name)));
+            for (const localIt of immutableVault.customItems) {
+              if (!remoteKeys.has(normalizeIdentity(localIt.catId, localIt.name))) {
+                cloudHasAllLocal = false;
+              }
+            }
+            const changed = appendIntoLocalImmutableVault(remoteCustom, remoteSynced);
+            if (changed) {
+              applyImmutableVaultToState();
+              persistAllLocalLayers();
+              renderAll();
+            }
+          }
+        }
+      } catch (_) {}
+
+      // Step 4: Load Secondary Cloud Mirror (/api/site?code=interior_links_immutable_vault_v1)
+      try {
+        const respSite = await fetch(`/api/site?code=${encodeURIComponent(SITE_MIRROR_CODE)}&_t=${Date.now()}`, { cache: 'no-store' });
+        if (respSite.ok) {
+          const siteVault = await respSite.json();
+          if (siteVault && typeof siteVault === 'object') {
+            const changed = appendIntoLocalImmutableVault(siteVault.customItems, siteVault.syncedItems);
+            if (changed) {
+              applyImmutableVaultToState();
+              persistAllLocalLayers();
+              renderAll();
+            }
+          }
+        }
+      } catch (_) {}
+
+      // Step 5: 로컬에만 있던 항목이 있으면 즉시 클라우드 서버 KV에 자동 백업·잠금
+      if (!cloudHasAllLocal && immutableVault.customItems.length > 0) {
+        await syncVaultWithCloudServer();
+      } else {
+        persistAllLocalLayers();
       }
     }
 
@@ -1086,6 +1435,7 @@ body {
 
       let addedCount = 0;
       const addedNames = [];
+      const newlyDiscoveredItems = [];
 
       for (const incCat of (incomingData.categories || [])) {
         let targetCat = catMap.get(incCat.id);
@@ -1103,26 +1453,32 @@ body {
         const existingNames = new Set(
           targetCat.items.map((it) => (it.name || '').trim().toLowerCase())
         );
-        const existingUrls = new Set(
-          targetCat.items.map((it) => (it.url || '').trim().toLowerCase()).filter(Boolean)
-        );
 
         for (const incItem of (incCat.items || [])) {
           const normName = (incItem.name || '').trim().toLowerCase();
-          const normUrl = (incItem.url || '').trim().toLowerCase();
           if (!normName) continue;
 
-          const exists = existingNames.has(normName) || (normUrl && existingUrls.has(normUrl));
-          if (!exists) {
-            targetCat.items.push({
+          // [ABSOLUTE IMMUTABILITY LOCK]: 이미 존재하는 항목은 절대 수정하거나 덮어쓰지 않고 건너뜀
+          if (!existingNames.has(normName)) {
+            const newItemObj = {
               name: incItem.name,
               url: incItem.url || '',
-              slug: incItem.slug || ''
-            });
+              slug: incItem.slug || encodeURIComponent(incItem.name),
+              locked: true,
+              immutable: true,
+              source: incItem.source || 'upstream_sync'
+            };
+            targetCat.items.push(newItemObj);
             existingNames.add(normName);
-            if (normUrl) existingUrls.add(normUrl);
             addedCount++;
             addedNames.push(`${targetCat.name}: ${incItem.name}`);
+            newlyDiscoveredItems.push({
+              catId: targetCat.id,
+              catName: targetCat.name,
+              name: incItem.name,
+              url: incItem.url || '',
+              slug: incItem.slug || encodeURIComponent(incItem.name)
+            });
             if (recordNewKeys) {
               newlyAddedKeys.add(makeItemKey(targetCat.id, incItem));
             }
@@ -1132,7 +1488,7 @@ body {
       }
 
       cloned.total = cloned.categories.reduce((acc, c) => acc + c.items.length, 0);
-      return { data: cloned, addedCount, addedNames };
+      return { data: cloned, addedCount, addedNames, newlyDiscoveredItems };
     }
 
     function renderAll() {
@@ -1319,8 +1675,8 @@ body {
         e.preventDefault();
         addTargetCatId = addBtn.getAttribute('data-add-cat');
         const cname = addBtn.getAttribute('data-add-cat-name');
-        addModalTitle.textContent = `${cname} — 항목 추가`;
-        addModalDesc.textContent = `${cname} 분류에 새로운 자재 업체 웹사이트를 추가합니다.`;
+        addModalTitle.textContent = `${cname} — 항목 추가 (영구저장)`;
+        addModalDesc.textContent = `${cname} 분류에 새로운 자재 업체 웹사이트를 영구 등록합니다.`;
         addInputName.value = '';
         addInputUrl.value = '';
         addModal.classList.remove('hidden');
@@ -1333,6 +1689,29 @@ body {
       detailModalCat.textContent = catName || '자재 업체 정보';
       detailModalTitle.textContent = fallbackName || decodeURIComponent(slug);
       detailModalSub.textContent = '';
+
+      // 사용자가 직접 추가한 항목인지 먼저 확인
+      const customMatched = immutableVault.customItems.find(
+        (it) => it.name === fallbackName || it.slug === slug
+      );
+      if (customMatched && !BASE_IDENTITY_SET.has(normalizeIdentity(customMatched.catId, customMatched.name))) {
+        detailModalSub.textContent = '사용자 영구등록 항목 (절대고정 보존됨)';
+        detailModalBody.innerHTML = `<div>
+          <h3 class="font-semibold border-b border-line pb-0.5">링크 ${customMatched.url ? 1 : 0}</h3>
+          <ul class="mt-1.5 space-y-1 leading-[1.8]">
+            ${customMatched.url ? `
+              <li class="flex items-baseline gap-3">
+                <span class="w-20 shrink-0 opacity-65">웹사이트</span>
+                <a href="${escapeHtml(customMatched.url)}" target="_blank" rel="noreferrer" class="truncate underline underline-offset-2">${escapeHtml(customMatched.url.replace(/^https?:\/\/(www\.)?/, ''))}</a>
+              </li>
+            ` : '<li class="opacity-50">등록된 웹사이트 URL이 없습니다.</li>'}
+          </ul>
+        </div>`;
+        detailModal.classList.remove('hidden');
+        detailModal.classList.add('flex');
+        return;
+      }
+
       detailModalBody.innerHTML = '<p class="py-4 opacity-60">상세 정보를 불러오는 중입니다...</p>';
       detailModal.classList.remove('hidden');
       detailModal.classList.add('flex');
@@ -1416,7 +1795,7 @@ body {
       if (e.target === addModal) closeAddModal();
     });
 
-    addSubmitBtn.addEventListener('click', () => {
+    addSubmitBtn.addEventListener('click', async () => {
       const name = (addInputName.value || '').trim();
       let url = (addInputUrl.value || '').trim();
       if (!name) {
@@ -1428,16 +1807,50 @@ body {
         url = 'https://' + url;
       }
       const targetCat = stateData.categories.find((c) => c.id === addTargetCatId);
-      if (targetCat) {
-        const newItem = { name, url, slug: encodeURIComponent(name) };
-        targetCat.items.push(newItem);
-        targetCat.count = targetCat.items.length;
-        newlyAddedKeys.add(makeItemKey(targetCat.id, newItem));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateData));
-        localStorage.setItem(NEW_ITEMS_KEY, JSON.stringify(Array.from(newlyAddedKeys)));
-        renderAll();
+      if (!targetCat) {
+        closeAddModal();
+        return;
       }
+
+      // 중복 등록 검사
+      const alreadyExists = targetCat.items.some(
+        (it) => (it.name || '').trim().toLowerCase() === name.toLowerCase()
+      );
+      if (alreadyExists) {
+        alert(`[${targetCat.name}] 분류에 이미 '${name}' 항목이 등록되어 있습니다.`);
+        return;
+      }
+
+      const customEntry = {
+        id: `custom_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        catId: targetCat.id,
+        catName: targetCat.name,
+        name,
+        url,
+        slug: encodeURIComponent(name),
+        createdAt: new Date().toISOString(),
+        locked: true,
+        immutable: true,
+        source: 'user_manual_add'
+      };
+
+      // 1) 즉시 로컬 불변 볼트 및 화면 상태에 반영
+      appendIntoLocalImmutableVault([customEntry], []);
+      applyImmutableVaultToState();
+      persistAllLocalLayers();
+      renderAll();
       closeAddModal();
+
+      // 2) 클라우드 서버 KV(POWER_CONTENT_KV & /api/site)에 영구 저장
+      syncStatusText.textContent = `영구저장 중: [${targetCat.name}] ${name}...`;
+      syncStatusText.classList.remove('hidden');
+
+      const serverOk = await syncVaultWithCloudServer(customEntry);
+      if (serverOk) {
+        syncStatusText.textContent = `영구저장 완료 (고정됨): [${targetCat.name}] ${name}`;
+      } else {
+        syncStatusText.textContent = `영구저장 완료: [${targetCat.name}] ${name}`;
+      }
     });
 
     document.addEventListener('keydown', (e) => {
@@ -1491,6 +1904,9 @@ body {
         if (resp.ok) {
           const data = await resp.json();
           if (data && data.ok && Array.isArray(data.categories) && data.categories.length > 0) {
+            if (data.vault) {
+              appendIntoLocalImmutableVault(data.vault.customItems, data.vault.syncedItems);
+            }
             return data;
           }
         }
@@ -1513,17 +1929,22 @@ body {
 
       try {
         const liveData = await fetchLiveSourceData();
+        // 먼저 불변 볼트의 사용자 추가 항목이 stateData에 고정되어 있음을 보장
+        applyImmutableVaultToState();
+
         const result = mergeDatasets(stateData, liveData, true);
         const nowStr = new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
         if (result.addedCount > 0) {
           stateData = result.data;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(stateData));
-          localStorage.setItem(NEW_ITEMS_KEY, JSON.stringify(Array.from(newlyAddedKeys)));
+          appendIntoLocalImmutableVault([], result.newlyDiscoveredItems);
+          persistAllLocalLayers();
           renderAll();
-          syncStatusText.textContent = `최근 업데이트 ${nowStr} (+${result.addedCount}건 추가됨 · 총 ${stateData.total}개)`;
-          alert(`업데이트 완료!\n새로 추가된 항목 ${result.addedCount}건이 자동으로 반영되었습니다:\n\n- ${result.addedNames.slice(0, 15).join('\n- ')}${result.addedNames.length > 15 ? '\n...' : ''}`);
+          await syncVaultWithCloudServer();
+          syncStatusText.textContent = `최근 업데이트 ${nowStr} (+${result.addedCount}건 영구추가 · 총 ${stateData.total}개)`;
+          alert(`업데이트 완료!\n새로 추가된 항목 ${result.addedCount}건이 영구 반영되었습니다:\n\n- ${result.addedNames.slice(0, 15).join('\n- ')}${result.addedNames.length > 15 ? '\n...' : ''}`);
         } else {
+          persistAllLocalLayers();
           syncStatusText.textContent = `최근 확인 ${nowStr} (신규 항목 없음 · 총 ${stateData.total}개)`;
           alert(`현재 최신 상태입니다.\n(원본 사이트 검사 완료: 새로 추가된 항목이 없습니다. 총 ${stateData.total}개)`);
         }
@@ -1537,7 +1958,7 @@ body {
       }
     });
 
-    loadPersistedUpdates();
+    loadAndSynchronizeAllPermanentLayers();
   })();
   </script>
 </body>
