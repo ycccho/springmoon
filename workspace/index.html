@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>스프링문 워크스페이스 | Springmoon Marketing Portfolio</title>
+  <title>스프링문 마케팅 워크스페이스 | Springmoon Marketing Portfolio</title>
   
   <!-- Open Graph / KakaoTalk Preview Meta Tags -->
   <meta property="og:title" content="스프링문 마케팅 워크스페이스" />
@@ -190,31 +190,6 @@
       box-shadow: 1.5px 1.5px 0 var(--ink);
     }
 
-    /* Live Pulse Dot */
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: var(--status-online);
-      display: inline-block;
-      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-      animation: pulse-green 2s infinite;
-    }
-    @keyframes pulse-green {
-      0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-      }
-      70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
-      }
-      100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-      }
-    }
-
     /* WYSIWYG Rich Editor & Content View styles */
     #rich-editor-content img, #modal-view-content img {
       max-width: 100%;
@@ -285,6 +260,36 @@
       font-style: italic;
     }
 
+    /* Media Channel Toggle Chip Button */
+    .channel-chip-btn {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      user-select: none;
+      border: 1.5px solid transparent;
+    }
+    .channel-chip-btn.inactive {
+      background-color: var(--card-inner);
+      color: var(--ink-3);
+      border-color: var(--ink-3);
+      opacity: 0.6;
+    }
+    .channel-chip-btn.inactive:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .channel-chip-btn.active {
+      box-shadow: 2px 2px 0 var(--ink);
+      transform: translateY(-1px);
+      opacity: 1;
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
@@ -311,9 +316,8 @@
   <header class="w-full border-b-2 border-[var(--ink)] bg-[var(--paper)] sticky top-0 z-40 px-4 sm:px-6 py-3.5 transition-colors">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       
-      <!-- Brand & Presence -->
+      <!-- Brand Logo & Title -->
       <div class="flex items-center gap-3.5">
-        <!-- Avatar Sticker Wrap -->
         <a href="/workspace/" class="relative flex-shrink-0 group">
           <div class="w-11 h-11 rounded-full neo-border bg-[var(--sun)] flex items-center justify-center neo-shadow-sm group-hover:scale-105 transition-transform overflow-hidden">
             <span class="text-xl">🌙</span>
@@ -326,16 +330,15 @@
         <div>
           <div class="flex items-center gap-2">
             <a href="/workspace/" class="font-display font-extrabold text-lg sm:text-xl text-[var(--ink)] tracking-tight hover:text-[var(--accent)] transition-colors">
-              Springmoon Resets
+              Springmoon WorkSpace
             </a>
-            <span id="storage-mode" class="neo-badge bg-[var(--mint)] text-[var(--ink)] hidden sm:inline-flex">
-              CLOUD KV
+            <span id="storage-mode" class="neo-badge bg-[var(--mint)] text-[var(--ink)] hidden sm:inline-flex" title="Cloudflare KV 서버 연동 상태">
+              서버 동기화
             </span>
           </div>
           
           <div class="flex items-center gap-2 text-xs text-[var(--ink-2)] font-medium">
-            <span class="status-dot"></span>
-            <span>지금 <strong id="live-visitor-count" class="font-bold text-[var(--ink)]">28</strong>명 접속 중</span>
+            <span class="font-mono text-[11px] text-[var(--ink-2)]">실시간 공식 성과 데이터베이스</span>
             <span class="text-[var(--ink-3)] hidden md:inline">·</span>
             <span class="font-mono text-[11px] text-[var(--ink-3)] hidden md:inline" id="sidebar-time">--:--:-- KST</span>
           </div>
@@ -347,7 +350,7 @@
         
         <!-- Storage Warning Indicator if local -->
         <div id="storage-warning" class="hidden px-2.5 py-1 rounded-md bg-[var(--rose)] neo-border text-[11px] font-bold text-[var(--ink)] neo-shadow-sm">
-          ⚠️ 로컬 캐시 모드
+          ⚠️ 서버 연결 대기중
         </div>
 
         <!-- Time Clock Display -->
@@ -399,7 +402,7 @@
           <strong class="text-[var(--ink)] font-bold">@springmoon</strong>이 직접 집행하고 검증한 마케팅 성과 및 포트폴리오를 실시간으로 확인하세요.
         </p>
         <div class="flex items-center gap-2 font-mono text-xs">
-          <span class="text-[var(--ink-3)]">방문 IP:</span>
+          <span class="text-[var(--ink-3)]">접속 IP:</span>
           <span id="visitor-ip" class="px-2 py-0.5 rounded bg-[var(--card)] neo-border text-[var(--ink)] font-bold">127.0.0.1</span>
         </div>
       </div>
@@ -418,7 +421,7 @@
             <span class="px-2 py-0.5 rounded-full bg-[var(--mint)] neo-border text-[var(--ink)] font-bold text-[10px]">VERIFIED</span>
             <span>스프링문 공식 마케팅 검증 데이터베이스</span>
             <span class="text-[var(--ink-3)]">·</span>
-            <span class="font-mono text-[11px] text-[var(--ink-3)]">실시간 갱신</span>
+            <span class="font-mono text-[11px] text-[var(--ink-3)]">실시간 서버 영구 동기화</span>
           </div>
 
           <!-- Codex Resets Reaction Button ('감사해요' 버튼 스타일) -->
@@ -456,7 +459,7 @@
           <input
             type="text"
             id="portfolio-search"
-            placeholder="프로젝트, 병원명, 키워드 검색..."
+            placeholder="프로젝트, 병원명, 매체, 키워드 검색..."
             oninput="handleSearch(this.value)"
             class="w-full pl-9 pr-4 py-2 text-xs font-medium rounded-xl bg-[var(--card)] neo-border neo-shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-[var(--ink)] placeholder:text-[var(--ink-3)]"
           />
@@ -483,10 +486,10 @@
   <footer class="max-w-6xl mx-auto px-4 sm:px-6 pt-16 text-center space-y-2">
     <div class="w-12 h-1 bg-[var(--ink)] mx-auto rounded-full mb-4"></div>
     <p class="font-display font-bold text-sm text-[var(--ink)]">
-      Springmoon Resets • High-Performance Marketing Portfolio
+      스프링문 마케팅 성과 및 포트폴리오 센터 (Springmoon Marketing Workspace)
     </p>
     <p class="text-xs text-[var(--ink-3)] font-mono">
-      Designed in Neo-Brutalist Studio Aesthetic • Powered by Cloudflare Workers & KV
+      전국 병·의원 및 기업 실시간 마케팅 집행 검증 시스템 • Cloudflare KV 엔터프라이즈 서버 구동
     </p>
   </footer>
 
@@ -502,7 +505,7 @@
         <button id="password-close" class="neo-btn p-1.5 text-xs">✕</button>
       </div>
       <p class="text-xs text-[var(--ink-2)] font-medium">
-        포트폴리오 등록 및 편집 권한을 얻으려면 비밀번호를 입력해 주세요.
+        포트폴리오 등록 및 편집 권한을 얻으려면 관리자 비밀번호를 입력해 주세요.
       </p>
       <div>
         <input
@@ -547,15 +550,19 @@
         </button>
       </div>
 
-      <!-- Core Spec Row (ROAS, 채널 등) -->
-      <div id="modal-core-row" class="px-5 py-3 border-b-2 border-[var(--ink)] bg-[var(--card-inner)] flex flex-wrap items-center gap-4 text-xs font-mono">
-        <div class="flex items-center gap-1.5">
-          <span class="text-[var(--ink-3)]" id="modal-roas-label">성과 지표:</span>
-          <span id="modal-roas" class="font-bold text-[var(--accent)] text-sm">ROAS 450%</span>
+      <!-- Core Spec Row (ROAS, 마케팅 매체 고유 컬러 버튼들) -->
+      <div id="modal-core-row" class="px-5 py-3 border-b-2 border-[var(--ink)] bg-[var(--card-inner)] flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+        <div class="flex items-center gap-2">
+          <span class="text-[var(--ink-3)] font-bold" id="modal-roas-label">성과 지표:</span>
+          <span id="modal-roas" class="font-extrabold text-[var(--accent)] text-sm">ROAS 450%</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="text-[var(--ink-3)]">집행 채널:</span>
-          <span id="modal-channels" class="font-bold text-[var(--ink)]">네이버 플레이스, 블로그</span>
+        
+        <!-- Channels Container with Brand Colors -->
+        <div class="flex items-center gap-2">
+          <span class="text-[var(--ink-3)] font-bold">집행 매체:</span>
+          <div id="modal-channels-badges" class="flex flex-wrap gap-1.5 items-center">
+            <!-- Rendered by JS as colorful brand badges -->
+          </div>
         </div>
       </div>
 
@@ -568,7 +575,41 @@
         </div>
 
         <!-- Edit Mode Content (WYSIWYG Editor) -->
-        <div id="modal-edit-content" class="hidden space-y-4">
+        <div id="modal-edit-content" class="hidden space-y-5">
+
+          <!-- Channel Selection Toolbar in Modal -->
+          <div class="p-4 rounded-xl bg-[var(--card-inner)] neo-border space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-[var(--ink)] flex items-center gap-1.5">
+                <span>🎯</span> 마케팅 집행 매체 선택 (원클릭 토글)
+              </label>
+              <span class="text-[10px] text-[var(--ink-3)] font-mono">클릭하여 매체 추가/제거</span>
+            </div>
+            
+            <!-- Quick Channel Buttons with Brand Colors -->
+            <div id="modal-channel-picker" class="flex flex-wrap gap-1.5 pt-1">
+              <!-- Dynamically rendered -->
+            </div>
+
+            <!-- Custom Channel Input -->
+            <div class="flex items-center gap-2 pt-2 border-t border-[var(--ink-3)]/30">
+              <span class="text-[11px] text-[var(--ink-2)] font-bold flex-shrink-0">직접 입력:</span>
+              <input
+                type="text"
+                id="modal-custom-channel-input"
+                placeholder="예: 틱톡 광고, 맘카페 등 (쉼표 구분)"
+                class="flex-1 px-3 py-1.5 rounded-lg bg-[var(--card)] neo-border text-xs text-[var(--ink)] focus:outline-none"
+              />
+              <button
+                type="button"
+                onclick="addCustomModalChannels()"
+                class="neo-btn px-3 py-1.5 text-xs font-bold"
+              >
+                추가
+              </button>
+            </div>
+          </div>
+
           <!-- Editor Toolbar -->
           <div class="p-2 rounded-xl bg-[var(--card-inner)] neo-border flex flex-wrap items-center gap-1.5 text-xs">
             <button type="button" onclick="formatDoc('bold')" class="neo-btn px-2.5 py-1 text-xs" title="굵게"><strong>B</strong></button>
@@ -622,7 +663,7 @@
           닫기
         </button>
         <button id="modal-btn-save" onclick="saveEditorContent()" class="neo-btn neo-btn-primary text-xs hidden">
-          💾 상세 내용 저장
+          💾 상세 내용 임시 반영
         </button>
       </div>
 
@@ -630,14 +671,14 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- JAVASCRIPT LOGIC (Codex Resets Adapted)    -->
+  <!-- JAVASCRIPT LOGIC                           -->
   <!-- ========================================== -->
   <script>
     const PASSWORD = "2";
     let isDarkMode = false;
     let isEditMode = false;
     let portfolios = [];
-    let isServerStorage = false;
+    let isServerStorage = true;
     let categoryOrder = [];
     let activeCategory = "전체";
     let activeEditorCardId = null;
@@ -646,8 +687,54 @@
 
     // Header text state variables
     let headerTitle = "springmoon WorkSpace";
-    let headerDesc = "스프링문이 직접 집행하고 검증한 마케팅 성과 및 포트폴리오 리스트입니다.";
-    let btnText = "성과 상세 보기";
+    let headerDesc = "스프링문이 직접 집행한 마케팅 성과 및 포트폴리오 리스트입니다. 마케팅 대행은 불가 합니다.";
+    let btnText = "상세보기";
+
+    // ==========================================
+    // 마케팅 채널 사전 및 고유 브랜드 컬러 스펙
+    // ==========================================
+    const MARKETING_CHANNELS = [
+      { name: "네이버 플레이스", color: "#03C75A", bg: "#e6f9ed", text: "#037334", border: "#03C75A" },
+      { name: "네이버 블로그", color: "#2DB400", bg: "#ebfbeb", text: "#1b6d00", border: "#2DB400" },
+      { name: "네이버 파워링크", color: "#00a843", bg: "#e6f8ec", text: "#006b2b", border: "#00a843" },
+      { name: "네이버 파워콘텐츠", color: "#0D9488", bg: "#f0fdfa", text: "#0f766e", border: "#0D9488" },
+      { name: "네이버 GFA", color: "#8B5CF6", bg: "#f5f3ff", text: "#6d28d9", border: "#8B5CF6" },
+      { name: "네이버 카페", color: "#029f48", bg: "#e6f7ed", text: "#015c2a", border: "#029f48" },
+      { name: "네이버 브랜드검색", color: "#00833C", bg: "#e6f5ec", text: "#004d23", border: "#00833C" },
+      { name: "인스타그램", color: "#E1306C", bg: "#fdf2f6", text: "#b0184d", border: "#E1306C" },
+      { name: "페이스북", color: "#1877F2", bg: "#eff6ff", text: "#1d4ed8", border: "#1877F2" },
+      { name: "당근마켓", color: "#FF6F0F", bg: "#fff7ed", text: "#c2410c", border: "#FF6F0F" },
+      { name: "카카오 모먼트", color: "#FEE500", bg: "#fefce8", text: "#3C1E1E", border: "#d4b800" },
+      { name: "카카오 알림톡", color: "#ffeb00", bg: "#fef9c3", text: "#3C1E1E", border: "#ca8a04" },
+      { name: "구글 검색/GDN", color: "#4285F4", bg: "#eff6ff", text: "#1e40af", border: "#4285F4" },
+      { name: "유튜브 광고", color: "#FF0000", bg: "#fef2f2", text: "#b91c1c", border: "#FF0000" },
+      { name: "언론보도", color: "#4B5563", bg: "#f3f4f6", text: "#1f2937", border: "#4B5563" },
+      { name: "체험단/인플루언서", color: "#EC4899", bg: "#fdf2f8", text: "#be185d", border: "#EC4899" }
+    ];
+
+    // 채널명을 고유 컬러 뱃지 HTML로 변환하는 헬퍼 함수
+    function renderChannelBadgesHtml(channelsStr) {
+      if (!channelsStr || !channelsStr.trim()) {
+        return '<span class="text-xs text-[var(--ink-3)] font-mono">-</span>';
+      }
+
+      const list = channelsStr.split(',').map(s => s.trim()).filter(Boolean);
+      if (list.length === 0) return '<span class="text-xs text-[var(--ink-3)] font-mono">-</span>';
+
+      return list.map(name => {
+        // 정확 또는 부분 매칭
+        const found = MARKETING_CHANNELS.find(ch => 
+          name.toLowerCase() === ch.name.toLowerCase() ||
+          name.includes(ch.name) ||
+          ch.name.includes(name)
+        );
+
+        if (found) {
+          return `<span class="inline-flex items-center px-2 py-0.5 rounded-md font-bold text-[11px] neo-shadow-sm transition-transform hover:scale-105" style="background-color: ${found.bg}; color: ${found.text}; border: 1.5px solid ${found.border};">${name}</span>`;
+        }
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded-md font-bold text-[11px] bg-[var(--card-inner)] text-[var(--ink)] neo-border neo-shadow-sm">${name}</span>`;
+      }).join(' ');
+    }
 
     // Theme Toggle Function
     function toggleTheme() {
@@ -664,7 +751,7 @@
       }
     }
 
-    // Reaction Button Click Effect (Codex Resets '감사해요' 모션)
+    // Reaction Button Click Effect
     function handleReactionClick() {
       reactionCountVal++;
       const counter = document.getElementById("reaction-count");
@@ -705,7 +792,7 @@
       }
     }
 
-    // Category Color Mapping (Codex Resets 파스텔 배지 테마)
+    // Category Color Mapping
     function getCategoryColor(cat) {
       switch (cat) {
         case '피부과': return 'bg-[var(--rose)]';
@@ -713,7 +800,10 @@
         case '성형외과': return 'bg-[var(--peach)]';
         case '치과': return 'bg-[var(--mint)]';
         case '인테리어': return 'bg-[var(--sun)]';
-        case '마케팅': return 'bg-[var(--mint)]';
+        case '요식업': return 'bg-[var(--peach)]';
+        case '온라인판매': return 'bg-[var(--mint)]';
+        case '행정사': return 'bg-[var(--sky)]';
+        case '건축/공사업': return 'bg-[var(--sun)]';
         default: return 'bg-[var(--sun)]';
       }
     }
@@ -724,14 +814,12 @@
       if (!container) return;
       container.innerHTML = "";
 
-      // Extract unique categories
       const set = new Set();
       portfolios.forEach(p => {
         if (p.businessType) set.add(p.businessType);
       });
       const uniqueCats = Array.from(set);
 
-      // Re-order based on saved order if available
       let ordered = [];
       categoryOrder.forEach(c => {
         if (uniqueCats.includes(c)) ordered.push(c);
@@ -776,75 +864,26 @@
       });
     }
 
-    // Default sample portfolios if server and local are empty
-    const defaultSamplePortfolios = [
-      {
-        id: "port_1",
-        businessType: "피부과",
-        clientName: "부산 센텀 리더스 피부과의원",
-        roas: "신환 유입 +340%",
-        channels: "네이버 플레이스, 파워콘텐츠, 블로그",
-        image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&auto=format&fit=crop&q=80",
-        tags: ["플레이스 1위", "월 유입 1.2만명", "매출 2.8배"],
-        detailContent: "<h2>센텀 리더스 피부과 마케팅 집중 집행 성과</h2><p>지역 중심 키워드 및 의료법 준수 콘텐츠 전략을 통해 단 3개월 만에 플레이스 1위 진입 및 월 신환 유입 340% 증가를 달성했습니다.</p><table><tr><th>구분</th><th>집행 전</th><th>집행 후</th><th>증감률</th></tr><tr><td>월 플레이스 조회수</td><td>3,200회</td><td>14,500회</td><td>+353%</td></tr><tr><td>신환 전화 예약수</td><td>48건</td><td>212건</td><td>+341%</td></tr></table>"
-      },
-      {
-        id: "port_2",
-        businessType: "안과",
-        clientName: "서면 밝은누리 안과의원",
-        roas: "스마일라식 상담 +280%",
-        channels: "파워콘텐츠, 키워드 광고, 로컬 SEO",
-        image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800&auto=format&fit=crop&q=80",
-        tags: ["스마일라식", "의료 칼럼", "ROAS 520%"],
-        detailContent: "<h2>서면 밝은누리 안과의원 스마일라식 집중 캠페인</h2><p>고객의 불안감을 해소하는 전문의 심층 Q&A 칼럼과 로컬 타겟팅 캠페인을 결합하여 예약 전환율을 극대화했습니다.</p>"
-      },
-      {
-        id: "port_3",
-        businessType: "성형외과",
-        clientName: "해운대 에이치 성형외과의원",
-        roas: "상담 전환율 +210%",
-        channels: "인스타그램, 블로그 C-Rank, 플레이스",
-        image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&auto=format&fit=crop&q=80",
-        tags: ["비포애프터", "프리미엄 브랜딩", "전환율 18%"],
-        detailContent: "<h2>해운대 에이치 성형외과 프리미엄 리브랜딩</h2><p>고급스러운 비주얼 아이덴티티와 신뢰 중심의 케이스 스터디로 하이엔드 고객층 유입을 확보했습니다.</p>"
-      },
-      {
-        id: "port_4",
-        businessType: "치과",
-        clientName: "센텀 프라임 치과의원",
-        roas: "임플란트 문의 +190%",
-        channels: "네이버 스마트플레이스, 지역 타겟팅",
-        image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&auto=format&fit=crop&q=80",
-        tags: ["네비게이션 임플란트", "지역 1위", "전화 유입 급증"],
-        detailContent: "<h2>센텀 프라임 치과의원 임플란트 마케팅</h2><p>네비게이션 임플란트의 안정성을 강조한 콘텐츠와 플레이스 리뷰 활성화로 내원율을 대폭 신장시켰습니다.</p>"
-      },
-      {
-        id: "port_5",
-        businessType: "인테리어",
-        clientName: "인디컴퍼니 상업공간 인테리어",
-        roas: "월간 견적 문의 +450%",
-        channels: "포트폴리오 SEO, 블로그, 인스타그램",
-        image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&auto=format&fit=crop&q=80",
-        tags: ["병원 인테리어", "월 40건 견적", "고단가 수주"],
-        detailContent: "<h2>인디컴퍼니 3D 실사 포트폴리오 연계 마케팅</h2><p>실제 완공 3D 투어와 도면 분석 칼럼을 통해 병·의원 원장님들의 직통 견적 문의를 대량 창출했습니다.</p>"
-      }
-    ];
-
-    // Load Portfolios from Cloudflare KV API or LocalStorage
+    // ==========================================
+    // 서버 영구 저장 및 로드 로직 (Cloudflare KV)
+    // ==========================================
     async function loadPortfolios() {
       try {
-        const res = await fetch("/api/portfolio");
+        const res = await fetch("/api/portfolio?t=" + Date.now());
         if (res.ok) {
           const data = await res.json();
           isServerStorage = true;
-          document.getElementById("storage-mode").textContent = "CLOUD KV";
-          document.getElementById("storage-mode").classList.remove("hidden");
-          document.getElementById("storage-warning").classList.add("hidden");
+          const modeEl = document.getElementById("storage-mode");
+          if (modeEl) {
+            modeEl.textContent = "서버 동기화";
+            modeEl.classList.remove("hidden");
+          }
+          document.getElementById("storage-warning")?.classList.add("hidden");
           
           if (Array.isArray(data)) {
-            portfolios = data.length > 0 ? data : defaultSamplePortfolios;
+            portfolios = data;
           } else if (data && typeof data === "object") {
-            portfolios = (data.portfolios && data.portfolios.length > 0) ? data.portfolios : defaultSamplePortfolios;
+            portfolios = data.portfolios || [];
             headerTitle = data.headerTitle || headerTitle;
             headerDesc = data.headerDesc || headerDesc;
             btnText = data.btnText || btnText;
@@ -854,37 +893,35 @@
           return;
         }
       } catch (err) {
-        console.warn("Server API fetch failed, falling back to localStorage", err);
+        console.error("서버 API 조회 오류:", err);
       }
 
-      // Local fallback
+      // 서버 연결 실패 시 비상 캐시
       isServerStorage = false;
-      document.getElementById("storage-mode").textContent = "LOCAL";
-      document.getElementById("storage-warning").classList.remove("hidden");
-      
+      const warnEl = document.getElementById("storage-warning");
+      if (warnEl) warnEl.classList.remove("hidden");
+
       const local = localStorage.getItem("springmoon_portfolios");
       if (local) {
         try {
           const parsed = JSON.parse(local);
           if (Array.isArray(parsed)) {
-            portfolios = parsed.length > 0 ? parsed : defaultSamplePortfolios;
+            portfolios = parsed;
           } else if (parsed && typeof parsed === "object") {
-            portfolios = (parsed.portfolios && parsed.portfolios.length > 0) ? parsed.portfolios : defaultSamplePortfolios;
+            portfolios = parsed.portfolios || [];
             headerTitle = parsed.headerTitle || headerTitle;
             headerDesc = parsed.headerDesc || headerDesc;
             btnText = parsed.btnText || btnText;
             categoryOrder = parsed.categoryOrder || [];
           }
         } catch (e) {
-          portfolios = defaultSamplePortfolios;
+          portfolios = [];
         }
-      } else {
-        portfolios = defaultSamplePortfolios;
       }
       renderPortfolios();
     }
 
-    // Save Portfolios to Server or Local
+    // 서버에 영구 저장 (Cloudflare KV 우선 적용)
     async function savePortfolios() {
       serializePortfoliosFromDOM();
       
@@ -896,24 +933,32 @@
         portfolios
       };
 
-      localStorage.setItem("springmoon_portfolios", JSON.stringify(payload));
+      // 브라우저 캐시 백업
+      try {
+        localStorage.setItem("springmoon_portfolios", JSON.stringify(payload));
+      } catch (e) {
+        console.warn("로컬 캐시 저장 제한 초과:", e);
+      }
 
-      if (isServerStorage) {
-        try {
-          const res = await fetch("/api/portfolio", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-          if (res.ok) {
-            alert("✅ 서버 KV 데이터베이스에 성공적으로 저장되었습니다!");
-            return;
-          }
-        } catch (e) {
-          alert("⚠️ 서버 통신 중 오류가 발생하여 로컬에만 저장되었습니다.");
+      // 서버 영구 저장 호출
+      try {
+        const res = await fetch("/api/portfolio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          alert("✅ 클라우드플레어 서버(KV)에 영구 저장되었습니다!\n모든 다른 사용자 및 방문자에게 동일하게 반영됩니다.");
+          return true;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          alert("⚠️ 서버 저장 응답 오류: " + (errData.error || res.statusText) + "\n관리자에게 문의해 주세요.");
+          return false;
         }
-      } else {
-        alert("✅ 로컬 브라우저에 저장되었습니다.");
+      } catch (e) {
+        alert("❌ 서버 통신 오류가 발생했습니다. 네트워크 연결을 확인해 주세요.");
+        return false;
       }
     }
 
@@ -925,12 +970,15 @@
         document.getElementById("password-input").focus();
       } else {
         // Save and Exit Edit Mode
-        savePortfolios();
-        isEditMode = false;
-        document.getElementById("edit-icon").textContent = "🔒";
-        document.getElementById("edit-text").textContent = "수정하기";
-        document.getElementById("btn-edit-mode").className = "neo-btn neo-btn-sun flex items-center gap-1.5";
-        renderPortfolios();
+        savePortfolios().then(success => {
+          if (success) {
+            isEditMode = false;
+            document.getElementById("edit-icon").textContent = "🔒";
+            document.getElementById("edit-text").textContent = "수정하기";
+            document.getElementById("btn-edit-mode").className = "neo-btn neo-btn-sun flex items-center gap-1.5";
+            renderPortfolios();
+          }
+        });
       }
     }
 
@@ -993,7 +1041,7 @@
           channels,
           image,
           tags,
-          detailContent: existing.detailContent || ""
+          detailContent: existing.detailContent || existing.detailHtml || ""
         });
       });
 
@@ -1006,13 +1054,13 @@
       const newId = "port_" + Date.now();
       portfolios.unshift({
         id: newId,
-        businessType: "피부과",
+        businessType: "마케팅",
         clientName: "신규 프로젝트명",
         roas: "전환율 +200%",
-        channels: "네이버 플레이스, 파워콘텐츠",
+        channels: "네이버 플레이스, 네이버 블로그",
         image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80",
-        tags: ["신규", "플레이스 1위", "매출 상승"],
-        detailContent: "<h2>프로젝트 상세 내용</h2><p>마케팅 성과 및 세부 집행 내용을 입력해 주세요.</p>"
+        tags: ["신규 성과", "상위노출", "매출 상승"],
+        detailContent: "<h2>프로젝트 성과 분석</h2><p>마케팅 집행 성과 및 세부 내용을 입력해 주세요.</p>"
       });
       renderPortfolios();
     }
@@ -1023,6 +1071,49 @@
       serializePortfoliosFromDOM();
       portfolios = portfolios.filter(p => p.id !== id);
       renderPortfolios();
+    }
+
+    // Toggle card channel helper
+    function toggleCardChannel(cardId, channelName) {
+      const card = document.querySelector(`.portfolio-card-editable[data-id="${cardId}"]`);
+      if (!card) return;
+      const input = card.querySelector('.inp-channels');
+      if (!input) return;
+
+      let current = input.value.split(',').map(s => s.trim()).filter(Boolean);
+      if (current.includes(channelName)) {
+        current = current.filter(s => s !== channelName);
+      } else {
+        current.push(channelName);
+      }
+      input.value = current.join(', ');
+
+      // Update button styles in that card
+      updateCardChannelButtonStyles(cardId, input.value);
+    }
+
+    function updateCardChannelButtonStyles(cardId, channelsStr) {
+      const card = document.querySelector(`.portfolio-card-editable[data-id="${cardId}"]`);
+      if (!card) return;
+      const current = channelsStr.split(',').map(s => s.trim()).filter(Boolean);
+
+      card.querySelectorAll('.channel-chip-btn').forEach(btn => {
+        const chName = btn.dataset.channel;
+        const spec = MARKETING_CHANNELS.find(c => c.name === chName);
+        if (current.includes(chName)) {
+          btn.className = 'channel-chip-btn active';
+          if (spec) {
+            btn.style.backgroundColor = spec.bg;
+            btn.style.color = spec.text;
+            btn.style.borderColor = spec.border;
+          }
+        } else {
+          btn.className = 'channel-chip-btn inactive';
+          btn.style.backgroundColor = '';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }
+      });
     }
 
     // Render Hero Header
@@ -1120,9 +1211,31 @@
         card.className = "portfolio-card-item";
 
         const badgeColor = getCategoryColor(item.businessType);
+        const channelsVal = item.channels || "";
 
         if (isEditMode) {
           card.className += " portfolio-card-editable neo-card p-5 space-y-4 relative bg-[var(--card)]";
+          
+          // Generate channel chip buttons for this card
+          const currentChannels = channelsVal.split(',').map(s => s.trim()).filter(Boolean);
+          const channelChipsHtml = MARKETING_CHANNELS.map(ch => {
+            const isActive = currentChannels.includes(ch.name);
+            const activeStyle = isActive 
+              ? `background-color: ${ch.bg}; color: ${ch.text}; border-color: ${ch.border};`
+              : '';
+            return `
+              <button
+                type="button"
+                data-channel="${ch.name}"
+                onclick="toggleCardChannel('${item.id}', '${ch.name}')"
+                class="channel-chip-btn ${isActive ? 'active' : 'inactive'}"
+                style="${activeStyle}"
+              >
+                ${ch.name}
+              </button>
+            `;
+          }).join('');
+
           card.innerHTML = `
             <!-- Delete & Drag Handle -->
             <div class="flex items-center justify-between pb-3 border-b-2 border-[var(--ink)]">
@@ -1151,7 +1264,7 @@
             <!-- Fields -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-[10px] font-bold text-[var(--ink-3)] uppercase font-mono">카테고리</label>
+                <label class="block text-[10px] font-bold text-[var(--ink-3)] uppercase font-mono">업종/분류</label>
                 <input type="text" class="inp-businessType w-full px-3 py-1.5 rounded neo-border bg-[var(--card-inner)] text-xs font-bold text-[var(--ink)]" value="${item.businessType || ''}">
               </div>
               <div>
@@ -1161,13 +1274,23 @@
             </div>
 
             <div>
-              <label class="block text-[10px] font-bold text-[var(--ink-3)] uppercase font-mono">프로젝트 / 고객사명</label>
+              <label class="block text-[10px] font-bold text-[var(--ink-3)] uppercase font-mono">고객사 / 프로젝트명</label>
               <input type="text" class="inp-clientName w-full px-3 py-1.5 rounded neo-border bg-[var(--card-inner)] text-xs font-bold text-[var(--ink)]" value="${item.clientName || ''}">
             </div>
 
-            <div>
-              <label class="block text-[10px] font-bold text-[var(--ink-3)] uppercase font-mono">집행 채널</label>
-              <input type="text" class="inp-channels w-full px-3 py-1.5 rounded neo-border bg-[var(--card-inner)] text-xs text-[var(--ink-2)]" value="${item.channels || ''}">
+            <!-- Marketing Channels with Brand Color Buttons -->
+            <div class="space-y-1.5">
+              <label class="block text-[10px] font-bold text-[var(--ink-3)] uppercase font-mono">마케팅 매체 선택 (원클릭 토글)</label>
+              <div class="flex flex-wrap gap-1 p-2 rounded-lg bg-[var(--card-inner)] neo-border max-h-28 overflow-y-auto">
+                ${channelChipsHtml}
+              </div>
+              <input
+                type="text"
+                class="inp-channels w-full px-3 py-1 rounded neo-border bg-[var(--card-inner)] text-xs text-[var(--ink-2)]"
+                placeholder="직접 쉼표로 추가/수정 가능"
+                value="${channelsVal}"
+                oninput="updateCardChannelButtonStyles('${item.id}', this.value)"
+              >
             </div>
 
             <div>
@@ -1182,7 +1305,7 @@
             </div>
           `;
         } else {
-          // View Mode (Codex Resets Log Card Style)
+          // View Mode
           card.className += " neo-card neo-card-hover flex flex-col justify-between overflow-hidden cursor-pointer group bg-[var(--card)]";
           card.onclick = () => openDetailModal(item.id);
 
@@ -1191,6 +1314,8 @@
               #${t}
             </span>
           `).join('');
+
+          const channelsBadgesHtml = renderChannelBadgesHtml(channelsVal);
 
           card.innerHTML = `
             <!-- Card Thumbnail -->
@@ -1204,7 +1329,7 @@
               />
               <div class="absolute top-3 left-3">
                 <span class="neo-badge ${badgeColor} text-[var(--ink)]">
-                  ${item.businessType || '기타'}
+                  ${item.businessType || '마케팅'}
                 </span>
               </div>
               <div class="absolute top-3 right-3">
@@ -1216,17 +1341,18 @@
 
             <!-- Card Content -->
             <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
-              <div class="space-y-2">
+              <div class="space-y-2.5">
                 <h3 class="font-display font-extrabold text-lg text-[var(--ink)] tracking-tight group-hover:text-[var(--accent)] transition-colors line-clamp-1">
                   ${item.clientName || '프로젝트명'}
                 </h3>
-                <div class="flex items-center gap-2 font-mono text-xs text-[var(--ink-2)]">
-                  <span class="text-[var(--ink-3)]">채널:</span>
-                  <span class="truncate">${item.channels || '네이버 플레이스, 블로그'}</span>
+                
+                <!-- Brand Color Marketing Channel Badges -->
+                <div class="flex flex-wrap gap-1 items-center pt-0.5">
+                  ${channelsBadgesHtml}
                 </div>
               </div>
 
-              <!-- ROAS & Result Box (Codex Resets 강조 피규어 스타일) -->
+              <!-- ROAS & Result Box -->
               <div class="p-3 rounded-xl bg-[var(--card-inner)] neo-border flex items-center justify-between">
                 <span class="text-[11px] font-bold text-[var(--ink-2)]">핵심 성과</span>
                 <span class="font-mono font-extrabold text-sm sm:text-base text-[var(--accent)]">
@@ -1294,16 +1420,22 @@
       
       const badge = document.getElementById("modal-category-badge");
       if (badge) {
-        badge.textContent = item.businessType || "기타";
+        badge.textContent = item.businessType || "마케팅";
         badge.className = "neo-badge " + getCategoryColor(item.businessType) + " text-[var(--ink)]";
       }
 
       document.getElementById("modal-title").textContent = item.clientName || "프로젝트 상세";
       document.getElementById("modal-roas").textContent = item.roas || "-";
-      document.getElementById("modal-channels").textContent = item.channels || "-";
+      
+      // Render brand color channel badges in modal
+      const badgesContainer = document.getElementById("modal-channels-badges");
+      if (badgesContainer) {
+        badgesContainer.innerHTML = renderChannelBadgesHtml(item.channels || "");
+      }
 
       const viewContent = document.getElementById("modal-view-content");
-      viewContent.innerHTML = item.detailContent || "<p class='text-gray-400'>등록된 상세 내용이 없습니다.</p>";
+      const content = item.detailContent || item.detailHtml || "<p class='text-gray-400'>등록된 상세 내용이 없습니다.</p>";
+      viewContent.innerHTML = content;
 
       document.getElementById("modal-view-content").classList.remove("hidden");
       document.getElementById("modal-edit-content").classList.add("hidden");
@@ -1321,16 +1453,19 @@
 
       const badge = document.getElementById("modal-category-badge");
       if (badge) {
-        badge.textContent = item.businessType || "기타";
+        badge.textContent = item.businessType || "마케팅";
         badge.className = "neo-badge " + getCategoryColor(item.businessType) + " text-[var(--ink)]";
       }
 
       document.getElementById("modal-title").textContent = (item.clientName || "프로젝트") + " 상세 내용 편집";
       document.getElementById("modal-roas").textContent = item.roas || "-";
-      document.getElementById("modal-channels").textContent = item.channels || "-";
+
+      // Render channel picker in editor modal
+      renderModalChannelPicker(item.channels || "");
 
       const editor = document.getElementById("rich-editor-content");
-      editor.innerHTML = item.detailContent || "<h2>프로젝트 상세 분석</h2><p>이곳에 마케팅 집행 성과 내용을 입력하세요.</p>";
+      const content = item.detailContent || item.detailHtml || "<h2>프로젝트 상세 분석</h2><p>이곳에 마케팅 집행 성과 내용을 입력하세요.</p>";
+      editor.innerHTML = content;
 
       document.getElementById("modal-view-content").classList.add("hidden");
       document.getElementById("modal-edit-content").classList.remove("hidden");
@@ -1338,6 +1473,94 @@
 
       document.getElementById("detail-modal").classList.remove("hidden");
       editor.focus();
+    }
+
+    // Modal Channel Picker Helper
+    function renderModalChannelPicker(channelsStr) {
+      const container = document.getElementById("modal-channel-picker");
+      if (!container) return;
+
+      const current = channelsStr.split(',').map(s => s.trim()).filter(Boolean);
+
+      container.innerHTML = MARKETING_CHANNELS.map(ch => {
+        const isActive = current.includes(ch.name);
+        const activeStyle = isActive 
+          ? `background-color: ${ch.bg}; color: ${ch.text}; border-color: ${ch.border};`
+          : '';
+        return `
+          <button
+            type="button"
+            data-channel="${ch.name}"
+            onclick="toggleModalChannel('${ch.name}')"
+            class="channel-chip-btn ${isActive ? 'active' : 'inactive'}"
+            style="${activeStyle}"
+          >
+            ${ch.name}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleModalChannel(channelName) {
+      if (!activeEditorCardId) return;
+      const item = portfolios.find(p => p.id === activeEditorCardId);
+      if (!item) return;
+
+      let current = (item.channels || '').split(',').map(s => s.trim()).filter(Boolean);
+      if (current.includes(channelName)) {
+        current = current.filter(s => s !== channelName);
+      } else {
+        current.push(channelName);
+      }
+      item.channels = current.join(', ');
+
+      renderModalChannelPicker(item.channels);
+      
+      // Update badge row in modal
+      const badgesContainer = document.getElementById("modal-channels-badges");
+      if (badgesContainer) {
+        badgesContainer.innerHTML = renderChannelBadgesHtml(item.channels);
+      }
+
+      // Also update card input if visible in background
+      const card = document.querySelector(`.portfolio-card-editable[data-id="${activeEditorCardId}"]`);
+      if (card) {
+        const inp = card.querySelector('.inp-channels');
+        if (inp) inp.value = item.channels;
+        updateCardChannelButtonStyles(activeEditorCardId, item.channels);
+      }
+    }
+
+    function addCustomModalChannels() {
+      const input = document.getElementById("modal-custom-channel-input");
+      if (!input || !input.value.trim() || !activeEditorCardId) return;
+
+      const item = portfolios.find(p => p.id === activeEditorCardId);
+      if (!item) return;
+
+      let current = (item.channels || '').split(',').map(s => s.trim()).filter(Boolean);
+      const newItems = input.value.split(',').map(s => s.trim()).filter(Boolean);
+
+      newItems.forEach(n => {
+        if (!current.includes(n)) current.push(n);
+      });
+
+      item.channels = current.join(', ');
+      input.value = '';
+
+      renderModalChannelPicker(item.channels);
+      
+      const badgesContainer = document.getElementById("modal-channels-badges");
+      if (badgesContainer) {
+        badgesContainer.innerHTML = renderChannelBadgesHtml(item.channels);
+      }
+
+      const card = document.querySelector(`.portfolio-card-editable[data-id="${activeEditorCardId}"]`);
+      if (card) {
+        const inp = card.querySelector('.inp-channels');
+        if (inp) inp.value = item.channels;
+        updateCardChannelButtonStyles(activeEditorCardId, item.channels);
+      }
     }
 
     function saveEditorContent() {
@@ -1348,10 +1571,11 @@
       const item = portfolios.find(p => p.id === activeEditorCardId);
       if (item) {
         item.detailContent = content;
+        item.detailHtml = content;
       }
 
       closeDetailModal();
-      alert("✅ 상세 내용이 임시 저장되었습니다. 상단의 [저장 & 완료]를 눌러 최종 반영하세요.");
+      alert("✅ 상세 내용이 반영되었습니다.\n상단의 [저장 & 완료] 버튼을 눌러 서버에 영구 반영해 주세요.");
     }
 
     function closeDetailModal() {
