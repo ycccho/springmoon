@@ -1519,21 +1519,21 @@
         <div class="mb-12">
           <div class="flex items-center gap-3 mb-4">
             <span class="bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-full">7번 기능</span>
-            <h2 class="text-2xl font-bold text-gray-800">아임웹 게시글이미지용 뷰포트 최적화 <span class="text-lg font-medium text-gray-500">(가로 1200px / 세로 800px 한 화면 최적화 / 150~200KB 이하 고효율 JPG)</span></h2>
+            <h2 class="text-2xl font-bold text-gray-800">아임웹 게시글이미지용 규격 최적화 <span class="text-lg font-medium text-gray-500">(가로 1200x~~ / 세로 ~~x1200 / 확대 시 선명도 유지 고화질 JPG)</span></h2>
           </div>
           <div class="bg-indigo-50 p-5 rounded-xl border border-indigo-200 mb-6">
             <ul class="text-sm text-indigo-900 list-disc list-inside space-y-1">
-              <li><span class="font-bold text-indigo-950">가로/세로 지능형 뷰포트 맞춤 규격:</span> <span class="font-bold text-indigo-800">가로 사진은 폭 1200px(세로 ~800px)</span>로 시원하게 채우고, <span class="font-bold text-indigo-800">세로 사진은 세로 800px(폭 ~533px)</span>로 리사이징하여 스크롤 없이 한 화면에 온전히 쏙 들어오도록 비율을 유지합니다.</li>
-              <li><span class="font-bold text-indigo-950">TinyPNG급 고효율 JPG 압축:</span> 본문용 고화질을 유지하면서 용량을 <span class="font-bold text-indigo-800">150~200KB 이하</span>로 지능형 초고효율 압축합니다.</li>
-              <li><span class="font-bold text-indigo-950">EXIF 메타데이터 100% 제거 & 1px 크롭:</span> 촬영 위치, 편집 이력 삭제 및 AI 중복 패널티 회피 방어선이 포함됩니다.</li>
+              <li><span class="font-bold text-indigo-950">가로 1200x~~ / 세로 ~~x1200 지능형 규격:</span> <span class="font-bold text-indigo-800">가로 사진은 폭 1200px(세로 비율 유지)</span>, <span class="font-bold text-indigo-800">세로 사진은 높이 1200px(가로 비율 유지)</span>, 정사각 사진은 <span class="font-bold text-indigo-800">1200x1200px</span>로 원본 구도를 온전히 살려 변환합니다.</li>
+              <li><span class="font-bold text-indigo-950">확대해도 선명한 고화질 디테일 유지 (Q=0.92 + 샤프닝):</span> 무리한 압축으로 인한 화질 뭉개짐(블록 왜곡)을 배제하고, 해상도 리사이징과 0.92 고화질 및 미세 샤프닝으로 사진을 확대해도 타일·우드 질감과 인테리어 디테일을 깨끗하게 유지합니다.</li>
+              <li><span class="font-bold text-indigo-950">EXIF 메타데이터 100% 제거 & 1px 크롭:</span> 촬영 위치, 기기 정보 완전 삭제 및 AI 중복 패널티 회피 방어선이 포함됩니다.</li>
             </ul>
           </div>
           <div id="drop-zone-imweb-1200" class="border-2 border-dashed border-indigo-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-indigo-50 group bg-white">
             <div class="text-indigo-400 mb-4 group-hover:text-indigo-500 transition-colors flex justify-center gap-2">
               <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             </div>
-            <h3 class="text-xl font-bold text-indigo-800 mb-2">아임웹 게시글용 (가로 1200 / 세로 800) 업로드</h3>
-            <p class="text-sm text-indigo-600 font-medium mb-1">사진 드래그 (가로사진 1200px / 세로사진 800px 한 화면 맞춤 + 150~200KB 이하 고효율 JPG 압축)</p>
+            <h3 class="text-xl font-bold text-indigo-800 mb-2">아임웹 게시글용 (가로 1200x~~ / 세로 ~~x1200) 업로드</h3>
+            <p class="text-sm text-indigo-600 font-medium mb-1">사진 드래그 (가로사진 1200x~~ / 세로사진 ~~x1200 비율 유지 + 확대 시 선명도 유지 고화질 JPG)</p>
             <input type="file" id="file-imweb-1200" multiple accept=".jpg, .jpeg, .png" class="hidden">
           </div>
         </div>
@@ -2747,7 +2747,7 @@
         });
     }
 
-    // [8번 기능] 아임웹 게시글이미지용 1200사이즈 (가로 1200px 비율 유지 + 150~200KB 이하 고효율 JPG 압축)
+    // [7번 기능] 아임웹 게시글이미지용 규격 최적화 (가로 1200x~~ / 세로 ~~x1200 / 확대 시 선명도 유지 고화질 JPG)
     function processImwebContent1200(file, flip = false) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -2757,25 +2757,31 @@
                 const originalWidth = img.width;
                 const originalHeight = img.height;
                 
-                // 1px 크롭 설정
+                // 1px 크롭 설정 (AI 중복 패널티 회피 및 메타데이터 클리어)
                 let cropX = 0, cropY = 0, cropW = originalWidth, cropH = originalHeight;
                 if (originalWidth > 2 && originalHeight > 2) {
                     cropX = 1; cropY = 1;
                     cropW = originalWidth - 2; cropH = originalHeight - 2;
                 }
 
-                const orientation = (cropW > cropH) ? 'landscape' : 'portrait';
+                let orientation = 'square';
+                if (cropW > cropH) orientation = 'landscape';
+                else if (cropH > cropW) orientation = 'portrait';
                 
-                // 가로/세로 지능형 뷰포트 규격 계산
-                // 1) 가로 사진(landscape): 가로 1200px 고정, 세로는 원본 비율 유지 (3:2 비율 기준 1200x800px)
-                // 2) 세로 사진(portrait/정사각): 한 화면에 쏙 들어오도록 세로 800px 고정, 가로는 원본 비율 유지 (2:3 비율 기준 533x800px)
+                // 가로/세로 지능형 규격 계산
+                // 1) 가로 사진(landscape): 가로 1200px 고정, 세로는 원본 비율 유지 (1200 x ~~)
+                // 2) 세로 사진(portrait): 세로 1200px 고정, 가로는 원본 비율 유지 (~~ x 1200)
+                // 3) 정사각 사진(square): 1200 x 1200px
                 let targetW, targetH;
                 if (orientation === 'landscape') {
                     targetW = 1200;
                     targetH = Math.max(1, Math.round((cropH / cropW) * 1200));
+                } else if (orientation === 'portrait') {
+                    targetH = 1200;
+                    targetW = Math.max(1, Math.round((cropW / cropH) * 1200));
                 } else {
-                    targetH = 800;
-                    targetW = Math.max(1, Math.round((cropW / cropH) * 800));
+                    targetW = 1200;
+                    targetH = 1200;
                 }
 
                 const generateBlob = (q) => {
@@ -2797,7 +2803,7 @@
                         }
                         
                         ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetW, targetH);
-                        sharpenCanvas(canvas, ctx, 0.12);
+                        sharpenCanvas(canvas, ctx, 0.15);
                         
                         canvas.toBlob((blob) => {
                             res({ blob: blob, width: targetW, height: targetH });
@@ -2806,13 +2812,16 @@
                 };
 
                 try {
-                    // TinyPNG 스타일 지능형 고효율 압축 (150KB ~ 200KB 이하 타겟: max 200KB)
-                    const TARGET_MAX_BYTES = 200 * 1024; // 200KB
-                    let currentQuality = 0.85;
+                    // 고화질 선명도 유지 (확대 시 깨짐 방지: 0.92 고품질 JPG)
+                    // 해상도 규격 최적화(1200px) 자체로 원본 대용량 대비 90% 이상 용량이 줄어들며,
+                    // 무리한 강제 압축 루프를 제거하여 타일·우드 질감 등 미세 디테일을 온전히 보존합니다.
+                    let currentQuality = 0.92;
                     let resultData = await generateBlob(currentQuality);
 
-                    while (resultData.blob.size > TARGET_MAX_BYTES && currentQuality > 0.45) {
-                        currentQuality -= 0.05;
+                    // 웹 표준 극단적 안전 마진 (1.5MB 초과 시에만 최소 0.85선까지만 미세 조정)
+                    const MAX_SAFE_BYTES = 1500 * 1024;
+                    while (resultData.blob.size > MAX_SAFE_BYTES && currentQuality > 0.85) {
+                        currentQuality -= 0.02;
                         resultData = await generateBlob(currentQuality);
                     }
 
@@ -3225,7 +3234,7 @@
               } else if (mode === 'imweb-800') {
                   progressStatusText.textContent = `[아임웹 썸네일용 800px] 100KB 내외 고효율 JPG 압축 진행 중...`;
               } else if (mode === 'imweb-1200') {
-                  progressStatusText.textContent = `[아임웹 게시글용] 가로 1200 / 세로 800 한 화면 최적화 JPG 압축 진행 중...`;
+                  progressStatusText.textContent = `[아임웹 게시글용] 가로 1200x~~ / 세로 ~~x1200 고화질 선명도 유지 JPG 변환 진행 중...`;
               } else if (mode === 'insta') {
                   progressStatusText.textContent = `[인스타그램용] 1080px 규격, 1px 크롭 및 고화질 JPG 변환 진행 중...`;
               }
@@ -3286,7 +3295,13 @@
                           badgeText = isLandscape ? '아임웹 썸네일 (가로 800)' : '아임웹 썸네일 (세로 800)';
                           badgeClass = 'bg-orange-100 text-orange-800 border border-orange-200 font-bold';
                       } else if (mode === 'imweb-1200') {
-                          badgeText = isLandscape ? '아임웹 게시글 (가로 1200)' : '아임웹 게시글 (세로 800)';
+                          if (resultData.orientation === 'landscape') {
+                              badgeText = `아임웹 가로 (${resultData.width}x${resultData.height})`;
+                          } else if (resultData.orientation === 'portrait') {
+                              badgeText = `아임웹 세로 (${resultData.width}x${resultData.height})`;
+                          } else {
+                              badgeText = `아임웹 정사각 (${resultData.width}x${resultData.height})`;
+                          }
                           badgeClass = 'bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold';
                       } else if (mode === 'insta') {
                           if (resultData.orientation === 'landscape') {
