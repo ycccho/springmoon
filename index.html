@@ -1439,16 +1439,16 @@
           </div>
         </div>
 
-        <!-- 1-3번 기능: 홈페이지용 1080 높이 맞춤 경량 압축 WEBP (3:2 기준 1620x1080) -->
+        <!-- 1-3번 기능: 홈페이지용 1620x1080 경량 압축 WEBP -->
         <div class="mb-12">
           <div class="flex items-center gap-3 mb-4">
             <span class="bg-cyan-600 text-white text-sm font-bold px-3 py-1 rounded-full">1-3번 기능</span>
-            <h2 class="text-2xl font-bold text-gray-800">공식 홈페이지용 1080 높이 맞춤 경량 압축 <span class="text-lg font-medium text-gray-500">(1620×1080 기준 / 인테리어 화질 유지 초경량 WEBP)</span></h2>
+            <h2 class="text-2xl font-bold text-gray-800">공식 홈페이지용 1620×1080 경량 압축 <span class="text-lg font-medium text-gray-500">(세로 1080×1620 / 화질 유지 초경량 WEBP)</span></h2>
           </div>
           <div class="bg-cyan-50 p-5 rounded-xl border border-cyan-200 mb-6">
             <ul class="text-sm text-cyan-900 list-disc list-inside space-y-1">
-              <li><span class="font-bold text-cyan-950">높이 1080px 맞춤 (잘림·찌그러짐 없음):</span> 가로 사진은 <span class="font-bold">1920×1080 한도</span> 내에 비율 유지로 축소되어 3:2 촬영 원본 기준 <span class="font-bold text-cyan-800">1620×1080px</span>로 변환됩니다. (세로 사진은 1080×1920 한도)</li>
-              <li><span class="font-bold text-cyan-950">인테리어 화질 유지 초경량 압축:</span> 색감·질감을 해치지 않는 선(품질 78% → 필요 시 최대 68% 자동 최적화)으로 용량을 최대한 줄여줍니다.</li>
+              <li><span class="font-bold text-cyan-950">가로 1620×1080 / 세로 1080×1620 고정 변환:</span> 가로 사진은 <span class="font-bold text-cyan-800">1620×1080px</span>, 세로 사진은 <span class="font-bold text-cyan-800">1080×1620px</span>로 자동 변환됩니다.</li>
+              <li><span class="font-bold text-cyan-950">인테리어 화질 유지 초경량 압축:</span> 색감·질감을 해치지 않는 선에서 용량을 최대한 줄여 WEBP로 저장합니다.</li>
             </ul>
           </div>
           <div id="drop-zone-hq-lite-1080" class="border-2 border-dashed border-cyan-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-cyan-50 group bg-white">
@@ -1457,7 +1457,7 @@
               <svg class="h-12 w-12 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
             <h3 class="text-xl font-bold text-cyan-800 mb-2">홈페이지용 경량 압축 WEBP (1620×1080) 일괄 업로드</h3>
-            <p class="text-sm text-cyan-600 font-medium mb-1">방향 상관없이 드래그 (1620×1080 높이 맞춤 + 화질 유지 초경량 WEBP)</p>
+            <p class="text-sm text-cyan-600 font-medium mb-1">가로 1620×1080 / 세로 1080×1620 자동 변환 + 초경량 WEBP</p>
             <input type="file" id="file-hq-lite-1080" multiple accept=".jpg, .jpeg, .png" class="hidden">
           </div>
         </div>
@@ -2471,8 +2471,28 @@
                 let targetH = cropH;
                 let isResized = false;
 
-                if (options.fitBox) {
-                    // 박스(가로x세로 한도) 기준 비율 유지 리사이징 (예: 3:2 가로 -> 1620x1080)
+                if (options.exactCover) {
+                    // 정확히 지정된 가로x세로 규격(예: 1620x1080 / 1080x1620)으로 중앙 비율 맞춤
+                    targetW = targetWidthLimit;
+                    targetH = (orientation === 'landscape')
+                        ? (options.targetLandHeight || targetPortWidth)
+                        : (options.targetPortHeight || targetLandWidth);
+                    const targetRatio = targetW / targetH;
+                    const srcRatio = cropW / cropH;
+                    if (Math.abs(srcRatio - targetRatio) > 0.002) {
+                        if (srcRatio > targetRatio) {
+                            const newCropW = Math.round(cropH * targetRatio);
+                            cropX += Math.round((cropW - newCropW) / 2);
+                            cropW = newCropW;
+                        } else {
+                            const newCropH = Math.round(cropW / targetRatio);
+                            cropY += Math.round((cropH - newCropH) / 2);
+                            cropH = newCropH;
+                        }
+                    }
+                    isResized = (cropW !== targetW || cropH !== targetH);
+                } else if (options.fitBox) {
+                    // 박스(가로x세로 한도) 기준 비율 유지 리사이징
                     const targetHeightLimit = (orientation === 'landscape')
                         ? (options.targetLandHeight || targetPortWidth)
                         : (options.targetPortHeight || targetLandWidth);
@@ -3399,7 +3419,7 @@
               } else if (mode === 'hq-lite') {
                   progressStatusText.textContent = `[홈페이지용 1-2 경량] 1px 크롭 및 인테리어 화질 유지 초경량 WEBP 변환 진행 중...`;
               } else if (mode === 'hq-lite-1080') {
-                  progressStatusText.textContent = `[홈페이지용 1-3 경량] 1620×1080 높이 맞춤 및 초경량 WEBP 변환 진행 중...`;
+                  progressStatusText.textContent = `[홈페이지용 1-3 경량] 1620×1080 / 1080×1620 초경량 WEBP 변환 진행 중...`;
               } else if (mode === 'blog') {
                   progressStatusText.textContent = `[블로그용] 1px 크롭 및 WEBP 변환 진행 중...`;
               } else if (mode === 'pdf') {
@@ -3437,10 +3457,10 @@
                               sharpenMix: 0.12
                           });
                       } else if (mode === 'hq-lite-1080') {
-                          resultData = await processWebpResizedAuto(file, 0.78, 1920, 1080, false, {
-                              fitBox: true,
+                          resultData = await processWebpResizedAuto(file, 0.78, 1620, 1080, false, {
+                              exactCover: true,
                               targetLandHeight: 1080,
-                              targetPortHeight: 1920,
+                              targetPortHeight: 1620,
                               targetMaxBytes: 150 * 1024,
                               minQuality: 0.68,
                               sharpenMix: 0.12
