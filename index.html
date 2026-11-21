@@ -1439,15 +1439,15 @@
           </div>
         </div>
 
-        <!-- 1-3번 기능: 홈페이지용 1620x1080 경량 압축 WEBP -->
+        <!-- 1-3번 기능: 메인슬라이드 1920 × 960 px 경량 압축 WEBP -->
         <div class="mb-12">
           <div class="flex items-center gap-3 mb-4">
             <span class="bg-cyan-600 text-white text-sm font-bold px-3 py-1 rounded-full">1-3번 기능</span>
-            <h2 class="text-2xl font-bold text-gray-800">공식 홈페이지용 1620×1080 경량 압축 <span class="text-lg font-medium text-gray-500">(세로 1080×1620 / 화질 유지 초경량 WEBP)</span></h2>
+            <h2 class="text-2xl font-bold text-gray-800">메인슬라이드 1920 × 960 px 경량 압축 <span class="text-lg font-medium text-gray-500">(세로 960×1920 / 화질 유지 초경량 WEBP)</span></h2>
           </div>
           <div class="bg-cyan-50 p-5 rounded-xl border border-cyan-200 mb-6">
             <ul class="text-sm text-cyan-900 list-disc list-inside space-y-1">
-              <li><span class="font-bold text-cyan-950">가로 1620×1080 / 세로 1080×1620 고정 변환:</span> 가로 사진은 <span class="font-bold text-cyan-800">1620×1080px</span>, 세로 사진은 <span class="font-bold text-cyan-800">1080×1620px</span>로 자동 변환됩니다.</li>
+              <li><span class="font-bold text-cyan-950">가로 1920×960 / 세로 960×1920 고정 변환:</span> 가로 사진은 <span class="font-bold text-cyan-800">1920×960px</span>, 세로 사진은 <span class="font-bold text-cyan-800">960×1920px</span>로 자동 변환됩니다.</li>
               <li><span class="font-bold text-cyan-950">인테리어 화질 유지 초경량 압축:</span> 색감·질감을 해치지 않는 선에서 용량을 최대한 줄여 WEBP로 저장합니다.</li>
             </ul>
           </div>
@@ -1456,8 +1456,8 @@
               <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               <svg class="h-12 w-12 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
-            <h3 class="text-xl font-bold text-cyan-800 mb-2">홈페이지용 경량 압축 WEBP (1620×1080) 일괄 업로드</h3>
-            <p class="text-sm text-cyan-600 font-medium mb-1">가로 1620×1080 / 세로 1080×1620 자동 변환 + 초경량 WEBP</p>
+            <h3 class="text-xl font-bold text-cyan-800 mb-2">메인슬라이드 1920 × 960 px 경량 압축 WEBP 업로드</h3>
+            <p class="text-sm text-cyan-600 font-medium mb-1">가로 1920×960 / 세로 960×1920 자동 변환 + 초경량 WEBP</p>
             <input type="file" id="file-hq-lite-1080" multiple accept=".jpg, .jpeg, .png" class="hidden">
           </div>
         </div>
@@ -3419,7 +3419,7 @@
               } else if (mode === 'hq-lite') {
                   progressStatusText.textContent = `[홈페이지용 1-2 경량] 1px 크롭 및 인테리어 화질 유지 초경량 WEBP 변환 진행 중...`;
               } else if (mode === 'hq-lite-1080') {
-                  progressStatusText.textContent = `[홈페이지용 1-3 경량] 1620×1080 / 1080×1620 초경량 WEBP 변환 진행 중...`;
+                  progressStatusText.textContent = `[메인슬라이드 1-3 경량] 1920×960 / 960×1920 초경량 WEBP 변환 진행 중...`;
               } else if (mode === 'blog') {
                   progressStatusText.textContent = `[블로그용] 1px 크롭 및 WEBP 변환 진행 중...`;
               } else if (mode === 'pdf') {
@@ -3457,11 +3457,11 @@
                               sharpenMix: 0.12
                           });
                       } else if (mode === 'hq-lite-1080') {
-                          resultData = await processWebpResizedAuto(file, 0.78, 1620, 1080, false, {
+                          resultData = await processWebpResizedAuto(file, 0.78, 1920, 960, false, {
                               exactCover: true,
-                              targetLandHeight: 1080,
-                              targetPortHeight: 1620,
-                              targetMaxBytes: 150 * 1024,
+                              targetLandHeight: 960,
+                              targetPortHeight: 1920,
+                              targetMaxBytes: 180 * 1024,
                               minQuality: 0.68,
                               sharpenMix: 0.12
                           });
@@ -3499,7 +3499,7 @@
                           badgeText = isLandscape ? '홈 경량 가로 (초경량)' : '홈 경량 세로 (초경량)';
                           badgeClass = 'bg-sky-100 text-sky-800 border border-sky-200 font-bold';
                       } else if (mode === 'hq-lite-1080') {
-                          badgeText = isLandscape ? '홈 1080경량 가로' : '홈 1080경량 세로';
+                          badgeText = isLandscape ? '메인슬라이드 1920×960' : '메인슬라이드 960×1920';
                           badgeClass = 'bg-cyan-100 text-cyan-800 border border-cyan-200 font-bold';
                       } else if (mode === 'blog') {
                           badgeText = isLandscape ? '블로그 가로 (1px크롭)' : '블로그 세로 (1px크롭)';
@@ -3552,7 +3552,7 @@
                       let suffix = '';
                       if (mode === 'hq') suffix = '-home';
                       else if (mode === 'hq-lite') suffix = '-home-lite';
-                      else if (mode === 'hq-lite-1080') suffix = '-home-1080-lite';
+                      else if (mode === 'hq-lite-1080') suffix = '-slide-1920x960';
                       else if (mode === 'blog') suffix = '-blog';
                       else if (mode === 'pdf') suffix = '-compressed';
                       else if (mode === 'jpg') suffix = '-jpg-cleared';
