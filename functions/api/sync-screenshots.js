@@ -96,12 +96,27 @@ export async function onRequestPost(context) {
       }
 
       const folderPath = normalizeFolderPath(rawFolder);
+      const keyPrefix = `screenshots:file:${folderPath}:`;
+
+      // kv.get()을 파일 수만큼 호출하면 Worker 리소스 한도(Error 1102)를 초과하므로
+      // kv.list()로 본문 없이 키 목록만 조회해 O(1) 메모리/서브리퀘스트로 누락 파일 판별
+      const existingKeys = new Set();
+      let cursor = undefined;
+      let pageCount = 0;
+      const MAX_LIST_PAGES = 20;
+      do {
+        const listResult = await kv.list({ prefix: keyPrefix, cursor });
+        for (const keyObj of listResult.keys) {
+          existingKeys.add(keyObj.name);
+        }
+        cursor = listResult.list_complete ? undefined : listResult.cursor;
+        pageCount++;
+      } while (cursor && pageCount < MAX_LIST_PAGES);
 
       const missingFiles = [];
       for (const file of files) {
-        const fileKey = `screenshots:file:${folderPath}:${file.fileName}`;
-        const existing = await kv.get(fileKey, { type: "text" });
-        if (!existing) {
+        const fileKey = `${keyPrefix}${file.fileName}`;
+        if (!existingKeys.has(fileKey)) {
           missingFiles.push(file.fileName);
         }
       }
