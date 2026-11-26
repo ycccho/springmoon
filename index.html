@@ -1416,16 +1416,16 @@
           </div>
         </div>
 
-        <!-- 1-2번 기능: 홈페이지용 용량 절감 압축 WEBP -->
+        <!-- 1-2번 기능: 홈페이지용 용량 절감 압축 JPG -->
         <div class="mb-12">
           <div class="flex items-center gap-3 mb-4">
             <span class="bg-sky-600 text-white text-sm font-bold px-3 py-1 rounded-full">1-2번 기능</span>
-            <h2 class="text-2xl font-bold text-gray-800">공식 홈페이지용 경량 압축 <span class="text-lg font-medium text-gray-500">(폭 1920px 기준 / 인테리어 화질 유지 초경량 WEBP)</span></h2>
+            <h2 class="text-2xl font-bold text-gray-800">공식 홈페이지용 경량 압축 <span class="text-lg font-medium text-gray-500">(폭 1920px 기준 / 품질 80% JPG)</span></h2>
           </div>
           <div class="bg-sky-50 p-5 rounded-xl border border-sky-200 mb-6">
             <ul class="text-sm text-sky-900 list-disc list-inside space-y-1">
               <li><span class="font-bold text-sky-950">가로/세로 자동 리사이징:</span> 1번 기능과 동일하게 가로 <span class="font-bold">폭 1920px</span>(3:2 기준 1920×1280), 세로 <span class="font-bold">폭 1080px</span> 한도 내에서 비율을 유지하며 축소됩니다.</li>
-              <li><span class="font-bold text-sky-950">인테리어 화질 유지 초경량 압축:</span> 색감·질감을 해치지 않는 선(품질 78% → 필요 시 최대 68% 자동 최적화)으로 용량을 최대한 줄여 웹 로딩 속도를 극대화합니다.</li>
+              <li><span class="font-bold text-sky-950">JPG 포맷 & 품질 80% 고정:</span> 인테리어 화질을 유지하면서 용량을 줄인 <span class="font-bold text-sky-700">.jpg (품질 80%)</span> 파일로 다운로드됩니다.</li>
             </ul>
           </div>
           <div id="drop-zone-hq-lite" class="border-2 border-dashed border-sky-300 rounded-xl p-10 text-center cursor-pointer transition-colors hover:bg-sky-50 group bg-white">
@@ -1433,8 +1433,8 @@
               <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               <svg class="h-12 w-12 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
-            <h3 class="text-xl font-bold text-sky-800 mb-2">홈페이지용 경량 압축 WEBP (폭 1920px) 일괄 업로드</h3>
-            <p class="text-sm text-sky-600 font-medium mb-1">방향 상관없이 드래그 (1920/1080px 폭 기준 리사이징 + 화질 유지 초경량 WEBP)</p>
+            <h3 class="text-xl font-bold text-sky-800 mb-2">홈페이지용 경량 압축 JPG (폭 1920px / 80%) 일괄 업로드</h3>
+            <p class="text-sm text-sky-600 font-medium mb-1">방향 상관없이 드래그 (1920/1080px 폭 기준 리사이징 + 품질 80% JPG)</p>
             <input type="file" id="file-hq-lite" multiple accept=".jpg, .jpeg, .png" class="hidden">
           </div>
         </div>
@@ -2513,6 +2513,12 @@
                 canvas.width = targetW;
                 canvas.height = targetH;
                 let ctx = canvas.getContext('2d');
+                const mimeType = options.mimeType || 'image/webp';
+
+                if (mimeType === 'image/jpeg') {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, targetW, targetH);
+                }
                 
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
@@ -2530,7 +2536,7 @@
                 }
 
                 const toWebpBlob = (q) => new Promise((res) => {
-                    canvas.toBlob((blob) => res(blob), 'image/webp', q);
+                    canvas.toBlob((blob) => res(blob), mimeType, q);
                 });
 
                 try {
@@ -3417,7 +3423,7 @@
               if (mode === 'hq') {
                   progressStatusText.textContent = `[홈페이지용] 1px 크롭 및 리사이징 진행 중...`;
               } else if (mode === 'hq-lite') {
-                  progressStatusText.textContent = `[홈페이지용 1-2 경량] 1px 크롭 및 인테리어 화질 유지 초경량 WEBP 변환 진행 중...`;
+                  progressStatusText.textContent = `[홈페이지용 1-2 경량] 1px 크롭 및 품질 80% JPG 변환 진행 중...`;
               } else if (mode === 'hq-lite-1080') {
                   progressStatusText.textContent = `[메인슬라이드 1-3] 2560×1280 / 1280×2560 (품질 85%) WEBP 변환 진행 중...`;
               } else if (mode === 'blog') {
@@ -3451,9 +3457,8 @@
                       if (mode === 'hq') {
                           resultData = await processWebpResizedAuto(file, 1.0, 1920, 1080, false);
                       } else if (mode === 'hq-lite') {
-                          resultData = await processWebpResizedAuto(file, 0.78, 1920, 1080, false, {
-                              targetMaxBytes: 180 * 1024,
-                              minQuality: 0.68,
+                          resultData = await processWebpResizedAuto(file, 0.80, 1920, 1080, false, {
+                              mimeType: 'image/jpeg',
                               sharpenMix: 0.12
                           });
                       } else if (mode === 'hq-lite-1080') {
@@ -3494,7 +3499,7 @@
                           badgeText = isLandscape ? '홈 가로 (1px크롭)' : '홈 세로 (1px크롭)';
                           badgeClass = 'bg-green-100 text-green-800';
                       } else if (mode === 'hq-lite') {
-                          badgeText = isLandscape ? '홈 경량 가로 (초경량)' : '홈 경량 세로 (초경량)';
+                          badgeText = isLandscape ? '홈 경량 가로 (JPG 80%)' : '홈 경량 세로 (JPG 80%)';
                           badgeClass = 'bg-sky-100 text-sky-800 border border-sky-200 font-bold';
                       } else if (mode === 'hq-lite-1080') {
                           badgeText = isLandscape ? '메인슬라이드 2560×1280' : '메인슬라이드 1280×2560';
@@ -3562,7 +3567,7 @@
 
                       let ext = '.webp';
                       if (mode === 'pdf') ext = '.pdf';
-                      else if (mode === 'jpg' || mode === 'jpg-resize' || mode === 'imweb-800' || mode === 'imweb-1200' || mode === 'insta') ext = '.jpg';
+                      else if (mode === 'hq-lite' || mode === 'jpg' || mode === 'jpg-resize' || mode === 'imweb-800' || mode === 'imweb-1200' || mode === 'insta') ext = '.jpg';
                       
                       const newName = baseName + suffix + ext;
                       
